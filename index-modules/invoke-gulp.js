@@ -1,6 +1,6 @@
 const
     path = require("path"),
-    spawn = require("./tasks/modules/spawn");
+    spawn = require("../tasks/modules/spawn");
 
 function alwaysAccept() {
   return true;

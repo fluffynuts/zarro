@@ -1,7 +1,7 @@
 // noinspection JSUndefinedPropertyAssignment
 const fs = require("fs"),
   path = require("path"),
-  gulpTasksFolder = path.join(__dirname, "tasks"),
+  gulpTasksFolder = path.join(__dirname, "gulp-tasks"),
   requireModule = global.requireModule = function (mod) {
     const modulePath = [".", gulpTasksFolder, "modules", mod].join("/");
     if (fs.existsSync(modulePath + ".js")) {
