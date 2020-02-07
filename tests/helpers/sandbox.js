@@ -3,8 +3,8 @@ const uuid = require("uuid/v4"),
   mkdir = require("mkdirp").sync,
   rimraf = require("rimraf").sync,
   fs = require("fs"),
-  writeFile = fs.writeFileSync,
-  readFile = fs.readFileSync,
+  writeFile = fs.promises.writeFile,
+  readFile = fs.promises.readFile,
   basePrefix = "__sandboxes__";
 
 class Sandbox {
@@ -21,14 +21,16 @@ class Sandbox {
     rimraf(dir);
   }
 
-  writeTextFile(at, contents) {
-    return writeFile(
-      this.fullPathFor(at),
+  async writeTextFile(at, contents) {
+    const fullPath = this.fullPathFor(at);
+    await writeFile(
+      fullPath,
       contents, { encoding: "utf8" }
     );
+    return fullPath;
   }
 
-  readTextFile(at) {
+  async readTextFile(at) {
     return readFile(
       this.fullPathFor(at),
       { encoding: "utf8" }

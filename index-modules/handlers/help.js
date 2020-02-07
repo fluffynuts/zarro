@@ -1,4 +1,4 @@
-const contains = require("./contains-any");
+const contains = require("../contains-any");
 
 module.exports = {
   test: args => contains(args, "-h", "--help"),
@@ -12,5 +12,6 @@ module.exports = {
       "  --show-env      show all environment variables observed by tasks",
       "  --tasks         show all tasks registered to gulp",
     ].forEach(s => console.log(s));
+    return Promise.resolve();
   }
 };

@@ -1,4 +1,4 @@
-const sut = require("../index-modules/init");
+const sut = require("../index-modules/handlers/init");
 const Sandbox = require("./helpers/sandbox");
 
 describe(`init`, () => {
@@ -6,7 +6,7 @@ describe(`init`, () => {
     describe(`when args contains --init`, () => {
       it(`should return true`, async () => {
         // Arrange
-        const args = ["--help", "moo", "cow"];
+        const args = ["--init"];
         // Act
         const result = sut.test(args);
         // Assert
@@ -35,11 +35,11 @@ describe(`init`, () => {
         const sandbox = Sandbox.create();
         const pkg = {
         };
-        sandbox.writeTextFile("package.json", JSON.stringify(pkg));
+        await sandbox.writeTextFile("package.json", JSON.stringify(pkg));
         // Act
-        sut.handler(sandbox.fullPathFor("package.json"));
+        await sut.handler(sandbox.fullPathFor("package.json"));
         // Assert
-        const contents = sandbox.readTextFile("package.json");
+        const contents = await sandbox.readTextFile("package.json");
         console.log(contents);
         const newPkg = JSON.parse(contents);
         expect(newPkg.scripts).toBeDefined();

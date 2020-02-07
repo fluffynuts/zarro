@@ -1,5 +1,6 @@
-const fs = require("fs");
+const fs = require("fs").promises;
 
-module.exports = function readTextFile(path) {
-  return fs.readFileSync(path, { encoding: "utf8" }).toString();
+module.exports = async function readTextFile(path) {
+  const buffer = await fs.readFile(path, { encoding: "utf8" });
+  return buffer.toString();
 };

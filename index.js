@@ -3,9 +3,9 @@ const
   gatherArgs = require("./index-modules/gather-args");
 
 const handlers = [
-  require("./index-modules/init"),
-  require("./index-modules/help"),
-  require("./index-modules/invoke-gulp"),
+  require("./index-modules/handlers/init"),
+  require("./index-modules/handlers/help"),
+  require("./index-modules/handlers/invoke-gulp"),
 ];
 
 (async function () {

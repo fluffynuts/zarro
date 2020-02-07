@@ -1,14 +1,17 @@
 const
-  fs = require("fs"),
-  readTextFile = require("./read-text-file");
+  isFile = require("../is-file"),
+  writeTextFile = require("../write-text-file"),
+  readTextFile = require("../read-text-file");
 
-function trySetupZarroScript(overridePackageFileName) {
-  const pkg = overridePackageFileName || "package.json";
-  if (!fs.existsSync(pkg)) {
+async function trySetupZarroScript(overridePackageFileName) {
+  const
+    pkg = overridePackageFileName || "package.json",
+    exists = await isFile(pkg);
+  if (!exists) {
     return;
   }
   const
-    stringContents = readTextFile(pkg),
+    stringContents = await readTextFile(pkg),
     tabSize = guessTabSizeFor(stringContents),
     packageJson = JSON.parse(stringContents);
   let scripts = packageJson.scripts;
@@ -21,11 +24,10 @@ function trySetupZarroScript(overridePackageFileName) {
   if (!scripts["zarro"]) {
     scripts["zarro"] = "zarro";
   }
-  fs.writeFileSync(pkg, JSON.stringify(packageJson, null, tabSize));
+  await writeTextFile(pkg, JSON.stringify(packageJson, null, tabSize));
   console.log("run zarro with 'npm run zarro -- {tasks or gulp arguments}')");
   console.log("eg: 'npm run zarro -- build' to attempt .net project build");
   console.log("get more help with 'npm run zarro -- --help'");
-  return Promise.resolve();
 }
 
 function guessTabSizeFor(json) {

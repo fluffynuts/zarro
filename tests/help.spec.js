@@ -1,4 +1,4 @@
-const sut = require("../index-modules/help");
+const sut = require("../index-modules/handlers/help");
 
 describe(`help`, () => {
   describe(`test function`, () => {
