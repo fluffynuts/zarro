@@ -11,7 +11,7 @@ module.exports = function containsAny() {
     return true;
   }
 
-  return (array).reduce(
+  return array.reduce(
     (acc, cur) => {
       if (acc) {
         return acc;

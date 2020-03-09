@@ -8,13 +8,18 @@ function alwaysAccept() {
 }
 
 async function invokeGulp(args) {
-  const gulp = await which("gulp");
+  const
+    gulp = await which("gulp"),
+    gulpTasksFolder = path.join(__dirname, "gulp-tasks"),
+    gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"),
+    env = Object.assign({}, process.env, { GULP_TASKS_FOLDER: gulpTasksFolder });
   return spawn(
     gulp,
     [
       "--gulpfile",
-      path.join(__dirname, "gulpfile.js")
-    ].concat(args)
+      gulpFile
+    ].concat(args),
+    { env }
   );
 }
 

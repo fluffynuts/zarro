@@ -20,9 +20,6 @@ describe(`invoke-gulp`, () => {
       const
         args = [ "build", "test" ],
         gulp = await which("gulp");
-      console.log({
-        gulp
-      });
       expect(gulp).toBeDefined();
       // Act
       await sut.handler(args);
