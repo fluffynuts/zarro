@@ -1,16 +1,73 @@
 const
+  os = require("os"),
+  requireModule = require("../../gulp-tasks/modules/require-module"),
   which = require("which"),
+  splitPath = requireModule("split-path"),
   path = require("path"),
-  spawn = require("../../gulp-tasks/modules/spawn");
+  isFile = require("../is-file"),
+  isDir = require("../is-dir"),
+  projectDir = path.dirname(path.dirname(__dirname)),
+  spawn = requireModule("spawn");
 
 function alwaysAccept() {
   return true;
 }
 
+async function tryToFindGulpCliFromInstalledModule() {
+  const
+    nodeModulesDir = path.dirname(__dirname),
+    binDir = path.join(nodeModulesDir, ".bin");
+  await validate(nodeModulesDir, binDir);
+  return generateFullGulpCliPathFor(binDir);
+}
+
+async function validate(nodeModulesDir, nodeBinDir) {
+  const nodeModulesDirName = path.basename(nodeModulesDir);
+  if (nodeModulesDirName !== "node_modules") {
+    throw new Error(`Expected ${nodeModulesDir} to be a node_modules folder`);
+  }
+  if (!(await isDir(nodeBinDir))) {
+    throw new Error(`node_modules bin dir not found at ${nodeBinDir}`);
+  }
+}
+
+async function generateFullGulpCliPathFor(nodeModulesBinDir) {
+  const stub = os.platform() === "win32"
+    ? "gulp.cmd"
+    : "gulp";
+  const fullStubPath = path.join(nodeModulesBinDir, stub);
+  if (!(await isFile(fullStubPath))) {
+    throw new Error(`Can't find gulp cli at ${fullStubPath}\nDo you have gulp installed?`);
+  }
+  return fullStubPath
+}
+
+async function tryToFindGulpFromOwnNodeModules() {
+  // mostly neede for testing
+  const
+    nodeModulesDir = path.join(projectDir, "node_modules"),
+    binDir = path.join(nodeModulesDir, ".bin");
+
+  await validate(nodeModulesDir, binDir);
+  return generateFullGulpCliPathFor(binDir);
+}
+
+async function findGulp() {
+  try {
+    return await which("gulp");
+  } catch (e) {
+    const isInstalledAsModule = !!splitPath(__dirname).find(d => d == "node_modules");
+    return isInstalledAsModule
+      // gulp really should be in the path...
+      ? tryToFindGulpCliFromInstalledModule()
+      : tryToFindGulpFromOwnNodeModules();
+  }
+}
+
 async function invokeGulp(args) {
   const
-    gulp = await which("gulp"),
-    gulpTasksFolder = path.join(__dirname, "gulp-tasks"),
+    gulp = await findGulp(),
+    gulpTasksFolder = path.join(projectDir, "gulp-tasks"),
     gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"),
     env = Object.assign({}, process.env, { GULP_TASKS_FOLDER: gulpTasksFolder });
   return spawn(

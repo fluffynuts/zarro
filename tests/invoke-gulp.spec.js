@@ -1,7 +1,11 @@
-const spawn = jest.fn("spawn");
-jest.doMock("../../gulp-tasks/modules/spawn", spawn);
 const
-  which = require("which"),
+  spawn = jest.fn(),
+  requireModule = require("../gulp-tasks/modules/require-module");
+requireModule.mock("spawn", spawn);
+
+const
+  path = require("path"),
+  isFile = require("../index-modules/is-file"),
   sut = require("../index-modules/handlers/invoke-gulp");
 
 describe(`invoke-gulp`, () => {
@@ -14,18 +18,36 @@ describe(`invoke-gulp`, () => {
     });
   });
 
+  function findStarterGulpFile() {
+    return path.join(
+      path.dirname(
+        __dirname
+      ), "gulp-tasks", "start", "gulpfile.js"
+    );
+  }
+
   describe(`handler`, () => {
     it(`should invoke gulp with all the args`, async () => {
       // Arrange
       const
         args = [ "build", "test" ],
-        gulp = await which("gulp");
-      expect(gulp).toBeDefined();
+        gulpFile = findStarterGulpFile(),
+        expected = [ "--gulpfile", gulpFile ].concat(args);
       // Act
       await sut.handler(args);
       // Assert
       expect(spawn)
-        .toHaveBeenCalledWith(gulp, args);
+        .toHaveBeenCalledTimes(1);
+      const
+        calledArgs = spawn.mock.calls[0],
+        usedGulp = calledArgs[0],
+        processArgs = calledArgs[1];
+      expect(usedGulp)
+        .toBeDefined();
+      expect((await isFile(usedGulp)))
+        .toBeTrue();
+      expect(processArgs)
+        .toEqual(expected);
     });
   });
 });

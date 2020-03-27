@@ -84,3 +84,4 @@ typings/
 .dynamodb/
 .idea
 .vscode
+.jest-cache
