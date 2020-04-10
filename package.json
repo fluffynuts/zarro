@@ -10,7 +10,8 @@
   "scripts": {
     "test": "jest",
     "start": "node index.js",
-    "gulp": "gulp"
+    "gulp": "gulp",
+    "publish-beta": "npm publish --tag beta"
   },
   "dependencies": {
     "ansi-colors": "^4.0.1",
