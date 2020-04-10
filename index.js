@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const
+  path = require("path"),
   debug = require("debug")("zarro"),
   gatherArgs = require("./index-modules/gather-args");
 
@@ -32,7 +33,7 @@ async function findHandlerFor(args) {
 
 (async function () {
   try {
-    const args = await gatherArgs(__filename);
+    const args = await gatherArgs([path.join(path.dirname(__dirname), ".bin", "zarro"), __filename]);
     const handler = await findHandlerFor(args);
     if (!handler) {
       throw new Error("no handler for current args");

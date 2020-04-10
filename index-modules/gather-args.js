@@ -38,10 +38,24 @@ module.exports = async function gatherArgs(
   potentialEntryPoints,
   overrideArgv // for testing only
 ) {
+  if (!Array.isArray(potentialEntryPoints)) {
+    potentialEntryPoints = [ potentialEntryPoints ];
+  }
   for (let entryPoint of potentialEntryPoints) {
+    let st;
+    try {
+      st = await stat(entryPoint);
+    } catch (e) {
+      // not found; try next
+      continue;
+    }
+    if (!st) {
+      // not found; try next
+      continue;
+    }
     const
       indexContents = await readTextFile(entryPoint),
-      indexSize = (await stat(entryPoint)).size,
+      indexSize = st.size,
       argv = overrideArgv || process.argv,
       acc = [];
     let foundSelf = false;
