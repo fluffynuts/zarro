@@ -32,7 +32,7 @@ describe(`invoke-gulp`, () => {
       const
         args = [ "build", "test" ],
         gulpFile = findStarterGulpFile(),
-        expected = [ "--gulpfile", gulpFile ].concat(args);
+        expected = [ "--gulpfile", gulpFile, "--cwd", process.cwd() ].concat(args);
       // Act
       await sut.handler(args);
       // Assert

@@ -1,4 +1,4 @@
-const uuid = require("uuid/v4"),
+const uuid = require("uuid").v4,
   path = require("path"),
   mkdir = require("mkdirp").sync,
   rimraf = require("rimraf").sync,
