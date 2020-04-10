@@ -47,12 +47,12 @@
     "xml2js": "^0.4.19"
   },
   "files": [
-      "gulp-tasks/**/*",
-      "index-modules/**/*"
+    "gulp-tasks/**/*",
+    "index-modules/**/*"
   ],
   "author": {
-      "name": "Davyd McColl",
-      "url": "https://github.com/fluffynuts"
+    "name": "Davyd McColl",
+    "url": "https://github.com/fluffynuts"
   },
   "license": "BSD-3-Clause",
   "devDependencies": {

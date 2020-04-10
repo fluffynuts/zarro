@@ -1,16 +1,29 @@
 #!/usr/bin/env node
 const
+  debug = require("debug")("zarro"),
   gatherArgs = require("./index-modules/gather-args");
 
+function requireHandler(name) {
+  const result = require(`./index-modules/handlers/${name}`);
+  return { ...result, name };
+}
+
 const handlers = [
-  require("./index-modules/handlers/init"),
-  require("./index-modules/handlers/help"),
-  require("./index-modules/handlers/invoke-gulp"),
+  requireHandler("init"),
+  requireHandler("help"),
+  requireHandler("show-env"),
+  // must always come last as it will always volunteer to handle
+  requireHandler("invoke-gulp")
 ];
 
 async function findHandlerFor(args) {
   for (let handler of handlers) {
+    debug({
+      label: "investigating handler",
+      name: handler.name
+    });
     if (await handler.test(args)) {
+      debug(`-> handler ${handler.name} is taking control...`);
       return handler.handler;
     }
   }

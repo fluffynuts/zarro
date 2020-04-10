@@ -1,7 +1,11 @@
 module.exports = function containsAny() {
-  const
+  // should be invoked with an args array followed by a list of things to look for
+  let
     args = Array.from(arguments),
     array = args[0] || [];
+  if (!Array.isArray(array)) {
+    array = [ array ]
+  }
   if (array.length === 0) {
     return false;
   }

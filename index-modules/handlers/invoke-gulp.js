@@ -64,7 +64,7 @@ async function findGulp() {
   }
 }
 
-async function invokeGulp(args) {
+async function invokeGulp(args, opts) {
   const
     gulp = await findGulp(),
     gulpTasksFolder = path.join(projectDir, "gulp-tasks"),
@@ -83,7 +83,8 @@ async function invokeGulp(args) {
       cwd
     ].concat(args), {
       env,
-      cwd
+      cwd,
+      ...opts
     }
   );
 }
