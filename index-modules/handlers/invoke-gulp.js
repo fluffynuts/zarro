@@ -69,14 +69,22 @@ async function invokeGulp(args) {
     gulp = await findGulp(),
     gulpTasksFolder = path.join(projectDir, "gulp-tasks"),
     gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"),
-    env = Object.assign({}, process.env, { GULP_TASKS_FOLDER: gulpTasksFolder });
+    cwd = process.cwd(),
+    env = Object.assign({}, process.env, {
+      GULP_TASKS_FOLDER: gulpTasksFolder,
+      RUNNING_AS_ZARRO: 1
+    });
   return spawn(
     gulp,
     [
       "--gulpfile",
-      gulpFile
-    ].concat(args),
-    { env }
+      gulpFile,
+      "--cwd",
+      cwd
+    ].concat(args), {
+      env,
+      cwd
+    }
   );
 }
 
