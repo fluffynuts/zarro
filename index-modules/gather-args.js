@@ -72,9 +72,9 @@ module.exports = async function gatherArgs(
         );
       }
     }
-    if (acc.length === 0) {
-      continue;
+    if (foundSelf) {
+      return acc;
     }
-    return acc;
   }
+  throw new Error("Can't figure out args: unable to find entry point in args list");
 };
