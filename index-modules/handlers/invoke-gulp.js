@@ -6,6 +6,7 @@ const
   path = require("path"),
   isFile = require("../is-file"),
   isDir = require("../is-dir"),
+  debug = require("debug")("zarro::invoke-gulp"),
   projectDir = path.dirname(path.dirname(__dirname)),
   spawn = requireModule("spawn");
 
@@ -73,15 +74,20 @@ async function invokeGulp(args, opts) {
     env = Object.assign({}, process.env, {
       GULP_TASKS_FOLDER: gulpTasksFolder,
       RUNNING_AS_ZARRO: 1
-    });
-  return spawn(
-    gulp,
-    [
+    }),
+    allArgs = [
       "--gulpfile",
       gulpFile,
       "--cwd",
-      cwd
-    ].concat(args), {
+      cwd,
+    ].concat(args);
+  debug({
+    label: "running gulp with",
+    allArgs
+  });
+  return spawn(
+    gulp,
+    allArgs, {
       env,
       cwd,
       ...opts

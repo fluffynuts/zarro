@@ -35,27 +35,32 @@ async function isProbablySameFile(
 }
 
 module.exports = async function gatherArgs(
-  indexFilePath,
+  potentialEntryPoints,
   overrideArgv // for testing only
 ) {
-  const
-    indexContents = await readTextFile(indexFilePath),
-    indexSize = (await stat(indexFilePath)).size,
-    argv = overrideArgv || process.argv,
-    acc = [];
-  let foundSelf = false;
+  for (let entryPoint of potentialEntryPoints) {
+    const
+      indexContents = await readTextFile(entryPoint),
+      indexSize = (await stat(entryPoint)).size,
+      argv = overrideArgv || process.argv,
+      acc = [];
+    let foundSelf = false;
 
-  for (let arg of argv) {
-    if (foundSelf) {
-      acc.push(arg);
-    } else {
-      foundSelf = await isProbablySameFile(
-        arg,
-        indexFilePath,
-        indexSize,
-        indexContents
-      );
+    for (let arg of argv) {
+      if (foundSelf) {
+        acc.push(arg);
+      } else {
+        foundSelf = await isProbablySameFile(
+          arg,
+          entryPoint,
+          indexSize,
+          indexContents
+        );
+      }
     }
+    if (acc.length === 0) {
+      continue;
+    }
+    return acc;
   }
-  return acc;
 };
