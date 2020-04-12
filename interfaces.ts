@@ -1,5 +1,4 @@
 import EventEmitter = NodeJS.EventEmitter;
-import { Stream } from "stream";
 declare function requireModule<T>(module: string): T;
 declare type VoidVoid = () => void;
 declare type GulpCallback =
@@ -64,7 +63,7 @@ declare type GitPush = (dryRun?: boolean, quiet?: boolean) => Promise<void>;
 declare type GitPushTags = (dryRun?: boolean) => Promise<void>;
 
 type StdioOptions = "pipe" | "ignore" | "inherit" |
-  Array<("pipe" | "ipc" | "ignore" | "inherit" | Stream | number | null | undefined)>;
+  Array<("pipe" | "ipc" | "ignore" | "inherit" | any | number | null | undefined)>;
 
 declare type BufferConsumer = (data: Buffer) => void;
 declare type ProcessIO = string | BufferConsumer
