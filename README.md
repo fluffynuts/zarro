@@ -120,6 +120,55 @@ about it. PRs for fixes and extension tasks which others could use will be appre
       - tag the release
       - push the tag and changes to GitHub
 
+## API
+
+Zarro provides some convenience functionality from baked-in modules. To access a module,
+the global `requireModule` function will resolve the correct location for you. Modules
+live under the `gulp-tasks/modules` folder. Most modules will return a single function,
+though there are some exceptions. Some modules may be of interest to custom tasks, eg:
+
+- `env`
+    - provides a utility object to resolve environment variables for you
+        - `register` can register an environment variable as known with a default
+           value and help. See `register-environment-variables.js` for examples.
+           When you use this function, you can have a central configuration for
+           a default value for an environment variable and your environment
+           variable will be displayed in the `--show-env` output
+        - `resolve` resolves environment variables for you. It can be invoked with
+            one or more variable names, so can be used to fall back from one variable
+            onto another. It will also resolve back values if registered.
+        - `associate` associates one or more variables with one or more tasks,
+           primarily to show which tasks are affected by which variables when
+           running with `--show-env`
+        - `resolveArray` can resolve an environment variable to an array for you,
+            with an optional `delimiter` parameter, which defaults to comma
+        - `resolveNumber` resolves a numeric value from the named environment
+            value or throws if the value can't be resolved as a number, effectively
+            stopping execution. If you're expecting a number (eg port or max thread
+            count) you can simply `resolveNumber` and an invalid value would cause
+            execution to stop with a reasonable message
+        - `resolveFlag` resolves boolean values from environment variables
+            - `true` for: "yes", "true" or "1"
+            - `false` for: "no", "false" or "0"
+            - throws for unknown values
+- `resolve-masks`
+    - single function to resolve an array of masks that could be used in a `gulp.src`
+        where those masks can be inclusive or exclusive
+- `find-local-nuget`
+    - provides a single function to find a locally-downloaded `nuget.exe`, automatically
+        downloading it if required. Use this if you need to use `nuget.exe` operations
+        and don't want to set up your build host with a pathed `nuget.exe`
+- git utilities
+    - `git-tag`
+    - `git-push`
+    - `git-push-tags`
+- string padding
+    - `pad`
+    - `pad-left`
+    - `pad-right`
+
+There are many more utilities in there, feel free to browse the source.
+
 ## History
 
 If you've made it thus far, some light history might be of interest. Zarro's core
