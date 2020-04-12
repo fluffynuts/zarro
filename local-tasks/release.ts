@@ -1,6 +1,7 @@
 import "../interfaces";
 
 const
+  Git = require("simple-git/promise"),
   spawn = requireModule<Spawn>("spawn"),
   gulp = requireModule<GulpWithHelp>("gulp-with-help"),
   gitTag = requireModule<GitTag>("git-tag"),
@@ -10,11 +11,17 @@ const
   readPackageVersion = requireModule<ReadPackageVersion>("read-package-version");
 
 gulp.task("release", ["increment-package-json-version"], async () => {
-  const dryRun = env.resolveFlag("DRY_RUN");
+  const
+    dryRun = env.resolveFlag("DRY_RUN"),
+    git = new Git();
+
   const version = await readPackageVersion();
-  if (!dryRun) {
-    await gitTag(`v${ version }`);
+  if (dryRun) {
+    return;
   }
+  await git.add("package.json");
+  await git.commit(":bookmark: bump package version");
+  await gitTag(`v${ version }`);
   await spawn("npm", ["publish"]);
   await gitPush(dryRun);
   await gitPushTags(dryRun);
