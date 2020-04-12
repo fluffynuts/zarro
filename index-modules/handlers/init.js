@@ -1,7 +1,7 @@
 const
   isFile = require("../is-file"),
-  writeTextFile = require("../write-text-file"),
-  readTextFile = require("../read-text-file");
+  writeTextFile = require("../../gulp-tasks/modules/write-text-file"),
+  readTextFile = require("../../gulp-tasks/modules/read-text-file");
 
 async function trySetupZarroScript(overridePackageFileName) {
   const

@@ -10,8 +10,8 @@
   "scripts": {
     "test": "jest",
     "start": "node index.js",
-    "gulp": "gulp",
-    "publish-beta": "npm publish --tag beta"
+    "publish-beta": "npm publish --tag beta",
+    "release": "cross-env VERSION_INCREMENT_STRATEGY=minor run-s \"start release\""
   },
   "dependencies": {
     "ansi-colors": "^4.1.1",
@@ -46,6 +46,8 @@
     "simple-git": "^1.132.0",
     "temp": "^0.9.1",
     "through2": "^3.0.1",
+    "ts-node": "^8.8.2",
+    "typescript": "^3.8.3",
     "undertaker-forward-reference": "^1.0.2",
     "uuid": "^7.0.3",
     "which": "^2.0.2",
@@ -61,6 +63,7 @@
   },
   "license": "BSD-3-Clause",
   "devDependencies": {
+    "@types/gulp": "^4.0.6",
     "@types/jest": "^25.2.1",
     "@types/node": "^13.11.1",
     "expect-more-jest": "^4.0.0",

@@ -1,7 +1,7 @@
 const
-  stat = require("./stat"),
+  stat = require("../gulp-tasks/modules/stat"),
   path = require("path"),
-  readTextFile = require("./read-text-file");
+  readTextFile = require("../gulp-tasks/modules/read-text-file");
 
 async function isProbablySameFile(
   test,
