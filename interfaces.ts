@@ -1,4 +1,5 @@
 import EventEmitter = NodeJS.EventEmitter;
+import { Stream } from "stream";
 declare function requireModule<T>(module: string): T;
 declare type VoidVoid = () => void;
 declare type GulpCallback =
@@ -54,4 +55,39 @@ declare type StatFunction = (path: string) => Promise<FsStats | null>
 declare type ReadTextFile = (path: string) => Promise<string>;
 declare type WriteTextFile = (path: string, data: string, options?: { encoding?: string | null, mode?: string | number, flag?: string | number } | string | null) => Promise<void>
 
-declare type IncrementVersion = (version: string, strategy: string, zeroLowerOrder: boolean) => string;
+declare type IncrementVersion = (version: string, strategy: string, zeroLowerOrder: boolean)
+  => string;
+declare type ReadPackageVersion = (packageJsonPath?: string) => string;
+
+declare type GitTag = (tag: string, comment?: string) => Promise<void>;
+declare type GitPush = (dryRun?: boolean, quiet?: boolean) => Promise<void>;
+declare type GitPushTags = (dryRun?: boolean) => Promise<void>;
+
+type StdioOptions = "pipe" | "ignore" | "inherit" |
+  Array<("pipe" | "ipc" | "ignore" | "inherit" | Stream | number | null | undefined)>;
+
+declare type BufferConsumer = (data: Buffer) => void;
+declare type ProcessIO = string | BufferConsumer
+
+interface SpawnOptions {
+  windowsHide?: boolean;
+  timeout?: number;
+  argv0?: string;
+  stdio?: StdioOptions;
+  shell?: boolean | string;
+  windowsVerbatimArguments?: boolean;
+
+  uid?: number;
+  gid?: number;
+  cwd?: string;
+  env?: NodeJS.ProcessEnv;
+
+  stdout: ProcessIO;
+  stderr: ProcessIO;
+
+  detached?: boolean;
+}
+
+declare type Spawn = (program: string, args: string[], options?: SpawnOptions)
+  => Promise<number>;
+
