@@ -18,7 +18,7 @@ gulp.task("release", ["increment-package-json-version"], async () => {
   if (dryRun) {
     return;
   }
-  await git.add("package.json");
+  await git.add(".");
   await git.commit(":bookmark: bump package version");
   await gitTag(`v${ version }`);
   await spawn("npm", ["publish"]);
