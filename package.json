@@ -56,7 +56,8 @@
   "files": [
     "gulp-tasks/**/*",
     "index-modules/**/*",
-    "interfaces.ts"
+    "interfaces.ts",
+    "tsconfig.json"
   ],
   "author": {
     "name": "Davyd McColl",
