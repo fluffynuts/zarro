@@ -1,22 +1,4 @@
-// wish I could import this, but ts-node is unhappy about it
-interface EventEmitter {
-  addListener(event: string | symbol, listener: (...args: any[]) => void): this;
-  on(event: string | symbol, listener: (...args: any[]) => void): this;
-  once(event: string | symbol, listener: (...args: any[]) => void): this;
-  removeListener(event: string | symbol, listener: (...args: any[]) => void): this;
-  off(event: string | symbol, listener: (...args: any[]) => void): this;
-  removeAllListeners(event?: string | symbol): this;
-  setMaxListeners(n: number): this;
-  getMaxListeners(): number;
-  listeners(event: string | symbol): Function[];
-  rawListeners(event: string | symbol): Function[];
-  emit(event: string | symbol, ...args: any[]): boolean;
-  listenerCount(type: string | symbol): number;
-  // Added in Node 6...
-  prependListener(event: string | symbol, listener: (...args: any[]) => void): this;
-  prependOnceListener(event: string | symbol, listener: (...args: any[]) => void): this;
-  eventNames(): Array<string | symbol>;
-}
+import EventEmitter = NodeJS.EventEmitter;
 
 declare function requireModule<T>(module: string): T;
 declare type VoidVoid = () => void;
@@ -37,8 +19,8 @@ interface Env {
   associate(varName: string | string[], tasks: string | string[]): void;
 }
 
-// TODO: figure out why importing this from the fs module causes other
-// stuff in this file to break;
+// // TODO: figure out why importing this from the fs module causes other
+// // stuff in this file to break;
 interface FsStatsBase<T> {
   isFile(): boolean;
   isDirectory(): boolean;
@@ -109,5 +91,3 @@ interface SpawnOptions {
 declare type Spawn = (program: string, args: string[], options?: SpawnOptions)
   => Promise<number>;
 
-
-module.exports = {};

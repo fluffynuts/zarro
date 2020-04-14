@@ -36,7 +36,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-require("../../../interfaces");
 var sut = require("../../../gulp-tasks/modules/increment-version");
 require("expect-more-jest");
 describe("increment-version", function () {

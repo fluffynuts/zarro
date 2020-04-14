@@ -1,5 +1,4 @@
-import "../interfaces";
-
+export {}
 const
   Git = require("simple-git/promise"),
   spawn = requireModule<Spawn>("spawn"),

@@ -36,7 +36,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-require("../interfaces");
 var Git = require("simple-git/promise"), spawn = requireModule("spawn"), gulp = requireModule("gulp-with-help"), gitTag = requireModule("git-tag"), gitPushTags = requireModule("git-push-tags"), gitPush = requireModule("git-push"), env = requireModule("env"), readPackageVersion = requireModule("read-package-version");
 gulp.task("release", ["increment-package-json-version"], function () { return __awaiter(void 0, void 0, void 0, function () {
     var dryRun, git, version;

@@ -1,4 +1,3 @@
-import "../../../interfaces";
 const sut = require("../../../gulp-tasks/modules/increment-version") as IncrementVersion;
 import "expect-more-jest";
 
