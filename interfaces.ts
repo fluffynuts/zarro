@@ -5,8 +5,8 @@ declare type GulpCallback =
   (() => Promise<any> | EventEmitter) | ((done: VoidVoid) => Promise<any> | EventEmitter)
 
 interface GulpWithHelp {
-  task(name: string, callback: GulpCallback);
-  task(name: string, dependencies: string[], callback: GulpCallback);
+  task(name: string, callback: GulpCallback): void;
+  task(name: string, dependencies: string[], callback: GulpCallback): void;
 }
 
 interface Env {

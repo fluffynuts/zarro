@@ -11,7 +11,8 @@
     "test": "jest",
     "start": "node index.js",
     "publish-beta": "npm publish --tag beta",
-    "release": "cross-env VERSION_INCREMENT_STRATEGY=minor run-s \"start release\""
+    "release": "cross-env VERSION_INCREMENT_STRATEGY=minor run-s \"start release\"",
+    "tsc": "tsc"
   },
   "dependencies": {
     "ansi-colors": "^4.1.1",
