@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf\r for some situations. In particular this should make building .NET (core\r or framework) applications easier. This project is basically a port of\r a git repo I've been using as a submodule in many places: I'm trying to\r make it easier to consume:\r - git submodules are difficult for some people to grok\r   - which results in \"wars\" where the submodule version is rolled back and forth\r - one less step at checkout: no more `git submodule update --init`\r   - we have to `npm install` anyway",
   "bin": {
     "zarro": "./index.js"
