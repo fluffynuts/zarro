@@ -49,7 +49,7 @@ gulp.task("release", ["increment-package-json-version"], function () { return __
                 if (dryRun) {
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, git.add(".")];
+                return [4 /*yield*/, git.add("./*")];
             case 2:
                 _a.sent();
                 return [4 /*yield*/, git.commit(":bookmark: bump package version")];
