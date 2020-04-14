@@ -73,7 +73,8 @@ async function invokeGulp(args, opts) {
     cwd = process.cwd(),
     env = Object.assign({}, process.env, {
       GULP_TASKS_FOLDER: gulpTasksFolder,
-      RUNNING_AS_ZARRO: 1
+      RUNNING_AS_ZARRO: 1,
+      TS_NODE_PROJECT: path.join(projectDir, "tsconfig.json")
     }),
     allArgs = [
       "--gulpfile",
