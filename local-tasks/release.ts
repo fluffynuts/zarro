@@ -19,10 +19,9 @@ gulp.task("release", ["increment-package-json-version"], async () => {
     return;
   }
   await git.add(":/");
-  throw new Error("DIE");
   await git.commit(":bookmark: bump package version");
-  // await gitTag(`v${ version }`);
-  // await spawn("npm", ["publish"]);
-  // await gitPush(dryRun);
-  // await gitPushTags(dryRun);
+  await gitTag(`v${ version }`);
+  await spawn("npm", ["publish"]);
+  await gitPush(dryRun);
+  await gitPushTags(dryRun);
 });
