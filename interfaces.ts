@@ -109,3 +109,5 @@ interface SpawnOptions {
 declare type Spawn = (program: string, args: string[], options?: SpawnOptions)
   => Promise<number>;
 
+
+module.exports = {};
