@@ -55,7 +55,8 @@
   },
   "files": [
     "gulp-tasks/**/*",
-    "index-modules/**/*"
+    "index-modules/**/*",
+    "interfaces.ts"
   ],
   "author": {
     "name": "Davyd McColl",
