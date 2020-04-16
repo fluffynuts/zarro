@@ -29,7 +29,7 @@ async function isProbablySameFile(
     const testContents = await readTextFile(test);
     // ensure that the arg refers to the starting file
     return testContents === compareContents;
-  } catch {
+  } catch (e) {
     /* ignore */
   }
 }
