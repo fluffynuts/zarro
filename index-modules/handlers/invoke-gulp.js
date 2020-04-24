@@ -16,7 +16,7 @@ function alwaysAccept() {
 
 async function tryToFindGulpCliFromInstalledModule() {
   const
-    nodeModulesDir = path.dirname(__dirname),
+    nodeModulesDir = path.dirname(path.dirname(__dirname)),
     binDir = path.join(nodeModulesDir, ".bin");
   await validate(nodeModulesDir, binDir);
   return generateFullGulpCliPathFor(binDir);
