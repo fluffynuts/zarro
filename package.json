@@ -15,6 +15,9 @@
     "release-beta": "npm publish --tag beta",
     "prerelease": "run-s tsc test",
     "release": "cross-env VERSION_INCREMENT_STRATEGY=minor run-s \"start release\"",
+    "update-gulp-tasks": "cd gulp-tasks && git checkout master && git pull --rebase",
+    "update-repo-root": "git pull --rebase",
+    "update": "run-s update-gulp-tasks update-repo-root",
     "tsc": "tsc"
   },
   "dependencies": {
