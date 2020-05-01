@@ -36,7 +36,7 @@
     "gulp-filter": "^6.0.0",
     "gulp-help": "^1.6.1",
     "gulp-msbuild": "^0.6.2",
-    "gulp-npm-run": "0.0.3",
+    "gulp-npm-run": "https://github.com/fluffynuts/gulp-npm-run.git#v1.0.0",
     "gulp-nunit-runner": "^1.2.3",
     "inquirer": "^7.1.0",
     "mkdirp": "^1.0.4",
