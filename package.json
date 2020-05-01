@@ -18,7 +18,8 @@
     "update-gulp-tasks": "cd gulp-tasks && git checkout master && git pull --rebase",
     "update-repo-root": "git pull --rebase",
     "update": "run-s update-gulp-tasks update-repo-root",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "gulp": "gulp"
   },
   "dependencies": {
     "ansi-colors": "^4.1.1",
@@ -36,7 +37,7 @@
     "gulp-filter": "^6.0.0",
     "gulp-help": "^1.6.1",
     "gulp-msbuild": "^0.6.2",
-    "gulp-npm-run": "https://github.com/fluffynuts/gulp-npm-run.git#v1.0.0",
+    "gulp-npm-run": "https://github.com/fluffynuts/gulp-npm-run.git#v1.0.1",
     "gulp-nunit-runner": "^1.2.3",
     "inquirer": "^7.1.0",
     "mkdirp": "^1.0.4",
