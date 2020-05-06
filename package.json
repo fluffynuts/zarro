@@ -38,7 +38,7 @@
     "gulp-help": "^1.6.1",
     "gulp-msbuild": "^0.6.3",
     "gulp-npm-run": "https://github.com/fluffynuts/gulp-npm-run.git#v1.0.2",
-    "gulp-nunit-runner": "https://github.com/fluffynuts/gulp-nunit-runner.git#v2.0.0",
+    "gulp-nunit-runner": "https://github.com/fluffynuts/gulp-nunit-runner.git#v2.0.1",
     "inquirer": "^7.1.0",
     "mkdirp": "^1.0.4",
     "nodemon": "^2.0.3",
