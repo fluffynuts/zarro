@@ -116,12 +116,15 @@ declare global {
 
   type ReadTextFile = (path: string) => Promise<string>;
   type WriteTextFile = (path: string, data: string, options?: { encoding?: string | null, mode?: string | number, flag?: string | number } | string | null) => Promise<void>
+  type ParseXml = (data: string) => Promise<Dictionary<any>>;
 
   type IncrementVersion = (version: string, strategy: string, zeroLowerOrder: boolean)
     => string;
   type ReadPackageVersion = (packageJsonPath?: string) => string;
+  type ReadNuspecVersion = (pathToNuspec: string) => string;
+  type ReadCsProjVersion = (pathToCsProj: string) => string;
 
-  type GitTag = (tag: string, comment?: string) => Promise<void>;
+  type GitTag = (tag: string, comment?: string, where?: string) => Promise<void>;
   type GitPush = (dryRun?: boolean, quiet?: boolean) => Promise<void>;
   type GitPushTags = (dryRun?: boolean) => Promise<void>;
 
