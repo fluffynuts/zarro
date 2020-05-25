@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import { Stream } from "stream";
 
 declare global {
   function requireModule<T>(module: string): T;
@@ -123,6 +124,8 @@ declare global {
   type ReadPackageVersion = (packageJsonPath?: string) => string;
   type ReadNuspecVersion = (pathToNuspec: string) => string;
   type ReadCsProjVersion = (pathToCsProj: string) => string;
+  type GatherPaths = (pathSpecs: string | string[]) => Promise<string[]>;
+  type PromisifyStream = (stream: Stream) => Promise<void>
 
   type GitTag = (tag: string, comment?: string, where?: string) => Promise<void>;
   type GitPush = (dryRun?: boolean, quiet?: boolean) => Promise<void>;
