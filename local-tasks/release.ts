@@ -36,16 +36,10 @@ async function commitAll(
   }
 }
 
-async function tagAndPush(
+async function push(
   dryRun: boolean,
-  tag: string,
   where: string
 ) {
-  await gitTag({
-    tag,
-    dryRun,
-    where
-  });
   await gitPush({
     dryRun,
     where
@@ -78,9 +72,23 @@ async function tagRelease(dryRun: boolean) {
   await commitAll(dryRun, "gulp-tasks", `:bookmark: goes with zarro v${ version }`);
   await commitAll(dryRun, ".", ":bookmark: bump package version");
 
-  // can tag and push in parallel
+  // can tag in parallel
   await Promise.all([
-    tagAndPush(dryRun, tag, "."),
-    tagAndPush(dryRun, tag, "gulp-tasks")
+    gitTag({
+      tag,
+      dryRun,
+      where: "."
+    }),
+    gitTag({
+      tag,
+      dryRun,
+      where: "gulp-tasks"
+    }),
+  ]);
+
+  // can push in parallel
+  await Promise.all([
+    push(dryRun, "."),
+    push(dryRun, "gulp-tasks")
   ]);
 }
