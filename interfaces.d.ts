@@ -1,5 +1,15 @@
 import * as fs from "fs";
 import { Stream } from "stream";
+import { StyleFunction } from "ansi-colors";
+
+// copied out of @types/fancy-log because imports are being stupid
+interface Logger {
+  (...args: any[]): Logger;
+  dir(...args: any[]): Logger;
+  error(...args: any[]): Logger;
+  info(...args: any[]): Logger;
+  warn(...args: any[]): Logger;
+}
 
 declare global {
   function requireModule<T>(module: string): T;
@@ -127,9 +137,20 @@ declare global {
   type GatherPaths = (pathSpecs: string | string[]) => Promise<string[]>;
   type PromisifyStream = (stream: Stream) => Promise<void>
 
-  type GitTag = (tag: string, comment?: string, where?: string) => Promise<void>;
-  type GitPush = (dryRun?: boolean, quiet?: boolean) => Promise<void>;
-  type GitPushTags = (dryRun?: boolean) => Promise<void>;
+  interface GitTagOptions {
+    tag: string;
+    comment?: string;
+    where?: string;
+    dryRun?: boolean;
+  }
+  interface GitPushOptions {
+    dryRun?: boolean;
+    quiet?: boolean;
+    where?: string
+  }
+  type GitTag = (tag: string | GitTagOptions, comment?: string, where?: string) => Promise<void>;
+  type GitPush = (dryRun?: boolean | GitPushOptions, quiet?: boolean, where?: string) => Promise<void>;
+  type GitPushTags = (dryRun?: boolean | GitPushOptions, comment?: string, where?: string) => Promise<void>;
 
   type StdioOptions = "pipe" | "ignore" | "inherit" |
     Array<("pipe" | "ipc" | "ignore" | "inherit" | any | number | null | undefined)>;
@@ -158,6 +179,12 @@ declare global {
 
   type Spawn = (program: string, args: string[], options?: SpawnOptions)
     => Promise<number>;
+
+  interface GulpUtil {
+    PluginError: Error;
+    log: Logger;
+    colors: StyleFunction;
+  }
 
   // scraped from https://spdx.org/licenses/
   // with the following fragment from FF dev console
