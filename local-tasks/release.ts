@@ -74,11 +74,11 @@ async function tagRelease(dryRun: boolean) {
     version = await readPackageVersion(),
     tag = `v${ version }`;
 
-  await Promise.all([
-    commitAll(dryRun, ".", ":bookmark: bump package version"),
-    commitAll(dryRun, "gulp-tasks", `:bookmark: goes with zarro v${ version }`),
-  ]);
+  // must commit all of gulp-tasks first so the updated module ends up committed with zarro
+  await commitAll(dryRun, "gulp-tasks", `:bookmark: goes with zarro v${ version }`);
+  await commitAll(dryRun, ".", ":bookmark: bump package version");
 
+  // can tag and push in parallel
   await Promise.all([
     tagAndPush(dryRun, tag, "."),
     tagAndPush(dryRun, tag, "gulp-tasks")
