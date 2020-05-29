@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import { Stream } from "stream";
 import { StyleFunction } from "ansi-colors";
+import { AlterPackageJsonVersionOptions } from "./gulp-tasks/modules/alter-package-json-version";
 
 // copied out of @types/fancy-log because imports are being stupid
 interface Logger {
@@ -65,6 +66,8 @@ declare global {
     resolveFlag(name: string): boolean;
     associate(varName: string | string[], tasks: string | string[]): void;
 
+    // these are generated on the js output by register-environment-variables
+    // -> included here to avoid typos: use env.CONSTANT_NAME
     BETA: string;
     USE_SYSTEM_NUGET: string;
     ENABLE_NUGET_PARALLEL_PROCESSING: string;
@@ -81,6 +84,7 @@ declare global {
     BUILD_EXCLUDE: string;
     BUILD_ADDITIONAL_EXCLUDE: string;
     DOTNET_CORE: string;
+    DOTNET_TEST_PARALLEL: boolean;
     NUNIT_ARCHITECTURE: string;
     BUILD_REPORT_XML: string;
     NUNIT_LABELS: string;
@@ -111,10 +115,11 @@ declare global {
     PURGE_DOTNET_DIRS: string;
     PURGE_ADDITIONAL_DIRS: string;
     PACKAGE_TARGET_FOLDER: string;
-    PACK_INCLUDE: string;
     PACK_EXCLUDE: string;
+    PACK_INCLUDE: string;
     PACK_CONFIGURATION: string;
     PACK_INCREMENT_VERSION: string;
+    PACK_INCREMENT_VERSION_BY: string;
     PACKAGE_JSON: string;
     VERSION_INCREMENT_STRATEGY: string;
     VERSION_INCREMENT_ZERO: string;
@@ -129,13 +134,14 @@ declare global {
   type WriteTextFile = (path: string, data: string, options?: { encoding?: string | null, mode?: string | number, flag?: string | number } | string | null) => Promise<void>
   type ParseXml = (data: string) => Promise<Dictionary<any>>;
 
-  type IncrementVersion = (version: string, strategy: string, zeroLowerOrder: boolean)
+  type IncrementVersion = (version: string, strategy: string, zeroLowerOrder: boolean, incrementBy: number)
     => string;
   type ReadPackageVersion = (packageJsonPath?: string) => string;
   type ReadNuspecVersion = (pathToNuspec: string) => string;
   type ReadCsProjVersion = (pathToCsProj: string) => string;
   type GatherPaths = (pathSpecs: string | string[]) => Promise<string[]>;
   type PromisifyStream = (stream: Stream) => Promise<void>
+  type AlterPackageJson = (opts?: AlterPackageJsonVersionOptions) => Promise<void>
 
   interface GitTagOptions {
     tag: string;
