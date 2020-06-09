@@ -144,6 +144,8 @@ declare global {
   type PromisifyStream = (stream: Stream) => Promise<void>;
   type AlterPackageJson = (opts?: AlterPackageJsonVersionOptions) => Promise<void>;
   type Rimraf = (at: string, opts?: RimrafOptions) => Promise<void>;
+  type ReadPackageJson = (at?: string) => Promise<PackageIndex>;
+
 
   interface GitTagOptions {
     tag: string;
