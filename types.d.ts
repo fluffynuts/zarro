@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { Stream } from "stream";
 import { StyleFunction } from "ansi-colors";
 import { AlterPackageJsonVersionOptions } from "./gulp-tasks/modules/alter-package-json-version";
+import { RimrafOptions } from "./gulp-tasks/modules/rimraf";
 
 // copied out of @types/fancy-log because imports are being stupid
 interface Logger {
@@ -130,18 +131,19 @@ declare global {
 
   type StatFunction = (path: string) => Promise<fs.Stats | null>
 
+  // module defs: get these via requireModule<T>("module-name");
   type ReadTextFile = (path: string) => Promise<string>;
   type WriteTextFile = (path: string, data: string, options?: { encoding?: string | null, mode?: string | number, flag?: string | number } | string | null) => Promise<void>
   type ParseXml = (data: string) => Promise<Dictionary<any>>;
-
   type IncrementVersion = (version: string, strategy: string, zeroLowerOrder: boolean, incrementBy: number)
     => string;
   type ReadPackageVersion = (packageJsonPath?: string) => string;
   type ReadNuspecVersion = (pathToNuspec: string) => string;
   type ReadCsProjVersion = (pathToCsProj: string) => string;
   type GatherPaths = (pathSpecs: string | string[]) => Promise<string[]>;
-  type PromisifyStream = (stream: Stream) => Promise<void>
-  type AlterPackageJson = (opts?: AlterPackageJsonVersionOptions) => Promise<void>
+  type PromisifyStream = (stream: Stream) => Promise<void>;
+  type AlterPackageJson = (opts?: AlterPackageJsonVersionOptions) => Promise<void>;
+  type Rimraf = (at: string, opts?: RimrafOptions) => Promise<void>;
 
   interface GitTagOptions {
     tag: string;
