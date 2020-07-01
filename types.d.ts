@@ -3,6 +3,8 @@ import { Stream } from "stream";
 import { StyleFunction } from "ansi-colors";
 import { AlterPackageJsonVersionOptions } from "./gulp-tasks/modules/alter-package-json-version";
 import { RimrafOptions } from "./gulp-tasks/modules/rimraf";
+import { ExecFileOptionsWithBufferEncoding } from "child_process";
+import { IoHandlers } from "./gulp-tasks/modules/exec";
 
 // copied out of @types/fancy-log because imports are being stupid
 interface Logger {
@@ -145,6 +147,7 @@ declare global {
   type AlterPackageJson = (opts?: AlterPackageJsonVersionOptions) => Promise<void>;
   type Rimraf = (at: string, opts?: RimrafOptions) => Promise<void>;
   type ReadPackageJson = (at?: string) => Promise<PackageIndex>;
+  type Exec = (cmd: string, args: string[], opts?: ExecFileOptionsWithBufferEncoding, handlers?: IoHandlers) => Promise<string>;
 
 
   interface GitTagOptions {

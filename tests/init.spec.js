@@ -1,3 +1,4 @@
+require("expect-even-more-jest");
 const sut = require("../index-modules/handlers/init");
 const Sandbox = require("./helpers/sandbox");
 

@@ -1,4 +1,6 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+require("expect-even-more-jest");
 describe(`read-nuspec-version`, () => {
     const sut = require("../../../gulp-tasks/modules/read-nuspec-version"), Sandbox = require("../../helpers/sandbox");
     it(`should read the version from a nuspec file`, async () => {

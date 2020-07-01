@@ -1,3 +1,7 @@
+import "expect-even-more-jest";
+import { Sandbox } from "filesystem-sandbox";
+import { copyFileSync } from "fs";
+
 describe('read-package-json', function () {
   const
     {promises} = require("fs"),
@@ -19,10 +23,17 @@ describe('read-package-json', function () {
   it(`should read the package.json in the provided dir`, async () => {
     // Arrange
     const
-      dir = path.resolve("gulp-tasks/start"),
-      expected = JSON.parse(await fs.readFile(path.join(dir, "package.json")));
+      sandbox = await Sandbox.create(),
+      dir = "__here__",
+      fullDirPath = sandbox.fullPathFor(dir);
+    await sandbox.mkdir(dir);
+    copyFileSync(
+      path.resolve("gulp-tasks/start/_package.json"),
+      sandbox.fullPathFor(`${dir}/package.json`)
+    );
+    const expected = JSON.parse(await fs.readFile(path.join(fullDirPath, "package.json")));
     // Act
-    const result = await readPackageJson(dir);
+    const result = await readPackageJson(fullDirPath);
     // Assert
     expect(result)
       .toEqual(expected);
@@ -31,12 +42,23 @@ describe('read-package-json', function () {
   it(`should read the package.json at the provided file path`, async () => {
     // Arrange
     const
-      dir = path.resolve("gulp-tasks/start"),
-      expected = JSON.parse(await fs.readFile(path.join(dir, "package.json")));
+      sandbox = await Sandbox.create(),
+      dir = "__here__",
+      fullDirPath = sandbox.fullPathFor(dir);
+    await sandbox.mkdir(dir);
+    copyFileSync(
+      path.resolve("gulp-tasks/start/_package.json"),
+      sandbox.fullPathFor(`${dir}/package.json`)
+    );
+    const expected = JSON.parse(await fs.readFile(path.join(fullDirPath, "package.json")));
     // Act
-    const result = await readPackageJson(path.join(dir, "package.json"));
+    const result = await readPackageJson(path.join(fullDirPath, "package.json"));
     // Assert
     expect(result)
       .toEqual(expected);
+  });
+
+  afterEach(async () => {
+    await Sandbox.destroyAll();
   });
 });

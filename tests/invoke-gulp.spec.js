@@ -1,3 +1,4 @@
+require("expect-even-more-jest");
 const
   spawn = jest.fn(),
   requireModule = require("../gulp-tasks/modules/require-module");

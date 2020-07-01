@@ -1,5 +1,5 @@
 const sut = require("../../../gulp-tasks/modules/increment-version") as IncrementVersion;
-import "expect-more-jest";
+import "expect-even-more-jest";
 
 describe(`increment-version`, function() {
   it(`should be a function`, async () => {

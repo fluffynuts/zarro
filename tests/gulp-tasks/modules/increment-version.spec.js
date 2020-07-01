@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const sut = require("../../../gulp-tasks/modules/increment-version");
-require("expect-more-jest");
+require("expect-even-more-jest");
 describe(`increment-version`, function () {
     it(`should be a function`, async () => {
         // Arrange

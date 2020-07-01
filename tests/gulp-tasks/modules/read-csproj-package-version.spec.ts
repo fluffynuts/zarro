@@ -1,3 +1,4 @@
+import "expect-even-more-jest";
 describe(`read-csproj-package-version`, () => {
   const
     sut = require("../../../gulp-tasks/modules/read-csproj-package-version") as ReadCsProjVersion,

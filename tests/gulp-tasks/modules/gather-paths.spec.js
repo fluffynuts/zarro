@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const sut = require("../../../gulp-tasks/modules/gather-paths");
-require("expect-more-jest");
+require("expect-even-more-jest");
 describe(`gather-paths module`, () => {
     it(`should export a single function`, async () => {
         // Arrange

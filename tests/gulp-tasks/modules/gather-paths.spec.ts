@@ -1,5 +1,5 @@
 const sut = require("../../../gulp-tasks/modules/gather-paths") as GatherPaths;
-import "expect-more-jest";
+import "expect-even-more-jest";
 
 describe(`gather-paths module`, () => {
   it(`should export a single function`, async () => {

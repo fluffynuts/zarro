@@ -127,8 +127,8 @@ the global `requireModule` function will resolve the correct location for you. M
 live under the `gulp-tasks/modules` folder. Most modules will return a single function,
 though there are some exceptions. Some modules may be of interest to custom tasks, eg:
 
-- `gulp-with-help`
-    - you should `requireModule("gulp-with-help")` wherever you would have normally
+- `gulp`
+    - you should `requireModule("gulp")` wherever you would have normally
         done `require("gulp")`. This gets you the patched version of gulp 4 which
         will happily consume gulp 3 tasks and which has inbuilt support for help
         for your tasks on both gulp 3 and 4. Most importantly, if you _do not_ use this

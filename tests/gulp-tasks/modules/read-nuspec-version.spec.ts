@@ -1,3 +1,4 @@
+import "expect-even-more-jest";
 describe(`read-nuspec-version`, () => {
   const
     sut = require("../../../gulp-tasks/modules/read-nuspec-version") as ReadNuspecVersion,

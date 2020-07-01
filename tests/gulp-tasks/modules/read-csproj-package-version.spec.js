@@ -1,4 +1,6 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+require("expect-even-more-jest");
 describe(`read-csproj-package-version`, () => {
     const sut = require("../../../gulp-tasks/modules/read-csproj-package-version"), Sandbox = require("../../helpers/sandbox");
     it(`should read the version from a csproj file`, async () => {
