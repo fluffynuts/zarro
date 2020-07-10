@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
+const filesystem_sandbox_1 = require("filesystem-sandbox");
 describe(`read-csproj-package-version`, () => {
-    const sut = require("../../../gulp-tasks/modules/read-csproj-package-version"), Sandbox = require("../../helpers/sandbox");
+    const sut = require("../../../gulp-tasks/modules/read-csproj-package-version");
     it(`should read the version from a csproj file`, async () => {
         // Arrange
-        const sandbox = Sandbox.create(), fileName = "package.nuspec", fullPath = await sandbox.writeTextFile(fileName, csprojXml);
+        const sandbox = await filesystem_sandbox_1.Sandbox.create(), fileName = "package.nuspec", fullPath = await sandbox.writeFile(fileName, csprojXml);
         // Act
         const result = await sut(fullPath);
         // Assert

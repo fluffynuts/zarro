@@ -38,7 +38,7 @@ describe('read-package-json', function () {
         expect(result)
             .toEqual(expected);
     });
-    afterEach(async () => {
+    afterAll(async () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
     });
 });

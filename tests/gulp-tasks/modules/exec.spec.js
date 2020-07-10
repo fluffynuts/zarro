@@ -53,7 +53,23 @@ describe(`exec`, () => {
             });
         });
     });
-    afterEach(async () => {
+    it(`should run the command from the current working directory`, async () => {
+        // Arrange
+        const sandbox = await filesystem_sandbox_1.Sandbox.create();
+        const start = process.cwd();
+        // Act
+        try {
+            process.chdir(sandbox.path);
+            const result = await exec("pwd", [], { suppressOutput: true });
+            expect(result)
+                .toEqual(sandbox.path);
+        }
+        finally {
+            process.chdir(start);
+        }
+        // Assert
+    });
+    afterAll(async () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
     });
 });

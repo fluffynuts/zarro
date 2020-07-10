@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
+const filesystem_sandbox_1 = require("filesystem-sandbox");
 describe(`read-nuspec-version`, () => {
-    const sut = require("../../../gulp-tasks/modules/read-nuspec-version"), Sandbox = require("../../helpers/sandbox");
+    const sut = require("../../../gulp-tasks/modules/read-nuspec-version");
     it(`should read the version from a nuspec file`, async () => {
         // Arrange
-        const sandbox = Sandbox.create(), fileName = "package.nuspec", fullPath = await sandbox.writeTextFile(fileName, packageNuspec);
+        const sandbox = await filesystem_sandbox_1.Sandbox.create(), fileName = "package.nuspec", fullPath = await sandbox.writeFile(fileName, packageNuspec);
         // Act
         const result = await sut(fullPath);
         // Assert
@@ -13,7 +14,7 @@ describe(`read-nuspec-version`, () => {
             .toEqual("1.0.158");
     });
     afterAll(async () => {
-        await Sandbox.destroyAll();
+        await filesystem_sandbox_1.Sandbox.destroyAll();
     });
     const packageNuspec = `
   <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

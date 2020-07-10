@@ -1,15 +1,15 @@
 import "expect-even-more-jest";
+import { Sandbox } from "filesystem-sandbox";
 describe(`read-csproj-package-version`, () => {
   const
-    sut = require("../../../gulp-tasks/modules/read-csproj-package-version") as ReadCsProjVersion,
-    Sandbox = require("../../helpers/sandbox");
+    sut = require("../../../gulp-tasks/modules/read-csproj-package-version") as ReadCsProjVersion;
 
   it(`should read the version from a csproj file`, async () => {
     // Arrange
     const
-      sandbox = Sandbox.create(),
+      sandbox = await Sandbox.create(),
       fileName = "package.nuspec",
-      fullPath = await sandbox.writeTextFile(fileName, csprojXml);
+      fullPath = await sandbox.writeFile(fileName, csprojXml);
     // Act
     const result = await sut(fullPath);
     // Assert

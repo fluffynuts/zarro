@@ -58,7 +58,7 @@ describe('read-package-json', function () {
       .toEqual(expected);
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await Sandbox.destroyAll();
   });
 });

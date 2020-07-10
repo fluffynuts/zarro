@@ -5,6 +5,7 @@ import { AlterPackageJsonVersionOptions } from "./gulp-tasks/modules/alter-packa
 import { RimrafOptions } from "./gulp-tasks/modules/rimraf";
 import { ExecFileOptionsWithBufferEncoding } from "child_process";
 import { IoHandlers } from "./gulp-tasks/modules/exec";
+import { StatsBase } from "fs";
 
 // copied out of @types/fancy-log because imports are being stupid
 interface Logger {
@@ -147,8 +148,75 @@ declare global {
   type AlterPackageJson = (opts?: AlterPackageJsonVersionOptions) => Promise<void>;
   type Rimraf = (at: string, opts?: RimrafOptions) => Promise<void>;
   type ReadPackageJson = (at?: string) => Promise<PackageIndex>;
-  type Exec = (cmd: string, args: string[], opts?: ExecFileOptionsWithBufferEncoding, handlers?: IoHandlers) => Promise<string>;
+  type Exec =
+    ((cmd: string, args?: string[], opts?: ExecOpts, handlers?: IoHandlers) => Promise<string>) & {
+    alwaysSuppressOutput: boolean
+  };
 
+  // @ts-ignore
+  export interface ExecOpts extends ExecFileOptionsWithBufferEncoding {
+    // force usage of execfile
+    _useExecFile?: boolean;
+    // exec normally mirrors output (and returns it)
+    // -> set this to true to only return the output
+    suppressOutput?: boolean;
+
+    encoding?: string | null;
+  }
+
+  export interface FileSystemUtils {
+    folderExists(at: string): Promise<boolean>;
+    fileExists(at: string): Promise<boolean>;
+    stat(p: string): Promise<StatsBase<any>>;
+    readFile(p: string, opts: any): Promise<Buffer | string>;
+    readdir(p: string): Promise<string[]>;
+    mkdir(p: string, opts: any): Promise<void>;
+  }
+
+  // simple-git wrappers
+  // resolves the (assumed primary) git remote at the current folder or provided override, allowing an environment override via GIT_REMOTE
+  type ResolveGitRemote = (at?: string) => Promise<string | undefined>;
+  // attempt to read the primary git remote, if there is one
+  type ReadGitRemote = (at?: string) => Promise<string | undefined>;
+  type ReadAllGitRemotes = (at?: string) => Promise<GitRemote[]>;
+  // resolves the git branch at the current folder or provided override, allowing an environment override via GIT_BRANCH
+  type ResolveGitBranch = (at?: string) => Promise<string | undefined>;
+  // reads the checked out branch name at the current folder or provided override
+  type ReadCurrentGitBranch = (at?: string) => Promise<string | undefined>;
+  type ReadAllGitBranches = (at?: string) => Promise<string[]>;
+  // runs some git functionality, returning undefined if that functionality is run outside a repo folder
+  type SafeGit = ((fn: () => Promise<any>, defaultValue?: any) => Promise<any | undefined>)
+
+  type PromisifyFunction = (fn: Function, parent?: any, cannotError?: any) => ((...args: any[]) => Promise<any>);
+
+  type ParseXmlString = (str: string) => any; // TODO: get xml types in here?
+  type LoadXmlFile = (str: string) => any; // TODO: get xml types in here?
+
+  type GitTagFromCsProj = (options?: GitTagFromCsProjOptions) => Stream;
+
+  interface GitTagFromCsProjOptions extends GitTagOptions {
+    push?: boolean;
+  }
+
+  type ReadGitInfo = (at?: string) => Promise<GitInfo>;
+  enum GitRemoteUsage {
+    fetch,
+    push,
+    fetchAndPush
+  }
+  interface GitRemote {
+    name: string;
+    url: string;
+    usage: GitRemoteUsage
+  }
+
+  interface GitInfo {
+    isGitRepository: boolean;
+    remotes: GitRemote[];
+    primaryRemote: string;
+    branches: string[];
+    currentBranch: string;
+  }
 
   interface GitTagOptions {
     tag: string;
@@ -194,9 +262,12 @@ declare global {
     => Promise<number>;
 
   interface GulpUtil {
-    PluginError: Error;
+    PluginError: PluginError;
     log: Logger;
     colors: StyleFunction;
+  }
+  interface PluginError extends Error {
+    new(pluginName: string, err: string | Error): void;
   }
 
   // scraped from https://spdx.org/licenses/
