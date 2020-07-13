@@ -194,6 +194,13 @@ declare global {
 
   type GitTagFromCsProj = (options?: GitTagFromCsProjOptions) => Stream;
 
+  type ReadGitCommitDeltaCount = (mainBranch: string, otherBranch: string) => Promise<GitCommitDeltaCount>;
+
+  interface GitCommitDeltaCount {
+    behind: number;
+    ahead: number;
+  }
+
   interface GitTagFromCsProjOptions extends GitTagOptions {
     push?: boolean;
   }

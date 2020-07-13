@@ -1,6 +1,7 @@
 import "expect-even-more-jest";
 import { Sandbox } from "filesystem-sandbox";
 import path from "path";
+import { runInFolder } from "../../test-helpers/run-in-folder";
 
 const
   readGitInfo = requireModule<ReadGitInfo>("read-git-info"),
@@ -126,27 +127,6 @@ describe(`read-git-info`, () => {
     return runInFolder(at, () => exec("git", ["init"]));
   }
 
-  type Func<T> = () => T;
-  type AsyncFunc<T> = () => Promise<T>;
-
-  async function runInFolder<T>(
-    folder: string,
-    fn: Func<T> | AsyncFunc<T>) {
-    const
-      start = process.cwd(),
-      alreadyThere = start === folder;
-
-    if (!alreadyThere) {
-      process.chdir(folder);
-    }
-    try {
-      return await fn();
-    } finally {
-      if (!alreadyThere) {
-        process.chdir(start);
-      }
-    }
-  }
 
   async function addRemote(at: string, name: string, url: string) {
     return runInFolder(at,

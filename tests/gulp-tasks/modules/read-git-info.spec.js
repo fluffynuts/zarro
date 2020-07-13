@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 const path_1 = __importDefault(require("path"));
+const run_in_folder_1 = require("../../test-helpers/run-in-folder");
 const readGitInfo = requireModule("read-git-info"), exec = requireModule("exec"), writeTextFile = requireModule("write-text-file"), readTextFile = requireModule("read-text-file");
 describe(`read-git-info`, () => {
     it(`should export a function`, async () => {
@@ -112,27 +113,13 @@ describe(`read-git-info`, () => {
     });
     afterAll(async () => await filesystem_sandbox_1.Sandbox.destroyAll());
     async function createRepo(at) {
-        return runInFolder(at, () => exec("git", ["init"]));
-    }
-    async function runInFolder(folder, fn) {
-        const start = process.cwd(), alreadyThere = start === folder;
-        if (!alreadyThere) {
-            process.chdir(folder);
-        }
-        try {
-            return await fn();
-        }
-        finally {
-            if (!alreadyThere) {
-                process.chdir(start);
-            }
-        }
+        return run_in_folder_1.runInFolder(at, () => exec("git", ["init"]));
     }
     async function addRemote(at, name, url) {
-        return runInFolder(at, () => exec("git", ["remote", "add", name, url]));
+        return run_in_folder_1.runInFolder(at, () => exec("git", ["remote", "add", name, url]));
     }
     async function commitFile(at, name, contents) {
-        return runInFolder(at, async () => {
+        return run_in_folder_1.runInFolder(at, async () => {
             const fpath = path_1.default.join(at, name);
             if (typeof contents === "function") {
                 const current = await readTextFile(fpath);
@@ -146,7 +133,7 @@ describe(`read-git-info`, () => {
         });
     }
     async function commitAll(at, message) {
-        return runInFolder(at, async () => {
+        return run_in_folder_1.runInFolder(at, async () => {
             await exec("git", ["add", "-A", ":/"]);
             await exec("git", ["commit", "-am", `"${message}"`]);
         });
@@ -160,7 +147,7 @@ describe(`read-git-info`, () => {
             args.push("-b");
         }
         args.push(branch);
-        return runInFolder(at, () => exec("git", args));
+        return run_in_folder_1.runInFolder(at, () => exec("git", args));
     }
     async function addBranch(at, name) {
         // checkout -b
