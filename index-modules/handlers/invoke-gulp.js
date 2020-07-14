@@ -57,7 +57,7 @@ async function findGulp() {
   try {
     return await which("gulp");
   } catch (e) {
-    const isInstalledAsModule = !!splitPath(__dirname).find(d => d == "node_modules");
+    const isInstalledAsModule = !!splitPath(__dirname).find(d => d === "node_modules");
     return isInstalledAsModule
       // gulp really should be in the path...
       ? tryToFindGulpCliFromInstalledModule()
