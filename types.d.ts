@@ -152,6 +152,7 @@ declare global {
     ((cmd: string, args?: string[], opts?: ExecOpts, handlers?: IoHandlers) => Promise<string>) & {
     alwaysSuppressOutput: boolean
   };
+  type Uniq = (values: any[]) => any[];
 
   // @ts-ignore
   export interface ExecOpts extends ExecFileOptionsWithBufferEncoding {
@@ -193,8 +194,10 @@ declare global {
   type LoadXmlFile = (str: string) => any; // TODO: get xml types in here?
 
   type GitTagFromCsProj = (options?: GitTagFromCsProjOptions) => Stream;
+  type GitFetch = (all: boolean) => Promise<void>;
 
   type ReadGitCommitDeltaCount = (mainBranch: string, otherBranch: string) => Promise<GitCommitDeltaCount>;
+  type ReadMainBranchName = () => Promise<string | undefined>;
 
   interface GitCommitDeltaCount {
     behind: number;
