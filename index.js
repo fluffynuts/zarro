@@ -43,7 +43,7 @@ async function findHandlerFor(args) {
     }
     await handler(args);
   } catch (e) {
-    console.error(e.stack);
+    debug(e.stack || e);
     process.exit(1);
   }
 })();

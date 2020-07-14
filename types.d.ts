@@ -196,6 +196,17 @@ declare global {
   type GitTagFromCsProj = (options?: GitTagFromCsProjOptions) => Stream;
   type GitFetch = (all: boolean) => Promise<void>;
 
+  interface Log {
+    setThreshold(level: number): void;
+    debug(...args: any[]): void;
+    log(...args: any[]): void;
+    info(...args: any[]): void;
+    notice(...args: any[]): void;
+    warn(...args: any[]): void;
+    error(...args: any[]): void;
+    fail(...args: any[]): void;
+  }
+
   type ReadGitCommitDeltaCount = (mainBranch: string, otherBranch: string) => Promise<GitCommitDeltaCount>;
   type ReadMainBranchName = () => Promise<string | undefined>;
 
