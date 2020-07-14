@@ -65,6 +65,62 @@ ones to download tooling, as required) so that when test-time comes, assemblies
 are already built (required for .NET Framework / NUnit runner, and optimised for
 `dotnet` by performing the build and testing without rebuild)).
 
+## What's in the box
+There are an array of pre-defined tasks you get out of the box with zarro. I hope to eventually
+provide more documentation for them, but running `zarro --tasks` should tell you something
+similar to:
+
+- help
+  - shows help / usage
+- help:environment
+  - shows help about environment variables zarro observes (same as running with --help)
+- build
+  - attempts to build all found .net solutions
+- test-dotnet
+  - test .net projects based on conventions
+    - test project names should match `*.Tests` or `*.Test` or plain old `Tests`
+    - assumes test are nunit
+- cover-dotnet
+  - test with coverage
+  - can use dotCover or OpenCover
+- generate-reports
+  - generate html reports from OpenCover results
+- default-tools-installer
+  - installs the default helper tooling from nuget
+    - nunit cli
+    - dotCover
+    - OpenCover
+    - ReportGenerator
+- install-tools
+  - called before build
+  - defaults to install default tools
+  - override with an empty task if not useful
+- dotnet-publish
+  - runs dotnet cli build with publish options
+- nuget-restor
+  - restores nuget packages
+  - run automatically as part of build
+- release-npm
+  - perform guided release of npm packages
+  - can do beta releases
+  - will automatically
+    - increment version
+    - git commit
+    - git tag
+    - git push
+- update-self
+  - updates to zarro@latest
+- update-git-submodules
+  - updates all git submodules in the repo
+- pretest
+  - place-holder: override this to run something before testing
+- verify-up-to-date
+  - verifies that the current branch is up-to-date with the main one
+    - will check against {remote}/{main branch} if possible
+
+
+Running the above would also list any custom tasks you have defined
+
 ## Zarro doesn't do what I want out of the box
 
 Zarro is designed to be zero- to low- conf. You can guide many aspects of available
@@ -97,7 +153,7 @@ Zarro will also search two folders:
 in the root of your repo, for extra tasks that you can access from your npm scripts.
 
 These can be brand-new functionality you'd like to add to your repo's build system,
-or you can override existing tasks, if they don't suit you. For example, if the `pack`
+or you can _override existing tasks_, if they don't suit you. For example, if the `pack`
 task doesn't do exactly what you want, copy `pack.js` from `node_modules/zarro/gulp-tasks`
 into your `local-tasks` folder and modify it to suit you. If you find a generic solution
 to the problem you have which others might find useful or fix a bug, I'd like to know
