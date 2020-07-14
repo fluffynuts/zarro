@@ -185,6 +185,7 @@ declare global {
   // reads the checked out branch name at the current folder or provided override
   type ReadCurrentGitBranch = (at?: string) => Promise<string | undefined>;
   type ReadAllGitBranches = (at?: string) => Promise<string[]>;
+  type ReadLastFetchTime = (at?: string) => Promise<Date | undefined>;
   // runs some git functionality, returning undefined if that functionality is run outside a repo folder
   type SafeGit = ((fn: () => Promise<any>, defaultValue?: any) => Promise<any | undefined>)
 
