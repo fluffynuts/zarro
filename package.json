@@ -8,7 +8,8 @@
   "homepage": "https://github.com/fluffynuts/zarro",
   "main": "index.js",
   "scripts": {
-    "commit": "node commit.js",
+    "commit": "node commit-all.js",
+    "push": "node push-all.js",
     "pretest": "run-p clean-cache build",
     "clean-cache": "rimraf .jest-cache",
     "test": "jest",
