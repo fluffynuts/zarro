@@ -162,6 +162,9 @@ declare global {
     // -> set this to true to only return the output
     suppressOutput?: boolean;
 
+    // merge stdout & stderr into one output
+    mergeIo?: boolean;
+
     encoding?: string | null;
   }
 

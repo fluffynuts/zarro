@@ -26,6 +26,7 @@ describe(`read-main-branch-name`, () => {
   });
 
   it(`should return master for a default init`, async () => {
+    jest.setTimeout(150000);
     // Arrange
     const
       sandbox = await Sandbox.create();

@@ -23,6 +23,7 @@ describe(`read-main-branch-name`, () => {
         // Assert
     });
     it(`should return master for a default init`, async () => {
+        jest.setTimeout(150000);
         // Arrange
         const sandbox = await filesystem_sandbox_1.Sandbox.create();
         await sandbox.writeFile("README.md", "test");
