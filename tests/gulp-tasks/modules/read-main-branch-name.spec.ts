@@ -36,6 +36,7 @@ describe(`read-main-branch-name`, () => {
       await exec("git", "add", "-A", ":/");
       await exec("git", "commit", "-m", `"initial commit"`)
     });
+    spyOn(console, "warn");
     // Act
     const result = await sandbox.run(
       () => sut()
@@ -43,6 +44,8 @@ describe(`read-main-branch-name`, () => {
     // Assert
     expect(result)
       .toEqual("master");
+    expect(console.warn)
+      .toHaveBeenCalled();
   });
 
   it(`should return master for a default repo with a remote`, async () => {
@@ -56,6 +59,7 @@ describe(`read-main-branch-name`, () => {
       await exec("git", "commit", "-m", `"initial commit"`)
       await exec("git", "remote", "add", "origin", "https://github.com/user/repo");
     });
+    spyOn(console, "warn");
     // Act
     const result = await sandbox.run(
       () => sut()
@@ -63,5 +67,7 @@ describe(`read-main-branch-name`, () => {
     // Assert
     expect(result)
       .toEqual("master");
+    expect(console.warn)
+      .toHaveBeenCalled();
   });
 });
