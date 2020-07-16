@@ -1,5 +1,6 @@
 const
   os = require("os"),
+  chalk = require("chalk"),
   requireModule = require("../../gulp-tasks/modules/require-module"),
   which = require("which"),
   splitPath = requireModule("split-path"),
@@ -16,7 +17,7 @@ function alwaysAccept() {
 
 async function tryToFindGulpCliFromInstalledModule() {
   const
-    nodeModulesDir = path.dirname(path.dirname(__dirname)),
+    nodeModulesDir = path.dirname(path.dirname(path.dirname(__dirname))),
     binDir = path.join(nodeModulesDir, ".bin");
   await validate(nodeModulesDir, binDir);
   return generateFullGulpCliPathFor(binDir);
@@ -38,7 +39,10 @@ async function generateFullGulpCliPathFor(nodeModulesBinDir) {
     : "gulp";
   const fullStubPath = path.join(nodeModulesBinDir, stub);
   if (!(await isFile(fullStubPath))) {
-    throw new Error(`Can't find gulp cli at ${fullStubPath}\nDo you have gulp installed?`);
+    const message = `Can't find gulp cli at ${fullStubPath}\nDo you have gulp installed?`;
+    console.error(chalk.red(message));
+    console.error(chalk.yellow("(gulp should have been installed as a dependency of zarro; if it's missing, npm did something wrong)"));
+    throw new Error(message);
   }
   return fullStubPath
 }
@@ -57,6 +61,10 @@ async function findGulp() {
   try {
     return await which("gulp");
   } catch (e) {
+    console.error(chalk.red(`Can't find gulp in the path
+- when running zarro as an npm script, gulp should be in your path
+  from your node_modules/.bin folder as gulp is a dependency of zarro.
+  I'll try finding gulp manually, but things are probably going to end badly`));
     const isInstalledAsModule = !!splitPath(__dirname).find(d => d === "node_modules");
     return isInstalledAsModule
       // gulp really should be in the path...
