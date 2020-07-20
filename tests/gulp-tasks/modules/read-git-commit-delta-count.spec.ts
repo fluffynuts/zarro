@@ -14,6 +14,7 @@ describe(`find-git-commit-delta-count`, () => {
   });
 
   beforeEach(() => {
+    jest.setTimeout(10000);
     spyOn(console, "debug");
     spyOn(console, "log");
     spyOn(console, "info");
