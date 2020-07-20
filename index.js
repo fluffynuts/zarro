@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// TODO: this file should be verified as having unix line-endings
 const
   path = require("path"),
   debug = require("debug")("zarro"),
