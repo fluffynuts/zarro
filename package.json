@@ -1,7 +1,7 @@
 {
   "name": "zarro",
-  "version": "1.66.0",
-  "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf\r for some situations. In particular this should make building .NET (core\r or framework) applications easier. This project is basically a port of\r a git repo I've been using as a submodule in many places: I'm trying to\r make it easier to consume:\r - git submodules are difficult for some people to grok\r   - which results in \"wars\" where the submodule version is rolled back and forth\r - one less step at checkout: no more `git submodule update --init`\r   - we have to `npm install` anyway",
+  "version": "1.66.5",
+  "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
   },
@@ -10,15 +10,16 @@
   "scripts": {
     "commit": "node commit-all.js",
     "push": "node push-all.js",
-    "pretest": "run-p clean-cache build",
+    "pretest": "run-s clean-cache build verify-submodules",
+    "verify-submodules": "node index.js verify-submodules",
     "clean-cache": "rimraf .jest-cache",
     "test": "jest",
     "prestart": "run-s build",
     "start": "node index.js",
     "increment-package-version-beta": "cross-env VERSION_INCREMENT_STRATEGY=patch run-s \"start increment-package-json-version\"",
-    "prerelease-beta": "run-s build test increment-package-version-beta",
+    "prerelease-beta": "run-s test increment-package-version-beta",
     "release-beta": "npm publish --tag beta",
-    "prerelease": "run-s verify-up-to-date build test",
+    "prerelease": "run-s verify-up-to-date test",
     "release": "cross-env VERSION_INCREMENT_STRATEGY=minor run-s \"start release\"",
     "update-gulp-tasks": "cd gulp-tasks && git checkout master && git pull --rebase",
     "update-repo-root": "git pull --rebase",
@@ -31,7 +32,6 @@
   "dependencies": {
     "ansi-colors": "^4.1.1",
     "array.prototype.flatmap": "^1.2.3",
-    "chalk": "^4.0.0",
     "cross-env": "^7.0.2",
     "debug": "^4.1.1",
     "del": "^5.1.0",
@@ -42,15 +42,11 @@
     "gulp-dotnet-cli": "^1.1.0",
     "gulp-edit-xml": "^3.1.1",
     "gulp-filter": "^6.0.0",
-    "gulp-help": "^1.6.1",
-    "gulp-msbuild": "^0.6.3",
-    "gulp-nunit-runner": "https://github.com/fluffynuts/gulp-nunit-runner.git#v2.0.2",
-    "inquirer": "^7.1.0",
+    "gulp-msbuild": "^0.7.0",
     "mkdirp": "^1.0.4",
     "nodemon": "^2.0.3",
     "npm-run-all": "^4.1.5",
     "plugin-error": "^1.0.1",
-    "q": "^1.5.1",
     "readline": "^1.3.0",
     "request": "^2.88.2",
     "require-dir": "^1.2.0",
@@ -60,10 +56,7 @@
     "simple-git": "^1.132.0",
     "temp": "^0.9.1",
     "through2": "^3.0.1",
-    "ts-node": "^8.10.2",
-    "typescript": "^3.8.3",
     "undertaker-forward-reference": "^1.0.2",
-    "uuid": "^7.0.3",
     "vinyl": "^2.2.0",
     "which": "^2.0.2",
     "xml2js": "^0.4.23"
@@ -94,6 +87,7 @@
     "jest": "^26.1.0",
     "proxyquire": "^2.1.3",
     "ts-jest": "^26.1.1",
+    "typescript": "^3.8.3",
     "yargs": "^15.4.1"
   }
 }

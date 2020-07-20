@@ -50,7 +50,9 @@ async function push(
   });
 }
 
-gulp.task("release", ["increment-package-json-version"], async () => {
+gulp.task("release", [
+  "increment-package-json-version"
+], async () => {
   const
     dryRun = env.resolveFlag("DRY_RUN");
 

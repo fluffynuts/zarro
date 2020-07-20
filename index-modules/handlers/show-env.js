@@ -1,5 +1,5 @@
 const
-  chalk = require("chalk"),
+  chalk = require("ansi-colors"),
   invokeGulp = require("./invoke-gulp").handler,
   contains = require("../contains-any");
 

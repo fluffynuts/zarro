@@ -32,6 +32,8 @@ declare global {
     dest(target: string): NodeJS.WritableStream;
   }
 
+  type Gulp = GulpWithHelp;
+
   type StringMap = (input: string) => string;
 
   interface Dictionary<TValue> {

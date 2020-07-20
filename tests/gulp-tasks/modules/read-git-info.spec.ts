@@ -46,6 +46,7 @@ describe(`read-git-info`, () => {
   describe(`when working in !repo`, () => {
     it(`should return info for !repo`, async () => {
       // Arrange
+      spyOn(console, "error");
       const sandbox = await Sandbox.create();
       // Act
       const result = await readGitInfo(sandbox.path);

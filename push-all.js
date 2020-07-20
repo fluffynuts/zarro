@@ -1,5 +1,5 @@
 const
-  chalk = require("chalk"),
+  chalk = require("ansi-colors"),
   Git = require("simple-git/promise");
 
 (async function () {

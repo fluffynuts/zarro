@@ -1,6 +1,6 @@
 const
   os = require("os"),
-  chalk = require("chalk"),
+  chalk = require("ansi-colors"),
   requireModule = require("../../gulp-tasks/modules/require-module"),
   which = require("which"),
   splitPath = requireModule("split-path"),
