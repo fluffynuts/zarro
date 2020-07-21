@@ -56,7 +56,8 @@ describe(`exec`, () => {
             it(`should reject with timeout`, async () => {
                 // Arrange
                 spyOn(console, "log");
-                const sandbox = await filesystem_sandbox_1.Sandbox.create(), code = "setTimeout(() => console.log('time to die'); process.exit(0), 2000);";
+                spyOn(console, "error");
+                const sandbox = await filesystem_sandbox_1.Sandbox.create(), code = "setTimeout(() => { console.log('time to die'); process.exit(0) }, 2000);";
                 await sandbox.writeFile("index.js", code);
                 // Act
                 try {
@@ -69,6 +70,8 @@ describe(`exec`, () => {
                     const err = e;
                     expect(err.info.timedOut)
                         .toBeTrue();
+                    expect(console.error)
+                        .not.toHaveBeenCalled();
                     return;
                 }
                 // Assert
