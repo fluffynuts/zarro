@@ -170,6 +170,13 @@ declare global {
     encoding?: string | null;
   }
 
+  type Sleep = (ms: number) => Promise<void>;
+  interface Failer {
+    promise: Promise<void>;
+    cancel(): void;
+  }
+  type FailAfter = (ms: number, message?: string) => Failer;
+
   export interface FileSystemUtils {
     folderExists(at: string): Promise<boolean>;
     fileExists(at: string): Promise<boolean>;

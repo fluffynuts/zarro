@@ -58,6 +58,31 @@ describe(`exec`, () => {
         fail("should have caught an error");
       });
     });
+
+    describe(`when command times out`, () => {
+      it(`should reject with timeout`, async () => {
+        // Arrange
+        spyOn(console, "log");
+        const
+          sandbox = await Sandbox.create(),
+          code = "setTimeout(() => console.log('time to die'); process.exit(0), 2000);";
+        await sandbox.writeFile("index.js", code);
+        // Act
+        try {
+          const result = await exec("node", [ sandbox.fullPathFor("index.js") ], { timeout: 100 });
+          console.log({
+            result
+          });
+        } catch (e) {
+          const err = e as ExecError;
+          expect(err.info.timedOut)
+            .toBeTrue();
+          return;
+        }
+        // Assert
+        fail("should have caught an error");
+      });
+    });
   });
 
   it(`should run the command from the current working directory`, async () => {

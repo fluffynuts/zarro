@@ -1,7 +1,7 @@
 import "expect-even-more-jest";
 import { Sandbox } from "filesystem-sandbox";
 
-describe(`find-git-commit-delta-count`, () => {
+describe(`read-git-commit-delta-count`, () => {
   const
     exec = requireModule<Exec>("exec");
   let sut: ReadGitCommitDeltaCount;
