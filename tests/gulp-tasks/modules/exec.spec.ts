@@ -69,12 +69,21 @@ describe(`exec`, () => {
           code = "setTimeout(() => { console.log('time to die'); process.exit(0) }, 2000);";
         await sandbox.writeFile("index.js", code);
         // Act
+        const start = Date.now();
         try {
-          const result = await exec("node", [ sandbox.fullPathFor("index.js") ], { timeout: 100 });
-          console.log({
-            result
-          });
+          await exec(
+            "node", [
+              sandbox.fullPathFor("index.js")
+            ], {
+              timeout: 100,
+              suppressOutput: true,
+              killSignal: "SIGKILL"
+            });
         } catch (e) {
+          const end = Date.now();
+          // prove that the exec finished early
+          expect(end - start)
+            .toBeLessThan(1000);
           const err = e as ExecError;
           expect(err.info.timedOut)
             .toBeTrue();
