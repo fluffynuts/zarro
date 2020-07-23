@@ -22,6 +22,7 @@ async function addAllAndCommit(git, message) {
 
     await addAllAndCommit(gulpTasksGit, message);
     await addAllAndCommit(rootGit, message);
+    await addAllAndCommit(nunitRunnerGit, message);
     process.exit(0);
   } catch (e) {
     console.error(e.stack || e);
