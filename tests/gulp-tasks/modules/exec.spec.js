@@ -72,6 +72,7 @@ describe(`exec`, () => {
                 }
                 catch (e) {
                     const end = Date.now();
+                    // prove that the exec finished early
                     expect(end - start)
                         .toBeLessThan(1000);
                     const err = e;
