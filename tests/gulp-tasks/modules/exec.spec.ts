@@ -18,7 +18,7 @@ describe(`exec`, () => {
     describe(`when command is successful`, () => {
       it(`should return the stdout`, async () => {
         // Arrange
-        spyOn(console, "log");
+        const spy = spyOn(console, "log");
         const
           sandbox = await Sandbox.create(),
           code = "console.log('hello');";
@@ -28,8 +28,10 @@ describe(`exec`, () => {
         // Assert
         expect((result || "").trim())
           .toEqual("hello");
-        expect(console.log)
-          .toHaveBeenCalledOnceWith(gutil.colors.yellow("hello"));
+        expect(spy)
+          .toHaveBeenCalledOnce();
+        expect(spy.calls.mostRecent().args[0].toString().trim())
+          .toEqual("hello");
       });
     });
 
@@ -46,6 +48,9 @@ describe(`exec`, () => {
           await exec("node", [ sandbox.fullPathFor("index.js") ]);
         } catch (e) {
           const err = e as ExecError;
+          console.log({
+            e
+          });
           expect(err.info.exitCode)
             .toBeGreaterThan(0);
           expect(err.info.stdout.join("\n"))
@@ -105,7 +110,7 @@ describe(`exec`, () => {
     try {
       process.chdir(sandbox.path);
       const result = await exec("pwd", [], { suppressOutput: true });
-      expect(result)
+      expect(result.trim())
         .toEqual(sandbox.path);
     } finally {
       process.chdir(start);

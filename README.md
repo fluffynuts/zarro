@@ -1,4 +1,7 @@
 # Zarro
+![Test](https://github.com/fluffynuts/zarro/workflows/Tests/badge.svg)
+
+![npm](https://img.shields.io/npm/v/zarro)
 
 ## What is this?
 

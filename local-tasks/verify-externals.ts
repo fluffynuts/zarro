@@ -24,11 +24,14 @@ import path from "path";
 
   async function verifyGulpNunitRunnerExternalAt(at: string) {
     const
-      expected = "v2.0.3",
-      git = new Git(at),
-      branchInfo = await git.branch();
-    if (!branchInfo || branchInfo.current !== expected) {
-      throw new Error(`Expected tag ${expected} for ext at ${at}`);
+      expected = ["v2.0.3", "f547f79"],
+      git = new Git(at);
+    await git.fetch(["--tags"]);
+    const branchInfo = await git.branch();
+    const current = branchInfo ? branchInfo.current : "";
+    // FIXME: find a better way to tie up tags to a sha
+    if (expected.indexOf(current) === -1) {
+      throw new Error(`Expected tag ${expected} for ext at ${at} (found: ${branchInfo.current})`);
     }
   }
 })();
