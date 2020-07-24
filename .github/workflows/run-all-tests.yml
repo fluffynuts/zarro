@@ -17,6 +17,8 @@ jobs:
       with:
         node-version: '12'
     - name: Test
+      env:
+        SKIP_SUBMODULE_CHECKS: 1
       run: |
         npm ci
         npm test

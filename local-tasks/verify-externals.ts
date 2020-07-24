@@ -8,6 +8,9 @@ import path from "path";
     gulp = requireModule<Gulp>("gulp");
 
   gulp.task("verify-externals", async () => {
+    if (process.env.SKIP_SUBMODULE_CHECKS) {
+      return;
+    }
     const
       externals = path.resolve(path.join(__dirname, "..", "gulp-tasks", "ext")),
       contents = await fs.readdir(externals);

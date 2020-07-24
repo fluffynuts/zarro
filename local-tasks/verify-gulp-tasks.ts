@@ -6,6 +6,9 @@ import path from "path";
     gulp = requireModule<Gulp>("gulp");
 
   gulp.task("verify-gulp-tasks", async () => {
+    if (process.env.SKIP_SUBMODULE_CHECKS) {
+      return;
+    }
     const
       at = path.resolve(path.join(__dirname, "..", "gulp-tasks")),
       git = new Git(at),
