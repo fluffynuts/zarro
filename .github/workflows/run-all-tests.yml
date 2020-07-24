@@ -18,7 +18,7 @@ jobs:
         node-version: '12'
     - name: Test
       env:
-        SKIP_SUBMODULE_CHECKS: 1
+        RUNNING_IN_GITHUB_ACTION: 1
       run: |
         npm ci
         npm test

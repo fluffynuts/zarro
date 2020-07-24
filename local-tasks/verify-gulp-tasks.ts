@@ -6,7 +6,7 @@ import path from "path";
     gulp = requireModule<Gulp>("gulp");
 
   gulp.task("verify-gulp-tasks", async () => {
-    if (process.env.SKIP_SUBMODULE_CHECKS) {
+    if (process.env.RUNNING_IN_GITHUB_ACTION) {
       return;
     }
     const
