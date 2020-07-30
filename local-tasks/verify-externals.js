@@ -7,6 +7,9 @@ const path_1 = __importDefault(require("path"));
 (function () {
     const Git = require("simple-git/promise"), fs = requireModule("fs"), gulp = requireModule("gulp");
     gulp.task("verify-externals", async () => {
+        if (process.env.RUNNING_IN_GITHUB_ACTION) {
+            return;
+        }
         const externals = path_1.default.resolve(path_1.default.join(__dirname, "..", "gulp-tasks", "ext")), contents = await fs.readdir(externals);
         for (let dir of contents) {
             switch (dir) {

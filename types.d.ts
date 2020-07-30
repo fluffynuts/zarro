@@ -73,7 +73,8 @@ declare global {
     associate(varName: string | string[], tasks: string | string[]): void;
 
     // these are generated on the js output by register-environment-variables
-    // -> included here to avoid typos: use env.CONSTANT_NAME
+    // -> included here to avoid typos: use env.CONSTANT_NAME when you want
+    // the constant name somewhere, eg in association
     BETA: string;
     USE_SYSTEM_NUGET: string;
     ENABLE_NUGET_PARALLEL_PROCESSING: string;
@@ -90,7 +91,7 @@ declare global {
     BUILD_EXCLUDE: string;
     BUILD_ADDITIONAL_EXCLUDE: string;
     DOTNET_CORE: string;
-    DOTNET_TEST_PARALLEL: boolean;
+    DOTNET_TEST_PARALLEL: string;
     NUNIT_ARCHITECTURE: string;
     BUILD_REPORT_XML: string;
     NUNIT_LABELS: string;
@@ -129,8 +130,17 @@ declare global {
     PACKAGE_JSON: string;
     VERSION_INCREMENT_STRATEGY: string;
     VERSION_INCREMENT_ZERO: string;
+    INITIAL_RELEASE: string;
     INCLUDE_PACKAGE_JSON: string;
     EXCLUDE_PACKAGE_JSON: string;
+    UPDATE_SUBMODULES_TO_LATEST: string;
+    ENFORCE_VERIFICATION: string;
+    GIT_MAIN_BRANCH: string;
+    GIT_VERIFY_BRANCH: string;
+    SKIP_FETCH_ON_VERIFY: string;
+    GIT_FETCH_TIMEOUT: string;
+    GIT_VERIFY_TIMEOUT: string;
+    GIT_FETCH_RECENT_TIME: string;
   }
 
 
@@ -170,6 +180,32 @@ declare global {
     encoding?: string | null;
   }
 
+  type Colors = "black"
+    | "red"
+    | "green"
+    | "yellow"
+    | "blue"
+    | "magenta"
+    | "cyan"
+    | "white"
+    | "gray"
+    | "grey"
+    // bright colors
+    | "blackBright"
+    | "redBright"
+    | "greenBright"
+    | "yellowBright"
+    | "blueBright"
+    | "magentaBright"
+    | "cyanBright"
+    | "whiteBright"
+
+  type Status = {
+    start(message: string, color?: Colors): void;
+    ok(): void;
+    fail(): void;
+    run<T>(message: string, action: (() => T | Promise<T>)): void;
+  };
   type Sleep = (ms: number) => Promise<void>;
   interface Failer {
     promise: Promise<void>;

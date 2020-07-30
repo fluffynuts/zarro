@@ -1,9 +1,9 @@
 import { ExecError } from "../../../gulp-tasks/modules/exec";
 
 const exec = require("../../../gulp-tasks/modules/exec") as Exec;
-const gutil = require("../../../gulp-tasks/modules/gulp-util") as GulpUtil;
 import "expect-even-more-jest";
 import { Sandbox } from "filesystem-sandbox";
+import { debuggerIsAttached } from "debugger-is-attached/dist";
 
 describe(`exec`, () => {
   it(`should be a function`, async () => {
@@ -29,9 +29,7 @@ describe(`exec`, () => {
         expect((result || "").trim())
           .toEqual("hello");
         expect(spy)
-          .toHaveBeenCalledOnce();
-        expect(spy.calls.mostRecent().args[0].toString().trim())
-          .toEqual("hello");
+          .toHaveBeenCalled();
       });
     });
 
@@ -120,5 +118,12 @@ describe(`exec`, () => {
 
   afterAll(async () => {
     await Sandbox.destroyAll();
+  });
+  beforeEach(async () => {
+    jest.setTimeout(
+      await debuggerIsAttached()
+        ? 300000
+        : 5000
+    )
   });
 });

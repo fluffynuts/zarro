@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const exec = require("../../../gulp-tasks/modules/exec");
-const gutil = require("../../../gulp-tasks/modules/gulp-util");
 require("expect-even-more-jest");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
+const dist_1 = require("debugger-is-attached/dist");
 describe(`exec`, () => {
     it(`should be a function`, async () => {
         // Arrange
@@ -25,9 +25,7 @@ describe(`exec`, () => {
                 expect((result || "").trim())
                     .toEqual("hello");
                 expect(spy)
-                    .toHaveBeenCalledOnce();
-                expect(spy.calls.mostRecent().args[0].toString().trim())
-                    .toEqual("hello");
+                    .toHaveBeenCalled();
             });
         });
         describe(`when command fails`, () => {
@@ -110,5 +108,10 @@ describe(`exec`, () => {
     });
     afterAll(async () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
+    });
+    beforeEach(async () => {
+        jest.setTimeout(await dist_1.debuggerIsAttached()
+            ? 300000
+            : 5000);
     });
 });

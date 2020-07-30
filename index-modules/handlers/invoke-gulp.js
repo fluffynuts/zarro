@@ -2,6 +2,7 @@ const
   os = require("os"),
   chalk = require("ansi-colors"),
   requireModule = require("../../gulp-tasks/modules/require-module"),
+  quoteIfRequired = requireModule("quote-if-required"),
   which = require("which"),
   splitPath = requireModule("split-path"),
   path = require("path"),
@@ -85,9 +86,9 @@ async function invokeGulp(args, opts) {
     }),
     allArgs = [
       "--gulpfile",
-      gulpFile,
+      quoteIfRequired(gulpFile),
       "--cwd",
-      cwd,
+      quoteIfRequired(cwd),
     ].concat(args);
   debug({
     label: "running gulp with",

@@ -91,7 +91,7 @@ module.exports = {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  // preset: null,
+  preset: "ts-jest",
 
   // Run tests from one or more projects
   // projects: null,
@@ -144,7 +144,7 @@ module.exports = {
 
   // The glob patterns Jest uses to detect test files
   testMatch: [
-    "**/tests/**/?(*.)+(spec|test).[tj]s?(x)"
+    "**/tests/**/?(*.)+(spec|test).[t]s?(x)"
   ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
@@ -169,9 +169,9 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   // transform: null,
-  transform: {
-    '^.+\\.tsx?$': 'ts-jest'
-  }
+  // transform: {
+  //   '^.+\\.tsx?$': 'ts-jest'
+  // }
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   // transformIgnorePatterns: [
