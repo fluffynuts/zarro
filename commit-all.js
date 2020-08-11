@@ -16,13 +16,11 @@ async function addAllAndCommit(git, message) {
   }
   try {
     const
-      nunitRunnerGit = new Git("gulp-tasks/ext/gulp-nunit-runner"),
       gulpTasksGit = new Git("gulp-tasks"),
       rootGit = new Git(".");
 
     await addAllAndCommit(gulpTasksGit, message);
     await addAllAndCommit(rootGit, message);
-    await addAllAndCommit(nunitRunnerGit, message);
     process.exit(0);
   } catch (e) {
     console.error(e.stack || e);

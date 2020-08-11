@@ -144,7 +144,8 @@ module.exports = {
 
   // The glob patterns Jest uses to detect test files
   testMatch: [
-    "**/tests/**/?(*.)+(spec|test).[t]s?(x)"
+    "**/tests/**/?(*.)+(spec|test).[t]s?(x)",
+    "**/modules/gulp-nunit-runner/**/*.spec.js"
   ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
