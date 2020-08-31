@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.75.0",
+  "version": "1.75.2",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -53,6 +53,7 @@
     "requirejs": "^2.3.6",
     "rimraf": "^3.0.2",
     "run-sequence": "^2.2.1",
+    "sax": "^1.2.4",
     "simple-git": "^1.132.0",
     "temp": "^0.9.1",
     "through2": "^3.0.1",
