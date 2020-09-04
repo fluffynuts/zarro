@@ -152,9 +152,10 @@ declare global {
   type ParseXml = (data: string) => Promise<Dictionary<any>>;
   type IncrementVersion = (version: string, strategy: string, zeroLowerOrder: boolean, incrementBy: number)
     => string;
-  type ReadPackageVersion = (packageJsonPath?: string) => string;
-  type ReadNuspecVersion = (pathToNuspec: string) => string;
-  type ReadCsProjVersion = (pathToCsProj: string) => string;
+  type ReadPackageVersion = (packageJsonPath?: string) => string | undefined;
+  type ReadNuspecVersion = (pathToNuspec: string) => string | undefined;
+  type ReadCsProjVersion = (pathToCsProj: string) => string | undefined;
+  type ReadCsProjPackageVersion = (pathToCsProj: string) => string | undefined;
   type GatherPaths = (pathSpecs: string | string[]) => Promise<string[]>;
   type PromisifyStream = (stream: Stream) => Promise<void>;
   type AlterPackageJson = (opts?: AlterPackageJsonVersionOptions) => Promise<void>;
