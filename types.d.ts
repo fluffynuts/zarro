@@ -166,6 +166,11 @@ declare global {
     alwaysSuppressOutput: boolean
   };
   type Uniq = (values: any[]) => any[];
+  type EnvHelpers = {
+    env: (name: string, fallback?: string) => string;
+    envNumber: (name: string, fallback?: number) => number;
+    envFlag: (name: string, fallback?: boolean) => boolean;
+  };
 
   // @ts-ignore
   export interface ExecOpts extends ExecFileOptionsWithBufferEncoding {
