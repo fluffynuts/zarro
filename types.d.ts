@@ -226,6 +226,9 @@ declare global {
     readFile(p: string, opts: any): Promise<Buffer | string>;
     readdir(p: string): Promise<string[]>;
     mkdir(p: string, opts: any): Promise<void>;
+
+    existsSync(p: string): boolean;
+    writeFileSync(p: string, contents: Buffer): void;
   }
 
   // simple-git wrappers
