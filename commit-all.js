@@ -1,15 +1,18 @@
 const
   Git = require("simple-git/promise"),
+  { ask } = require("./gulp-tasks/modules/ask"),
   yargs = require("yargs");
 
 async function addAllAndCommit(git, message) {
-  await git.add(["-A", ":/"]);
+  await git.add([ "-A", ":/" ]);
   await git.commit(message);
 }
 
 (async function () {
-  const
-    message = yargs.argv._.join(" ").trim();
+  let message = yargs.argv._.join(" ").trim();
+  if (!message) {
+    message = await ask("commit message: ");
+  }
   if (!message) {
     console.error("No commit message specified!");
     process.exit(1);

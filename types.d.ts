@@ -340,6 +340,13 @@ declare global {
   type Spawn = (program: string, args: string[], options?: SpawnOptions)
     => Promise<number>;
 
+  type AskOptions = {
+  }
+  type AskFunction = (message: string, options?: AskOptions) => Promise<string>;
+  type Ask = {
+    ask: AskFunction
+  };
+
   interface GulpUtil {
     PluginError: PluginError;
     log: Logger;
