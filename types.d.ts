@@ -186,6 +186,15 @@ declare global {
     encoding?: string | null;
   }
 
+  type PackOptions = {
+    basePath?: string;
+    excludeEmptyDirectories?: boolean;
+    version?: string;
+    symbols?: boolean;
+    legacySymbols?: boolean;
+  };
+  type Pack = (opts?: PackOptions) => Stream;
+
   type Colors = "black"
     | "red"
     | "green"
