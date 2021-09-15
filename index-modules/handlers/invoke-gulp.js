@@ -10,6 +10,7 @@ const
   isDir = require("../is-dir"),
   debug = require("debug")("zarro::invoke-gulp"),
   projectDir = path.dirname(path.dirname(__dirname)),
+  { ZarroError } = requireModule("zarro-error"),
   spawn = requireModule("spawn");
 
 function alwaysAccept() {
@@ -27,10 +28,10 @@ async function tryToFindGulpCliFromInstalledModule() {
 async function validate(nodeModulesDir, nodeBinDir) {
   const nodeModulesDirName = path.basename(nodeModulesDir);
   if (nodeModulesDirName !== "node_modules") {
-    throw new Error(`Expected ${nodeModulesDir} to be a node_modules folder`);
+    throw new ZarroError(`Expected ${nodeModulesDir} to be a node_modules folder`);
   }
   if (!(await isDir(nodeBinDir))) {
-    throw new Error(`node_modules bin dir not found at ${nodeBinDir}`);
+    throw new ZarroError(`node_modules bin dir not found at ${nodeBinDir}`);
   }
 }
 
@@ -43,13 +44,13 @@ async function generateFullGulpCliPathFor(nodeModulesBinDir) {
     const message = `Can't find gulp cli at ${fullStubPath}\nDo you have gulp installed?`;
     console.error(chalk.red(message));
     console.error(chalk.yellow("(gulp should have been installed as a dependency of zarro; if it's missing, npm did something wrong)"));
-    throw new Error(message);
+    throw new ZarroError(message);
   }
   return fullStubPath
 }
 
 async function tryToFindGulpFromOwnNodeModules() {
-  // mostly neede for testing
+  // mostly needed for testing
   const
     nodeModulesDir = path.join(projectDir, "node_modules"),
     binDir = path.join(nodeModulesDir, ".bin");

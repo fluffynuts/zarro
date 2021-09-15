@@ -3,6 +3,7 @@
 const
   path = require("path"),
   debug = require("debug")("zarro"),
+  { ZarroError } = require("./gulp-tasks/modules/zarro-error"),
   gatherArgs = require("./index-modules/gather-args");
 
 function requireHandler(name) {
@@ -37,10 +38,10 @@ async function findHandlerFor(args) {
     const args = await gatherArgs([path.join(path.dirname(__dirname), ".bin", "zarro"), __filename]);
     const handler = await findHandlerFor(args);
     if (!handler) {
-      throw new Error("no handler for current args");
+      throw new ZarroError("no handler for current args");
     }
     if (typeof handler !== "function") {
-      throw new Error(`handler for ${JSON.stringify(args)} is not a function?!`);
+      throw new ZarroError(`handler for ${JSON.stringify(args)} is not a function?!`);
     }
     await handler(args);
   } catch (e) {
