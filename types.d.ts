@@ -184,6 +184,10 @@ declare global {
     encoding?: string | null;
   }
 
+  export interface NugetPushOpts {
+    suppressDuplicateError?: boolean;
+  }
+
   type PackOptions = {
     basePath?: string;
     excludeEmptyDirectories?: boolean;
