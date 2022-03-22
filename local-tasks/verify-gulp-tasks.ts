@@ -2,7 +2,7 @@ import path from "path";
 
 (function() {
   const
-    Git = require("simple-git/promise"),
+    gitFactory = require("simple-git"),
     gulp = requireModule<Gulp>("gulp");
 
   gulp.task("verify-gulp-tasks", async () => {
@@ -11,7 +11,7 @@ import path from "path";
     }
     const
       at = path.resolve(path.join(__dirname, "..", "gulp-tasks")),
-      git = new Git(at),
+      git = gitFactory(at),
       expected = "master",
       branchInfo = await git.branch();
     if (!branchInfo || branchInfo.current !== expected) {

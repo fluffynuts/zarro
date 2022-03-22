@@ -1,5 +1,5 @@
 const
-  Git = require("simple-git/promise"),
+  gitFactory = require("simple-git"),
   { ask } = require("./gulp-tasks/modules/ask"),
   yargs = require("yargs");
 
@@ -19,8 +19,8 @@ async function addAllAndCommit(git, message) {
   }
   try {
     const
-      gulpTasksGit = new Git("gulp-tasks"),
-      rootGit = new Git(".");
+      gulpTasksGit = gitFactory("gulp-tasks"),
+      rootGit = gitFactory(".");
 
     await addAllAndCommit(gulpTasksGit, message);
     await addAllAndCommit(rootGit, message);

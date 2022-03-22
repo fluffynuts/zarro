@@ -1,12 +1,12 @@
 const
   chalk = require("ansi-colors"),
-  Git = require("simple-git/promise");
+  gitFactory = require("simple-git");
 
 (async function () {
   try {
     const
-      gulpTasksGit = new Git("gulp-tasks"),
-      rootGit = new Git(".");
+      gulpTasksGit = gitFactory("gulp-tasks"),
+      rootGit = gitFactory(".");
 
     process.stdout.write(`${chalk.cyanBright("pushing...")}`);
     await Promise.all([
