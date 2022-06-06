@@ -20,8 +20,12 @@ declare global {
   function requireModule<T>(module: string): T;
 
   type VoidVoid = () => void;
+  type AsyncVoidVoid = () => Promise<void>;
+  type AsyncVoidFunction = () => Promise<void>;
+  type ErrorReporter = (e: Error) => Promise<void> | void;
   type GulpCallback =
     (() => Promise<any> | NodeJS.EventEmitter) | ((done: VoidVoid) => Promise<any> | NodeJS.EventEmitter)
+  type TryDo = (logic: AsyncVoidVoid, retries: number | string, onTransientError?: ErrorReporter, onFinalFailure?: VoidVoid) => Promise<void>;
 
   interface GulpWithHelp {
     task(name: string, callback: GulpCallback): void;
