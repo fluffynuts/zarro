@@ -21,11 +21,14 @@ declare global {
 
   type VoidVoid = () => void;
   type AsyncVoidVoid = () => Promise<void>;
-  type AsyncVoidFunction = () => Promise<void>;
+  type AsyncVoidFunc<T> = () => Promise<T>;
   type ErrorReporter = (e: Error) => Promise<void> | void;
   type GulpCallback =
     (() => Promise<any> | NodeJS.EventEmitter) | ((done: VoidVoid) => Promise<any> | NodeJS.EventEmitter)
-  type TryDo = (logic: AsyncVoidVoid, retries: number | string, onTransientError?: ErrorReporter, onFinalFailure?: VoidVoid) => Promise<void>;
+  type TryDo<T> = (logic: AsyncVoidFunc<T>, retries: number | string, onTransientError?: ErrorReporter, onFinalFailure?: VoidVoid) => Promise<void>;
+  type Optional<T> = T | undefined;
+  type ResolveNuget = (nugetPath: Optional<string>, errorOnMissing: boolean) => string;
+  type FindLocalNuget = () => Promise<string>;
 
   interface GulpWithHelp {
     task(name: string, callback: GulpCallback): void;
