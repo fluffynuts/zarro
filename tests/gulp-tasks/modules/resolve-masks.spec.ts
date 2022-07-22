@@ -10,7 +10,6 @@ describe(`resolve-masks`, () => {
     // Act
     const result = sut("MOO_INCLUDE", ["MOO_EXCLUDE"]);
     // Assert
-    console.log(result);
     expect(result.find(s => s.match(/undefined/)))
       .not.toExist();
   });
