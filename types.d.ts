@@ -67,8 +67,8 @@ declare global {
   }
 
   type ResolveMasks = (
-    includeVar: string,
-    excludeVar: string,
+    includeVar: string | string[],
+    excludeVar: string | string[],
     modifierFunction?: StringMap) => string[];
 
   interface Env {
