@@ -1,7 +1,7 @@
 import "expect-even-more-jest";
 import { Sandbox } from "filesystem-sandbox";
 const sut = require("../index-modules/gather-args");
-const faker = require("faker");
+import { faker } from "@faker-js/faker";
 
 describe(`gather-args`, () => {
   it(`should gather no args when there are none`, async () => {

@@ -1,10 +1,7 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
-const faker_1 = __importDefault(require("faker"));
+const faker_1 = require("@faker-js/faker");
 (function () {
     const { env, envNumber, envFlag } = require("../../../gulp-tasks/modules/env-helpers");
     describe(`env-helpers`, () => {
@@ -18,7 +15,7 @@ const faker_1 = __importDefault(require("faker"));
             });
             it(`should return the environment variable, when defined`, async () => {
                 // Arrange
-                const name = faker_1.default.random.alphaNumeric(10), value = faker_1.default.random.alphaNumeric(10);
+                const name = faker_1.faker.random.alphaNumeric(10), value = faker_1.faker.random.alphaNumeric(10);
                 process.env[name] = value;
                 // Act
                 const result = env(name);
@@ -28,7 +25,7 @@ const faker_1 = __importDefault(require("faker"));
             });
             it(`should return the fallback when variable is not defined`, async () => {
                 // Arrange
-                const name = faker_1.default.random.alphaNumeric(10), fallback = faker_1.default.random.alphaNumeric(10);
+                const name = faker_1.faker.random.alphaNumeric(10), fallback = faker_1.faker.random.alphaNumeric(10);
                 expect(process.env[name])
                     .not.toExist();
                 // Act
@@ -39,7 +36,7 @@ const faker_1 = __importDefault(require("faker"));
             });
             it(`should throw if the var is not defined and no fallback provided`, async () => {
                 // Arrange
-                const name = faker_1.default.random.alphaNumeric(10);
+                const name = faker_1.faker.random.alphaNumeric(10);
                 expect(process.env[name])
                     .not.toExist();
                 // Act
@@ -49,7 +46,7 @@ const faker_1 = __importDefault(require("faker"));
             });
             it(`should return undefined if that is explicitly provided as the fallback`, async () => {
                 // Arrange
-                const name = faker_1.default.random.alphaNumeric(10);
+                const name = faker_1.faker.random.alphaNumeric(10);
                 expect(process.env[name])
                     .not.toExist();
                 // Act
@@ -62,7 +59,7 @@ const faker_1 = __importDefault(require("faker"));
         describe(`envNumber`, () => {
             it(`should return the numeric env var as a number`, async () => {
                 // Arrange
-                const name = faker_1.default.random.alphaNumeric(10), expected = faker_1.default.random.number();
+                const name = faker_1.faker.random.alphaNumeric(10), expected = faker_1.faker.datatype.number();
                 process.env[name] = expected.toString();
                 // Act
                 const result = envNumber(name);
@@ -72,7 +69,7 @@ const faker_1 = __importDefault(require("faker"));
             });
             it(`should return the numeric fall back when the var is not defined`, async () => {
                 // Arrange
-                const name = faker_1.default.random.alphaNumeric(10), expected = faker_1.default.random.number();
+                const name = faker_1.faker.random.alphaNumeric(10), expected = faker_1.faker.datatype.number();
                 expect(process.env[name])
                     .not.toExist();
                 // Act
@@ -83,7 +80,7 @@ const faker_1 = __importDefault(require("faker"));
             });
             it(`should throw if the env var is not found and no fallback`, async () => {
                 // Arrange
-                const name = faker_1.default.random.alphaNumeric(10);
+                const name = faker_1.faker.random.alphaNumeric(10);
                 expect(process.env[name])
                     .not.toExist();
                 // Act
@@ -93,10 +90,10 @@ const faker_1 = __importDefault(require("faker"));
             });
             it(`should throw if the env var is defined, but not numeric`, async () => {
                 // Arrange
-                const name = faker_1.default.random.alphaNumeric(10);
-                process.env[name] = faker_1.default.random.alphaNumeric(10);
+                const name = faker_1.faker.random.alphaNumeric(10);
+                process.env[name] = faker_1.faker.random.alphaNumeric(10);
                 while (!isNaN(parseInt(process.env[name] || ""))) {
-                    process.env[name] = faker_1.default.random.alphaNumeric(10);
+                    process.env[name] = faker_1.faker.random.alphaNumeric(10);
                 }
                 // Act
                 expect(() => envNumber(name))
@@ -116,7 +113,7 @@ const faker_1 = __importDefault(require("faker"));
             ].forEach(testCase => {
                 it(`should return the expected value for defined var: ${testCase.value}`, async () => {
                     // Arrange
-                    const name = faker_1.default.random.alphaNumeric(10);
+                    const name = faker_1.faker.random.alphaNumeric(10);
                     process.env[name] = testCase.expected.toString();
                     // Act
                     const result = envFlag(name);
@@ -127,7 +124,7 @@ const faker_1 = __importDefault(require("faker"));
             });
             it(`should throw for a value that can't be parsed as boolean`, async () => {
                 // Arrange
-                const name = faker_1.default.random.alphaNumeric(10), value = faker_1.default.random.alphaNumeric(10);
+                const name = faker_1.faker.random.alphaNumeric(10), value = faker_1.faker.random.alphaNumeric(10);
                 process.env[name] = value;
                 // Act
                 expect(() => envFlag(name))

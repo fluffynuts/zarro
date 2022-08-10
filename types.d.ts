@@ -4,7 +4,7 @@ import { StyleFunction } from "ansi-colors";
 import { AlterPackageJsonVersionOptions } from "./gulp-tasks/modules/alter-package-json-version";
 import { RimrafOptions } from "./gulp-tasks/modules/rimraf";
 import { ExecFileOptionsWithBufferEncoding } from "child_process";
-import { IoHandlers } from "./gulp-tasks/modules/exec";
+import { IoConsumer, IoHandlers } from "./gulp-tasks/modules/exec";
 import { StatsBase } from "fs";
 
 // copied out of @types/fancy-log because imports are being stupid
@@ -161,7 +161,7 @@ declare global {
   type ReadNuspecVersion = (pathToNuspec: string) => string | undefined;
   type ReadCsProjVersion = (pathToCsProj: string) => string | undefined;
   type ReadCsProjPackageVersion = (pathToCsProj: string) => string | undefined;
-  type GatherPaths = (pathSpecs: string | string[]) => Promise<string[]>;
+  type GatherPaths = (pathSpecs: string | string[], throwForNoMatches?: boolean) => Promise<string[]>;
   type PromisifyStream = (stream: Stream) => Promise<void>;
   type AlterPackageJson = (opts?: AlterPackageJsonVersionOptions) => Promise<void>;
   type Rimraf = (at: string, opts?: RimrafOptions) => Promise<void>;
@@ -333,8 +333,8 @@ declare global {
   type StdioOptions = "pipe" | "ignore" | "inherit" |
     Array<("pipe" | "ipc" | "ignore" | "inherit" | any | number | null | undefined)>;
 
-  type BufferConsumer = (data: Buffer) => void;
-  type ProcessIO = string | BufferConsumer
+  type StringConsumer = (data: string) => void;
+  type ProcessIO = string | StringConsumer;
 
   interface SpawnOptions {
     windowsHide?: boolean;
@@ -351,12 +351,26 @@ declare global {
 
     stdout?: ProcessIO;
     stderr?: ProcessIO;
+    lineBuffer?: boolean;
 
     detached?: boolean;
   }
 
+  interface SpawnError extends Error {
+    exitCode: number;
+    stderr: string[];
+    stdout: string[];
+  }
+
+  interface SpawnResult {
+    executable: string;
+    args: string[];
+    exitCode: number;
+    stderr: string[];
+    stdout: string[];
+  }
   type Spawn = (program: string, args: string[], options?: SpawnOptions)
-    => Promise<number>;
+    => Promise<SpawnResult>;
 
   type AskOptions = {
   }
@@ -370,8 +384,31 @@ declare global {
     log: Logger;
     colors: StyleFunction;
   }
+
   interface PluginError extends Error {
     new(pluginName: string, err: string | Error): void;
+    verbosity?: string;
+  }
+
+  type DotNetVerbosity = "q" | "quiet" | "m" | "minimal" | "n" | "normal" | "d" | "detailed" | "diag" | "diagnostic";
+
+  type DotNetTestLoggers = Dictionary<Dictionary<string>>;
+
+  interface DotNetTestOptions {
+    target: string;
+    verbosity?: DotNetVerbosity,
+    configuration?: string;
+    noBuild?: boolean;
+    noRestore?: boolean;
+    loggers?: DotNetTestLoggers;
+    stdout?: IoConsumer,
+    stderr?: IoConsumer
+  }
+
+  type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<void>;
+
+  interface DotNetCli {
+    test: DotNetTestFunction
   }
 
   // scraped from https://spdx.org/licenses/

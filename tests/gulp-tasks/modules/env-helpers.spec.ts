@@ -1,5 +1,5 @@
 import "expect-even-more-jest";
-import faker from "faker";
+import { faker } from "@faker-js/faker";
 
 (function() {
   const {
@@ -75,7 +75,7 @@ import faker from "faker";
         // Arrange
         const
           name = faker.random.alphaNumeric(10),
-          expected = faker.random.number();
+          expected = faker.datatype.number();
         process.env[name] = expected.toString();
         // Act
         const result = envNumber(name);
@@ -88,7 +88,7 @@ import faker from "faker";
         // Arrange
         const
           name = faker.random.alphaNumeric(10),
-          expected = faker.random.number();
+          expected = faker.datatype.number();
         expect(process.env[name])
           .not.toExist();
         // Act

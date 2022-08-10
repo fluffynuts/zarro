@@ -118,13 +118,13 @@ describe(`read-git-info`, () => {
     });
     afterAll(async () => await filesystem_sandbox_1.Sandbox.destroyAll());
     async function createRepo(at) {
-        return run_in_folder_1.runInFolder(at, () => exec("git", ["init"]));
+        return (0, run_in_folder_1.runInFolder)(at, () => exec("git", ["init"]));
     }
     async function addRemote(at, name, url) {
-        return run_in_folder_1.runInFolder(at, () => exec("git", ["remote", "add", name, url]));
+        return (0, run_in_folder_1.runInFolder)(at, () => exec("git", ["remote", "add", name, url]));
     }
     async function commitFile(at, name, contents) {
-        return run_in_folder_1.runInFolder(at, async () => {
+        return (0, run_in_folder_1.runInFolder)(at, async () => {
             const fpath = path_1.default.join(at, name);
             if (typeof contents === "function") {
                 const current = await readTextFile(fpath);
@@ -138,7 +138,7 @@ describe(`read-git-info`, () => {
         });
     }
     async function commitAll(at, message) {
-        return run_in_folder_1.runInFolder(at, async () => {
+        return (0, run_in_folder_1.runInFolder)(at, async () => {
             await exec("git", ["add", "-A", ":/"]);
             await exec("git", ["commit", "-am", `"${message}"`]);
         });
@@ -152,7 +152,7 @@ describe(`read-git-info`, () => {
             args.push("-b");
         }
         args.push(branch);
-        return run_in_folder_1.runInFolder(at, () => exec("git", args));
+        return (0, run_in_folder_1.runInFolder)(at, () => exec("git", args));
     }
     async function addBranch(at, name) {
         // checkout -b

@@ -18,7 +18,7 @@ describe('read-package-json', function () {
         // Arrange
         const sandbox = await filesystem_sandbox_1.Sandbox.create(), dir = "__here__", fullDirPath = sandbox.fullPathFor(dir);
         await sandbox.mkdir(dir);
-        fs_1.copyFileSync(path.resolve("gulp-tasks/start/_package.json"), sandbox.fullPathFor(`${dir}/package.json`));
+        (0, fs_1.copyFileSync)(path.resolve("gulp-tasks/start/_package.json"), sandbox.fullPathFor(`${dir}/package.json`));
         const expected = JSON.parse(await fs.readFile(path.join(fullDirPath, "package.json")));
         // Act
         const result = await readPackageJson(fullDirPath);
@@ -30,7 +30,7 @@ describe('read-package-json', function () {
         // Arrange
         const sandbox = await filesystem_sandbox_1.Sandbox.create(), dir = "__here__", fullDirPath = sandbox.fullPathFor(dir);
         await sandbox.mkdir(dir);
-        fs_1.copyFileSync(path.resolve("gulp-tasks/start/_package.json"), sandbox.fullPathFor(`${dir}/package.json`));
+        (0, fs_1.copyFileSync)(path.resolve("gulp-tasks/start/_package.json"), sandbox.fullPathFor(`${dir}/package.json`));
         const expected = JSON.parse(await fs.readFile(path.join(fullDirPath, "package.json")));
         // Act
         const result = await readPackageJson(path.join(fullDirPath, "package.json"));

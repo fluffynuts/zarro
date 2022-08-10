@@ -110,7 +110,7 @@ describe(`exec`, () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
     });
     beforeEach(async () => {
-        jest.setTimeout(await dist_1.debuggerIsAttached()
+        jest.setTimeout(await (0, dist_1.debuggerIsAttached)()
             ? 300000
             : 5000);
     });
