@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.108.0",
+  "version": "1.109.0",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -14,7 +14,7 @@
     "clean-cache": "rimraf .jest-cache",
     "pretest": "run-s clean-cache build verify-submodules",
     "test": "jest",
-    "watch-build": "nodemon -w gulp-tasks -x \"npm run build || cd .\" -e ts",
+    "autobuild": "nodemon -w gulp-tasks -x \"npm run build || cd .\" -e ts",
     "prestart": "run-s build",
     "start": "node index.js",
     "increment-package-version-beta": "cross-env VERSION_INCREMENT_STRATEGY=patch run-s \"start increment-package-json-version\"",

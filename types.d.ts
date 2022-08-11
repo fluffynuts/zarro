@@ -177,6 +177,16 @@ declare global {
     envFlag: (name: string, fallback?: boolean) => boolean;
   };
 
+  interface PathUtils {
+    splitPath: (path: string) => string[];
+    baseName: (path: string) => string;
+    chopExtension: (path: string) => string;
+  }
+
+  interface TestUtils {
+    resolveTestPrefixFor: (path: string) => string;
+  }
+
   // @ts-ignore
   export interface ExecOpts extends ExecFileOptionsWithBufferEncoding {
     // force usage of execfile

@@ -4,7 +4,7 @@ const
   requireModule = require("../../gulp-tasks/modules/require-module"),
   quoteIfRequired = requireModule("quote-if-required"),
   which = require("which"),
-  splitPath = requireModule("split-path"),
+  { splitPath } = requireModule("path-utils"),
   path = require("path"),
   isFile = require("../is-file"),
   isDir = require("../is-dir"),
