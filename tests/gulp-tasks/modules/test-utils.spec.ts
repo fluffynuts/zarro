@@ -5,7 +5,6 @@ const ev = "DOTNET_TEST_PREFIXES";
 describe(`test-utils`, () => {
   describe(`resolveTestPrefixFor`, () => {
     const { resolveTestPrefixFor } = requireModule<TestUtils>("test-utils");
-    const env = requireModule<Env>("env");
 
     it(`should be a function`, async () => {
       // Arrange
