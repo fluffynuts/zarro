@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.121.0",
+  "version": "1.121.2",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -64,8 +64,8 @@
     "yafs": "^1.23.0"
   },
   "files": [
-    "gulp-tasks/**/*",
-    "index-modules/**/*",
+    "gulp-tasks/**/*.js",
+    "index-modules/**/*.js",
     "types.d.ts",
     "tsconfig.json"
   ],
