@@ -8,7 +8,7 @@ describe(`env`, () => {
       const name = "moo_cakes";
       delete process.env[name];
       // Act
-      const result = env.resolveArray(name);
+      const result = env.resolveArray(name as StringEnvVar);
       // Assert
       expect(result)
         .toEqual([]);

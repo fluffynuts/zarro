@@ -46,6 +46,7 @@ declare global {
   interface Dictionary<TValue> {
     [key: string]: TValue;
   }
+
   interface Author {
     name: string;
     url: string;
@@ -71,92 +72,194 @@ declare global {
     excludeVar: string | string[],
     modifierFunction?: StringMap) => string[];
 
+  type VersionIncrementStrategy =
+    "major" | "minor" | "patch" | "prerelease";
+
+  type StringEnvVar =
+    "BUILD_CONFIGURATION" |
+    "BUILD_PLATFORM" |
+    "BUILD_ARCHITECTURE" |
+    "BUILD_INCLUDE" |
+    "BUILD_EXCLUDE" |
+    "BUILD_ADDITIONAL_EXCLUDE" |
+    "NUNIT_ARCHITECTURE" |
+    "BUILD_REPORT_XML" |
+    "NUNIT_LABELS" |
+    "NUNIT_PROCESS" |
+    "TEST_EXCLUDE" |
+    "TEST_VERBOSITY" |
+    "BUILD_TOOLSVERSION" |
+    "BUILD_TARGETS" |
+    "BUILD_VERBOSITY" |
+    "COVERAGE_EXCLUDE" |
+    "COVERAGE_INCLUDE" |
+    "COVERAGE_ADDITIONAL_EXCLUDE" |
+    "COVERAGE_XML" |
+    "GIT_OVERRIDE_BRANCH" |
+    "GIT_BRANCH" |
+    "GIT_MAIN_BRANCH" |
+    "GIT_VERIFY_BRANCH" |
+    "GIT_OVERRIDE_REMOTE" |
+    "GIT_REMOTE" |
+    "NUGET_API_KEY" |
+    "NUGET_PUSH_TIMEOUT" |
+    "DOTNET_PUBLISH_RUNTIMES" |
+    "OUTPUT" |
+    "PACK_TARGET_FOLDER" |
+    "PACK_INCLUDE_CSPROJ" |
+    "PACK_EXCLUDE_CSPROJ" |
+    "PACK_INCLUDE_NUSPEC" |
+    "PACK_EXCLUDE_NUSPEC" |
+    "PACK_CONFIGURATION" |
+    "PACK_BASE_PATH" |
+    "PACK_VERSION" |
+    "PACKAGE_JSON" |
+    "INCLUDE_PACKAGE_JSON" |
+    "EXCLUDE_PACKAGE_VERSION" |
+    "NPM_PUBLISH_ACCESS" |
+    "DOTNET_TEST_PREFIXES" |
+    "VERSION_INCREMENT_STRATEGY" |
+    "BUILD_TOOLS_FOLDER";
+
+  type NumericEnvVar =
+    "BUILD_MAX_CPU_COUNT" |
+    "MAX_NUNIT_AGENTS" |
+    "GIT_FETCH_TIMEOUT" |
+    "GIT_VERIFY_TIMEOUT" |
+    "GIT_FETCH_RECENT_TIME" |
+    "NUGET_PUSH_TIMEOUT" |
+    "PACK_INCREMENT_VERSION_BY" |
+    "MAX_RETRIES" |
+    "BUILD_RETRIES" |
+    "RESTORE_RETRIES" |
+    "MAX_CONCURRENCY";
+
+  type FlagEnvVar =
+    "ENABLE_NUGET_PARALLEL_PROCESSING" |
+    "BUILD_SHOW_INFO" |
+    "BUILD_FAIL_ON_ERROR" |
+    "BUILD_MSBUILD_NODE_REUSE" |
+    "DOTNET_TEST_PARALLEL" |
+    "DOTNET_CORE" |
+    "DRY_RUN" |
+    "ENFORCE_VERIFICATION" |
+    "INTERACTIVE" |
+    "SKIP_FETCH_ON_VERIFY" |
+    "NO_UNICODE" |
+    "NO_COLOR" |
+    "NUGET_IGNORE_DUPLICATE_PACKAGES" |
+    "PACK_INCREMENT_VERSION" |
+    "PACK_INCLUDE_EMPTY_DIRECTORIES" |
+    "PACK_INCLUDE_SYMBOLS" |
+    "INITIAL_RELEASE" |
+    "VERSION_INCREMENT_ZERO" |
+    "BETA" |
+    "RETAIN_TEST_DIAGNOSTICS" |
+    "DOTNET_TEST_QUIET_QUACKERS" |
+    "UPDATE_SUBMODULES_TO_LATEST" |
+    "USE_SYSTEM_NUGET";
+
+  type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar;
+
   interface Env {
-    resolve(...names: string[]): string;
-    resolveArray(name: string): string[];
-    resolveArray(name: string, delimiter: string): string[];
-    resolveNumber(name: string): number;
-    resolveFlag(name: string): boolean;
-    associate(varName: string | string[], tasks: string | string[]): void;
+    resolve(...names: StringEnvVar[]): string;
+    resolveArray(name: AnyEnvVar): string[];
+    resolveArray(name: AnyEnvVar, delimiter: string): string[];
+    resolveNumber(name: NumericEnvVar): number;
+    resolveFlag(name: FlagEnvVar): boolean;
+    associate(varName: AnyEnvVar | AnyEnvVar[], tasks: string | string[]): void;
 
     // these are generated on the js output by register-environment-variables
     // -> included here to avoid typos: use env.CONSTANT_NAME when you want
     // the constant name somewhere, eg in association
-    BETA: string;
-    USE_SYSTEM_NUGET: string;
-    ENABLE_NUGET_PARALLEL_PROCESSING: string;
-    BUILD_SHOW_INFO: string;
-    BUILD_FAIL_ON_ERROR: string;
-    BUILD_MSBUILD_NODE_REUSE: string;
-    MAX_CONCURRENCY: string;
-    BUILD_MAX_CPU_COUNT: string;
-    BUILD_CONFIGURATION: string;
-    BUILD_PLATFORM: string;
-    BUILD_ARCHITECTURE: string;
-    MAX_NUNIT_AGENTS: string;
-    BUILD_INCLUDE: string;
-    BUILD_EXCLUDE: string;
-    BUILD_ADDITIONAL_EXCLUDE: string;
-    DOTNET_CORE: string;
-    DOTNET_TEST_PARALLEL: string;
-    NUNIT_ARCHITECTURE: string;
-    BUILD_REPORT_XML: string;
-    NUNIT_LABELS: string;
-    NUNIT_PROCESS: string;
-    TEST_INCLUDE: string;
-    TEST_EXCLUDE: string;
-    TEST_VERBOSITY: string;
-    BUILD_TOOLSVERSION: string;
-    BUILD_TARGETS: string;
-    BUILD_VERBOSITY: string;
-    COVERAGE_INCLUDE: string;
-    COVERAGE_EXCLUDE: string;
-    COVERAGE_ADDITIONAL_EXCLUDE: string;
-    COVERAGE_XML: string;
-    COVERAGE_REPORTING_EXCLUDE: string;
-    BUILD_TOOLS_FOLDER: string;
-    DRY_RUN: string;
-    GIT_OVERRIDE_BRANCH: string;
-    GIT_BRANCH: string;
-    GIT_OVERRIDE_REMOTE: string;
-    NUGET_API_KEY: string;
-    DOTNET_PUBLISH_RUNTIMES: string;
-    DOTNET_PUBLISH_BUILD_CONFIGURATION: string;
-    OUTPUT: string;
-    PURGE_JS_DIRS: string;
-    PURGE_DOTNET_DIRS: string;
-    PURGE_ADDITIONAL_DIRS: string;
-    PACKAGE_TARGET_FOLDER: string;
-    PACK_EXCLUDE: string;
-    PACK_INCLUDE: string;
-    PACK_CONFIGURATION: string;
-    PACK_INCREMENT_VERSION: string;
-    PACK_INCREMENT_VERSION_BY: string;
-    PACKAGE_JSON: string;
-    VERSION_INCREMENT_STRATEGY: string;
-    VERSION_INCREMENT_ZERO: string;
-    INITIAL_RELEASE: string;
-    INCLUDE_PACKAGE_JSON: string;
-    EXCLUDE_PACKAGE_JSON: string;
-    UPDATE_SUBMODULES_TO_LATEST: string;
-    ENFORCE_VERIFICATION: string;
-    GIT_MAIN_BRANCH: string;
-    GIT_VERIFY_BRANCH: string;
-    SKIP_FETCH_ON_VERIFY: string;
-    GIT_FETCH_TIMEOUT: string;
-    GIT_VERIFY_TIMEOUT: string;
-    GIT_FETCH_RECENT_TIME: string;
+    BETA: FlagEnvVar;
+    USE_SYSTEM_NUGET: FlagEnvVar;
+    ENABLE_NUGET_PARALLEL_PROCESSING: FlagEnvVar;
+    BUILD_SHOW_INFO: FlagEnvVar;
+    BUILD_FAIL_ON_ERROR: FlagEnvVar;
+    BUILD_MSBUILD_NODE_REUSE: FlagEnvVar;
+    MAX_CONCURRENCY: NumericEnvVar;
+    BUILD_MAX_CPU_COUNT: NumericEnvVar;
+    BUILD_CONFIGURATION: StringEnvVar;
+    BUILD_PLATFORM: StringEnvVar;
+    BUILD_ARCHITECTURE: StringEnvVar;
+    MAX_NUNIT_AGENTS: NumericEnvVar;
+    BUILD_INCLUDE: StringEnvVar;
+    BUILD_EXCLUDE: StringEnvVar;
+    BUILD_ADDITIONAL_EXCLUDE: StringEnvVar;
+    DOTNET_CORE: FlagEnvVar;
+    DOTNET_TEST_PARALLEL: FlagEnvVar;
+    NUNIT_ARCHITECTURE: StringEnvVar;
+    BUILD_REPORT_XML: StringEnvVar;
+    NUNIT_LABELS: StringEnvVar; // for now, at least
+    NUNIT_PROCESS: StringEnvVar;
+    TEST_INCLUDE: StringEnvVar;
+    TEST_EXCLUDE: StringEnvVar;
+    TEST_VERBOSITY: StringEnvVar; // for now, at least
+    BUILD_TOOLSVERSION: StringEnvVar;
+    BUILD_TARGETS: StringEnvVar;
+    BUILD_VERBOSITY: StringEnvVar;
+    COVERAGE_INCLUDE: StringEnvVar;
+    COVERAGE_EXCLUDE: StringEnvVar;
+    COVERAGE_ADDITIONAL_EXCLUDE: StringEnvVar;
+    COVERAGE_XML: StringEnvVar;
+    COVERAGE_REPORTING_EXCLUDE: StringEnvVar;
+    BUILD_TOOLS_FOLDER: StringEnvVar;
+    DRY_RUN: FlagEnvVar;
+    GIT_OVERRIDE_BRANCH: StringEnvVar;
+    GIT_BRANCH: StringEnvVar;
+    GIT_OVERRIDE_REMOTE: StringEnvVar;
+    NUGET_API_KEY: StringEnvVar;
+    DOTNET_PUBLISH_RUNTIMES: StringEnvVar;
+    DOTNET_PUBLISH_BUILD_CONFIGURATION: StringEnvVar;
+    OUTPUT: StringEnvVar;
+    PURGE_JS_DIRS: StringEnvVar;
+    PURGE_DOTNET_DIRS: StringEnvVar;
+    PURGE_ADDITIONAL_DIRS: StringEnvVar;
+    PACK_TARGET_FOLDER: StringEnvVar;
+    PACK_EXCLUDE: StringEnvVar;
+    PACK_INCLUDE: StringEnvVar;
+    PACK_CONFIGURATION: StringEnvVar;
+    PACK_INCREMENT_VERSION: FlagEnvVar;
+    PACK_INCREMENT_VERSION_BY: NumericEnvVar;
+    PACKAGE_JSON: StringEnvVar;
+    VERSION_INCREMENT_STRATEGY: StringEnvVar; // for now at least
+    VERSION_INCREMENT_ZERO: FlagEnvVar;
+    INITIAL_RELEASE: FlagEnvVar;
+    INCLUDE_PACKAGE_JSON: StringEnvVar;
+    EXCLUDE_PACKAGE_JSON: StringEnvVar;
+    UPDATE_SUBMODULES_TO_LATEST: FlagEnvVar;
+    ENFORCE_VERIFICATION: FlagEnvVar;
+    GIT_MAIN_BRANCH: StringEnvVar;
+    GIT_VERIFY_BRANCH: StringEnvVar;
+    SKIP_FETCH_ON_VERIFY: FlagEnvVar;
+    GIT_FETCH_TIMEOUT: NumericEnvVar;
+    GIT_VERIFY_TIMEOUT: NumericEnvVar;
+    GIT_FETCH_RECENT_TIME: NumericEnvVar;
   }
-
 
   type StatFunction = (path: string) => Promise<fs.Stats | null>
 
+  interface GitSha {
+    currentGitSHA(): string;
+    currentShortSHA(): string;
+    fetchGitSha(): Promise<string>;
+  }
+
   // module defs: get these via requireModule<T>("module-name");
   type ReadTextFile = (path: string) => Promise<string>;
-  type WriteTextFile = (path: string, data: string, options?: { encoding?: string | null, mode?: string | number, flag?: string | number } | string | null) => Promise<void>
+  type WriteTextFile = (path: string, data: string, options?: {
+    encoding?: string | null,
+    mode?: string | number,
+    flag?: string | number
+  } | string | null) => Promise<void>
   type ParseXml = (data: string) => Promise<Dictionary<any>>;
-  type IncrementVersion = (version: string, strategy: string, zeroLowerOrder: boolean, incrementBy: number)
-    => string;
+  type IncrementVersion = (
+    version: string,
+    strategy: string,
+    zeroLowerOrder?: boolean,
+    incrementBy?: number
+  ) => Promise<string>;
   type ReadPackageVersion = (packageJsonPath?: string) => string | undefined;
   type ReadNuspecVersion = (pathToNuspec: string) => string | undefined;
   type ReadCsProjVersion = (pathToCsProj: string) => string | undefined;
@@ -186,6 +289,9 @@ declare global {
   interface TestUtils {
     resolveTestPrefixFor: (path: string) => string;
   }
+
+  type GulpIncrementNugetPackageDependencyVersion =
+    (packageMatch: RegExp | string) => any;
 
   // @ts-ignore
   export interface ExecOpts extends ExecFileOptionsWithBufferEncoding {
@@ -241,10 +347,12 @@ declare global {
     run<T>(message: string, action: (() => T | Promise<T>)): void;
   };
   type Sleep = (ms: number) => Promise<void>;
+
   interface Failer {
     promise: Promise<void>;
     cancel(): void;
   }
+
   type FailAfter = (ms: number, message?: string) => Failer;
 
   export interface FileSystemUtils {
@@ -306,11 +414,13 @@ declare global {
   }
 
   type ReadGitInfo = (at?: string) => Promise<GitInfo>;
+
   enum GitRemoteUsage {
     fetch,
     push,
     fetchAndPush
   }
+
   interface GitRemote {
     name: string;
     url: string;
@@ -331,11 +441,13 @@ declare global {
     where?: string;
     dryRun?: boolean;
   }
+
   interface GitPushOptions {
     dryRun?: boolean;
     quiet?: boolean;
     where?: string
   }
+
   type GitTag = (tag: string | GitTagOptions, comment?: string, where?: string) => Promise<void>;
   type GitPush = (dryRun?: boolean | GitPushOptions, quiet?: boolean, where?: string) => Promise<void>;
   type GitPushTags = (dryRun?: boolean | GitPushOptions, comment?: string, where?: string) => Promise<void>;
@@ -379,11 +491,11 @@ declare global {
     stderr: string[];
     stdout: string[];
   }
+
   type Spawn = (program: string, args: string[], options?: SpawnOptions)
     => Promise<SpawnResult>;
 
-  type AskOptions = {
-  }
+  type AskOptions = {}
   type AskFunction = (message: string, options?: AskOptions) => Promise<string>;
   type Ask = {
     ask: AskFunction

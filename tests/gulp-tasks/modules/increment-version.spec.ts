@@ -1,4 +1,5 @@
 const sut = require("../../../gulp-tasks/modules/increment-version") as IncrementVersion;
+const { currentShortSHA } = require("../../../gulp-tasks/modules/git-sha") as GitSha;
 import "expect-even-more-jest";
 
 describe(`increment-version`, function() {
@@ -9,7 +10,57 @@ describe(`increment-version`, function() {
     // Assert
   });
 
-  describe(`stragegy: major`, () => {
+  describe(`strategy: prerelease`, () => {
+    it(`should tack a datestamp and sha onto the version`, async () => {
+      // Arrange
+      const
+        now = Date.now(),
+        d = new Date(now);
+      spyOn(Date, "now").and.callFake(() => now);
+      const
+        input = "1.1.1",
+        year = `${d.getFullYear()}`.substring(2),
+        month = zeroPad(d.getMonth() + 1),
+        day = zeroPad(d.getDate()),
+        hour = zeroPad(d.getHours()),
+        minute = zeroPad(d.getMinutes()),
+        sha = currentShortSHA(),
+        expected = `1.1.1-${ year }${ month }${ day }${ hour }${ minute }-${sha}`;
+      // Act
+      const result = sut(input, "prerelease");
+      // Assert
+      expect(result)
+        .toEqual(expected);
+    });
+
+    it(`should drop prior prerelease info`, async () => {
+      // Arrange
+      const
+        now = Date.now(),
+        d = new Date(now);
+      spyOn(Date, "now").and.callFake(() => now);
+      const
+        input = "1.1.1-2301011112-abcdef0",
+        year = `${d.getFullYear()}`.substring(2),
+        month = zeroPad(d.getMonth() + 1),
+        day = zeroPad(d.getDate()),
+        hour = zeroPad(d.getHours()),
+        minute = zeroPad(d.getMinutes()),
+        sha = currentShortSHA(),
+        expected = `1.1.1-${ year }${ month }${ day }${ hour }${ minute }-${sha}`;
+      // Act
+      const result = sut(input, "prerelease");
+      // Assert
+      expect(result)
+        .toEqual(expected);
+    });
+
+    function zeroPad(num: number): string {
+      return num < 10 ? `0${ num }` : `${ num }`;
+    }
+  });
+
+  describe(`strategy: major`, () => {
     it(`should increment major version`, async () => {
       // Arrange
       const
@@ -35,7 +86,7 @@ describe(`increment-version`, function() {
     });
   });
 
-  describe(`stragegy: minor`, () => {
+  describe(`strategy: minor`, () => {
     it(`should increment minor version`, async () => {
       // Arrange
       const
@@ -73,7 +124,7 @@ describe(`increment-version`, function() {
     });
   });
 
-  describe(`stragegy: patch`, () => {
+  describe(`strategy: patch`, () => {
     it(`should increment patch version`, async () => {
       // Arrange
       const
