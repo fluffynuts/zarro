@@ -25,7 +25,7 @@ describe(`increment-version`, function() {
         hour = zeroPad(d.getHours()),
         minute = zeroPad(d.getMinutes()),
         sha = currentShortSHA(),
-        expected = `1.1.1-${ year }${ month }${ day }${ hour }${ minute }-${sha}`;
+        expected = `1.1.1-${ year }${ month }${ day }${ hour }${ minute }.${sha}`;
       // Act
       const result = sut(input, "prerelease");
       // Assert
@@ -40,7 +40,7 @@ describe(`increment-version`, function() {
         d = new Date(now);
       spyOn(Date, "now").and.callFake(() => now);
       const
-        input = "1.1.1-2301011112-abcdef0",
+        input = "1.1.1-2301011112.abcdef0",
         year = `${d.getFullYear()}`.substring(2),
         month = zeroPad(d.getMonth() + 1),
         day = zeroPad(d.getDate()),
