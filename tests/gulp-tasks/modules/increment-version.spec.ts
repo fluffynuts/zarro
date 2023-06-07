@@ -11,48 +11,52 @@ describe(`increment-version`, function() {
   });
 
   describe(`strategy: prerelease`, () => {
-    it(`should tack a datestamp and sha onto the version`, async () => {
-      // Arrange
-      const
-        now = Date.now(),
-        d = new Date(now);
-      spyOn(Date, "now").and.callFake(() => now);
-      const
-        input = "1.1.1",
-        year = `${d.getFullYear()}`.substring(2),
-        month = zeroPad(d.getMonth() + 1),
-        day = zeroPad(d.getDate()),
-        hour = zeroPad(d.getHours()),
-        minute = zeroPad(d.getMinutes()),
-        sha = currentShortSHA(),
-        expected = `1.1.1-${ year }${ month }${ day }${ hour }${ minute }.${sha}`;
-      // Act
-      const result = sut(input, "prerelease");
-      // Assert
-      expect(result)
-        .toEqual(expected);
+    describe(`when no prior prerelease version`, () => {
+      it(`should increment minor and tack a datestamp and sha onto the version`, async () => {
+        // Arrange
+        const
+          now = Date.now(),
+          d = new Date(now);
+        spyOn(Date, "now").and.callFake(() => now);
+        const
+          input = "1.1.1",
+          year = `${ d.getFullYear() }`.substring(2),
+          month = zeroPad(d.getMonth() + 1),
+          day = zeroPad(d.getDate()),
+          hour = zeroPad(d.getHours()),
+          minute = zeroPad(d.getMinutes()),
+          sha = currentShortSHA(),
+          expected = `1.1.2-${ year }${ month }${ day }${ hour }${ minute }.${ sha }`;
+        // Act
+        const result = sut(input, "prerelease");
+        // Assert
+        expect(result)
+          .toEqual(expected);
+      });
     });
 
-    it(`should drop prior prerelease info`, async () => {
-      // Arrange
-      const
-        now = Date.now(),
-        d = new Date(now);
-      spyOn(Date, "now").and.callFake(() => now);
-      const
-        input = "1.1.1-2301011112.abcdef0",
-        year = `${d.getFullYear()}`.substring(2),
-        month = zeroPad(d.getMonth() + 1),
-        day = zeroPad(d.getDate()),
-        hour = zeroPad(d.getHours()),
-        minute = zeroPad(d.getMinutes()),
-        sha = currentShortSHA(),
-        expected = `1.1.1-${ year }${ month }${ day }${ hour }${ minute }-${sha}`;
-      // Act
-      const result = sut(input, "prerelease");
-      // Assert
-      expect(result)
-        .toEqual(expected);
+    describe(`when have prior prerelease version`, () => {
+      it(`should drop prior prerelease info`, async () => {
+        // Arrange
+        const
+          now = Date.now(),
+          d = new Date(now);
+        spyOn(Date, "now").and.callFake(() => now);
+        const
+          input = "1.1.1-2301011112.abcdef0",
+          year = `${ d.getFullYear() }`.substring(2),
+          month = zeroPad(d.getMonth() + 1),
+          day = zeroPad(d.getDate()),
+          hour = zeroPad(d.getHours()),
+          minute = zeroPad(d.getMinutes()),
+          sha = currentShortSHA(),
+          expected = `1.1.1-${ year }${ month }${ day }${ hour }${ minute }.${ sha }`;
+        // Act
+        const result = sut(input, "prerelease");
+        // Assert
+        expect(result)
+          .toEqual(expected);
+      });
     });
 
     function zeroPad(num: number): string {
@@ -159,6 +163,19 @@ describe(`increment-version`, function() {
       // Assert
       expect(result)
         .toEqual(expected);
+    });
+    describe(`when was prerelease`, () => {
+      it(`should only drop the prerelease part`, async () => {
+        // Arrange
+        const
+          input = "1.1.2-2301011112.abcdef0",
+          expected = "1.1.2";
+        // Act
+        const result = sut(input, "patch", true, 1);
+        // Assert
+        expect(result)
+          .toEqual(expected);
+      });
     });
   });
 
