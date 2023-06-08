@@ -280,6 +280,19 @@ declare global {
     envFlag: (name: string, fallback?: boolean) => boolean;
   };
 
+  interface Version {
+    major: number;
+    minor: number;
+    patch: number;
+    tag: string;
+    isPreRelease: boolean;
+  }
+
+  interface PackageInfo {
+    id: string;
+    version: Version;
+  }
+
   interface PathUtils {
     splitPath: (path: string) => string[];
     baseName: (path: string) => string;
@@ -387,7 +400,7 @@ declare global {
   type ParseXmlString = (str: string) => any; // TODO: get xml types in here?
   type LoadXmlFile = (str: string) => any; // TODO: get xml types in here?
 
-  type GitTagFromCsProj = (options?: GitTagFromCsProjOptions) => Stream;
+  type GitTagFromCsProj = (options?: GitTagOptions) => Stream;
   type GitFetch = (all: boolean) => Promise<void>;
 
   interface Log {
@@ -401,16 +414,16 @@ declare global {
     fail(...args: any[]): void;
   }
 
+  interface ParseNugetVersion {
+    parseNugetVersion(versionStringOrFileName: string): Version;
+  }
+
   type ReadGitCommitDeltaCount = (mainBranch: string, otherBranch: string) => Promise<GitCommitDeltaCount>;
   type ReadMainBranchName = () => Promise<string | undefined>;
 
   interface GitCommitDeltaCount {
     behind: number;
     ahead: number;
-  }
-
-  interface GitTagFromCsProjOptions extends GitTagOptions {
-    push?: boolean;
   }
 
   type ReadGitInfo = (at?: string) => Promise<GitInfo>;
@@ -440,6 +453,8 @@ declare global {
     comment?: string;
     where?: string;
     dryRun?: boolean;
+    ignorePreRelease?: boolean;
+    push?: boolean;
   }
 
   interface GitPushOptions {
