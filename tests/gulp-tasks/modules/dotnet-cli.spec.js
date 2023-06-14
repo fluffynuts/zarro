@@ -6,13 +6,204 @@ describe("dotnet-cli", () => {
     const spawn = jest.fn(), requireModuleActual = require("../../../gulp-tasks/modules/require-module");
     requireModuleActual.mock("spawn", spawn);
     const sut = requireModule("dotnet-cli");
+    const anything = expect.any(Object);
+    describe(`build`, () => {
+        const { build } = sut;
+        it(`should be a function`, async () => {
+            // Arrange
+            // Act
+            expect(build)
+                .toBeAsyncFunction();
+            // Assert
+        });
+        [
+            "m", "minimal",
+            "q", "quiet",
+            "n", "normal",
+            "d", "detailed",
+            "diag", "diagnostic"
+        ].forEach(verbosity => {
+            it(`should use the provided verbosity`, async () => {
+                // Arrange
+                const target = faker_1.faker.random.word();
+                // Act
+                await build({
+                    target,
+                    verbosity: verbosity
+                });
+                // Assert
+                expect(spawn)
+                    .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--verbosity", verbosity], anything);
+            });
+        });
+        it(`should use the provided configuration`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), configuration = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                configuration
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--configuration", configuration], anything);
+        });
+        it(`should use the provided framework`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), framework = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                framework
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--framework", framework], anything);
+        });
+        it(`should use the provided runtime`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), runtime = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                runtime
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--runtime", runtime], anything);
+        });
+        it(`should use the provided architecture`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), arch = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                arch
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--arch", arch], anything);
+        });
+        it(`should use the provided os`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), os = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                os
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--os", os], anything);
+        });
+        it(`should use the provided version suffix`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), versionSuffix = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                versionSuffix
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--version-suffix", versionSuffix], anything);
+        });
+        it(`should be able to skip package restore`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                noRestore: true
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--no-restore"], anything);
+        });
+        it(`should be able to skip dependencies`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                noDependencies: true
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--no-dependencies"], anything);
+        });
+        it(`should be able to skip incremental building`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                noIncremental: true
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--no-incremental"], anything);
+        });
+        it(`should be able to force disable build servers`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                disableBuildServers: true
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--disable-build-servers"], anything);
+        });
+        it(`should be able to build self-contained`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                selfContained: true
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--self-contained"], anything);
+        });
+        it(`should add msbuildProperties, when present`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                msbuildProperties: {
+                    foo: "bar",
+                    quux: "wibbles and toast",
+                    "spaced arg": "more spaces"
+                }
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "/p:foo=bar", `/p:quux="wibbles and toast"`, `/p:"spaced arg"="more spaces"`], anything);
+        });
+        it(`should add additionalArguments, when set`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word();
+            // Act
+            await build({
+                target,
+                additionalArguments: ["foo", "bar", "quux"]
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "foo", "bar", "quux"], anything);
+        });
+    });
     describe(`test`, () => {
         const { test } = sut;
         it(`should be a function`, async () => {
             // Arrange
             // Act
             expect(test)
-                .toBeFunction();
+                .toBeAsyncFunction();
             // Assert
         });
         it(`should invoke dotnet test on provided solution / project`, async () => {
@@ -24,7 +215,7 @@ describe("dotnet-cli", () => {
             });
             // Assert
             expect(spawn)
-                .toHaveBeenCalledOnceWith("dotnet", ["test", expected], expect.any(Object));
+                .toHaveBeenCalledOnceWith("dotnet", ["test", expected], anything);
         });
         [
             "m", "minimal",
@@ -43,7 +234,7 @@ describe("dotnet-cli", () => {
                 });
                 // Assert
                 expect(spawn)
-                    .toHaveBeenCalledOnceWith("dotnet", ["test", target, "-v", verbosity], expect.any(Object));
+                    .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--verbosity", verbosity], anything);
             });
         });
         it(`should use the provided configuration`, async () => {
@@ -56,7 +247,55 @@ describe("dotnet-cli", () => {
             });
             // Assert
             expect(spawn)
-                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "-c", configuration], expect.any(Object));
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--configuration", configuration], anything);
+        });
+        it(`should use the provided framework`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), framework = faker_1.faker.random.word();
+            // Act
+            await test({
+                target,
+                framework
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--framework", framework], anything);
+        });
+        it(`should use the provided runtime`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), runtime = faker_1.faker.random.word();
+            // Act
+            await test({
+                target,
+                runtime
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--runtime", runtime], anything);
+        });
+        it(`should use the provided architecture`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), arch = faker_1.faker.random.word();
+            // Act
+            await test({
+                target,
+                arch
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--arch", arch], anything);
+        });
+        it(`should use the provided os`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), os = faker_1.faker.random.word();
+            // Act
+            await test({
+                target,
+                os
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--os", os], anything);
         });
         it(`should set --no-build on request`, async () => {
             // Arrange
@@ -68,7 +307,7 @@ describe("dotnet-cli", () => {
             });
             // Assert
             expect(spawn)
-                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--no-build"], expect.any(Object));
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--no-build"], anything);
         });
         it(`should set --no-restore on request`, async () => {
             // Arrange
@@ -80,7 +319,7 @@ describe("dotnet-cli", () => {
             });
             // Assert
             expect(spawn)
-                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--no-restore"], expect.any(Object));
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--no-restore"], anything);
         });
         it(`should set a single logger`, async () => {
             // Arrange
@@ -97,7 +336,236 @@ describe("dotnet-cli", () => {
             });
             // Assert
             expect(spawn)
-                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--logger", "console;verbosity=normal;foo=bar"], expect.any(Object));
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--logger", "console;verbosity=normal;foo=bar"], anything);
+        });
+        it(`should add msbuildProperties, when present`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word();
+            // Act
+            await test({
+                target,
+                msbuildProperties: {
+                    foo: "bar",
+                    quux: "wibbles and toast",
+                    "spaced arg": "more spaces"
+                }
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "/p:foo=bar", `/p:quux="wibbles and toast"`, `/p:"spaced arg"="more spaces"`], anything);
+        });
+        it(`should add additionalArguments, when set`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word();
+            // Act
+            await test({
+                target,
+                additionalArguments: ["foo", "bar", "quux"]
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "foo", "bar", "quux"], anything);
+        });
+        it(`should set the settings file`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), settingsFile = faker_1.faker.random.alphaNumeric();
+            // Act
+            await test({
+                target,
+                settingsFile
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--settings", settingsFile], anything);
+        });
+        it(`should set env vars`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word();
+            // Act
+            await test({
+                target,
+                env: {
+                    foo: "bar",
+                    moo: "cow beef",
+                    "moo cow": "yum yum"
+                }
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledWith("dotnet", ["test", target, "-e", "foo=bar", "-e", `moo="cow beef"`, "-e", `"moo cow"="yum yum"`], anything);
+        });
+        it(`should pass through a provided filter`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word();
+            // Act
+            await test({
+                target,
+                filter: "some filter expression"
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--filter", `"some filter expression"`], anything);
+        });
+        it(`should pass through output location`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), output1 = faker_1.faker.random.alphaNumeric(), output2 = `${faker_1.faker.random.alphaNumeric()} ${faker_1.faker.random.alphaNumeric()}`;
+            // Act
+            await test({
+                target,
+                output: output1
+            });
+            await test({
+                target,
+                output: output2
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--output", output1], anything);
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--output", `"${output2}"`], anything);
+        });
+        it(`should pass through diagnostics location`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.word(), diagnostics1 = faker_1.faker.random.alphaNumeric(), diagnostics2 = `${faker_1.faker.random.alphaNumeric()} ${faker_1.faker.random.alphaNumeric()}`;
+            // Act
+            await test({
+                target,
+                diagnostics: diagnostics1
+            });
+            await test({
+                target,
+                diagnostics: diagnostics2
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--diag", diagnostics1], anything);
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--diag", `"${diagnostics2}"`], anything);
+        });
+    });
+    describe(`pack`, () => {
+        const { pack } = sut;
+        it(`should be a function`, async () => {
+            // Arrange
+            // Act
+            expect(pack)
+                .toBeAsyncFunction();
+            // Assert
+        });
+        it(`should set the target`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.alphaNumeric();
+            // Act
+            await pack({
+                target
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", target], anything);
+        });
+        it(`should set the output`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.alphaNumeric(), output = faker_1.faker.random.alphaNumeric();
+            // Act
+            await pack({
+                target,
+                output
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--output", output], anything);
+        });
+        [
+            "m", "minimal",
+            "q", "quiet",
+            "n", "normal",
+            "d", "detailed",
+            "diag", "diagnostic"
+        ].forEach(verbosity => {
+            it(`should use the provided verbosity`, async () => {
+                // Arrange
+                const target = faker_1.faker.random.word();
+                // Act
+                await pack({
+                    target,
+                    verbosity: verbosity
+                });
+                // Assert
+                expect(spawn)
+                    .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--verbosity", verbosity], anything);
+            });
+        });
+        it(`should set the configuration`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.alphaNumeric(), configuration = faker_1.faker.random.alphaNumeric();
+            // Act
+            await pack({
+                target,
+                configuration
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--configuration", configuration], anything);
+        });
+        it(`should disable build on request`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.alphaNumeric();
+            // Act
+            await pack({
+                target,
+                noBuild: true
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--no-build"], anything);
+        });
+        it(`should include symbols on request`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.alphaNumeric();
+            // Act
+            await pack({
+                target,
+                includeSymbols: true
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--include-symbols"], anything);
+        });
+        it(`should include source on request`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.alphaNumeric();
+            // Act
+            await pack({
+                target,
+                includeSource: true
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--include-source"], anything);
+        });
+        it(`should skip restore on request`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.alphaNumeric();
+            // Act
+            await pack({
+                target,
+                noRestore: true
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--no-restore"], anything);
+        });
+        it(`should pass on the version suffix`, async () => {
+            // Arrange
+            const target = faker_1.faker.random.alphaNumeric(), versionSuffix = faker_1.faker.system.semver();
+            // Act
+            await pack({
+                target,
+                versionSuffix
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--version-suffix", versionSuffix], anything);
         });
     });
 });

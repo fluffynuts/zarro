@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.130.0",
+  "version": "1.130.1",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -14,7 +14,10 @@
     "clean-cache": "rimraf .jest-cache",
     "pretest": "run-s clean-cache build verify-submodules",
     "test": "jest",
-    "autotest": "jest --watch",
+    "quick-test": "jest -o --no-cache",
+    "clear-console": "console-cls",
+    "autotest-once": "run-s clear-console build quick-test",
+    "autotest": "nodemon -w gulp-tasks -w tests -w types.d.ts -x \"npm run autotest-once || cd .\" -e ts",
     "autobuild": "nodemon -w gulp-tasks -w tests -x \"npm run build || cd .\" -e ts",
     "prestart": "run-s build",
     "start": "node index.js",
@@ -84,10 +87,12 @@
     "@types/jest": "^26.0.20",
     "@types/node": "^13.13.40",
     "@types/rimraf": "^3.0.0",
+    "@types/through2": "^2.0.38",
     "@types/xml2js": "^0.4.8",
     "@types/yargs": "^15.0.13",
+    "console-cls": "^1.2.2",
     "debugger-is-attached": "^1.2.0",
-    "expect-even-more-jest": "^1.11.0",
+    "expect-even-more-jest": "^1.15.0",
     "filesystem-sandbox": "^1.20.0",
     "jest": "^26.6.3",
     "nodemon": "^2.0.19",

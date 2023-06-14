@@ -1,11 +1,14 @@
+// noinspection JSUnusedGlobalSymbols
+
 import * as fs from "fs";
-import { Stream } from "stream";
+import { Stream, Transform } from "stream";
 import { StyleFunction } from "ansi-colors";
 import { AlterPackageJsonVersionOptions } from "./gulp-tasks/modules/alter-package-json-version";
 import { RimrafOptions } from "./gulp-tasks/modules/rimraf";
 import { ExecFileOptionsWithBufferEncoding } from "child_process";
 import { IoConsumer, IoHandlers } from "./gulp-tasks/modules/exec";
 import { StatsBase } from "fs";
+import * as vinyl from "vinyl";
 
 // copied out of @types/fancy-log because imports are being stupid
 interface Logger {
@@ -22,6 +25,8 @@ declare global {
   type VoidVoid = () => void;
   type AsyncVoidVoid = () => Promise<void>;
   type AsyncVoidFunc<T> = () => Promise<T>;
+  type AsyncTVoid<T> = (arg: T) => Promise<void>;
+  type OptionsFactory<T> = (file: vinyl.BufferFile) => T | Promise<T>;
   type ErrorReporter = (e: Error) => Promise<void> | void;
   type GulpCallback =
     (() => Promise<any> | NodeJS.EventEmitter) | ((done: VoidVoid) => Promise<any> | NodeJS.EventEmitter)
@@ -29,6 +34,10 @@ declare global {
   type Optional<T> = T | undefined;
   type ResolveNuget = (nugetPath: Optional<string>, errorOnMissing: boolean) => string;
   type FindLocalNuget = () => Promise<string>;
+
+  interface Streamify {
+    streamify<T>(fn: AsyncTVoid<T>, optionsFactory: OptionsFactory<T>, pluginName: string, operation: string):  Transform;
+  }
 
   interface GulpWithHelp {
     task(name: string, callback: GulpCallback): void;
@@ -469,6 +478,7 @@ declare global {
   type GitTag = (tag: string | GitTagOptions, comment?: string, where?: string) => Promise<void>;
   type GitPush = (dryRun?: boolean | GitPushOptions, quiet?: boolean, where?: string) => Promise<void>;
   type GitPushTags = (dryRun?: boolean | GitPushOptions, comment?: string, where?: string) => Promise<void>;
+  type QuoteIfRequired = (str?: string) => string;
 
   type StdioOptions = "pipe" | "ignore" | "inherit" |
     Array<("pipe" | "ipc" | "ignore" | "inherit" | any | number | null | undefined)>;
@@ -534,21 +544,64 @@ declare global {
 
   type DotNetTestLoggers = Dictionary<Dictionary<string>>;
 
-  interface DotNetTestOptions {
-    target: string;
+  interface DotNetBaseOptions {
+    msbuildProperties?: Dictionary<string>;
+    additionalArguments?: string[]
     verbosity?: DotNetVerbosity,
+  }
+
+  interface DotNetCommonBuildOptions extends DotNetBaseOptions {
+    target: string;
     configuration?: string;
+    framework?: string;
+    runtime?: string;
+    output?: string;
+    arch?: string;
+    os?: string;
+  }
+
+  interface DotnetPackOptions extends DotNetBaseOptions, IoConsumers {
+    target: string;
+    output?: string;
+    configuration?: string;
+    noBuild?: boolean;
+    includeSymbols?: boolean;
+    includeSource?: boolean;
+    noRestore?: boolean;
+    versionSuffix?: string;
+  }
+
+  interface DotNetBuildOptions extends DotNetCommonBuildOptions, IoConsumers {
+    noIncremental?: boolean;
+    disableBuildServers?: boolean;
+    selfContained?: boolean;
+    noDependencies?: boolean;
+    noRestore?: boolean;
+    versionSuffix?: string;
+  }
+
+  interface IoConsumers {
+    stdout?: IoConsumer;
+    stderr?: IoConsumer;
+  }
+
+  interface DotNetTestOptions extends DotNetCommonBuildOptions, IoConsumers {
     noBuild?: boolean;
     noRestore?: boolean;
     loggers?: DotNetTestLoggers;
-    stdout?: IoConsumer,
-    stderr?: IoConsumer
+    settingsFile?: string;
+    env?: Dictionary<string>;
+    filter?: string;
+    diagnostics?: string;
   }
 
-  type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<void>;
-
+  type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<SpawnResult | SpawnError>;
+  type DotNetBuildFunction = (opts: DotNetBuildOptions) => Promise<SpawnResult | SpawnError>;
+  type DotNetPackFunction = (opts: DotnetPackOptions) => Promise<SpawnResult | SpawnError>;
   interface DotNetCli {
-    test: DotNetTestFunction
+    test: DotNetTestFunction;
+    build: DotNetBuildFunction;
+    pack: DotNetPackFunction;
   }
 
   // scraped from https://spdx.org/licenses/
