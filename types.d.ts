@@ -98,6 +98,7 @@ declare global {
     "GIT_OVERRIDE_BRANCH" |
     "GIT_BRANCH" |
     "GIT_MAIN_BRANCH" |
+    "GIT_DEFAULT_UPSTREAM" |
     "GIT_VERIFY_BRANCH" |
     "GIT_OVERRIDE_REMOTE" |
     "GIT_REMOTE" |
@@ -168,6 +169,7 @@ declare global {
     resolveNumber(name: NumericEnvVar): number;
     resolveFlag(name: FlagEnvVar): boolean;
     associate(varName: AnyEnvVar | AnyEnvVar[], tasks: string | string[]): void;
+    resolveWithFallback<T>(varName: AnyEnvVar, fallback: T): T;
 
     // these are generated on the js output by register-environment-variables
     // -> included here to avoid typos: use env.CONSTANT_NAME when you want
@@ -231,6 +233,7 @@ declare global {
     UPDATE_SUBMODULES_TO_LATEST: FlagEnvVar;
     ENFORCE_VERIFICATION: FlagEnvVar;
     GIT_MAIN_BRANCH: StringEnvVar;
+    GIT_DEFAULT_UPSTREAM: StringEnvVar;
     GIT_VERIFY_BRANCH: StringEnvVar;
     SKIP_FETCH_ON_VERIFY: FlagEnvVar;
     GIT_FETCH_TIMEOUT: NumericEnvVar;
