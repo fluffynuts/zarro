@@ -572,6 +572,7 @@ declare global {
     includeSource?: boolean;
     noRestore?: boolean;
     versionSuffix?: string;
+    nuspec?: string;
   }
 
   interface DotNetBuildOptions extends DotNetCommonBuildOptions {

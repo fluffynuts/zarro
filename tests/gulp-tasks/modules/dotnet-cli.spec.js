@@ -187,7 +187,7 @@ describe("dotnet-cli", () => {
             });
             // Assert
             expect(spawn)
-                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "/p:foo=bar", `/p:quux="wibbles and toast"`, `/p:"spaced arg"="more spaces"`], anything);
+                .toHaveBeenCalledOnceWith("dotnet", ["build", target, "-p:foo=bar", `-p:quux="wibbles and toast"`, `-p:"spaced arg"="more spaces"`], anything);
         });
         it(`should add additionalArguments, when set`, async () => {
             // Arrange
@@ -357,7 +357,7 @@ describe("dotnet-cli", () => {
             });
             // Assert
             expect(spawn)
-                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "/p:foo=bar", `/p:quux="wibbles and toast"`, `/p:"spaced arg"="more spaces"`], anything);
+                .toHaveBeenCalledOnceWith("dotnet", ["test", target, "-p:foo=bar", `-p:quux="wibbles and toast"`, `-p:"spaced arg"="more spaces"`], anything);
         });
         it(`should add additionalArguments, when set`, async () => {
             // Arrange
@@ -571,6 +571,30 @@ describe("dotnet-cli", () => {
             // Assert
             expect(spawn)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--version-suffix", versionSuffix], anything);
+        });
+        it(`should provide quick method for specifying a nuspec file (ie convert to msbuild prop)`, async () => {
+            // Arrange
+            const target = faker_1.faker.string.alphanumeric(), nuspec = faker_1.faker.string.alphanumeric();
+            // Act
+            await pack({
+                target,
+                nuspec
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", target, `-p:NuspecFile=${nuspec}`], anything);
+        });
+        it(`should provide quick method for specifying a nuspec file with spaces (ie convert to msbuild prop)`, async () => {
+            // Arrange
+            const target = faker_1.faker.string.alphanumeric(), nuspec = `${faker_1.faker.string.alphanumeric()} ${faker_1.faker.string.alphanumeric()}`;
+            // Act
+            await pack({
+                target,
+                nuspec
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", target, `-p:NuspecFile="${nuspec}"`], anything);
         });
     });
     describe(`nugetPush`, () => {

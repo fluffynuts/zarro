@@ -258,7 +258,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(spawn)
         .toHaveBeenCalledOnceWith(
-          "dotnet", [ "build", target, "/p:foo=bar", `/p:quux="wibbles and toast"`, `/p:"spaced arg"="more spaces"` ],
+          "dotnet", [ "build", target, "-p:foo=bar", `-p:quux="wibbles and toast"`, `-p:"spaced arg"="more spaces"` ],
           anything
         );
     });
@@ -492,7 +492,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(spawn)
         .toHaveBeenCalledOnceWith(
-          "dotnet", [ "test", target, "/p:foo=bar", `/p:quux="wibbles and toast"`, `/p:"spaced arg"="more spaces"` ],
+          "dotnet", [ "test", target, "-p:foo=bar", `-p:quux="wibbles and toast"`, `-p:"spaced arg"="more spaces"` ],
           anything
         );
     });
@@ -791,6 +791,41 @@ describe("dotnet-cli", () => {
       expect(spawn)
         .toHaveBeenCalledOnceWith(
           "dotnet", [ "pack", target, "--version-suffix", versionSuffix ],
+          anything
+        )
+    });
+
+    it(`should provide quick method for specifying a nuspec file (ie convert to msbuild prop)`, async () => {
+      // Arrange
+      const
+        target = faker.string.alphanumeric(),
+        nuspec = faker.string.alphanumeric();
+      // Act
+      await pack({
+        target,
+        nuspec
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", ["pack", target, `-p:NuspecFile=${nuspec}` ],
+          anything
+        )
+    });
+    it(`should provide quick method for specifying a nuspec file with spaces (ie convert to msbuild prop)`, async () => {
+      // Arrange
+      const
+        target = faker.string.alphanumeric(),
+        nuspec = `${faker.string.alphanumeric()} ${faker.string.alphanumeric()}`;
+      // Act
+      await pack({
+        target,
+        nuspec
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", ["pack", target, `-p:NuspecFile="${nuspec}"` ],
           anything
         )
     });
