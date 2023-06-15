@@ -9,7 +9,9 @@ async function tryPublish(dryRun) {
         log("would publish...");
     }
     else {
-        await spawn("npm", ["publish"]);
+        await spawn("npm", ["publish"], {
+            interactive: true
+        });
     }
 }
 async function commitAll(dryRun, where, comment) {
