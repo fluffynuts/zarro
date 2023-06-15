@@ -7,7 +7,7 @@ const faker_1 = require("@faker-js/faker");
 describe(`gather-args`, () => {
     it(`should gather no args when there are none`, async () => {
         // Arrange
-        const sandbox = await filesystem_sandbox_1.Sandbox.create(), fileName = faker_1.faker.random.alphaNumeric(4) + ".js", entryFile = await sandbox.writeFile(fileName, [
+        const sandbox = await filesystem_sandbox_1.Sandbox.create(), fileName = faker_1.faker.string.alphanumeric(4) + ".js", entryFile = await sandbox.writeFile(fileName, [
             "#!/bin/env node",
             "console.log('started');"
         ].join("\n")), argv = ["node", "foo", entryFile], expected = [];
@@ -18,7 +18,7 @@ describe(`gather-args`, () => {
     });
     it(`should return all args after the invoking file`, async () => {
         // Arrange
-        const sandbox = await filesystem_sandbox_1.Sandbox.create(), fileName = faker_1.faker.random.alphaNumeric(4) + ".js", entryFile = await sandbox.writeFile(fileName, [
+        const sandbox = await filesystem_sandbox_1.Sandbox.create(), fileName = faker_1.faker.string.alphanumeric(4) + ".js", entryFile = await sandbox.writeFile(fileName, [
             "#!/bin/env node",
             "console.log('started');"
         ]), argv = ["node", "foo", entryFile, "arg1", "arg2"], expected = ["arg1", "arg2"];

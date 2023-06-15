@@ -3,7 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
 describe("dotnet-cli", () => {
-    const spawn = jest.fn(), requireModuleActual = require("../../../gulp-tasks/modules/require-module");
+    const realSpawn = require("../../../gulp-tasks/modules/spawn"), spawn = jest.fn().mockImplementation((exe, args, opts) => {
+        if (args[0] == "nuget" && args[1] == "list") {
+            return realSpawn(exe, args, opts);
+        }
+        return Promise.resolve();
+    }), requireModuleActual = require("../../../gulp-tasks/modules/require-module");
     requireModuleActual.mock("spawn", spawn);
     const sut = requireModule("dotnet-cli");
     const anything = expect.any(Object);
@@ -25,7 +30,7 @@ describe("dotnet-cli", () => {
         ].forEach(verbosity => {
             it(`should use the provided verbosity`, async () => {
                 // Arrange
-                const target = faker_1.faker.random.word();
+                const target = faker_1.faker.word.sample();
                 // Act
                 await build({
                     target,
@@ -38,7 +43,7 @@ describe("dotnet-cli", () => {
         });
         it(`should use the provided configuration`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), configuration = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample(), configuration = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -50,7 +55,7 @@ describe("dotnet-cli", () => {
         });
         it(`should use the provided framework`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), framework = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample(), framework = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -62,7 +67,7 @@ describe("dotnet-cli", () => {
         });
         it(`should use the provided runtime`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), runtime = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample(), runtime = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -74,7 +79,7 @@ describe("dotnet-cli", () => {
         });
         it(`should use the provided architecture`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), arch = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample(), arch = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -86,7 +91,7 @@ describe("dotnet-cli", () => {
         });
         it(`should use the provided os`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), os = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample(), os = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -98,7 +103,7 @@ describe("dotnet-cli", () => {
         });
         it(`should use the provided version suffix`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), versionSuffix = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample(), versionSuffix = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -110,7 +115,7 @@ describe("dotnet-cli", () => {
         });
         it(`should be able to skip package restore`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -122,7 +127,7 @@ describe("dotnet-cli", () => {
         });
         it(`should be able to skip dependencies`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -134,7 +139,7 @@ describe("dotnet-cli", () => {
         });
         it(`should be able to skip incremental building`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -146,7 +151,7 @@ describe("dotnet-cli", () => {
         });
         it(`should be able to force disable build servers`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -158,7 +163,7 @@ describe("dotnet-cli", () => {
         });
         it(`should be able to build self-contained`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -170,7 +175,7 @@ describe("dotnet-cli", () => {
         });
         it(`should add msbuildProperties, when present`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -186,7 +191,7 @@ describe("dotnet-cli", () => {
         });
         it(`should add additionalArguments, when set`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await build({
                 target,
@@ -208,7 +213,7 @@ describe("dotnet-cli", () => {
         });
         it(`should invoke dotnet test on provided solution / project`, async () => {
             // Arrange
-            const expected = faker_1.faker.random.word();
+            const expected = faker_1.faker.word.sample();
             // Act
             await test({
                 target: expected
@@ -226,7 +231,7 @@ describe("dotnet-cli", () => {
         ].forEach(verbosity => {
             it(`should use the provided verbosity`, async () => {
                 // Arrange
-                const target = faker_1.faker.random.word();
+                const target = faker_1.faker.word.sample();
                 // Act
                 await test({
                     target,
@@ -239,7 +244,7 @@ describe("dotnet-cli", () => {
         });
         it(`should use the provided configuration`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), configuration = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample(), configuration = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -251,7 +256,7 @@ describe("dotnet-cli", () => {
         });
         it(`should use the provided framework`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), framework = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample(), framework = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -263,7 +268,7 @@ describe("dotnet-cli", () => {
         });
         it(`should use the provided runtime`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), runtime = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample(), runtime = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -275,7 +280,7 @@ describe("dotnet-cli", () => {
         });
         it(`should use the provided architecture`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), arch = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample(), arch = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -287,7 +292,7 @@ describe("dotnet-cli", () => {
         });
         it(`should use the provided os`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), os = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample(), os = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -299,7 +304,7 @@ describe("dotnet-cli", () => {
         });
         it(`should set --no-build on request`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -311,7 +316,7 @@ describe("dotnet-cli", () => {
         });
         it(`should set --no-restore on request`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -323,7 +328,7 @@ describe("dotnet-cli", () => {
         });
         it(`should set a single logger`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -340,7 +345,7 @@ describe("dotnet-cli", () => {
         });
         it(`should add msbuildProperties, when present`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -356,7 +361,7 @@ describe("dotnet-cli", () => {
         });
         it(`should add additionalArguments, when set`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -368,7 +373,7 @@ describe("dotnet-cli", () => {
         });
         it(`should set the settings file`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), settingsFile = faker_1.faker.random.alphaNumeric();
+            const target = faker_1.faker.word.sample(), settingsFile = faker_1.faker.string.alphanumeric();
             // Act
             await test({
                 target,
@@ -380,7 +385,7 @@ describe("dotnet-cli", () => {
         });
         it(`should set env vars`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -396,7 +401,7 @@ describe("dotnet-cli", () => {
         });
         it(`should pass through a provided filter`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word();
+            const target = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
@@ -408,7 +413,7 @@ describe("dotnet-cli", () => {
         });
         it(`should pass through output location`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), output1 = faker_1.faker.random.alphaNumeric(), output2 = `${faker_1.faker.random.alphaNumeric()} ${faker_1.faker.random.alphaNumeric()}`;
+            const target = faker_1.faker.word.sample(), output1 = faker_1.faker.string.alphanumeric(), output2 = `${faker_1.faker.string.alphanumeric()} ${faker_1.faker.string.alphanumeric()}`;
             // Act
             await test({
                 target,
@@ -426,7 +431,7 @@ describe("dotnet-cli", () => {
         });
         it(`should pass through diagnostics location`, async () => {
             // Arrange
-            const target = faker_1.faker.random.word(), diagnostics1 = faker_1.faker.random.alphaNumeric(), diagnostics2 = `${faker_1.faker.random.alphaNumeric()} ${faker_1.faker.random.alphaNumeric()}`;
+            const target = faker_1.faker.word.sample(), diagnostics1 = faker_1.faker.string.alphanumeric(), diagnostics2 = `${faker_1.faker.string.alphanumeric()} ${faker_1.faker.string.alphanumeric()}`;
             // Act
             await test({
                 target,
@@ -454,7 +459,7 @@ describe("dotnet-cli", () => {
         });
         it(`should set the target`, async () => {
             // Arrange
-            const target = faker_1.faker.random.alphaNumeric();
+            const target = faker_1.faker.string.alphanumeric();
             // Act
             await pack({
                 target
@@ -465,7 +470,7 @@ describe("dotnet-cli", () => {
         });
         it(`should set the output`, async () => {
             // Arrange
-            const target = faker_1.faker.random.alphaNumeric(), output = faker_1.faker.random.alphaNumeric();
+            const target = faker_1.faker.string.alphanumeric(), output = faker_1.faker.string.alphanumeric();
             // Act
             await pack({
                 target,
@@ -484,7 +489,7 @@ describe("dotnet-cli", () => {
         ].forEach(verbosity => {
             it(`should use the provided verbosity`, async () => {
                 // Arrange
-                const target = faker_1.faker.random.word();
+                const target = faker_1.faker.word.sample();
                 // Act
                 await pack({
                     target,
@@ -497,7 +502,7 @@ describe("dotnet-cli", () => {
         });
         it(`should set the configuration`, async () => {
             // Arrange
-            const target = faker_1.faker.random.alphaNumeric(), configuration = faker_1.faker.random.alphaNumeric();
+            const target = faker_1.faker.string.alphanumeric(), configuration = faker_1.faker.string.alphanumeric();
             // Act
             await pack({
                 target,
@@ -509,7 +514,7 @@ describe("dotnet-cli", () => {
         });
         it(`should disable build on request`, async () => {
             // Arrange
-            const target = faker_1.faker.random.alphaNumeric();
+            const target = faker_1.faker.string.alphanumeric();
             // Act
             await pack({
                 target,
@@ -521,7 +526,7 @@ describe("dotnet-cli", () => {
         });
         it(`should include symbols on request`, async () => {
             // Arrange
-            const target = faker_1.faker.random.alphaNumeric();
+            const target = faker_1.faker.string.alphanumeric();
             // Act
             await pack({
                 target,
@@ -533,7 +538,7 @@ describe("dotnet-cli", () => {
         });
         it(`should include source on request`, async () => {
             // Arrange
-            const target = faker_1.faker.random.alphaNumeric();
+            const target = faker_1.faker.string.alphanumeric();
             // Act
             await pack({
                 target,
@@ -545,7 +550,7 @@ describe("dotnet-cli", () => {
         });
         it(`should skip restore on request`, async () => {
             // Arrange
-            const target = faker_1.faker.random.alphaNumeric();
+            const target = faker_1.faker.string.alphanumeric();
             // Act
             await pack({
                 target,
@@ -557,7 +562,7 @@ describe("dotnet-cli", () => {
         });
         it(`should pass on the version suffix`, async () => {
             // Arrange
-            const target = faker_1.faker.random.alphaNumeric(), versionSuffix = faker_1.faker.system.semver();
+            const target = faker_1.faker.string.alphanumeric(), versionSuffix = faker_1.faker.system.semver();
             // Act
             await pack({
                 target,
@@ -566,6 +571,158 @@ describe("dotnet-cli", () => {
             // Assert
             expect(spawn)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--version-suffix", versionSuffix], anything);
+        });
+    });
+    describe(`nugetPush`, () => {
+        const { nugetPush } = sut;
+        it(`should be a function`, async () => {
+            // Arrange
+            // Act
+            expect(nugetPush)
+                .toBeAsyncFunction();
+            // Assert
+        });
+        it(`should attempt to push the target with the apiKey, with default source nuget.org`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10);
+            // Act
+            await nugetPush({
+                target,
+                apiKey
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org"], anything);
+        });
+        it(`should set the timeout when provided`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), timeout = faker_1.faker.number.int({ min: 100, max: 500 });
+            // Act
+            await nugetPush({
+                target,
+                apiKey,
+                timeout
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--timeout", `${timeout}`], anything);
+        });
+        it(`should set the symbol source when provided`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), symbolSource = faker_1.faker.internet.url();
+            // Act
+            await nugetPush({
+                target,
+                apiKey,
+                symbolSource
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--symbol-source", symbolSource], anything);
+        });
+        it(`should set the source when provided`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), source = faker_1.faker.internet.url();
+            // Act
+            await nugetPush({
+                target,
+                apiKey,
+                source
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", source], anything);
+        });
+        it(`should force english output on request`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), forceEnglishOutput = true;
+            // Act
+            await nugetPush({
+                target,
+                apiKey,
+                forceEnglishOutput
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--force-english-output"], anything);
+        });
+        it(`should disable service endpoint on request`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), noServiceEndpoint = true;
+            // Act
+            await nugetPush({
+                target,
+                apiKey,
+                noServiceEndpoint
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--no-service-endpoint"], anything);
+        });
+        it(`should skip duplicates on request`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), skipDuplicate = true;
+            // Act
+            await nugetPush({
+                target,
+                apiKey,
+                skipDuplicate
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--skip-duplicate"], anything);
+        });
+        it(`should disable symbols on request`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), noSymbols = true;
+            // Act
+            await nugetPush({
+                target,
+                apiKey,
+                noSymbols
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--no-symbols"], anything);
+        });
+        it(`should disable buffering on request`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), disableBuffering = true;
+            // Act
+            await nugetPush({
+                target,
+                apiKey,
+                disableBuffering
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--disable-buffering"], anything);
+        });
+        it(`should not disable buffering on request`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), disableBuffering = false;
+            // Act
+            await nugetPush({
+                target,
+                apiKey,
+                disableBuffering
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org"], anything);
+        });
+        it(`should set the symbol api key when provided`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), symbolApiKey = faker_1.faker.string.alphanumeric(10);
+            // Act
+            await nugetPush({
+                target,
+                apiKey,
+                symbolApiKey
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--symbol-api-key", symbolApiKey], anything);
         });
     });
 });

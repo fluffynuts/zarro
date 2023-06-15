@@ -36,7 +36,7 @@ declare global {
   type FindLocalNuget = () => Promise<string>;
 
   interface Streamify {
-    streamify<T>(fn: AsyncTVoid<T>, optionsFactory: OptionsFactory<T>, pluginName: string, operation: string):  Transform;
+    streamify<T>(fn: AsyncTVoid<T>, optionsFactory: OptionsFactory<T>, pluginName: string, operation: string): Transform;
   }
 
   interface GulpWithHelp {
@@ -333,7 +333,7 @@ declare global {
   }
 
   export interface NugetPushOpts {
-    suppressDuplicateError?: boolean;
+    skipDuplicates?: boolean;
   }
 
   type PackOptions = {
@@ -414,6 +414,7 @@ declare global {
 
   type GitTagFromCsProj = (options?: GitTagOptions) => Stream;
   type GitFetch = (all: boolean) => Promise<void>;
+  type NugetPush = (packageFile: string, sourceName?: string, options?: NugetPushOpts) => Promise<void>;
 
   interface Log {
     setThreshold(level: number): void;
@@ -544,10 +545,12 @@ declare global {
 
   type DotNetTestLoggers = Dictionary<Dictionary<string>>;
 
-  interface DotNetBaseOptions {
+  interface DotNetBaseOptions extends IoConsumers {
     msbuildProperties?: Dictionary<string>;
-    additionalArguments?: string[]
-    verbosity?: DotNetVerbosity,
+    additionalArguments?: string[];
+    verbosity?: DotNetVerbosity;
+    // when set, errors are returned instead of thrown
+    suppressErrors?: boolean;
   }
 
   interface DotNetCommonBuildOptions extends DotNetBaseOptions {
@@ -560,7 +563,7 @@ declare global {
     os?: string;
   }
 
-  interface DotnetPackOptions extends DotNetBaseOptions, IoConsumers {
+  interface DotNetPackOptions extends DotNetBaseOptions {
     target: string;
     output?: string;
     configuration?: string;
@@ -571,7 +574,7 @@ declare global {
     versionSuffix?: string;
   }
 
-  interface DotNetBuildOptions extends DotNetCommonBuildOptions, IoConsumers {
+  interface DotNetBuildOptions extends DotNetCommonBuildOptions {
     noIncremental?: boolean;
     disableBuildServers?: boolean;
     selfContained?: boolean;
@@ -580,12 +583,26 @@ declare global {
     versionSuffix?: string;
   }
 
+  interface DotNetNugetPushOptions extends DotNetBaseOptions {
+    target: string;
+    apiKey: string;
+    symbolApiKey?: string;
+    disableBuffering?: boolean;
+    noSymbols?: boolean;
+    skipDuplicate?: boolean;
+    noServiceEndpoint?: boolean;
+    forceEnglishOutput?: boolean;
+    source?: string;
+    symbolSource?: string;
+    timeout?: number;
+  }
+
   interface IoConsumers {
     stdout?: IoConsumer;
     stderr?: IoConsumer;
   }
 
-  interface DotNetTestOptions extends DotNetCommonBuildOptions, IoConsumers {
+  interface DotNetTestOptions extends DotNetCommonBuildOptions {
     noBuild?: boolean;
     noRestore?: boolean;
     loggers?: DotNetTestLoggers;
@@ -597,11 +614,14 @@ declare global {
 
   type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetBuildFunction = (opts: DotNetBuildOptions) => Promise<SpawnResult | SpawnError>;
-  type DotNetPackFunction = (opts: DotnetPackOptions) => Promise<SpawnResult | SpawnError>;
+  type DotNetPackFunction = (opts: DotNetPackOptions) => Promise<SpawnResult | SpawnError>;
+  type DotNetNugetPushFunction = (opts: DotNetNugetPushOptions) => Promise<SpawnResult | SpawnError>;
+
   interface DotNetCli {
     test: DotNetTestFunction;
     build: DotNetBuildFunction;
     pack: DotNetPackFunction;
+    nugetPush: DotNetNugetPushFunction;
   }
 
   // scraped from https://spdx.org/licenses/

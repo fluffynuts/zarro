@@ -8,7 +8,7 @@ describe(`gather-args`, () => {
     // Arrange
     const
       sandbox = await Sandbox.create(),
-      fileName = faker.random.alphaNumeric(4) + ".js",
+      fileName = faker.string.alphanumeric(4) + ".js",
       entryFile = await sandbox.writeFile(fileName, [
         "#!/bin/env node",
         "console.log('started');"
@@ -24,7 +24,7 @@ describe(`gather-args`, () => {
     // Arrange
     const
       sandbox = await Sandbox.create(),
-      fileName = faker.random.alphaNumeric(4) + ".js",
+      fileName = faker.string.alphanumeric(4) + ".js",
       entryFile = await sandbox.writeFile(fileName, [
         "#!/bin/env node",
         "console.log('started');"
