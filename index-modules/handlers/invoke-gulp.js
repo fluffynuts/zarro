@@ -8,6 +8,7 @@ const
   path = require("path"),
   isFile = require("../is-file"),
   isDir = require("../is-dir"),
+  env = requireModule("env"),
   debug = require("debug")("zarro::invoke-gulp"),
   projectDir = path.dirname(path.dirname(__dirname)),
   { ZarroError } = requireModule("zarro-error"),
@@ -81,11 +82,17 @@ async function invokeGulp(args, opts) {
     gulpTasksFolder = path.join(projectDir, "gulp-tasks"),
     gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"),
     cwd = process.cwd(),
-    env = Object.assign({}, process.env, {
+    envVars = Object.assign({}, process.env, {
       GULP_TASKS_FOLDER: gulpTasksFolder,
       RUNNING_AS_ZARRO: 1
     }),
+    trueFlags = new Set(["true", "1", "T", "on"]),
+    noColor = trueFlags.has(process.env.NO_COLOR),
     allArgs = [
+      // this will be run via spawn, which now collects output for error
+      // reporting, so we have to force color on again because gulp
+      // realises that it's being piped
+      noColor ? "--no-color" : "--color",
       "--gulpfile",
       quoteIfRequired(gulpFile),
       "--cwd",
@@ -98,9 +105,10 @@ async function invokeGulp(args, opts) {
   return spawn(
     gulp,
     allArgs, {
-      env,
+      env: envVars,
       cwd,
-      ...opts
+      ...opts,
+      disableIoCaptureForErrorReporting: true
     }
   );
 }

@@ -36,7 +36,12 @@ declare global {
   type FindLocalNuget = () => Promise<string>;
 
   interface Streamify {
-    streamify<T>(fn: AsyncTVoid<T>, optionsFactory: OptionsFactory<T>, pluginName: string, operation: string): Transform;
+    streamify<T>(
+      fn: AsyncTVoid<T>,
+      optionsFactory: OptionsFactory<T>,
+      pluginName: string,
+      operation: string
+    ): Transform;
   }
 
   interface GulpWithHelp {
@@ -121,6 +126,7 @@ declare global {
     "PACK_INCLUDE_NUSPEC" |
     "PACK_EXCLUDE_NUSPEC" |
     "PACK_CONFIGURATION" |
+    "PACK_SUPPLEMENTARY_NUSPEC" |
     "PACK_BASE_PATH" |
     "PACK_VERSION" |
     "PACKAGE_JSON" |
@@ -231,6 +237,7 @@ declare global {
     PACK_EXCLUDE: StringEnvVar;
     PACK_INCLUDE: StringEnvVar;
     PACK_CONFIGURATION: StringEnvVar;
+    PACK_SUPPLEMENTARY_NUSPEC: StringEnvVar;
     PACK_INCREMENT_VERSION: FlagEnvVar;
     PACK_INCREMENT_VERSION_BY: NumericEnvVar;
     PACKAGE_JSON: StringEnvVar;
@@ -503,11 +510,11 @@ declare global {
     stdout?: ProcessIO;
     stderr?: ProcessIO;
     lineBuffer?: boolean;
-
-    detached?: boolean;
   }
 
   interface SpawnError extends Error {
+    exe: string;
+    args: string[];
     exitCode: number;
     stderr: string[];
     stdout: string[];
@@ -521,8 +528,12 @@ declare global {
     stdout: string[];
   }
 
-  type Spawn = (program: string, args: string[], options?: SpawnOptions)
+  type SpawnFunction = (program: string, args: string[], options?: SpawnOptions)
     => Promise<SpawnResult>;
+  interface Spawn extends SpawnFunction {
+    SpawnResult: Function;
+    SpawnError: Function;
+  }
 
   type AskOptions = {}
   type AskFunction = (message: string, options?: AskOptions) => Promise<string>;

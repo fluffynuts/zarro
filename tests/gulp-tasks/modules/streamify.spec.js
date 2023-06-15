@@ -22,10 +22,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const through = __importStar(require("through2"));
+const plugin_error_1 = __importDefault(require("plugin-error"));
+const faker_1 = require("@faker-js/faker");
 const { streamify } = requireModule("streamify");
+const spawn = requireModule("spawn");
 const { Sandbox } = require("filesystem-sandbox");
 const gulp = requireModule("gulp");
 describe(`streamify-async-function`, () => {
@@ -36,7 +42,7 @@ describe(`streamify-async-function`, () => {
     it(`should provide a new function taking the same arguments, which can be streamed`, async () => {
         // Arrange
         const sandbox = await Sandbox.create();
-        await sandbox.writeFile("foo.txt", "moo-cow");
+        const txtFile = await sandbox.writeFile("foo.txt", "moo-cow");
         // Act
         await new Promise(resolve => {
             gulp.src(`${sandbox.path}/**/*.txt`)
@@ -48,7 +54,47 @@ describe(`streamify-async-function`, () => {
         });
         // Assert
         expect(captured.opts.target)
-            .toEqual(sandbox.fullPathFor("foo.txt"));
+            .toEqual(txtFile);
+    });
+    it(`should surface outputs when a SpawnError is caught`, async () => {
+        // Arrange
+        spyOn(console, "log");
+        spyOn(console, "error");
+        const sandbox = await Sandbox.create();
+        await sandbox.writeFile("foo.txt", "moo-cow");
+        const regularMessage = faker_1.faker.word.words(5);
+        const errorMessage = faker_1.faker.word.words(5);
+        const errorJs = await sandbox.writeFile("error.js", `
+    console.log("${regularMessage}");
+    throw new Error("${errorMessage}");
+    `);
+        let captured;
+        // Act
+        await new Promise(resolve => {
+            gulp.src(`${sandbox.path}/**/*.txt`)
+                .pipe(streamify((opts) => Promise.resolve(), async (f) => {
+                await spawn("node", [errorJs]);
+                // shouldn't get here...
+                return {};
+            }, "test plugin", "foo")).on("error", e => {
+                captured = e;
+                resolve();
+            });
+        });
+        // Assert
+        expect(captured)
+            .toExist();
+        expect(captured)
+            .toBeA(plugin_error_1.default);
+        expect(captured.message)
+            .toContain(errorMessage);
+        expect(captured.message)
+            .toContain(regularMessage);
+    });
+    beforeEach(() => {
+        for (const k of Object.keys(captured)) {
+            delete captured[k];
+        }
     });
     afterEach(async () => {
         await Sandbox.destroyAll();
