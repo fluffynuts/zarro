@@ -108,7 +108,7 @@ async function invokeGulp(args, opts) {
       env: envVars,
       cwd,
       ...opts,
-      disableIoCaptureForErrorReporting: true
+      interactive: true
     }
   );
 }

@@ -510,6 +510,12 @@ declare global {
     stdout?: ProcessIO;
     stderr?: ProcessIO;
     lineBuffer?: boolean;
+
+    /*
+    * when a process is marked as interactive, no stderr/stdout
+    * collection is done as the IO is left as "inherit"
+     */
+    interactive?: boolean;
   }
 
   interface SpawnError extends Error {

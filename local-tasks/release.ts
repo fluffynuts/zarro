@@ -18,7 +18,9 @@ async function tryPublish(dryRun: boolean) {
   if (dryRun) {
     log("would publish...");
   } else {
-    await spawn("npm", ["publish"]);
+    await spawn("npm", ["publish"], {
+      interactive: true
+    });
   }
 }
 

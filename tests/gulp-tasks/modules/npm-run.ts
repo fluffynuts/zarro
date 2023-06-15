@@ -22,7 +22,9 @@
   async function npmRun(...args: StringOrArrayOfStrings[]): Promise<void> {
     const flattened = flatten(args);
     if (os.platform() === "win32") {
-      await spawn("cmd", [ "/c", "npm" ].concat(flattened))
+      await spawn("cmd", [ "/c", "npm" ].concat(flattened), {
+        interactive: true
+      })
     } else {
       await spawn("npm", flattened);
     }
