@@ -2,19 +2,165 @@ import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
 
 describe("dotnet-cli", () => {
+  beforeEach(() => {
+    spyOn(console, "log");
+  });
   const
     realSpawn = require("../../../gulp-tasks/modules/spawn"),
     spawn = jest.fn().mockImplementation((exe, args, opts) => {
       if (args[0] == "nuget" && args[1] == "list") {
         return realSpawn(exe, args, opts)
       }
-      return Promise.resolve();
+      return Promise.resolve({
+        executable: exe,
+        args,
+        exitCode: 0
+      } as SpawnResult);
     }),
     requireModuleActual = require("../../../gulp-tasks/modules/require-module");
   requireModuleActual.mock("spawn", spawn);
+  (spawn as any).isSpawnError = realSpawn.isSpawnError;
+  (spawn as any).isSpawnResult = realSpawn.isSpawnResult;
 
   const sut = requireModule<DotNetCli>("dotnet-cli");
   const anything = expect.any(Object);
+
+  describe(`clean`, () => {
+    const { clean } = sut;
+    it(`should be a function`, async () => {
+      // Arrange
+      // Act
+      // Assert
+      expect(clean)
+        .toBeAsyncFunction();
+    });
+
+    it(`should use the provided framework`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        framework = faker.word.sample();
+      // Act
+      await clean({
+        target,
+        framework
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "clean", target, "--framework", framework ],
+          anything
+        );
+    });
+
+    it(`should use the provided runtime`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        runtime = faker.word.sample();
+      // Act
+      await clean({
+        target,
+        runtime
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "clean", target, "--runtime", runtime ],
+          anything
+        );
+    });
+
+    it(`should use the provided configuration`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        configuration = faker.word.sample();
+      // Act
+      await clean({
+        target,
+        configuration
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "clean", target, "--configuration", configuration ],
+          anything
+        );
+    });
+
+    it(`should use the provided configurations`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        configuration1 = faker.word.sample(),
+        configuration2 = faker.word.sample();
+      // Act
+      await clean({
+        target,
+        configuration: [ configuration1, configuration2 ]
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledTimes(2);
+      expect(spawn)
+        .toHaveBeenCalledWith(
+          "dotnet", [ "clean", target, "--configuration", configuration1 ],
+          anything
+        );
+      expect(spawn)
+        .toHaveBeenCalledWith(
+          "dotnet", [ "clean", target, "--configuration", configuration2 ],
+          anything
+        );
+    });
+
+    [
+      "m", "minimal",
+      "q", "quiet",
+      "n", "normal",
+      "d", "detailed",
+      "diag", "diagnostic"
+    ].forEach(verbosity => {
+      it(`should use the provided verbosity`, async () => {
+        // Arrange
+        const
+          target = faker.word.sample();
+        // Act
+        await clean({
+          target,
+          verbosity: verbosity as DotNetVerbosity
+        });
+        // Assert
+        expect(spawn)
+          .toHaveBeenCalledOnceWith(
+            "dotnet", [ "clean", target, "--verbosity", verbosity ],
+            anything
+          );
+      });
+    });
+
+    // shouldn't ever have to do this - dotnet clean should be
+    // looking at the csproj, surely?
+    it(`should use the provided output`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        output = faker.word.sample();
+      // Act
+      await clean({
+        target,
+        output
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "clean", target, "--output", output ],
+          anything
+        );
+    });
+
+  });
 
   describe(`build`, () => {
     const { build } = sut;
@@ -58,7 +204,7 @@ describe("dotnet-cli", () => {
       // Act
       await build({
         target,
-        configuration
+        configuration: configuration
       });
       // Assert
       expect(spawn)
@@ -338,7 +484,7 @@ describe("dotnet-cli", () => {
       // Act
       await test({
         target,
-        configuration
+        configuration: configuration
       });
       // Assert
       expect(spawn)
@@ -472,7 +618,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(spawn)
         .toHaveBeenCalledOnceWith(
-          "dotnet", [ "test", target, "--logger", "console;verbosity=normal;foo=bar" ],
+          "dotnet", [ "test", target, "--logger", "\"console;verbosity=normal;foo=bar\"" ],
           anything
         )
     });

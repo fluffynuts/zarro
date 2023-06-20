@@ -32,6 +32,7 @@ declare global {
     (() => Promise<any> | NodeJS.EventEmitter) | ((done: VoidVoid) => Promise<any> | NodeJS.EventEmitter)
   type TryDo<T> = (logic: AsyncVoidFunc<T>, retries: number | string, onTransientError?: ErrorReporter, onFinalFailure?: VoidVoid) => Promise<void>;
   type Optional<T> = T | undefined;
+  type Nullable<T> = T | null;
   type ResolveNuget = (nugetPath: Optional<string>, errorOnMissing: boolean) => string;
   type FindLocalNuget = () => Promise<string>;
 
@@ -516,6 +517,7 @@ declare global {
     * collection is done as the IO is left as "inherit"
      */
     interactive?: boolean;
+    suppressStdIoInErrors?: boolean
   }
 
   interface SpawnError extends Error {
@@ -539,6 +541,8 @@ declare global {
   interface Spawn extends SpawnFunction {
     SpawnResult: Function;
     SpawnError: Function;
+    isSpawnError: (o: any) => o is SpawnError;
+    isSpawnResult: (o: any) => o is SpawnResult;
   }
 
   type AskOptions = {}
@@ -568,11 +572,12 @@ declare global {
     verbosity?: DotNetVerbosity;
     // when set, errors are returned instead of thrown
     suppressErrors?: boolean;
+    suppressStdIoInErrors?: boolean;
   }
 
   interface DotNetCommonBuildOptions extends DotNetBaseOptions {
     target: string;
-    configuration?: string;
+    configuration?: string | string[];
     framework?: string;
     runtime?: string;
     output?: string;
@@ -583,7 +588,7 @@ declare global {
   interface DotNetPackOptions extends DotNetBaseOptions {
     target: string;
     output?: string;
-    configuration?: string;
+    configuration?: string | string[];
     noBuild?: boolean;
     includeSymbols?: boolean;
     includeSource?: boolean;
@@ -599,6 +604,14 @@ declare global {
     noDependencies?: boolean;
     noRestore?: boolean;
     versionSuffix?: string;
+  }
+
+  interface DotNetCleanOptions extends DotNetBaseOptions {
+    target: string;
+    framework?: string;
+    runtime?: string;
+    configuration?: string | string[],
+    output?: string;
   }
 
   interface DotNetNugetPushOptions extends DotNetBaseOptions {
@@ -634,12 +647,29 @@ declare global {
   type DotNetBuildFunction = (opts: DotNetBuildOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetPackFunction = (opts: DotNetPackOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetNugetPushFunction = (opts: DotNetNugetPushOptions) => Promise<SpawnResult | SpawnError>;
+  type DotNetCleanFunction = (opts: DotNetCleanOptions) => Promise<SpawnResult | SpawnError>;
 
   interface DotNetCli {
-    test: DotNetTestFunction;
+    clean: DotNetCleanFunction;
     build: DotNetBuildFunction;
+    test: DotNetTestFunction;
     pack: DotNetPackFunction;
     nugetPush: DotNetNugetPushFunction;
+  }
+
+  type TransformFunction<T> = (opts: T) => Transform;
+  type GulpDotNetTestFunction = TransformFunction<DotNetTestOptions>;
+  type GulpDotNetBuildFunction = TransformFunction<DotNetBuildOptions>;
+  type GulpDotNetPackFunction = TransformFunction<DotNetPackOptions>;
+  type GulpDotNetNugetPushFunction = TransformFunction<DotNetNugetPushOptions>;
+  type GulpDotNetCleanFunction = TransformFunction<DotNetCleanOptions>;
+
+  interface GulpDotNetCli {
+    build: GulpDotNetBuildFunction;
+    clean: GulpDotNetCleanFunction;
+    test: GulpDotNetTestFunction;
+    pack: GulpDotNetPackFunction;
+    nugetPush: GulpDotNetNugetPushFunction;
   }
 
   // scraped from https://spdx.org/licenses/
