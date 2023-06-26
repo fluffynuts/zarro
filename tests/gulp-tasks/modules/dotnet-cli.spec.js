@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
 describe("dotnet-cli", () => {
+    beforeEach(() => {
+        spyOn(console, "log");
+    });
     const realSpawn = require("../../../gulp-tasks/modules/spawn"), spawn = jest.fn().mockImplementation((exe, args, opts) => {
         if (args[0] == "nuget" && args[1] == "list") {
             return realSpawn(exe, args, opts);
