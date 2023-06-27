@@ -1,5 +1,6 @@
 import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
+import { run } from "gulp-dotnet-cli";
 
 describe("dotnet-cli", () => {
   beforeEach(() => {
@@ -385,6 +386,23 @@ describe("dotnet-cli", () => {
       expect(spawn)
         .toHaveBeenCalledOnceWith(
           "dotnet", [ "build", target, "--self-contained" ],
+          anything
+        )
+    });
+
+    it(`should disable build servers on request`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample();
+      // Act
+      await build({
+        target,
+        disableBuildServers: true
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "build", target, "--disable-build-servers" ],
           anything
         )
     });
@@ -954,7 +972,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(spawn)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", target, `-p:NuspecFile=${nuspec}` ],
+          "dotnet", [ "pack", target, `-p:NuspecFile=${ nuspec }` ],
           anything
         )
     });
@@ -962,7 +980,7 @@ describe("dotnet-cli", () => {
       // Arrange
       const
         target = faker.string.alphanumeric(),
-        nuspec = `${faker.string.alphanumeric()} ${faker.string.alphanumeric()}`;
+        nuspec = `${ faker.string.alphanumeric() } ${ faker.string.alphanumeric() }`;
       // Act
       await pack({
         target,
@@ -971,7 +989,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(spawn)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", target, `-p:NuspecFile="${nuspec}"` ],
+          "dotnet", [ "pack", target, `-p:NuspecFile="${ nuspec }"` ],
           anything
         )
     });
@@ -1018,7 +1036,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(spawn)
         .toHaveBeenCalledOnceWith(
-          "dotnet", [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--timeout", `${timeout}` ],
+          "dotnet", [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--timeout", `${ timeout }` ],
           anything
         )
     });
@@ -1193,5 +1211,291 @@ describe("dotnet-cli", () => {
           anything
         )
     });
+  });
+
+  describe(`publish`, () => {
+    const { publish } = sut;
+    it(`should be a function`, async () => {
+      // Arrange
+      // Act
+      expect(publish)
+        .toBeAsyncFunction();
+      // Assert
+    });
+
+    it(`should publish the target`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample();
+      // Act
+      await publish({
+        target
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target ],
+          anything
+        )
+    });
+
+    it(`should use the current runtime when set`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        useCurrentRuntime: true
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--use-current-runtime" ],
+          anything
+        )
+    });
+
+    it(`should set the output`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        output = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        output
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--output", output ],
+          anything
+        )
+    });
+
+    it(`should set the manifest`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        manifest = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        manifest
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--manifest", manifest ],
+          anything
+        )
+    });
+
+    it(`should skip build on request`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        noBuild: true
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--no-build" ],
+          anything
+        )
+    });
+
+
+    it(`should set the runtime, defaulting to not self-contained`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        runtime = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        runtime
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--runtime", runtime, "--no-self-contained" ],
+          anything
+        )
+    });
+
+    it(`should set self-contained, when selected`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        runtime = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        runtime,
+        selfContained: true
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--runtime", runtime, "--self-contained" ],
+          anything
+        )
+    });
+
+    it(`should set the framework`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        framework = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        framework
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--framework", framework ],
+          anything
+        )
+    });
+
+    it(`should set the configuration`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        configuration = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        configuration
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--configuration", configuration ],
+          anything
+        )
+    });
+
+    it(`should set the version suffix`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        versionSuffix = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        versionSuffix
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--version-suffix", versionSuffix ],
+          anything
+        )
+    });
+
+    it(`should disable restore on request`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        noRestore: true
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--no-restore" ],
+          anything
+        )
+    });
+
+    [
+      "m", "minimal",
+      "q", "quiet",
+      "n", "normal",
+      "d", "detailed",
+      "diag", "diagnostic"
+    ].forEach(verbosity => {
+      it(`should use the provided verbosity`, async () => {
+        // Arrange
+        const
+          target = faker.word.sample();
+        // Act
+        await publish({
+          target,
+          verbosity: verbosity as DotNetVerbosity
+        });
+        // Assert
+        expect(spawn)
+          .toHaveBeenCalledOnceWith(
+            "dotnet", [ "publish", target, "--verbosity", verbosity ],
+            anything
+          );
+      });
+    });
+
+    it(`should set the arch`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        arch = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        arch
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--arch", arch ],
+          anything
+        )
+    });
+
+    it(`should set the os`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        os = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        os
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--os", os ],
+          anything
+        )
+    });
+
+    it(`should disable build servers on request`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        disableBuildServers: true
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--disable-build-servers" ],
+          anything
+        )
+    });
+
+
   });
 });

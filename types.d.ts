@@ -575,6 +575,7 @@ declare global {
     suppressStdIoInErrors?: boolean;
   }
 
+
   interface DotNetCommonBuildOptions extends DotNetBaseOptions {
     target: string;
     configuration?: string | string[];
@@ -583,6 +584,16 @@ declare global {
     output?: string;
     arch?: string;
     os?: string;
+    disableBuildServers?: boolean;
+  }
+
+  interface DotNetPublishOptions extends DotNetCommonBuildOptions {
+    useCurrentRuntime?: boolean;
+    manifest?: string;
+    noBuild?: boolean;
+    noRestore?: boolean;
+    selfContained?: boolean;
+    versionSuffix?: string;
   }
 
   interface DotNetPackOptions extends DotNetBaseOptions {
@@ -648,6 +659,7 @@ declare global {
   type DotNetPackFunction = (opts: DotNetPackOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetNugetPushFunction = (opts: DotNetNugetPushOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetCleanFunction = (opts: DotNetCleanOptions) => Promise<SpawnResult | SpawnError>;
+  type DotNetPublishFunction = (opts: DotNetPublishOptions) => Promise<SpawnResult | SpawnError>;
 
   interface DotNetCli {
     clean: DotNetCleanFunction;
@@ -655,6 +667,7 @@ declare global {
     test: DotNetTestFunction;
     pack: DotNetPackFunction;
     nugetPush: DotNetNugetPushFunction;
+    publish: DotNetPublishFunction;
   }
 
   type TransformFunction<T> = (opts: T) => Transform;
