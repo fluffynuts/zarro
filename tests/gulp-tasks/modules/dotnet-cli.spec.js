@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
+const filesystem_sandbox_1 = require("filesystem-sandbox");
 describe("dotnet-cli", () => {
     beforeEach(() => {
         spyOn(console, "log");
@@ -695,7 +696,8 @@ describe("dotnet-cli", () => {
             // Act
             await pack({
                 target,
-                nuspec
+                nuspec,
+                ignoreMissingNuspec: false
             });
             // Assert
             expect(spawn)
@@ -707,11 +709,63 @@ describe("dotnet-cli", () => {
             // Act
             await pack({
                 target,
-                nuspec
+                nuspec,
+                ignoreMissingNuspec: false
             });
             // Assert
             expect(spawn)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, `-p:NuspecFile="${nuspec}"`], anything);
+        });
+        it(`should test if the nuspec file exists by default (local, found)`, async () => {
+            // Arrange
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), project = faker_1.faker.word.sample(), folder = await sandbox.mkdir(project), csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""), nuspec = await sandbox.writeFile(`${project}/Package.nuspec`, "");
+            // Act
+            await pack({
+                target: csproj,
+                nuspec: "Package.nuspec"
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", csproj, `-p:NuspecFile=Package.nuspec`], anything);
+        });
+        it(`should test if the nuspec file exists by default (local, not found)`, async () => {
+            // Arrange
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), project = faker_1.faker.word.sample(), folder = await sandbox.mkdir(project), csproj = await sandbox.writeFile(`${project}/${project}.csproj`, "");
+            // Act
+            await pack({
+                target: csproj,
+                nuspec: "Package.nuspec"
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", csproj], anything);
+        });
+        it(`should test if the nuspec file exists by default (relative, found)`, async () => {
+            // Arrange
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), project = faker_1.faker.word.sample(), folder = await sandbox.mkdir(project), sub = await sandbox.mkdir(`${project}/pack`), csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""), nuspec = await sandbox.writeFile(`${project}/pack/Package.nuspec`, "");
+            // Act
+            await pack({
+                target: csproj,
+                nuspec: "pack/Package.nuspec"
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", csproj, `-p:NuspecFile=pack/Package.nuspec`], anything);
+        });
+        it(`should test if the nuspec file exists by default (absoluet, found)`, async () => {
+            // Arrange
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), project = faker_1.faker.word.sample(), folder = await sandbox.mkdir(project), sub = await sandbox.mkdir(`${project}/pack`), csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""), nuspec = await sandbox.writeFile(`${project}/pack/Package.nuspec`, "");
+            // Act
+            await pack({
+                target: csproj,
+                nuspec
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["pack", csproj, `-p:NuspecFile=${nuspec}`], anything);
+        });
+        afterEach(async () => {
+            await filesystem_sandbox_1.Sandbox.destroyAll();
         });
     });
     describe(`nugetPush`, () => {
@@ -934,7 +988,7 @@ describe("dotnet-cli", () => {
             expect(spawn)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--no-build"], anything);
         });
-        it(`should set the runtime, defaulting to not self-contained`, async () => {
+        it(`should set the runtime, defaulting to self-contained`, async () => {
             // Arrange
             const target = faker_1.faker.word.sample(), runtime = faker_1.faker.word.sample();
             // Act
@@ -944,7 +998,7 @@ describe("dotnet-cli", () => {
             });
             // Assert
             expect(spawn)
-                .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--runtime", runtime, "--no-self-contained"], anything);
+                .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--runtime", runtime, "--self-contained"], anything);
         });
         it(`should set self-contained, when selected`, async () => {
             // Arrange
@@ -958,6 +1012,19 @@ describe("dotnet-cli", () => {
             // Assert
             expect(spawn)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--runtime", runtime, "--self-contained"], anything);
+        });
+        it(`should set self-contained, when deselected`, async () => {
+            // Arrange
+            const target = faker_1.faker.word.sample(), runtime = faker_1.faker.word.sample();
+            // Act
+            await publish({
+                target,
+                runtime,
+                selfContained: false
+            });
+            // Assert
+            expect(spawn)
+                .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--runtime", runtime, "--no-self-contained"], anything);
         });
         it(`should set the framework`, async () => {
             // Arrange

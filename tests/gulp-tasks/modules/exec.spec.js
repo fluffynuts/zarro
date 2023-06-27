@@ -17,6 +17,7 @@ describe(`exec`, () => {
             it(`should return the stdout`, async () => {
                 // Arrange
                 const spy = spyOn(console, "log");
+                spyOn(console, "error");
                 const sandbox = await filesystem_sandbox_1.Sandbox.create(), code = "console.log('hello');";
                 await sandbox.writeFile("index.js", code);
                 // Act
@@ -32,6 +33,7 @@ describe(`exec`, () => {
             it(`should reject with error info`, async () => {
                 // Arrange
                 spyOn(console, "log");
+                spyOn(console, "error");
                 const sandbox = await filesystem_sandbox_1.Sandbox.create(), code = "console.log('whoopsie!'); throw new Error('the message');";
                 await sandbox.writeFile("index.js", code);
                 // Act

@@ -1,6 +1,7 @@
 import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
 import { run } from "gulp-dotnet-cli";
+import { Sandbox } from "filesystem-sandbox";
 
 describe("dotnet-cli", () => {
   beforeEach(() => {
@@ -967,7 +968,8 @@ describe("dotnet-cli", () => {
       // Act
       await pack({
         target,
-        nuspec
+        nuspec,
+        ignoreMissingNuspec: false
       });
       // Assert
       expect(spawn)
@@ -976,6 +978,7 @@ describe("dotnet-cli", () => {
           anything
         )
     });
+
     it(`should provide quick method for specifying a nuspec file with spaces (ie convert to msbuild prop)`, async () => {
       // Arrange
       const
@@ -984,7 +987,8 @@ describe("dotnet-cli", () => {
       // Act
       await pack({
         target,
-        nuspec
+        nuspec,
+        ignoreMissingNuspec: false
       });
       // Assert
       expect(spawn)
@@ -993,6 +997,95 @@ describe("dotnet-cli", () => {
           anything
         )
     });
+
+    it(`should test if the nuspec file exists by default (local, found)`, async () => {
+      // Arrange
+      const
+        sandbox = await Sandbox.create(),
+        project = faker.word.sample(),
+        folder = await sandbox.mkdir(project),
+        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""),
+        nuspec = await sandbox.writeFile(`${project}/Package.nuspec`, "");
+      // Act
+      await pack({
+        target: csproj,
+        nuspec: "Package.nuspec"
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "pack", csproj, `-p:NuspecFile=Package.nuspec` ],
+          anything
+        )
+    });
+
+    it(`should test if the nuspec file exists by default (local, not found)`, async () => {
+      // Arrange
+      const
+        sandbox = await Sandbox.create(),
+        project = faker.word.sample(),
+        folder = await sandbox.mkdir(project),
+        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, "");
+      // Act
+      await pack({
+        target: csproj,
+        nuspec: "Package.nuspec"
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "pack", csproj ],
+          anything
+        )
+    });
+
+    it(`should test if the nuspec file exists by default (relative, found)`, async () => {
+      // Arrange
+      const
+        sandbox = await Sandbox.create(),
+        project = faker.word.sample(),
+        folder = await sandbox.mkdir(project),
+        sub = await sandbox.mkdir(`${project}/pack`),
+        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""),
+        nuspec = await sandbox.writeFile(`${project}/pack/Package.nuspec`, "");
+      // Act
+      await pack({
+        target: csproj,
+        nuspec: "pack/Package.nuspec"
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "pack", csproj, `-p:NuspecFile=pack/Package.nuspec` ],
+          anything
+        )
+    });
+
+    it(`should test if the nuspec file exists by default (absoluet, found)`, async () => {
+      // Arrange
+      const
+        sandbox = await Sandbox.create(),
+        project = faker.word.sample(),
+        folder = await sandbox.mkdir(project),
+        sub = await sandbox.mkdir(`${project}/pack`),
+        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""),
+        nuspec = await sandbox.writeFile(`${project}/pack/Package.nuspec`, "");
+      // Act
+      await pack({
+        target: csproj,
+        nuspec
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "pack", csproj, `-p:NuspecFile=${nuspec}` ],
+          anything
+        )
+    });
+
+    afterEach(async () => {
+      await Sandbox.destroyAll();
+    })
   });
 
   describe(`nugetPush`, () => {
@@ -1310,7 +1403,7 @@ describe("dotnet-cli", () => {
     });
 
 
-    it(`should set the runtime, defaulting to not self-contained`, async () => {
+    it(`should set the runtime, defaulting to self-contained`, async () => {
       // Arrange
       const
         target = faker.word.sample(),
@@ -1323,7 +1416,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(spawn)
         .toHaveBeenCalledOnceWith(
-          "dotnet", [ "publish", target, "--runtime", runtime, "--no-self-contained" ],
+          "dotnet", [ "publish", target, "--runtime", runtime, "--self-contained" ],
           anything
         )
     });
@@ -1343,6 +1436,25 @@ describe("dotnet-cli", () => {
       expect(spawn)
         .toHaveBeenCalledOnceWith(
           "dotnet", [ "publish", target, "--runtime", runtime, "--self-contained" ],
+          anything
+        )
+    });
+
+    it(`should set self-contained, when deselected`, async () => {
+      // Arrange
+      const
+        target = faker.word.sample(),
+        runtime = faker.word.sample();
+      // Act
+      await publish({
+        target,
+        runtime,
+        selfContained: false
+      });
+      // Assert
+      expect(spawn)
+        .toHaveBeenCalledOnceWith(
+          "dotnet", [ "publish", target, "--runtime", runtime, "--no-self-contained" ],
           anything
         )
     });

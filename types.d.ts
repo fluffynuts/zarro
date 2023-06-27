@@ -110,6 +110,7 @@ declare global {
     "COVERAGE_INCLUDE" |
     "COVERAGE_ADDITIONAL_EXCLUDE" |
     "COVERAGE_XML" |
+    "COVERAGE_REPORTING_EXCLUDE" |
     "GIT_OVERRIDE_BRANCH" |
     "GIT_BRANCH" |
     "GIT_MAIN_BRANCH" |
@@ -118,9 +119,18 @@ declare global {
     "GIT_OVERRIDE_REMOTE" |
     "GIT_REMOTE" |
     "NUGET_API_KEY" |
-    "NUGET_PUSH_TIMEOUT" |
     "DOTNET_PUBLISH_RUNTIMES" |
+    "DOTNET_PUBLISH_BUILD_CONFIGURATION" |
+    "DOTNET_PUBLISH_OS" |
+    "DOTNET_PUBLISH_ARCH" |
+    "DOTNET_PUBLISH_FRAMEWORK" |
+    "DOTNET_PUBLISH_MANIFEST" |
+    "DOTNET_PUBLISH_VERSION_SUFFIX" |
+    "DOTNET_PUBLISH_VERBOSITY" |
     "OUTPUT" |
+    "PURGE_JS_DIRS" |
+    "PURGE_DOTNET_DIRS" |
+    "PURGE_ADDITIONAL_DIRS" |
     "PACK_TARGET_FOLDER" |
     "PACK_INCLUDE_CSPROJ" |
     "PACK_EXCLUDE_CSPROJ" |
@@ -130,9 +140,10 @@ declare global {
     "PACK_SUPPLEMENTARY_NUSPEC" |
     "PACK_BASE_PATH" |
     "PACK_VERSION" |
+    "PACK_VERBOSITY" |
     "PACKAGE_JSON" |
     "INCLUDE_PACKAGE_JSON" |
-    "EXCLUDE_PACKAGE_VERSION" |
+    "EXCLUDE_PACKAGE_JSON" |
     "NPM_PUBLISH_ACCESS" |
     "DOTNET_TEST_PREFIXES" |
     "VERSION_INCREMENT_STRATEGY" |
@@ -168,18 +179,27 @@ declare global {
     "PACK_INCREMENT_VERSION" |
     "PACK_INCLUDE_EMPTY_DIRECTORIES" |
     "PACK_INCLUDE_SYMBOLS" |
+    "PACK_INCLUDE_SOURCE" |
+    "PACK_IGNORE_MISSING_DEFAULT_NUSPEC" |
     "INITIAL_RELEASE" |
     "VERSION_INCREMENT_ZERO" |
     "BETA" |
     "RETAIN_TEST_DIAGNOSTICS" |
     "DOTNET_TEST_QUIET_QUACKERS" |
     "UPDATE_SUBMODULES_TO_LATEST" |
-    "USE_SYSTEM_NUGET";
+    "USE_SYSTEM_NUGET" |
+    "DOTNET_DISABLE_BUILD_SERVERS" |
+    "DOTNET_PUBLISH_SELF_CONTAINED" |
+    "DOTNET_PUBLISH_NO_BUILD" |
+    "DOTNET_PUBLISH_NO_RESTORE" |
+    "DOTNET_PUBLISH_USE_CURRENT_RUNTIME" |
+    "PACK_NO_BUILD" |
+    "PACK_NO_RESTORE";
 
-  type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar;
+  type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
 
   interface Env {
-    resolve(...names: StringEnvVar[]): string;
+    resolve(...names: (StringEnvVar | VersionIncrementStrategy)[]): string;
     resolveArray(name: AnyEnvVar): string[];
     resolveArray(name: AnyEnvVar, delimiter: string): string[];
     resolveNumber(name: NumericEnvVar): number;
@@ -190,23 +210,12 @@ declare global {
     // these are generated on the js output by register-environment-variables
     // -> included here to avoid typos: use env.CONSTANT_NAME when you want
     // the constant name somewhere, eg in association
-    BETA: FlagEnvVar;
-    USE_SYSTEM_NUGET: FlagEnvVar;
-    ENABLE_NUGET_PARALLEL_PROCESSING: FlagEnvVar;
-    BUILD_SHOW_INFO: FlagEnvVar;
-    BUILD_FAIL_ON_ERROR: FlagEnvVar;
-    BUILD_MSBUILD_NODE_REUSE: FlagEnvVar;
-    MAX_CONCURRENCY: NumericEnvVar;
-    BUILD_MAX_CPU_COUNT: NumericEnvVar;
     BUILD_CONFIGURATION: StringEnvVar;
     BUILD_PLATFORM: StringEnvVar;
     BUILD_ARCHITECTURE: StringEnvVar;
-    MAX_NUNIT_AGENTS: NumericEnvVar;
     BUILD_INCLUDE: StringEnvVar;
     BUILD_EXCLUDE: StringEnvVar;
     BUILD_ADDITIONAL_EXCLUDE: StringEnvVar;
-    DOTNET_CORE: FlagEnvVar;
-    DOTNET_TEST_PARALLEL: FlagEnvVar;
     NUNIT_ARCHITECTURE: StringEnvVar;
     BUILD_REPORT_XML: StringEnvVar;
     NUNIT_LABELS: StringEnvVar; // for now, at least
@@ -222,40 +231,87 @@ declare global {
     COVERAGE_ADDITIONAL_EXCLUDE: StringEnvVar;
     COVERAGE_XML: StringEnvVar;
     COVERAGE_REPORTING_EXCLUDE: StringEnvVar;
-    BUILD_TOOLS_FOLDER: StringEnvVar;
-    DRY_RUN: FlagEnvVar;
     GIT_OVERRIDE_BRANCH: StringEnvVar;
     GIT_BRANCH: StringEnvVar;
+    GIT_MAIN_BRANCH: StringEnvVar;
+    GIT_DEFAULT_UPSTREAM: StringEnvVar;
+    GIT_VERIFY_BRANCH: StringEnvVar;
     GIT_OVERRIDE_REMOTE: StringEnvVar;
+    GIT_REMOTE: StringEnvVar;
     NUGET_API_KEY: StringEnvVar;
     DOTNET_PUBLISH_RUNTIMES: StringEnvVar;
     DOTNET_PUBLISH_BUILD_CONFIGURATION: StringEnvVar;
+    DOTNET_PUBLISH_OS: StringEnvVar;
+    DOTNET_PUBLISH_ARCH: StringEnvVar;
+    DOTNET_PUBLISH_FRAMEWORK: StringEnvVar;
+    DOTNET_PUBLISH_MANIFEST: StringEnvVar;
+    DOTNET_PUBLISH_VERSION_SUFFIX: StringEnvVar;
+    DOTNET_PUBLISH_VERBOSITY: StringEnvVar;
     OUTPUT: StringEnvVar;
     PURGE_JS_DIRS: StringEnvVar;
     PURGE_DOTNET_DIRS: StringEnvVar;
     PURGE_ADDITIONAL_DIRS: StringEnvVar;
     PACK_TARGET_FOLDER: StringEnvVar;
-    PACK_EXCLUDE: StringEnvVar;
-    PACK_INCLUDE: StringEnvVar;
+    PACK_INCLUDE_CSPROJ: StringEnvVar;
+    PACK_EXCLUDE_CSPROJ: StringEnvVar;
+    PACK_INCLUDE_NUSPEC: StringEnvVar;
+    PACK_EXCLUDE_NUSPEC: StringEnvVar;
     PACK_CONFIGURATION: StringEnvVar;
     PACK_SUPPLEMENTARY_NUSPEC: StringEnvVar;
-    PACK_INCREMENT_VERSION: FlagEnvVar;
-    PACK_INCREMENT_VERSION_BY: NumericEnvVar;
+    PACK_BASE_PATH: StringEnvVar;
+    PACK_VERSION: StringEnvVar;
+    PACK_VERBOSITY: DotNetVerbosity;
     PACKAGE_JSON: StringEnvVar;
-    VERSION_INCREMENT_STRATEGY: StringEnvVar; // for now at least
-    VERSION_INCREMENT_ZERO: FlagEnvVar;
-    INITIAL_RELEASE: FlagEnvVar;
     INCLUDE_PACKAGE_JSON: StringEnvVar;
     EXCLUDE_PACKAGE_JSON: StringEnvVar;
-    UPDATE_SUBMODULES_TO_LATEST: FlagEnvVar;
+    NPM_PUBLISH_ACCESS: StringEnvVar;
+    DOTNET_TEST_PREFIXES: StringEnvVar;
+    VERSION_INCREMENT_STRATEGY: VersionIncrementStrategy;
+    BUILD_TOOLS_FOLDER: StringEnvVar;
+
+    ENABLE_NUGET_PARALLEL_PROCESSING: FlagEnvVar;
+    BUILD_SHOW_INFO: FlagEnvVar;
+    BUILD_FAIL_ON_ERROR: FlagEnvVar;
+    BUILD_MSBUILD_NODE_REUSE: FlagEnvVar;
+    DOTNET_TEST_PARALLEL: FlagEnvVar;
+    DOTNET_CORE: FlagEnvVar;
+    DRY_RUN: FlagEnvVar;
     ENFORCE_VERIFICATION: FlagEnvVar;
-    GIT_MAIN_BRANCH: StringEnvVar;
-    GIT_DEFAULT_UPSTREAM: StringEnvVar;
-    GIT_VERIFY_BRANCH: StringEnvVar;
+    INTERACTIVE: FlagEnvVar;
     SKIP_FETCH_ON_VERIFY: FlagEnvVar;
+    NO_UNICODE: FlagEnvVar;
+    NO_COLOR: FlagEnvVar;
+    NUGET_IGNORE_DUPLICATE_PACKAGES: FlagEnvVar;
+    PACK_INCREMENT_VERSION: FlagEnvVar;
+    PACK_INCLUDE_EMPTY_DIRECTORIES: FlagEnvVar;
+    PACK_INCLUDE_SYMBOLS: FlagEnvVar;
+    INITIAL_RELEASE: FlagEnvVar;
+    VERSION_INCREMENT_ZERO: FlagEnvVar;
+    BETA: FlagEnvVar;
+    RETAIN_TEST_DIAGNOSTICS: FlagEnvVar;
+    DOTNET_TEST_QUIET_QUACKERS: FlagEnvVar;
+    UPDATE_SUBMODULES_TO_LATEST: FlagEnvVar;
+    USE_SYSTEM_NUGET: FlagEnvVar;
+    DOTNET_DISABLE_BUILD_SERVERS: FlagEnvVar;
+    DOTNET_PUBLISH_SELF_CONTAINED: FlagEnvVar;
+    DOTNET_PUBLISH_NO_BUILD: FlagEnvVar;
+    DOTNET_PUBLISH_NO_RESTORE: FlagEnvVar;
+    DOTNET_PUBLISH_USE_CURRENT_RUNTIME: FlagEnvVar;
+    PACK_NO_BUILD: FlagEnvVar;
+    PACK_NO_RESTORE: FlagEnvVar;
+    PACK_IGNORE_MISSING_DEFAULT_NUSPEC: FlagEnvVar;
+
+    BUILD_MAX_CPU_COUNT: NumericEnvVar;
+    MAX_NUNIT_AGENTS: NumericEnvVar;
     GIT_FETCH_TIMEOUT: NumericEnvVar;
     GIT_VERIFY_TIMEOUT: NumericEnvVar;
     GIT_FETCH_RECENT_TIME: NumericEnvVar;
+    NUGET_PUSH_TIMEOUT: NumericEnvVar;
+    PACK_INCREMENT_VERSION_BY: NumericEnvVar;
+    MAX_RETRIES: NumericEnvVar;
+    BUILD_RETRIES: NumericEnvVar;
+    RESTORE_RETRIES: NumericEnvVar;
+    MAX_CONCURRENCY: NumericEnvVar;
   }
 
   type StatFunction = (path: string) => Promise<fs.Stats | null>
@@ -606,6 +662,7 @@ declare global {
     noRestore?: boolean;
     versionSuffix?: string;
     nuspec?: string;
+    ignoreMissingNuspec?: boolean
   }
 
   interface DotNetBuildOptions extends DotNetCommonBuildOptions {
@@ -676,6 +733,7 @@ declare global {
   type GulpDotNetPackFunction = TransformFunction<DotNetPackOptions>;
   type GulpDotNetNugetPushFunction = TransformFunction<DotNetNugetPushOptions>;
   type GulpDotNetCleanFunction = TransformFunction<DotNetCleanOptions>;
+  type GulpDotNetPublishFunction = TransformFunction<DotNetPublishOptions>;
 
   interface GulpDotNetCli {
     build: GulpDotNetBuildFunction;
@@ -683,6 +741,7 @@ declare global {
     test: GulpDotNetTestFunction;
     pack: GulpDotNetPackFunction;
     nugetPush: GulpDotNetNugetPushFunction;
+    publish: GulpDotNetPublishFunction;
   }
 
   // scraped from https://spdx.org/licenses/
