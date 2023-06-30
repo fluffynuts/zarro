@@ -1,5 +1,6 @@
 const
-  chalk = require("ansi-colors"),
+  requireModule = require("../../gulp-tasks/modules/require-module"),
+  chalk = requireModule("ansi-colors"),
   invokeGulp = require("./invoke-gulp").handler,
   longSwitch = "--show-environment",
   shortSwitch = "--show-env",
@@ -36,8 +37,8 @@ module.exports = {
     //    has registered usage of variables has its registration
     //    reflected in the help
     let muted = true;
-    if (process.stdout.isTTY) {
-      process.env.FORCE_COLOR = 1;
+    if (process.stdout.isTTY && !process.env.NO_COLOR) {
+      process.env.FORCE_COLOR = "1";
     }
     return invokeGulp(
       [ "help:environment" ], {

@@ -1,5 +1,5 @@
 const
-  chalk = require("ansi-colors"),
+  chalk = requireModule("ansi-colors"),
   gitFactory = require("simple-git");
 
 (async function () {

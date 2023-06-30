@@ -2,7 +2,7 @@
 
 import * as fs from "fs";
 import { Stream, Transform } from "stream";
-import { StyleFunction } from "ansi-colors";
+import ansiColors, { StyleFunction } from "ansi-colors";
 import { AlterPackageJsonVersionOptions } from "./gulp-tasks/modules/alter-package-json-version";
 import { RimrafOptions } from "./gulp-tasks/modules/rimraf";
 import { ExecFileOptionsWithBufferEncoding } from "child_process";
@@ -503,6 +503,8 @@ declare global {
     ahead: number;
   }
 
+  type AnsiColors = typeof ansiColors;
+
   type ReadGitInfo = (at?: string) => Promise<GitInfo>;
 
   enum GitRemoteUsage {
@@ -591,6 +593,8 @@ declare global {
     stderr: string[];
     stdout: string[];
   }
+
+  type RequireModule = <T>(name: string) => T;
 
   type SpawnFunction = (program: string, args: string[], options?: SpawnOptions)
     => Promise<SpawnResult>;
