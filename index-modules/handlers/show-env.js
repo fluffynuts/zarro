@@ -58,7 +58,9 @@ module.exports = {
         },
         stderr: data => {
           console.error(data.toString());
-        }
+        },
+        interactive: false,
+        suppressStdIoInErrors: true
       })
   }
 };

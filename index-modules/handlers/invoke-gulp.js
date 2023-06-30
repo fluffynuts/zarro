@@ -71,7 +71,9 @@
             label: "running gulp with",
             allArgs
         });
-        return spawn(gulp, allArgs, Object.assign(Object.assign({ env: envVars, cwd }, opts), { suppressStdIoInErrors: true }));
+        return spawn(gulp, allArgs, Object.assign({ env: envVars, cwd, 
+            // default to be interactive, so we can, eg, allow for user to input an OTP
+            interactive: true }, opts));
     }
     module.exports = {
         test: alwaysAccept,
