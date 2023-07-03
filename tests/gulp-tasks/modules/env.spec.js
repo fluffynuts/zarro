@@ -110,6 +110,29 @@ describe(`env`, () => {
             expect(result)
                 .toEqual(expected);
         });
+        it(`should resolve the default value when the env var is not set`, async () => {
+            // Arrange
+            const key = faker_1.faker.word.sample();
+            env.register({
+                name: key,
+                help: "some help",
+                default: "true"
+            });
+            // Act
+            delete process.env[key];
+            const result = env.resolveFlag(key);
+            // Assert
+            expect(result)
+                .toBeTrue();
+        });
+        it(`should resolve the default value when the env var is not set (2)`, async () => {
+            // Arrange
+            // Act
+            const result = env.resolveFlag("INITIAL_RELEASE");
+            // Assert
+            expect(result)
+                .toBeFalse();
+        });
         afterEach(async () => {
             await filesystem_sandbox_1.Sandbox.destroyAll();
         });

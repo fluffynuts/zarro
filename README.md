@@ -195,7 +195,7 @@ though there are some exceptions. Some modules may be of interest to custom task
 - `env`
     - provides a utility object to resolve environment variables for you
         - `register` can register an environment variable as known with a default
-           value and help. See `register-environment-variables.js` for examples.
+           value and help. See `register-environment-variables.ts` for examples.
            When you use this function, you can have a central configuration for
            a default value for an environment variable and your environment
            variable will be displayed in the `--show-env` output

@@ -202,12 +202,14 @@ declare global {
   type OverrideWhen = (existing: Optional<string>, potential: Optional<string>) => boolean;
   interface EnvRegistration {
     name: string;
-    help: string;
+    help: string | string[];
     tasks?: string | string[];
     overriddenBy?: string | string[];
     when?: OverrideWhen;
     default?: string;
   }
+
+  type GetToolsFolder = (overrideEnv?: Env) => string;
 
   interface Env {
     resolve(...names: (StringEnvVar | VersionIncrementStrategy)[]): string;
@@ -218,6 +220,7 @@ declare global {
     associate(varName: AnyEnvVar | AnyEnvVar[], tasks: string | string[]): void;
     resolveWithFallback<T>(varName: AnyEnvVar, fallback: T): T;
     resolveMap<T>(varName: AnyEnvVar, fallback?: T, delimiter?: string): T;
+    register(reg: EnvRegistration): void;
 
     // these are generated on the js output by register-environment-variables
     // -> included here to avoid typos: use env.CONSTANT_NAME when you want
