@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.141.0",
+  "version": "1.141.1",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -44,6 +44,7 @@
     "del": "^5.1.0",
     "event-stream": "^4.0.1",
     "fancy-log": "^1.3.3",
+    "fetch-github-release": "^1.0.0",
     "gulp": "^4.0.2",
     "gulp-debug": "^4.0.0",
     "gulp-dotnet-cli": "^1.1.0",
