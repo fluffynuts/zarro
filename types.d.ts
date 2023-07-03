@@ -147,7 +147,8 @@ declare global {
     "NPM_PUBLISH_ACCESS" |
     "DOTNET_TEST_PREFIXES" |
     "VERSION_INCREMENT_STRATEGY" |
-    "BUILD_TOOLS_FOLDER";
+    "BUILD_TOOLS_FOLDER" |
+    "MSBUILD_PROPERTIES";
 
   type NumericEnvVar =
     "BUILD_MAX_CPU_COUNT" |
@@ -194,9 +195,19 @@ declare global {
     "DOTNET_PUBLISH_NO_RESTORE" |
     "DOTNET_PUBLISH_USE_CURRENT_RUNTIME" |
     "PACK_NO_BUILD" |
-    "PACK_NO_RESTORE";
+    "PACK_NO_RESTORE" |
+    "ZARRO_ENABLE_CONFIGURATION_FILES";
 
   type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
+  type OverrideWhen = (existing: Optional<string>, potential: Optional<string>) => boolean;
+  interface EnvRegistration {
+    name: string;
+    help: string;
+    tasks?: string | string[];
+    overriddenBy?: string | string[];
+    when?: OverrideWhen;
+    default?: string;
+  }
 
   interface Env {
     resolve(...names: (StringEnvVar | VersionIncrementStrategy)[]): string;
@@ -206,6 +217,7 @@ declare global {
     resolveFlag(name: FlagEnvVar): boolean;
     associate(varName: AnyEnvVar | AnyEnvVar[], tasks: string | string[]): void;
     resolveWithFallback<T>(varName: AnyEnvVar, fallback: T): T;
+    resolveMap<T>(varName: AnyEnvVar, fallback?: T, delimiter?: string): T;
 
     // these are generated on the js output by register-environment-variables
     // -> included here to avoid typos: use env.CONSTANT_NAME when you want
@@ -268,6 +280,7 @@ declare global {
     DOTNET_TEST_PREFIXES: StringEnvVar;
     VERSION_INCREMENT_STRATEGY: VersionIncrementStrategy;
     BUILD_TOOLS_FOLDER: StringEnvVar;
+    MSBUILD_PROPERTIES: StringEnvVar;
 
     ENABLE_NUGET_PARALLEL_PROCESSING: FlagEnvVar;
     BUILD_SHOW_INFO: FlagEnvVar;
@@ -300,6 +313,7 @@ declare global {
     PACK_NO_BUILD: FlagEnvVar;
     PACK_NO_RESTORE: FlagEnvVar;
     PACK_IGNORE_MISSING_DEFAULT_NUSPEC: FlagEnvVar;
+    ZARRO_ENABLE_CONFIGURATION_FILES: FlagEnvVar;
 
     BUILD_MAX_CPU_COUNT: NumericEnvVar;
     MAX_NUNIT_AGENTS: NumericEnvVar;
