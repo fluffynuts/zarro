@@ -1,11 +1,19 @@
 import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
-import { run } from "gulp-dotnet-cli";
 import { Sandbox } from "filesystem-sandbox";
+import path from "path";
 
 describe("dotnet-cli", () => {
+  let allowLogs = false;
   beforeEach(() => {
-    spyOn(console, "log");
+    allowLogs = false;
+    const original = console.log;
+    spyOn(console, "log").and.callFake((...args: any[]) => {
+      if (!allowLogs) {
+        return;
+      }
+      original.apply(console, args);
+    });
   });
   const
     realSpawn = require("../../../gulp-tasks/modules/spawn"),
@@ -1004,8 +1012,8 @@ describe("dotnet-cli", () => {
         sandbox = await Sandbox.create(),
         project = faker.word.sample(),
         folder = await sandbox.mkdir(project),
-        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""),
-        nuspec = await sandbox.writeFile(`${project}/Package.nuspec`, "");
+        csproj = await sandbox.writeFile(`${ project }/${ project }.csproj`, ""),
+        nuspec = await sandbox.writeFile(`${ project }/Package.nuspec`, "");
       // Act
       await pack({
         target: csproj,
@@ -1025,7 +1033,7 @@ describe("dotnet-cli", () => {
         sandbox = await Sandbox.create(),
         project = faker.word.sample(),
         folder = await sandbox.mkdir(project),
-        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, "");
+        csproj = await sandbox.writeFile(`${ project }/${ project }.csproj`, "");
       // Act
       await pack({
         target: csproj,
@@ -1045,9 +1053,9 @@ describe("dotnet-cli", () => {
         sandbox = await Sandbox.create(),
         project = faker.word.sample(),
         folder = await sandbox.mkdir(project),
-        sub = await sandbox.mkdir(`${project}/pack`),
-        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""),
-        nuspec = await sandbox.writeFile(`${project}/pack/Package.nuspec`, "");
+        sub = await sandbox.mkdir(`${ project }/pack`),
+        csproj = await sandbox.writeFile(`${ project }/${ project }.csproj`, ""),
+        nuspec = await sandbox.writeFile(`${ project }/pack/Package.nuspec`, "");
       // Act
       await pack({
         target: csproj,
@@ -1067,9 +1075,9 @@ describe("dotnet-cli", () => {
         sandbox = await Sandbox.create(),
         project = faker.word.sample(),
         folder = await sandbox.mkdir(project),
-        sub = await sandbox.mkdir(`${project}/pack`),
-        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""),
-        nuspec = await sandbox.writeFile(`${project}/pack/Package.nuspec`, "");
+        sub = await sandbox.mkdir(`${ project }/pack`),
+        csproj = await sandbox.writeFile(`${ project }/${ project }.csproj`, ""),
+        nuspec = await sandbox.writeFile(`${ project }/pack/Package.nuspec`, "");
       // Act
       await pack({
         target: csproj,
@@ -1078,7 +1086,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(spawn)
         .toHaveBeenCalledOnceWith(
-          "dotnet", [ "pack", csproj, `-p:NuspecFile=${nuspec}` ],
+          "dotnet", [ "pack", csproj, `-p:NuspecFile=${ nuspec }` ],
           anything
         )
     });
@@ -1608,6 +1616,78 @@ describe("dotnet-cli", () => {
         )
     });
 
+    describe(`listPackages`, () => {
+      const { listPackages } = sut;
+      const exampleCsproj = path.join(
+        __dirname,
+        "csproj",
+        "example.csproj"
+      );
+      it(`should be a function`, async () => {
+        // Arrange
+        // Act
+        expect(listPackages)
+          .toBeFunction();
+        // Assert
+      });
+      it(`should list the example packages`, async () => {
+        allowLogs = true;
+        // Arrange
+        const expected = [
+          { id: "microsoft.net.test.sdk", version: "17.4.1" },
+          { id: "NSubstitute", version: "4.4.0" },
+          { id: "nunit", version: "3.13.3" },
+          { id: "nunit3testadapter", version: "4.3.1" },
+          { id: "system.valuetuple", version: "4.5.0" },
+        ];
+        // Act
+        const result = await listPackages(exampleCsproj);
+        // Assert
+        expect(result)
+          .toEqual(expected);
+      });
+    });
 
+    describe(`containerisation`, () => {
+      describe(`when publishContainer is true`, () => {
+        describe(`when csproj doesn't reference Microsoft.NET.Build.Containers`, () => {
+          const target = path.join(
+            __dirname,
+            "csproj",
+            "example.csproj"
+          );
+          it(`should throw`, async () => {
+            // Arrange
+            // Act
+            await expect(publish({
+              target,
+              publishContainer: true
+            })).rejects.toThrow(/Microsoft.NET.Build.Containers/);
+            // Assert
+          });
+        });
+        describe(`when csproj _does_ reference Microsoft.NET.Build.Containers`, () => {
+          const target = path.join(
+            __dirname,
+            "csproj",
+            "containered.csproj"
+          );
+          it(`should set the /t:PublishContainer arg`, async () => {
+            // Arrange
+            // Act
+            await publish({
+              target,
+              publishContainer: true
+            });
+            // Assert
+            expect(spawn)
+              .toHaveBeenCalledOnceWith(
+                "dotnet", [ "publish", target, "/t:PublishContainer" ],
+                anything
+              );
+          });
+        });
+      });
+    });
   });
 });

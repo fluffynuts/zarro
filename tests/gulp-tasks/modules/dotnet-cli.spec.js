@@ -1,11 +1,23 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
+const path_1 = __importDefault(require("path"));
 describe("dotnet-cli", () => {
+    let allowLogs = false;
     beforeEach(() => {
-        spyOn(console, "log");
+        allowLogs = false;
+        const original = console.log;
+        spyOn(console, "log").and.callFake((...args) => {
+            if (!allowLogs) {
+                return;
+            }
+            original.apply(console, args);
+        });
     });
     const realSpawn = require("../../../gulp-tasks/modules/spawn"), spawn = jest.fn().mockImplementation((exe, args, opts) => {
         if (args[0] == "nuget" && args[1] == "list") {
@@ -1129,6 +1141,63 @@ describe("dotnet-cli", () => {
             // Assert
             expect(spawn)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--disable-build-servers"], anything);
+        });
+        describe(`listPackages`, () => {
+            const { listPackages } = sut;
+            const exampleCsproj = path_1.default.join(__dirname, "csproj", "example.csproj");
+            it(`should be a function`, async () => {
+                // Arrange
+                // Act
+                expect(listPackages)
+                    .toBeFunction();
+                // Assert
+            });
+            it(`should list the example packages`, async () => {
+                allowLogs = true;
+                // Arrange
+                const expected = [
+                    { id: "microsoft.net.test.sdk", version: "17.4.1" },
+                    { id: "NSubstitute", version: "4.4.0" },
+                    { id: "nunit", version: "3.13.3" },
+                    { id: "nunit3testadapter", version: "4.3.1" },
+                    { id: "system.valuetuple", version: "4.5.0" },
+                ];
+                // Act
+                const result = await listPackages(exampleCsproj);
+                // Assert
+                expect(result)
+                    .toEqual(expected);
+            });
+        });
+        describe(`containerisation`, () => {
+            describe(`when publishContainer is true`, () => {
+                describe(`when csproj doesn't reference Microsoft.NET.Build.Containers`, () => {
+                    const target = path_1.default.join(__dirname, "csproj", "example.csproj");
+                    it(`should throw`, async () => {
+                        // Arrange
+                        // Act
+                        await expect(publish({
+                            target,
+                            publishContainer: true
+                        })).rejects.toThrow(/Microsoft.NET.Build.Containers/);
+                        // Assert
+                    });
+                });
+                describe(`when csproj _does_ reference Microsoft.NET.Build.Containers`, () => {
+                    const target = path_1.default.join(__dirname, "csproj", "containered.csproj");
+                    it(`should set the /t:PublishContainer arg`, async () => {
+                        // Arrange
+                        // Act
+                        await publish({
+                            target,
+                            publishContainer: true
+                        });
+                        // Assert
+                        expect(spawn)
+                            .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "/t:PublishContainer"], anything);
+                    });
+                });
+            });
         });
     });
 });

@@ -19,6 +19,41 @@ interface Logger {
   warn(...args: any[]): Logger;
 }
 
+interface LogLevels {
+  Debug: string;
+  Info: string;
+  Notice: string;
+  Warning: string;
+  Error: string;
+}
+
+declare enum LogThreshold {
+  debug = 1,
+  info = 2,
+  notice = 3,
+  warning = 4,
+  error = 5
+}
+
+interface ZarroLogger {
+  LogLevels: LogLevels;
+  threshold: LogThreshold;
+
+  setThreshold(threshold: number | string): void;
+  debug(...args: any[]): void;
+  info(...args: any[]): void;
+  notice(...args: any[]): void;
+  warning(...args: any[]): void;
+  error(...args: any[]): void;
+
+  fail(...args: any[]): void;
+  ok(...args: any[]): void;
+  notice(...args: any[]): void;
+  suppressTimestamps(): void;
+  showTimestamps(): void;
+
+}
+
 declare global {
   function requireModule<T>(module: string): T;
 
@@ -43,6 +78,18 @@ declare global {
       pluginName: string,
       operation: string
     ): Transform;
+  }
+
+  interface HttpClient {
+    download(url: string, target: string): Promise<string>;
+    exists(url: string): Promise<boolean>;
+  }
+
+  interface HttpClientModule {
+    create(
+      infoLogFunction?: (s: string) => void,
+      debugLogFunction?: (s: string) => void
+    ): HttpClient;
   }
 
   interface GulpWithHelp {
@@ -148,7 +195,9 @@ declare global {
     "DOTNET_TEST_PREFIXES" |
     "VERSION_INCREMENT_STRATEGY" |
     "BUILD_TOOLS_FOLDER" |
-    "MSBUILD_PROPERTIES";
+    "MSBUILD_PROPERTIES" |
+    "DEV_SMTP_BIND_IP" |
+    "DEV_SMTP_INTERFACE_BIND_IP";
 
   type NumericEnvVar =
     "BUILD_MAX_CPU_COUNT" |
@@ -161,7 +210,9 @@ declare global {
     "MAX_RETRIES" |
     "BUILD_RETRIES" |
     "RESTORE_RETRIES" |
-    "MAX_CONCURRENCY";
+    "MAX_CONCURRENCY" |
+    "DEV_SMTP_PORT" |
+    "DEV_SMTP_INTERFACE_PORT";
 
   type FlagEnvVar =
     "ENABLE_NUGET_PARALLEL_PROCESSING" |
@@ -196,10 +247,14 @@ declare global {
     "DOTNET_PUBLISH_USE_CURRENT_RUNTIME" |
     "PACK_NO_BUILD" |
     "PACK_NO_RESTORE" |
-    "ZARRO_ENABLE_CONFIGURATION_FILES";
+    "ZARRO_ENABLE_CONFIGURATION_FILES" |
+    "DEV_SMTP_DETACHED" |
+    "DEV_SMTP_IGNORE_ERRORS" |
+    "DEV_SMTP_OPEN_INTERFACE";
 
   type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
   type OverrideWhen = (existing: Optional<string>, potential: Optional<string>) => boolean;
+
   interface EnvRegistration {
     name: string;
     help: string | string[];
@@ -210,6 +265,10 @@ declare global {
   }
 
   type GetToolsFolder = (overrideEnv?: Env) => string;
+
+  interface Open {
+    open(url: string): Promise<void>;
+  }
 
   interface Env {
     resolve(...names: (StringEnvVar | VersionIncrementStrategy)[]): string;
@@ -284,6 +343,8 @@ declare global {
     VERSION_INCREMENT_STRATEGY: VersionIncrementStrategy;
     BUILD_TOOLS_FOLDER: StringEnvVar;
     MSBUILD_PROPERTIES: StringEnvVar;
+    DEV_SMTP_BIND_IP: StringEnvVar;
+    DEV_SMTP_INTERFACE_BIND_IP: StringEnvVar;
 
     ENABLE_NUGET_PARALLEL_PROCESSING: FlagEnvVar;
     BUILD_SHOW_INFO: FlagEnvVar;
@@ -317,6 +378,9 @@ declare global {
     PACK_NO_RESTORE: FlagEnvVar;
     PACK_IGNORE_MISSING_DEFAULT_NUSPEC: FlagEnvVar;
     ZARRO_ENABLE_CONFIGURATION_FILES: FlagEnvVar;
+    DEV_SMTP_DETACHED: FlagEnvVar;
+    DEV_SMTP_IGNORE_ERRORS: FlagEnvVar;
+    DEV_SMTP_OPEN_INTERFACE: FlagEnvVar;
 
     BUILD_MAX_CPU_COUNT: NumericEnvVar;
     MAX_NUNIT_AGENTS: NumericEnvVar;
@@ -329,6 +393,8 @@ declare global {
     BUILD_RETRIES: NumericEnvVar;
     RESTORE_RETRIES: NumericEnvVar;
     MAX_CONCURRENCY: NumericEnvVar;
+    DEV_SMTP_PORT: NumericEnvVar;
+    DEV_SMTP_INTERFACE_PORT: NumericEnvVar;
   }
 
   type StatFunction = (path: string) => Promise<fs.Stats | null>
@@ -461,6 +527,8 @@ declare global {
 
   type FailAfter = (ms: number, message?: string) => Failer;
 
+  type NugetUpdateSelf = (nugetPath: string) => Promise<void>;
+
   export interface FileSystemUtils {
     folderExists(at: string): Promise<boolean>;
     fileExists(at: string): Promise<boolean>;
@@ -587,6 +655,8 @@ declare global {
     stderr?: ProcessIO;
     lineBuffer?: boolean;
 
+    detached?: boolean;
+
     /*
     * when a process is marked as interactive, no stderr/stdout
     * collection is done as the IO is left as "inherit"
@@ -615,6 +685,7 @@ declare global {
 
   type SpawnFunction = (program: string, args: string[], options?: SpawnOptions)
     => Promise<SpawnResult>;
+
   interface Spawn extends SpawnFunction {
     SpawnResult: Function;
     SpawnError: Function;
@@ -664,7 +735,13 @@ declare global {
     disableBuildServers?: boolean;
   }
 
-  interface DotNetPublishOptions extends DotNetCommonBuildOptions {
+  interface DotNetPublishContainerOptions {
+    publishContainer?: boolean;
+  }
+
+  interface DotNetPublishOptions
+    extends DotNetCommonBuildOptions,
+      DotNetPublishContainerOptions {
     useCurrentRuntime?: boolean;
     manifest?: string;
     noBuild?: boolean;
@@ -732,12 +809,18 @@ declare global {
     diagnostics?: string;
   }
 
+  interface DotNetPackageReference {
+    id: string;
+    version: string;
+  }
+
   type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetBuildFunction = (opts: DotNetBuildOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetPackFunction = (opts: DotNetPackOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetNugetPushFunction = (opts: DotNetNugetPushOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetCleanFunction = (opts: DotNetCleanOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetPublishFunction = (opts: DotNetPublishOptions) => Promise<SpawnResult | SpawnError>;
+  type DotNetListPackagesFunction = (projectPath: string) => Promise<DotNetPackageReference[]>;
 
   interface DotNetCli {
     clean: DotNetCleanFunction;
@@ -746,6 +829,7 @@ declare global {
     pack: DotNetPackFunction;
     nugetPush: DotNetNugetPushFunction;
     publish: DotNetPublishFunction;
+    listPackages: DotNetListPackagesFunction;
   }
 
   type TransformFunction<T> = (opts: T) => Transform;

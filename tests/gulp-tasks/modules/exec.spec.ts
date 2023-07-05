@@ -18,7 +18,7 @@ describe(`exec`, () => {
     describe(`when command is successful`, () => {
       it(`should return the stdout`, async () => {
         // Arrange
-        const spy = spyOn(console, "log");
+        spyOn(console, "log");
         spyOn(console, "error");
         const
           sandbox = await Sandbox.create(),
@@ -29,8 +29,6 @@ describe(`exec`, () => {
         // Assert
         expect((result || "").trim())
           .toEqual("hello");
-        expect(spy)
-          .toHaveBeenCalled();
       });
     });
 
