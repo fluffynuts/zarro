@@ -130,9 +130,10 @@ declare global {
   }
 
   type ResolveMasks = (
-    includeVar: string | string[],
-    excludeVar: string | string[],
-    modifierFunction?: StringMap) => string[];
+    includeVar: StringEnvVar | StringEnvVar[],
+    excludeVar: StringEnvVar | StringEnvVar[],
+    modifierFunction?: StringMap
+  ) => string[];
 
   type VersionIncrementStrategy =
     "major" | "minor" | "patch" | "prerelease";
