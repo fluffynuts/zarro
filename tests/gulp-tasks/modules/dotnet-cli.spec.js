@@ -1194,10 +1194,59 @@ describe("dotnet-cli", () => {
                         });
                         // Assert
                         expect(spawn)
-                            .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "/t:PublishContainer"], anything);
+                            .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "-t:PublishContainer"], anything);
+                    });
+                    it(`should set the container tag`, async () => {
+                        // Arrange
+                        const tag = faker_1.faker.word.sample();
+                        // Act
+                        await publish({
+                            target,
+                            publishContainer: true,
+                            containerImageTag: tag
+                        });
+                        // Assert
+                        expect(spawn)
+                            .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "-t:PublishContainer", `-p:ContainerImageTag=${tag}`], anything);
+                    });
+                    it(`should set the container registry`, async () => {
+                        // Arrange
+                        const registry = faker_1.faker.internet.domainName();
+                        // Act
+                        await publish({
+                            target,
+                            publishContainer: true,
+                            containerRegistry: registry
+                        });
+                        // Assert
+                        expect(spawn)
+                            .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "-t:PublishContainer", `-p:ContainerRegistry=${registry}`], anything);
+                    });
+                    it(`should set the container image name`, async () => {
+                        // Arrange
+                        const name = faker_1.faker.word.sample();
+                        // Act
+                        await publish({
+                            target,
+                            publishContainer: true,
+                            containerImageName: name
+                        });
+                        // Assert
+                        expect(spawn)
+                            .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "-t:PublishContainer", `-p:ContainerImageName=${name}`], anything);
                     });
                 });
             });
+        });
+    });
+    describe(`issueContainerWarnings`, () => {
+        const { issueContainerWarnings } = sut;
+        it(`should be a function`, async () => {
+            // Arrange
+            // Act
+            expect(issueContainerWarnings)
+                .toBeFunction();
+            // Assert
         });
     });
 });

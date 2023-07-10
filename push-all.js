@@ -1,5 +1,5 @@
 const
-  chalk = requireModule("ansi-colors"),
+  chalk = require("./gulp-tasks/modules/ansi-colors"),
   gitFactory = require("simple-git");
 
 (async function () {

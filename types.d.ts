@@ -421,6 +421,7 @@ declare global {
   ) => Promise<string>;
   type ReadPackageVersion = (packageJsonPath?: string) => string | undefined;
   type ReadNuspecVersion = (pathToNuspec: string) => string | undefined;
+  // FIXME: is this used anywhere? should be supplanted by csproj-utils
   type ReadCsProjVersion = (pathToCsProj: string) => string | undefined;
   type ReadCsProjPackageVersion = (pathToCsProj: string) => string | undefined;
   type GatherPaths = (pathSpecs: string | string[], throwForNoMatches?: boolean) => Promise<string[]>;
@@ -737,6 +738,9 @@ declare global {
 
   interface DotNetPublishContainerOptions {
     publishContainer?: boolean;
+    containerImageTag?: string;
+    containerRegistry?: string;
+    containerImageName?: string;
   }
 
   interface DotNetPublishOptions
@@ -821,6 +825,7 @@ declare global {
   type DotNetCleanFunction = (opts: DotNetCleanOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetPublishFunction = (opts: DotNetPublishOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetListPackagesFunction = (projectPath: string) => Promise<DotNetPackageReference[]>;
+  type DotNetPublishIssueContainerWarningsFunction = (opts: DotNetPublishOptions) => void;
 
   interface DotNetCli {
     clean: DotNetCleanFunction;
@@ -830,6 +835,16 @@ declare global {
     nugetPush: DotNetNugetPushFunction;
     publish: DotNetPublishFunction;
     listPackages: DotNetListPackagesFunction;
+    issueContainerWarnings: DotNetPublishIssueContainerWarningsFunction;
+  }
+
+  type ReadCsprojNode = (csproj: string) => Promise<string>;
+
+  interface CsprojUtils {
+    readPackageVersion: ReadCsprojNode;
+    readAssemblyVersion: ReadCsprojNode;
+    readAssemblyName: ReadCsprojNode;
+    readProjectVersion: ReadCsprojNode;
   }
 
   type TransformFunction<T> = (opts: T) => Transform;
