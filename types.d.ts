@@ -148,6 +148,7 @@ declare global {
     "BUILD_REPORT_XML" |
     "NUNIT_LABELS" |
     "NUNIT_PROCESS" |
+    "TEST_INCLUDE" |
     "TEST_EXCLUDE" |
     "TEST_VERBOSITY" |
     "BUILD_TOOLSVERSION" |
@@ -197,7 +198,13 @@ declare global {
     "BUILD_TOOLS_FOLDER" |
     "MSBUILD_PROPERTIES" |
     "DEV_SMTP_BIND_IP" |
-    "DEV_SMTP_INTERFACE_BIND_IP";
+    "DEV_SMTP_INTERFACE_BIND_IP" |
+    "DOTNET_PUBLISH_INCLUDE" |
+    "DOTNET_PUBLISH_EXCLUDE" |
+    "DOTNET_PUBLISH_ADDITIONAL_EXCLUDE" |
+    "DOTNET_PUBLISH_CONTAINER_REGISTRY" |
+    "DOTNET_PUBLISH_CONTAINER_IMAGE_TAG" |
+    "DOTNET_PUBLISH_CONTAINER_IMAGE_NAME";
 
   type NumericEnvVar =
     "BUILD_MAX_CPU_COUNT" |
@@ -232,6 +239,7 @@ declare global {
     "PACK_INCLUDE_EMPTY_DIRECTORIES" |
     "PACK_INCLUDE_SYMBOLS" |
     "PACK_INCLUDE_SOURCE" |
+    "PACK_LEGACY_SYMBOLS" |
     "PACK_IGNORE_MISSING_DEFAULT_NUSPEC" |
     "INITIAL_RELEASE" |
     "VERSION_INCREMENT_ZERO" |
@@ -250,13 +258,15 @@ declare global {
     "ZARRO_ENABLE_CONFIGURATION_FILES" |
     "DEV_SMTP_DETACHED" |
     "DEV_SMTP_IGNORE_ERRORS" |
-    "DEV_SMTP_OPEN_INTERFACE";
+    "DEV_SMTP_OPEN_INTERFACE" |
+    "DOTNET_PUBLISH_CONTAINER" |
+    "ZARRO_ALLOW_FILE_RESOLUTION";
 
   type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
   type OverrideWhen = (existing: Optional<string>, potential: Optional<string>) => boolean;
 
   interface EnvRegistration {
-    name: string;
+    name: keyof Env;
     help: string | string[];
     tasks?: string | string[];
     overriddenBy?: string | string[];
@@ -278,7 +288,7 @@ declare global {
     resolveFlag(name: FlagEnvVar): boolean;
     associate(varName: AnyEnvVar | AnyEnvVar[], tasks: string | string[]): void;
     resolveWithFallback<T>(varName: AnyEnvVar, fallback: T): T;
-    resolveMap<T>(varName: AnyEnvVar, fallback?: T, delimiter?: string): T;
+    resolveMap(varName: AnyEnvVar, fallback?: Dictionary<string>, delimiter?: string): Dictionary<string>;
     register(reg: EnvRegistration): void;
 
     // these are generated on the js output by register-environment-variables
@@ -345,6 +355,12 @@ declare global {
     MSBUILD_PROPERTIES: StringEnvVar;
     DEV_SMTP_BIND_IP: StringEnvVar;
     DEV_SMTP_INTERFACE_BIND_IP: StringEnvVar;
+    DOTNET_PUBLISH_INCLUDE: StringEnvVar;
+    DOTNET_PUBLISH_EXCLUDE: StringEnvVar;
+    DOTNET_PUBLISH_ADDITIONAL_EXCLUDE: StringEnvVar;
+    DOTNET_PUBLISH_CONTAINER_REGISTRY: StringEnvVar;
+    DOTNET_PUBLISH_CONTAINER_IMAGE_TAG: StringEnvVar;
+    DOTNET_PUBLISH_CONTAINER_IMAGE_NAME: StringEnvVar;
 
     ENABLE_NUGET_PARALLEL_PROCESSING: FlagEnvVar;
     BUILD_SHOW_INFO: FlagEnvVar;
@@ -362,6 +378,8 @@ declare global {
     PACK_INCREMENT_VERSION: FlagEnvVar;
     PACK_INCLUDE_EMPTY_DIRECTORIES: FlagEnvVar;
     PACK_INCLUDE_SYMBOLS: FlagEnvVar;
+    PACK_INCLUDE_SOURCE: FlagEnvVar;
+    PACK_LEGACY_SYMBOLS: FlagEnvVar;
     INITIAL_RELEASE: FlagEnvVar;
     VERSION_INCREMENT_ZERO: FlagEnvVar;
     BETA: FlagEnvVar;
@@ -381,6 +399,8 @@ declare global {
     DEV_SMTP_DETACHED: FlagEnvVar;
     DEV_SMTP_IGNORE_ERRORS: FlagEnvVar;
     DEV_SMTP_OPEN_INTERFACE: FlagEnvVar;
+    DOTNET_PUBLISH_CONTAINER: FlagEnvVar;
+    ZARRO_ALLOW_FILE_RESOLUTION: FlagEnvVar;
 
     BUILD_MAX_CPU_COUNT: NumericEnvVar;
     MAX_NUNIT_AGENTS: NumericEnvVar;
@@ -818,6 +838,13 @@ declare global {
     version: string;
   }
 
+  interface ResolvedContainerOption {
+    value: string;
+    environmentVariable: string;
+    option: keyof DotNetPublishContainerOptions;
+    usingFallback: boolean;
+  }
+
   type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetBuildFunction = (opts: DotNetBuildOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetPackFunction = (opts: DotNetPackOptions) => Promise<SpawnResult | SpawnError>;
@@ -825,7 +852,7 @@ declare global {
   type DotNetCleanFunction = (opts: DotNetCleanOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetPublishFunction = (opts: DotNetPublishOptions) => Promise<SpawnResult | SpawnError>;
   type DotNetListPackagesFunction = (projectPath: string) => Promise<DotNetPackageReference[]>;
-  type DotNetPublishIssueContainerWarningsFunction = (opts: DotNetPublishOptions) => void;
+  type DotNetPublishResolveContainerOptions = (opts: DotNetPublishOptions) => Promise<ResolvedContainerOption[]>;
 
   interface DotNetCli {
     clean: DotNetCleanFunction;
@@ -835,16 +862,22 @@ declare global {
     nugetPush: DotNetNugetPushFunction;
     publish: DotNetPublishFunction;
     listPackages: DotNetListPackagesFunction;
-    issueContainerWarnings: DotNetPublishIssueContainerWarningsFunction;
+    resolveContainerOptions: DotNetPublishResolveContainerOptions;
   }
 
-  type ReadCsprojNode = (csproj: string) => Promise<string>;
+  type ReadCsProjNode = (csproj: string) => Promise<string>;
+  type ReadCsProjProperty = (
+    pathToCsProj: string,
+    property: string,
+    fallback?: string | (() => Promise<string>)
+  ) => Promise<Optional<string>>;
 
-  interface CsprojUtils {
-    readPackageVersion: ReadCsprojNode;
-    readAssemblyVersion: ReadCsprojNode;
-    readAssemblyName: ReadCsprojNode;
-    readProjectVersion: ReadCsprojNode;
+  interface CsProjUtils {
+    readPackageVersion: ReadCsProjNode;
+    readAssemblyVersion: ReadCsProjNode;
+    readAssemblyName: ReadCsProjNode;
+    readProjectVersion: ReadCsProjNode;
+    readCsProjProperty: ReadCsProjProperty;
   }
 
   type TransformFunction<T> = (opts: T) => Transform;

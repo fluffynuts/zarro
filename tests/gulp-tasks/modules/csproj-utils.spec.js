@@ -43,7 +43,7 @@ describe(`csproj-utils`, () => {
         });
         it(`should fall back on 1.0.0`, async () => {
             // Arrange
-            const sandbox = await filesystem_sandbox_1.Sandbox.create(), filtered = filterCsprojXml(line => line.indexOf("<Version>") === -1), csproj = await sandbox.writeFile("sample.csproj", filtered);
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), filtered = filterCsProjXml(line => line.indexOf("<Version>") === -1), csproj = await sandbox.writeFile("sample.csproj", filtered);
             // Act
             const result = await readProjectVersion(csproj);
             // Assert
@@ -71,7 +71,7 @@ describe(`csproj-utils`, () => {
         });
         it(`should fall back on 1.0.0`, async () => {
             // Arrange
-            const sandbox = await filesystem_sandbox_1.Sandbox.create(), filtered = filterCsprojXml(line => line.indexOf("<AssemblyVersion>") === -1), csproj = await sandbox.writeFile("sample.csproj", filtered);
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), filtered = filterCsProjXml(line => line.indexOf("<AssemblyVersion>") === -1), csproj = await sandbox.writeFile("sample.csproj", filtered);
             // Act
             const result = await readAssemblyVersion(csproj);
             // Assert
@@ -99,7 +99,7 @@ describe(`csproj-utils`, () => {
         });
         it(`should fall back on the project file base name`, async () => {
             // Arrange
-            const sandbox = await filesystem_sandbox_1.Sandbox.create(), modified = filterCsprojXml(line => line.indexOf("<AssemblyName>") === -1), csproj = await sandbox.writeFile("sample.csproj", modified);
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), modified = filterCsProjXml(line => line.indexOf("<AssemblyName>") === -1), csproj = await sandbox.writeFile("sample.csproj", modified);
             // Act
             const result = await readAssemblyName(csproj);
             // Assert
@@ -107,7 +107,14 @@ describe(`csproj-utils`, () => {
                 .toEqual("sample");
         });
     });
-    function filterCsprojXml(filter) {
+    describe(`readProperty`, () => {
+        it(`should read the first instance of the provided property`, async () => {
+            // Arrange
+            // Act
+            // Assert
+        });
+    });
+    function filterCsProjXml(filter) {
         const lines = csprojXml.split("\n"), filtered = lines.filter(filter);
         return filtered.join("\n");
     }

@@ -139,7 +139,7 @@ describe(`env`, () => {
       const
         key = faker.word.sample();
       env.register({
-        name: key,
+        name: key as FlagEnvVar,
         help: "some help",
         default: "true"
       });

@@ -2,7 +2,7 @@ import "expect-even-more-jest";
 import { Sandbox } from "filesystem-sandbox";
 import { boolean } from "yargs";
 
-const sut = requireModule<CsprojUtils>("csproj-utils");
+const sut = requireModule<CsProjUtils>("csproj-utils");
 
 describe(`csproj-utils`, () => {
   describe(`readPackageVersion`, () => {
@@ -53,7 +53,7 @@ describe(`csproj-utils`, () => {
       // Arrange
       const
         sandbox = await Sandbox.create(),
-        filtered = filterCsprojXml(
+        filtered = filterCsProjXml(
           line => line.indexOf("<Version>") === -1
         ),
         csproj = await sandbox.writeFile("sample.csproj", filtered);
@@ -89,7 +89,7 @@ describe(`csproj-utils`, () => {
       // Arrange
       const
         sandbox = await Sandbox.create(),
-        filtered = filterCsprojXml(
+        filtered = filterCsProjXml(
           line => line.indexOf("<AssemblyVersion>") === -1
         ),
         csproj = await sandbox.writeFile("sample.csproj", filtered);
@@ -125,7 +125,7 @@ describe(`csproj-utils`, () => {
       // Arrange
       const
         sandbox = await Sandbox.create(),
-        modified = filterCsprojXml(
+        modified = filterCsProjXml(
           line => line.indexOf("<AssemblyName>") === -1
         ),
         csproj = await sandbox.writeFile("sample.csproj", modified);
@@ -137,7 +137,15 @@ describe(`csproj-utils`, () => {
     });
   });
 
-  function filterCsprojXml(
+  describe(`readProperty`, () => {
+    it(`should read the first instance of the provided property`, async () => {
+      // Arrange
+      // Act
+      // Assert
+    });
+  });
+
+  function filterCsProjXml(
     filter: (line: string) => boolean
   ): string {
     const
