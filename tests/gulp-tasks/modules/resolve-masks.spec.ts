@@ -8,7 +8,7 @@ describe(`resolve-masks`, () => {
     expect(process.env["MOO_EXCLUDE"])
       .not.toBeDefined();
     // Act
-    const result = sut("MOO_INCLUDE", ["MOO_EXCLUDE"]);
+    const result = sut("MOO_INCLUDE" as StringEnvVar, ["MOO_EXCLUDE" as StringEnvVar]);
     // Assert
     expect(result.find(s => s.match(/undefined/)))
       .not.toExist();
