@@ -684,7 +684,13 @@ declare global {
     * collection is done as the IO is left as "inherit"
      */
     interactive?: boolean;
-    suppressStdIoInErrors?: boolean
+    suppressStdIoInErrors?: boolean;
+
+    /*
+    * quotes can be hard, so if things aren't working out and
+    * you'd like to take full control, set this
+     */
+    disableAutomaticQuoting?: boolean;
   }
 
   interface SpawnError extends Error {
