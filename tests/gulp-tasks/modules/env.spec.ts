@@ -62,7 +62,7 @@ describe(`env`, () => {
           bar: faker.word.sample()
         },
         key = faker.string.sample(10),
-        envVar = `foo=${expected.foo},bar=${expected.bar}`;
+        envVar = `foo=${ expected.foo },bar=${ expected.bar }`;
       // Act
       process.env[key] = envVar;
       const result = env.resolveMap(key as AnyEnvVar);
@@ -125,7 +125,7 @@ describe(`env`, () => {
         sandbox = await Sandbox.create(),
         expected = faker.word.sample(),
         key = faker.string.alphanumeric(10);
-      await sandbox.writeFile(key, `${expected}\n`);
+      await sandbox.writeFile(key, `${ expected }\n`);
       // Act
       delete process.env[key];
       const result = await sandbox.run(() => env.resolve(key as StringEnvVar));
@@ -139,7 +139,7 @@ describe(`env`, () => {
       const
         key = faker.word.sample();
       env.register({
-        name: key as FlagEnvVar,
+        name: key as AnyEnvVar,
         help: "some help",
         default: "true"
       });
@@ -162,6 +162,142 @@ describe(`env`, () => {
 
     afterEach(async () => {
       await Sandbox.destroyAll();
+    });
+  });
+
+  describe(`resolve`, () => {
+    it(`should be a function`, async () => {
+      // Arrange
+      // Act
+      expect(env.resolve)
+        .toBeFunction();
+      // Assert
+    });
+    it(`should throw when given no env var names`, async () => {
+      // Arrange
+      // Act
+      expect(() => env.resolve())
+        .toThrow();
+      // Assert
+    });
+    it(`should return the defined environment variable for a single var name`, async () => {
+      // Arrange
+      const
+        key = faker.string.alphanumeric(10),
+        expected = setEnv(key, faker.string.alphanumeric(10));
+      // Act
+      const result = env.resolve(key);
+      // Assert
+      expect(result)
+        .toEqual(expected);
+    });
+    it(`should resolve the fallback variable`, async () => {
+      // Arrange
+      const
+        missing = faker.string.alphanumeric(10),
+        key = faker.string.alphanumeric(10),
+        expected = setEnv(key, faker.string.alphanumeric(10));
+      // Act
+      const result = env.resolve(missing, key);
+      // Assert
+      expect(result)
+        .toEqual(expected);
+    });
+    it(`should resolve the initial variable when the fallback is not found`, async () => {
+      // Arrange
+      const
+        missing = faker.string.alphanumeric(10),
+        key = faker.string.alphanumeric(10),
+        expected = setEnv(key, faker.string.alphanumeric(10));
+      // Act
+      const result = env.resolve(key, missing);
+      // Assert
+      expect(result)
+        .toEqual(expected);
+    });
+    const testVars = {} as Dictionary<string>;
+
+    function setEnv(name: string, value: string) {
+      testVars[name] = value;
+      process.env[name] = value;
+      return value;
+    }
+
+    afterEach(() => {
+      for (const key of Object.keys(testVars)) {
+        delete process.env[key];
+        delete testVars[key];
+      }
+    });
+  });
+
+  describe(`resolveRequired`, () => {
+    it(`should be a function`, async () => {
+      // Arrange
+      // Act
+      expect(env.resolveRequired)
+        .toBeFunction();
+      // Assert
+    });
+    it(`should return the defined environment variable for a single var name`, async () => {
+      // Arrange
+      const
+        key = faker.string.alphanumeric(10),
+        expected = setEnv(key, faker.string.alphanumeric(10));
+      // Act
+      const result = env.resolveRequired(key);
+      // Assert
+      expect(result)
+        .toEqual(expected);
+    });
+    it(`should resolve the fallback variable`, async () => {
+      // Arrange
+      const
+        missing = faker.string.alphanumeric(10),
+        key = faker.string.alphanumeric(10),
+        expected = setEnv(key, faker.string.alphanumeric(10));
+      // Act
+      const result = env.resolveRequired(missing, key);
+      // Assert
+      expect(result)
+        .toEqual(expected);
+    });
+    it(`should resolve the initial variable when the fallback is not found`, async () => {
+      // Arrange
+      const
+        missing = faker.string.alphanumeric(10),
+        key = faker.string.alphanumeric(10),
+        expected = setEnv(key, faker.string.alphanumeric(10));
+      // Act
+      const result = env.resolveRequired(key, missing);
+      // Assert
+      expect(result)
+        .toEqual(expected);
+    });
+    it(`should throw when the environment variable(s) weren't found`, async () => {
+      // Arrange
+      const
+        missing1 = faker.string.alphanumeric(10),
+        missing2 = faker.string.alphanumeric(10)
+      // Act
+      expect(() => env.resolveRequired(missing1, missing2))
+        .toThrow();
+      // Assert
+    });
+
+    const testVars = {} as Dictionary<string>;
+
+    function setEnv(name: string, value: string) {
+      testVars[name] = value;
+      process.env[name] = value;
+      return value;
+    }
+
+    afterEach(() => {
+      for (const key of Object.keys(testVars)) {
+        delete process.env[key];
+        delete testVars[key];
+      }
     });
   });
 });

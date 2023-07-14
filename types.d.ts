@@ -205,7 +205,8 @@ declare global {
     "DOTNET_PUBLISH_ADDITIONAL_EXCLUDE" |
     "DOTNET_PUBLISH_CONTAINER_REGISTRY" |
     "DOTNET_PUBLISH_CONTAINER_IMAGE_TAG" |
-    "DOTNET_PUBLISH_CONTAINER_IMAGE_NAME";
+    "DOTNET_PUBLISH_CONTAINER_IMAGE_NAME" |
+    string; // allow client-side extension, encourage usage of env.associate & env.register
 
   type NumericEnvVar =
     "BUILD_MAX_CPU_COUNT" |
@@ -220,7 +221,8 @@ declare global {
     "RESTORE_RETRIES" |
     "MAX_CONCURRENCY" |
     "DEV_SMTP_PORT" |
-    "DEV_SMTP_INTERFACE_PORT";
+    "DEV_SMTP_INTERFACE_PORT" |
+    string;
 
   type FlagEnvVar =
     "ENABLE_NUGET_PARALLEL_PROCESSING" |
@@ -261,13 +263,14 @@ declare global {
     "DEV_SMTP_IGNORE_ERRORS" |
     "DEV_SMTP_OPEN_INTERFACE" |
     "DOTNET_PUBLISH_CONTAINER" |
-    "ZARRO_ALLOW_FILE_RESOLUTION";
+    "ZARRO_ALLOW_FILE_RESOLUTION" |
+    string;
 
   type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
   type OverrideWhen = (existing: Optional<string>, potential: Optional<string>) => boolean;
 
   interface EnvRegistration {
-    name: keyof Env;
+    name: string | (keyof Env);
     help: string | string[];
     tasks?: string | string[];
     overriddenBy?: string | string[];
@@ -281,8 +284,9 @@ declare global {
     open(url: string): Promise<void>;
   }
 
-  interface Env {
+  interface Env extends Dictionary<any> {
     resolve(...names: (StringEnvVar | VersionIncrementStrategy)[]): string;
+    resolveRequired(...names: (StringEnvVar | VersionIncrementStrategy)[]): string;
     resolveArray(name: AnyEnvVar): string[];
     resolveArray(name: AnyEnvVar, delimiter: string): string[];
     resolveNumber(name: NumericEnvVar): number;
