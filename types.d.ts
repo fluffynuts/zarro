@@ -695,6 +695,13 @@ declare global {
     * you'd like to take full control, set this
      */
     disableAutomaticQuoting?: boolean;
+
+    /**
+     * when set true, output will not be echoed back on the
+     * console but you will be able to get it from a custom
+     * io writer or the result from after spawn completes
+     */
+    suppressOutput?: boolean;
   }
 
   interface SpawnError extends Error {
@@ -713,9 +720,16 @@ declare global {
     stdout: string[];
   }
 
+  interface Linq {
+    last<T>(arr: T[]): Optional<T>;
+    first<T>(arr: T[]): Optional<T>;
+    skip<T>(arr: T[] | IterableIterator<T> , howMany: number): IterableIterator<T>;
+    take<T>(arr: T[] | IterableIterator<T>, howMany: number): IterableIterator<T>;
+  }
+
   type RequireModule = <T>(name: string) => T;
 
-  type SpawnFunction = (program: string, args: string[], options?: SpawnOptions)
+  type SpawnFunction = (program: string, args?: string[], options?: SpawnOptions)
     => Promise<SpawnResult>;
 
   interface Spawn extends SpawnFunction {
