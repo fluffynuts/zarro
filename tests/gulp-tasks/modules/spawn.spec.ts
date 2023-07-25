@@ -57,7 +57,7 @@ describe(`spawn`, () => {
         file = await sandbox.writeFile(fileName, "");
       // Act
       if (isWindows) {
-        await spawn("cmd", [ "/c", "echo", "foo", ">>", file ]);
+        await spawn("cmd", [ "/c", `echo foo >> ${file}` ]);
       } else {
         await spawn("/bin/sh", [ "-c", `echo foo >> ${file}` ]);
       }

@@ -48,7 +48,7 @@ describe(`spawn`, () => {
             const sandbox = await Sandbox.create(), fileName = faker_1.faker.system.fileName(), file = await sandbox.writeFile(fileName, "");
             // Act
             if (isWindows) {
-                await spawn("cmd", ["/c", "echo", "foo", ">>", file]);
+                await spawn("cmd", ["/c", `echo foo >> ${file}`]);
             }
             else {
                 await spawn("/bin/sh", ["-c", `echo foo >> ${file}`]);
