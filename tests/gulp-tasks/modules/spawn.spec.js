@@ -76,4 +76,20 @@ describe(`spawn`, () => {
                 .toEqual("foo");
         });
     });
+    it(`should suppress output on demand`, async () => {
+        // Arrange
+        spyOn(console, "log");
+        spyOn(console, "error");
+        // Act
+        const result = await spawn("npm", ["publish", "--help"], {
+            suppressOutput: true
+        });
+        // Assert
+        expect(result.stdout)
+            .not.toBeEmptyArray();
+        expect(console.log)
+            .not.toHaveBeenCalled();
+        expect(console.error)
+            .not.toHaveBeenCalled();
+    });
 });

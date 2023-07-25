@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.144.27",
+  "version": "1.144.29",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -20,7 +20,7 @@
     "autotest": "nodemon -w gulp-tasks -w tests -w types.d.ts -x \"npm run autotest-once || cd .\" -e ts",
     "autotest-full-once": "run-s clear-console build test",
     "autotest-full": "nodemon -w gulp-tasks -w tests -w types.d.ts -x \"npm run autotest-full-once || cd .\" -e ts",
-    "autobuild": "nodemon -w gulp-tasks -w tests -x \"npm run build || cd .\" -e ts",
+    "autobuild": "nodemon -w gulp-tasks -w tests -i gulp-tasks/modules/fetch-github-release -x \"npm run build || cd .\" -e ts",
     "prestart": "run-s build",
     "start": "node index.js",
     "zarro": "node index.js",
