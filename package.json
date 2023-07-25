@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.144.14",
+  "version": "1.144.16",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -23,18 +23,19 @@
     "autobuild": "nodemon -w gulp-tasks -w tests -x \"npm run build || cd .\" -e ts",
     "prestart": "run-s build",
     "start": "node index.js",
-    "increment-package-version-beta": "cross-env VERSION_INCREMENT_STRATEGY=patch run-s \"start increment-package-json-version\"",
+    "zarro": "node index.js",
+    "increment-package-version-beta": "cross-env VERSION_INCREMENT_STRATEGY=patch run-s \"zarro increment-package-json-version\"",
     "prerelease-beta": "run-s test increment-package-version-beta",
-    "release-beta": "cross-env BETA=1 run-s \"start release-npm\"",
+    "release-beta": "cross-env BETA=1 run-s \"zarro release-npm\"",
     "prerelease": "run-s verify-up-to-date test",
-    "release": "cross-env VERSION_INCREMENT_STRATEGY=minor run-s \"start release-npm\"",
+    "release": "cross-env VERSION_INCREMENT_STRATEGY=minor run-s \"zarro release-npm\"",
     "pull-gulp-tasks": "cd gulp-tasks && git checkout master && git pull --rebase",
     "pull-repo-root": "git pull --rebase",
     "pull": "run-s pull-gulp-tasks pull-repo-root",
     "build": "tsc",
     "gulp": "gulp",
     "test-npm-gulp-task": "echo \"this is a test\"",
-    "verify-up-to-date": "run-s \"start -- verify-up-to-date\""
+    "verify-up-to-date": "run-s \"zarro -- verify-up-to-date\""
   },
   "dependencies": {
     "ansi-colors": "^4.1.1",
