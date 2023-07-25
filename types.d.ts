@@ -109,6 +109,21 @@ declare global {
     runTask: RunTaskFn;
   }
 
+  interface TemporaryEnvironmentRunner {
+    run<T>(fn: (() => T | Promise<T>)): Promise<T>;
+  }
+  type WithEnvironment = (
+    env: Dictionary<string>,
+    /**
+     * If you'd like to replace the entire environment instead of augmenting it,
+     * set this to true
+     */
+    replaceExistingEnvironment?: boolean
+  ) => TemporaryEnvironmentRunner;
+  type TemporaryEnvironment = {
+    withEnvironment: WithEnvironment;
+  }
+
   type Gulp = GulpWithHelp;
   interface GulpVersion {
     major: number;
