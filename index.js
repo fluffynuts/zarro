@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // TODO: this file should be verified as having unix line-endings
 const
-  { fileExists, readTextFileLines } = require("yafs"),
+  { fileExists, readTextFileLines, writeTextFile } = require("yafs"),
   path = require("path"),
   debug = require("debug")("zarro"),
   { ZarroError } = require("./gulp-tasks/modules/zarro-error"),
@@ -35,12 +35,19 @@ async function findHandlerFor(args) {
   return null;
 }
 
+const defaultsFile = ".zarro-defaults";
+
+async function createZarroDefaultsEmpty() {
+  await writeTextFile(defaultsFile, `# zarro defaults file:
+# place one VARIABLE=VALUE per line below
+`);
+}
+
 async function loadDefaults() {
   const
-    defaultsFile = ".zarro-defaults",
     exists = await fileExists(defaultsFile);
   if (!exists) {
-
+    await createZarroDefaultsEmpty();
     return;
   }
   const
