@@ -34,14 +34,7 @@ async function push(dryRun, where) {
         where
     });
 }
-gulp.task("release.old", [
-    "increment-package-json-version"
-], async () => {
-    const dryRun = env.resolveFlag("DRY_RUN");
-    await tryPublish(dryRun);
-    await tagRelease(dryRun);
-});
-gulp.task("tag-release", async () => {
+gulp.task("git-tag-and-push", async () => {
     const dryRun = env.resolveFlag("DRY_RUN");
     await tagRelease(dryRun);
 });
@@ -63,7 +56,8 @@ async function tagRelease(dryRun) {
             where: "gulp-tasks"
         }),
     ]);
-    // can push in parallel
+    // can push in parallel, if it's quick enough so that the GH action doesn't
+    // fail to get the submodule...
     await Promise.all([
         push(dryRun, "."),
         push(dryRun, "gulp-tasks")
