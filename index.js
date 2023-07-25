@@ -40,13 +40,24 @@ async function loadDefaults() {
     defaultsFile = ".zarro-defaults",
     exists = await fileExists(defaultsFile);
   if (!exists) {
+
     return;
   }
   const
     lines = await readTextFileLines(defaultsFile);
   for (const line of lines) {
     const
-      parts = line.trim().split("="),
+      [ code, comment ] = splitComment(line);
+    if (isEmpty(code)) {
+      // comment-only line or empty line
+      continue;
+    }
+    if (looksInvalid(code)) {
+      console.warn(`invalid config line in ${defaultsFile}:\n${line}`);
+      continue;
+    }
+    const
+      parts = code.trim().split("="),
       name = parts[0],
       value = Array.from(skip(parts, 1)).join("=");
     debug(`setting env var ${name} to ${value}`);
@@ -54,10 +65,29 @@ async function loadDefaults() {
   }
 }
 
+function looksInvalid(code) {
+  return (code || "").indexOf("=") === -1;
+}
+
+function isEmpty(text) {
+  return (text || "").trim() === "";
+}
+
+function splitComment(line) {
+  if (!line) {
+    return [ "", "" ];
+  }
+  const idx = line.indexOf("#");
+  if (idx === -1) {
+    return [ line, "" ];
+  }
+  return [ line.substring(0, idx), line.substring(idx + 1) ];
+}
+
 (async function () {
   try {
     await loadDefaults();
-    const args = await gatherArgs([path.join(path.dirname(__dirname), ".bin", "zarro"), __filename]);
+    const args = await gatherArgs([ path.join(path.dirname(__dirname), ".bin", "zarro"), __filename ]);
     const handler = await findHandlerFor(args);
     if (!handler) {
       throw new ZarroError("no handler for current args");
