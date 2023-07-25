@@ -299,6 +299,7 @@ declare global {
     "DEV_SMTP_OPEN_INTERFACE" |
     "DOTNET_PUBLISH_CONTAINER" |
     "ZARRO_ALLOW_FILE_RESOLUTION" |
+    "NPM_PUBLISH_SKIP_OTP" |
     string;
 
   type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
@@ -444,6 +445,7 @@ declare global {
     DEV_SMTP_OPEN_INTERFACE: FlagEnvVar;
     DOTNET_PUBLISH_CONTAINER: FlagEnvVar;
     ZARRO_ALLOW_FILE_RESOLUTION: FlagEnvVar;
+    NPM_PUBLISH_SKIP_OTP: FlagEnvVar;
 
     BUILD_MAX_CPU_COUNT: NumericEnvVar;
     MAX_NUNIT_AGENTS: NumericEnvVar;

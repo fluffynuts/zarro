@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 // TODO: this file should be verified as having unix line-endings
 const
-  { fileExists, readTextFile } = require("yafs"),
+  { fileExists, readTextFileLines } = require("yafs"),
   path = require("path"),
   debug = require("debug")("zarro"),
   { ZarroError } = require("./gulp-tasks/modules/zarro-error"),
+  { skip, take } = require("./gulp-tasks/modules/linq"),
   gatherArgs = require("./index-modules/gather-args");
 
 function requireHandler(name) {
@@ -42,8 +43,15 @@ async function loadDefaults() {
     return;
   }
   const
-    contents = await readTextFile(defaultsFile);
-  // TODO: read line per line, parsing out env vars of the format VAR=VALUE
+    lines = await readTextFileLines(defaultsFile);
+  for (const line of lines) {
+    const
+      parts = line.trim().split("="),
+      name = parts[0],
+      value = Array.from(skip(parts, 1)).join("=");
+    debug(`setting env var ${name} to ${value}`);
+    process.env[name] = value;
+  }
 }
 
 (async function () {
