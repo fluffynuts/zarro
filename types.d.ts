@@ -112,8 +112,11 @@ declare global {
   interface TemporaryEnvironmentRunner {
     run<T>(fn: (() => T | Promise<T>)): Promise<T>;
   }
+  interface EnvDictionary {
+    [key: AnyEnvVar | string]: string;
+  }
   type WithEnvironment = (
-    env: Dictionary<string>,
+    env: EnvDictionary,
     /**
      * If you'd like to replace the entire environment instead of augmenting it,
      * set this to true
@@ -237,7 +240,7 @@ declare global {
     "DOTNET_PUBLISH_CONTAINER_IMAGE_NAME" |
     "TAG" |
     "GIT_TAG" |
-    "GIT_TAG_COMMIT_MESSAGE" |
+    "GIT_VERSION_INCREMENT_MESSAGE" |
     string; // allow client-side extension, encourage usage of env.associate & env.register
 
   type NumericEnvVar =
@@ -400,7 +403,7 @@ declare global {
     DOTNET_PUBLISH_CONTAINER_IMAGE_NAME: StringEnvVar;
     TAG: StringEnvVar;
     GIT_TAG: StringEnvVar;
-    GIT_TAG_COMMIT_MESSAGE: StringEnvVar;
+    GIT_VERSION_INCREMENT_MESSAGE: StringEnvVar;
 
     ENABLE_NUGET_PARALLEL_PROCESSING: FlagEnvVar;
     BUILD_SHOW_INFO: FlagEnvVar;
@@ -463,6 +466,10 @@ declare global {
     currentGitSHA(): string;
     currentShortSHA(): string;
     fetchGitSha(): Promise<string>;
+  }
+
+  interface ZarroError {
+    new(message: string): ZarroError;
   }
 
   // module defs: get these via requireModule<T>("module-name");
