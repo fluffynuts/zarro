@@ -99,9 +99,23 @@ declare global {
 
     src(mask: string | string[]): NodeJS.ReadableStream;
     dest(target: string): NodeJS.WritableStream;
+
+    series(...tasks: string[]): (fn: Function) => void;
+  }
+
+  type RunSequence = (...args: (string|Function)[]) => void;
+  type RunTaskFn = (task: string) => Promise<void>;
+  interface RunTask {
+    runTask: RunTaskFn;
   }
 
   type Gulp = GulpWithHelp;
+  interface GulpVersion {
+    major: number;
+    minor: number;
+    patch: number;
+  }
+  type SetTaskName = (task: any, name: string) => any;
 
   type StringMap = (input: string) => string;
 
@@ -206,6 +220,9 @@ declare global {
     "DOTNET_PUBLISH_CONTAINER_REGISTRY" |
     "DOTNET_PUBLISH_CONTAINER_IMAGE_TAG" |
     "DOTNET_PUBLISH_CONTAINER_IMAGE_NAME" |
+    "TAG" |
+    "GIT_TAG" |
+    "GIT_TAG_COMMIT_MESSAGE" |
     string; // allow client-side extension, encourage usage of env.associate & env.register
 
   type NumericEnvVar =
@@ -366,6 +383,9 @@ declare global {
     DOTNET_PUBLISH_CONTAINER_REGISTRY: StringEnvVar;
     DOTNET_PUBLISH_CONTAINER_IMAGE_TAG: StringEnvVar;
     DOTNET_PUBLISH_CONTAINER_IMAGE_NAME: StringEnvVar;
+    TAG: StringEnvVar;
+    GIT_TAG: StringEnvVar;
+    GIT_TAG_COMMIT_MESSAGE: StringEnvVar;
 
     ENABLE_NUGET_PARALLEL_PROCESSING: FlagEnvVar;
     BUILD_SHOW_INFO: FlagEnvVar;

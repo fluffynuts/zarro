@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const os = require("os"), requireModule = require("../../gulp-tasks/modules/require-module"), chalk = requireModule("ansi-colors"), quoteIfRequired = requireModule("quote-if-required"), which = require("which"), { splitPath } = requireModule("path-utils"), path = require("path"), isFile = require("../is-file"), isDir = require("../is-dir"), env = requireModule("env"), debug = require("debug")("zarro::invoke-gulp"), projectDir = path.dirname(path.dirname(__dirname)), { ZarroError } = requireModule("zarro-error"), spawn = requireModule("spawn");
+    const os = require("os"), requireModule = require("../../gulp-tasks/modules/require-module"), chalk = requireModule("ansi-colors"), quoteIfRequired = requireModule("quote-if-required"), which = require("which"), { splitPath } = requireModule("path-utils"), path = require("path"), isFile = require("../is-file"), isDir = require("../is-dir"), debug = require("debug")("zarro::invoke-gulp"), projectDir = path.dirname(path.dirname(__dirname)), { ZarroError } = requireModule("zarro-error"), spawn = requireModule("spawn");
     function alwaysAccept() {
         return true;
     }
@@ -54,6 +54,9 @@
         }
     }
     async function invokeGulp(args, opts) {
+        if (args && args.length === 1 && args[0] === "@") {
+            args[0] = process.env.npm_lifecycle_event;
+        }
         const gulp = await findGulp(), gulpTasksFolder = path.join(projectDir, "gulp-tasks"), gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"), cwd = process.cwd(), envVars = Object.assign({}, process.env, {
             GULP_TASKS_FOLDER: gulpTasksFolder,
             RUNNING_AS_ZARRO: 1
@@ -69,6 +72,7 @@
         ].concat(args);
         debug({
             label: "running gulp with",
+            gulp,
             allArgs
         });
         return spawn(gulp, allArgs, Object.assign({ env: envVars, cwd, 

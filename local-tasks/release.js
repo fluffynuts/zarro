@@ -34,7 +34,7 @@ async function push(dryRun, where) {
         where
     });
 }
-gulp.task("release", [
+gulp.task("release.old", [
     "increment-package-json-version"
 ], async () => {
     const dryRun = env.resolveFlag("DRY_RUN");

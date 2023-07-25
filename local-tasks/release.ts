@@ -52,7 +52,7 @@ async function push(
   });
 }
 
-gulp.task("release", [
+gulp.task("release.old", [
   "increment-package-json-version"
 ], async () => {
   const

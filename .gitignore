@@ -88,3 +88,4 @@ typings/
 *.swp
 __build__
 __sandboxes__
+gulp-tasks/modules/fetch-github-release/src/**/*.js
