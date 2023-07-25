@@ -2,7 +2,6 @@ import "expect-even-more-jest"
 
 const { Sandbox } = require("filesystem-sandbox");
 import { faker } from "@faker-js/faker";
-import * as path from "path";
 import { readTextFile } from "yafs";
 
 describe(`spawn`, () => {
@@ -60,7 +59,7 @@ describe(`spawn`, () => {
       if (isWindows) {
         await spawn("cmd", [ "/c", "echo", "foo", ">>", file ]);
       } else {
-        await spawn("/bin/sh", [ "-c", "echo", "foo", ">>", file ]);
+        await spawn("/bin/sh", [ "-c", `echo foo >> ${file}` ]);
       }
       // Assert
       const contents = await readTextFile(file);

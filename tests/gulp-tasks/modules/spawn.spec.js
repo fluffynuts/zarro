@@ -51,7 +51,7 @@ describe(`spawn`, () => {
                 await spawn("cmd", ["/c", "echo", "foo", ">>", file]);
             }
             else {
-                await spawn("/bin/sh", ["-c", "echo", "foo", ">>", file]);
+                await spawn("/bin/sh", ["-c", `echo foo >> ${file}`]);
             }
             // Assert
             const contents = await (0, yafs_1.readTextFile)(file);
