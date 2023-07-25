@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.144.23",
+  "version": "1.144.25",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -32,7 +32,9 @@
     "pull-gulp-tasks": "cd gulp-tasks && git checkout master && git pull --rebase",
     "pull-repo-root": "git pull --rebase",
     "pull": "run-s pull-gulp-tasks pull-repo-root",
-    "build": "tsc",
+    "build": "run-p build-zarro build-fetch-github-release",
+    "build-zarro": "tsc",
+    "build-fetch-github-release": "tsc -p gulp-tasks/modules/fetch-github-release/tsconfig.json",
     "gulp": "gulp",
     "test-npm-gulp-task": "echo \"this is a test\"",
     "verify-up-to-date": "run-s \"zarro -- verify-up-to-date\""
