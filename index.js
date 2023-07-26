@@ -66,9 +66,15 @@ async function loadDefaults() {
     const
       parts = code.trim().split("="),
       name = parts[0],
-      value = Array.from(skip(parts, 1)).join("=");
-    debug(`setting env var ${name} to ${value}`);
-    process.env[name] = value;
+      value = Array.from(skip(parts, 1)).join("="),
+      forced = name[0] === '!',
+      notYetSet = process.env[name] === undefined;
+    if (notYetSet || forced) {
+      debug(`setting env var ${name} to ${value}`);
+      process.env[name.replace(/^!/, "")] = value;
+    } else {
+      debug(`env var ${name} is already set, force it by setting !${name}=${value} in ${defaultsFile}`)
+    }
   }
 }
 
