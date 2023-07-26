@@ -116,7 +116,7 @@ declare global {
     interface GulpWithHelp {
         task(name: string, callback: GulpCallback): void;
         task(name: string, help: string, callback: GulpCallback): void;
-        task(name: string, dependencies: string[], callback: GulpCallback): void;
+        task(name: string, dependencies: string[], callback?: GulpCallback): void;
 
         src(mask: string | string[]): NodeJS.ReadableStream;
         dest(target: string): NodeJS.WritableStream;
