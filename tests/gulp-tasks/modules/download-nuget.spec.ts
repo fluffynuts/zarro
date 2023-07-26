@@ -2,7 +2,6 @@ import "expect-even-more-jest";
 import { Sandbox } from "filesystem-sandbox";
 import * as path from "path";
 import { fileExists } from "yafs";
-import { ZarroLogger } from "../../../types";
 
 describe(`download-nuget`, () => {
   const downloadNuget = require("../../../gulp-tasks/modules/download-nuget");

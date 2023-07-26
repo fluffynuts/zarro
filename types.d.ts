@@ -9,53 +9,57 @@ import { ExecFileOptionsWithBufferEncoding } from "child_process";
 import { IoConsumer, IoHandlers } from "./gulp-tasks/modules/exec";
 import { StatsBase } from "fs";
 import * as vinyl from "vinyl";
+// noinspection ES6PreferShortImport
+import { FetchReleaseOptions } from "./gulp-tasks/modules/fetch-github-release/src";
 
-// copied out of @types/fancy-log because imports are being stupid
-interface Logger {
-  (...args: any[]): Logger;
-  dir(...args: any[]): Logger;
-  error(...args: any[]): Logger;
-  info(...args: any[]): Logger;
-  warn(...args: any[]): Logger;
-}
-
-interface LogLevels {
-  Debug: string;
-  Info: string;
-  Notice: string;
-  Warning: string;
-  Error: string;
-}
-
-declare enum LogThreshold {
-  debug = 1,
-  info = 2,
-  notice = 3,
-  warning = 4,
-  error = 5
-}
-
-interface ZarroLogger {
-  LogLevels: LogLevels;
-  threshold: LogThreshold;
-
-  setThreshold(threshold: number | string): void;
-  debug(...args: any[]): void;
-  info(...args: any[]): void;
-  notice(...args: any[]): void;
-  warning(...args: any[]): void;
-  error(...args: any[]): void;
-
-  fail(...args: any[]): void;
-  ok(...args: any[]): void;
-  notice(...args: any[]): void;
-  suppressTimestamps(): void;
-  showTimestamps(): void;
-
-}
+export * from "./gulp-tasks/modules/fetch-github-release/src";
 
 declare global {
   function requireModule<T>(module: string): T;
+
+// copied out of @types/fancy-log because imports are being stupid
+  interface Logger {
+    (...args: any[]): Logger;
+    dir(...args: any[]): Logger;
+    error(...args: any[]): Logger;
+    info(...args: any[]): Logger;
+    warn(...args: any[]): Logger;
+  }
+
+  interface LogLevels {
+    Debug: string;
+    Info: string;
+    Notice: string;
+    Warning: string;
+    Error: string;
+  }
+
+  enum LogThreshold {
+    debug = 1,
+    info = 2,
+    notice = 3,
+    warning = 4,
+    error = 5
+  }
+
+  interface ZarroLogger {
+    LogLevels: LogLevels;
+    threshold: LogThreshold;
+
+    setThreshold(threshold: number | string): void;
+    debug(...args: any[]): void;
+    info(...args: any[]): void;
+    notice(...args: any[]): void;
+    warning(...args: any[]): void;
+    error(...args: any[]): void;
+
+    fail(...args: any[]): void;
+    ok(...args: any[]): void;
+    notice(...args: any[]): void;
+    suppressTimestamps(): void;
+    showTimestamps(): void;
+
+  }
 
   type VoidVoid = () => void;
   type AsyncVoidVoid = () => Promise<void>;
@@ -103,8 +107,9 @@ declare global {
     series(...tasks: string[]): (fn: Function) => void;
   }
 
-  type RunSequence = (...args: (string|Function)[]) => void;
+  type RunSequence = (...args: (string | Function)[]) => void;
   type RunTaskFn = (task: string) => Promise<void>;
+
   interface RunTask {
     runTask: RunTaskFn;
   }
@@ -112,9 +117,11 @@ declare global {
   interface TemporaryEnvironmentRunner {
     run<T>(fn: (() => T | Promise<T>)): Promise<T>;
   }
+
   interface EnvDictionary {
     [key: AnyEnvVar | string]: string;
   }
+
   type WithEnvironment = (
     env: EnvDictionary,
     /**
@@ -128,11 +135,13 @@ declare global {
   }
 
   type Gulp = GulpWithHelp;
+
   interface GulpVersion {
     major: number;
     minor: number;
     patch: number;
   }
+
   type SetTaskName = (task: any, name: string) => any;
 
   type StringMap = (input: string) => string;
@@ -767,7 +776,7 @@ declare global {
   interface Linq {
     last<T>(arr: T[]): Optional<T>;
     first<T>(arr: T[]): Optional<T>;
-    skip<T>(arr: T[] | IterableIterator<T> , howMany: number): IterableIterator<T>;
+    skip<T>(arr: T[] | IterableIterator<T>, howMany: number): IterableIterator<T>;
     take<T>(arr: T[] | IterableIterator<T>, howMany: number): IterableIterator<T>;
   }
 
@@ -964,6 +973,11 @@ declare global {
     pack: GulpDotNetPackFunction;
     nugetPush: GulpDotNetNugetPushFunction;
     publish: GulpDotNetPublishFunction;
+  }
+
+  interface FetchGithubRelease {
+    fetchLatestRelease(options: Omit<FetchReleaseOptions, "getRelease">): Promise<string[]>
+    fetchReleaseByTag(options: Omit<FetchReleaseOptions, "getRelease"> & { tag: string; }): Promise<string[]>;
   }
 
   // scraped from https://spdx.org/licenses/
@@ -1354,3 +1368,4 @@ declare global {
     "ZPL-2.0" |
     "ZPL-2.1"
 }
+
