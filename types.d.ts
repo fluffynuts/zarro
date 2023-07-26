@@ -75,6 +75,8 @@ declare global {
   type ResolveNuget = (nugetPath: Optional<string>, errorOnMissing: boolean) => string;
   type FindLocalNuget = () => Promise<string>;
 
+  type Fetch = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+
   interface Streamify {
     streamify<T>(
       fn: AsyncTVoid<T>,
