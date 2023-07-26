@@ -19,7 +19,22 @@ describe("dotnet-cli", () => {
     realSpawn = require("../../../gulp-tasks/modules/spawn"),
     spawn = jest.fn().mockImplementation((exe, args, opts) => {
       if (args[0] == "nuget" && args[1] == "list") {
-        return realSpawn(exe, args, opts)
+        const result = {
+          stdout: [
+            "Registered Sources:",
+            "  1.  nuget.org [Enabled]",
+            "      https://api.nuget.org/v3/index.json",
+            "  2.  custom [Enabled]",
+            "      https://nuget.custom-domain.com/nuget",
+            "  3.  Microsoft Visual Studio Offline Packages [Enabled]",
+            "      C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\"
+          ],
+          stderr: [],
+          exitCode: 0,
+          args: [ "list" ],
+          executable: "nuget.exe"
+        } as SpawnResult;
+        return result;
       }
       return Promise.resolve({
         executable: exe,
