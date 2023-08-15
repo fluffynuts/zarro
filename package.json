@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.144.55",
+  "version": "1.144.57",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -72,6 +72,7 @@
     "simple-git": "^3.15.0",
     "temp": "^0.9.4",
     "through2": "^3.0.2",
+    "ts-node": "^10.9.1",
     "undertaker-forward-reference": "^1.0.2",
     "unfetch": "^5.0.0",
     "vinyl": "^2.2.1",
