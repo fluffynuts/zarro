@@ -499,8 +499,11 @@ declare global {
         fetchGitSha(): Promise<string>;
     }
 
-    interface ZarroError {
+    interface ZarroError extends Error {
         new(message: string): ZarroError;
+    }
+    interface ZarroErrorModule {
+
     }
 
     // module defs: get these via requireModule<T>("module-name");

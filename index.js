@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 // TODO: this file should be verified as having unix line-endings
-require("ts-node/register/transpile-only");
+try {
+  // optimistically attempt to support typescript
+  require("typescript");
+  require("ts-node/register/transpile-only");
+} catch (e) {
+}
+
 const
   { fileExists, readTextFileLines, writeTextFile } = require("yafs"),
   path = require("path"),
