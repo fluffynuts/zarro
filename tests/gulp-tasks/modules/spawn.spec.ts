@@ -22,7 +22,7 @@ describe(`spawn`, () => {
   describe(`given command`, () => {
     it(`should run single command item`, async () => {
       // Arrange
-      spyOn(console, "log");
+      jest.spyOn(console, "log");
       // Act
       await expect(spawn("whoami"))
         .resolves.not.toThrow();
@@ -30,7 +30,7 @@ describe(`spawn`, () => {
     });
     it(`should return the output from the command item`, async () => {
       // Arrange
-      spyOn(console, "log");
+      jest.spyOn(console, "log");
       const
         username = (os.userInfo().username as string).toLowerCase();
       // Act
@@ -90,8 +90,8 @@ describe(`spawn`, () => {
 
   it(`should suppress output on demand`, async () => {
     // Arrange
-    spyOn(console, "log");
-    spyOn(console, "error");
+    jest.spyOn(console, "log");
+    jest.spyOn(console, "error");
     // Act
     const result = await spawn("npm", [ "publish", "--help" ], {
       suppressOutput: true

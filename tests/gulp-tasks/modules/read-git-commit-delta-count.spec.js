@@ -18,11 +18,11 @@ describe(`read-git-commit-delta-count`, () => {
     });
     beforeEach(() => {
         jest.setTimeout(10000);
-        spyOn(console, "debug").and.callThrough();
-        spyOn(console, "log").and.callThrough();
-        spyOn(console, "info").and.callThrough();
-        spyOn(console, "warn").and.callThrough();
-        spyOn(console, "error").and.callThrough();
+        spyOn(console, "debug");
+        spyOn(console, "log");
+        spyOn(console, "info");
+        spyOn(console, "warn");
+        spyOn(console, "error");
         try {
             sut = sut || requireModule("read-git-commit-delta-count");
         }
