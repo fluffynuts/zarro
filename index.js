@@ -8,7 +8,7 @@ try {
 }
 
 const
-  { fileExists, readTextFileLines, writeTextFile } = require("yafs"),
+  { FsEntities, stat, ls, readTextFile, fileExists, folderExists, readTextFileLines, writeTextFile } = require("yafs"),
   path = require("path"),
   debug = require("debug")("zarro"),
   { ZarroError } = require("./gulp-tasks/modules/zarro-error"),
@@ -109,10 +109,60 @@ function splitComment(line) {
   }
   return [ line.substring(0, idx), line.substring(idx + 1) ];
 }
+async function transpileLocalTasks() {
+  const toTranspile = [];
+  for (const dirname of [ "local-tasks", "override-tasks" ]) {
+    const fullPath = path.join(process.cwd(), dirname);
+    if (await folderExists(fullPath)) {
+      const contents = await ls(dirname, {
+        recurse: true,
+        entities: FsEntities.files,
+        match: /\.ts$/,
+        fullPaths: true
+      });
+      for (const item of contents) {
+        toTranspile.push(item);
+      }
+    }
+  }
+
+  if (toTranspile.length === 0) {
+    debug(`no typescript modules found; skipping transpile phase.`);
+    return;
+  }
+
+  try {
+    const typescript = require("typescript");
+    for (const item of toTranspile) {
+      const output = item.replace(/\.ts/, ".generated.js");
+      if (await fileExists(output)) {
+        const itemStat = await stat(item);
+        const outputStat = await stat(output);
+        if (itemStat.mtime <= outputStat.mtime) {
+          debug(`${item} modified after ${output}; skipping transpile`);
+          continue;
+        }
+      }
+      debug(`transpiling ${item}`);
+      const contents = await readTextFile(item);
+      const transpiled = typescript.transpileModule(contents, {
+        compilerOptions: {
+          esModuleInterop: true,
+          module: typescript.ModuleKind.CommonJS
+        }
+      }).outputText;
+      debug(`writing transpiled file: ${output}`);
+      await writeTextFile(output, transpiled);
+    }
+  } catch (e) {
+    console.error(`one or more typescript modules could not be transpiled:\n${e}`);
+  }
+}
 
 (async function () {
   try {
     await loadDefaults();
+    await transpileLocalTasks();
     const args = await gatherArgs([ path.join(path.dirname(__dirname), ".bin", "zarro"), __filename ]);
     const handler = await findHandlerFor(args);
     if (!handler) {
