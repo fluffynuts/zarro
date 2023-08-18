@@ -15,6 +15,7 @@ describe(`env`, () => {
       expect(result)
         .toEqual([]);
     });
+
     it(`should resolve the comma-delimited array`, async () => {
       // Arrange
       const
@@ -22,7 +23,76 @@ describe(`env`, () => {
         key = faker.string.sample(10),
         envVar = values.join(",");
       // Act
-      process.env[key] = envVar;
+      setEnv(key, envVar);
+      const result = env.resolveArray(key as AnyEnvVar);
+      // Assert
+      expect(result)
+        .toEqual(values);
+    });
+
+    it(`should resolve the comma-delimited array from the first defined var`, async () => {
+      // Arrange
+      const
+        values = [ faker.word.sample(), faker.word.sample(), faker.word.sample() ],
+        missingKey = faker.string.sample(10),
+        key = faker.string.sample(10),
+        envVar = values.join(",");
+      // Act
+      setEnv(key, envVar);
+      const result = env.resolveArray([ missingKey, key] as AnyEnvVar[]);
+      // Assert
+      expect(result)
+        .toEqual(values);
+    });
+
+    it(`should resolve the array with custom delimiter`, async () => {
+      // Arrange
+      const
+        values = [ faker.word.sample(), faker.word.sample(), faker.word.sample() ],
+        key = faker.string.sample(10),
+        delimiter = faker.helpers.arrayElement([ ";", ":", "/" ]),
+        envVar = values.join(delimiter);
+      // Act
+      setEnv(key, envVar);
+      const result = env.resolveArray(key as AnyEnvVar, delimiter);
+      // Assert
+      expect(result)
+        .toEqual(values);
+    });
+
+    function setEnv(name: string, value: string) {
+      process.env[name] = value;
+      cleanVars.push(name);
+    }
+
+    const cleanVars = [] as string[];
+    afterEach(() => {
+      for (const v of cleanVars) {
+        delete process.env[v];
+      }
+      cleanVars.splice(0, cleanVars.length);
+    });
+  });
+
+  describe(`resolveMergedArray`, () => {
+    it(`should resolve undefined var to []`, async () => {
+      // Arrange
+      const name = "moo_cakes";
+      delete process.env[name];
+      // Act
+      const result = env.resolveArray(name as StringEnvVar);
+      // Assert
+      expect(result)
+        .toEqual([]);
+    });
+    it(`should resolve the comma-delimited array`, async () => {
+      // Arrange
+      const
+        values = [ faker.word.sample(), faker.word.sample(), faker.word.sample() ],
+        key = faker.string.sample(10),
+        envVar = values.join(",");
+      // Act
+      setEnv(key, envVar);
       const result = env.resolveArray(key as AnyEnvVar);
       // Assert
       expect(result)
@@ -36,13 +106,43 @@ describe(`env`, () => {
         delimiter = faker.helpers.arrayElement([ ";", ":", "/" ]),
         envVar = values.join(delimiter);
       // Act
-      process.env[key] = envVar;
+      setEnv(key, envVar);
       const result = env.resolveArray(key as AnyEnvVar, delimiter);
       // Assert
       expect(result)
         .toEqual(values);
     });
+
+    it(`should resolve merged array from all env vars`, async () => {
+      // Arrange
+      const
+        k1 = faker.word.sample(),
+        v1 = [ faker.word.sample(), faker.word.sample() ],
+        k2 = faker.word.sample(),
+        v2 = [ faker.word.sample() ];
+      setEnv(k1, v1.join(","));
+      setEnv(k2, v2.join(","));
+      // Act
+      const result = env.resolveMergedArray([ k1, k2 ]);
+      // Assert
+      expect(result)
+        .toEqual(v1.concat(v2));
+    });
+
+    function setEnv(name: string, value: string) {
+      process.env[name] = value;
+      cleanVars.push(name);
+    }
+
+    const cleanVars = [] as string[];
+    afterEach(() => {
+      for (const v of cleanVars) {
+        delete process.env[v];
+      }
+      cleanVars.splice(0, cleanVars.length);
+    });
   });
+
   describe(`resolveMap`, () => {
     it(`should resolve empty var to empty object`, async () => {
       // Arrange

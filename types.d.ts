@@ -352,8 +352,8 @@ declare global {
     interface Env extends Dictionary<any> {
         resolve(...names: (StringEnvVar | VersionIncrementStrategy)[]): string;
         resolveRequired(...names: (StringEnvVar | VersionIncrementStrategy)[]): string;
-        resolveArray(name: AnyEnvVar): string[];
-        resolveArray(name: AnyEnvVar, delimiter: string): string[];
+        resolveArray(name: AnyEnvVar | AnyEnvVar[], delimiter?: string): string[];
+        resolveMergedArray(name: AnyEnvVar | AnyEnvVar[], delimiter?: string): string[];
         resolveNumber(name: NumericEnvVar): number;
         resolveFlag(name: FlagEnvVar): boolean;
         associate(varName: AnyEnvVar | AnyEnvVar[], tasks: string | string[]): void;

@@ -20,7 +20,60 @@ describe(`env`, () => {
             // Arrange
             const values = [faker_1.faker.word.sample(), faker_1.faker.word.sample(), faker_1.faker.word.sample()], key = faker_1.faker.string.sample(10), envVar = values.join(",");
             // Act
-            process.env[key] = envVar;
+            setEnv(key, envVar);
+            const result = env.resolveArray(key);
+            // Assert
+            expect(result)
+                .toEqual(values);
+        });
+        it(`should resolve the comma-delimited array from the first defined var`, async () => {
+            // Arrange
+            const values = [faker_1.faker.word.sample(), faker_1.faker.word.sample(), faker_1.faker.word.sample()], missingKey = faker_1.faker.string.sample(10), key = faker_1.faker.string.sample(10), envVar = values.join(",");
+            // Act
+            setEnv(key, envVar);
+            const result = env.resolveArray([missingKey, key]);
+            // Assert
+            expect(result)
+                .toEqual(values);
+        });
+        it(`should resolve the array with custom delimiter`, async () => {
+            // Arrange
+            const values = [faker_1.faker.word.sample(), faker_1.faker.word.sample(), faker_1.faker.word.sample()], key = faker_1.faker.string.sample(10), delimiter = faker_1.faker.helpers.arrayElement([";", ":", "/"]), envVar = values.join(delimiter);
+            // Act
+            setEnv(key, envVar);
+            const result = env.resolveArray(key, delimiter);
+            // Assert
+            expect(result)
+                .toEqual(values);
+        });
+        function setEnv(name, value) {
+            process.env[name] = value;
+            cleanVars.push(name);
+        }
+        const cleanVars = [];
+        afterEach(() => {
+            for (const v of cleanVars) {
+                delete process.env[v];
+            }
+            cleanVars.splice(0, cleanVars.length);
+        });
+    });
+    describe(`resolveMergedArray`, () => {
+        it(`should resolve undefined var to []`, async () => {
+            // Arrange
+            const name = "moo_cakes";
+            delete process.env[name];
+            // Act
+            const result = env.resolveArray(name);
+            // Assert
+            expect(result)
+                .toEqual([]);
+        });
+        it(`should resolve the comma-delimited array`, async () => {
+            // Arrange
+            const values = [faker_1.faker.word.sample(), faker_1.faker.word.sample(), faker_1.faker.word.sample()], key = faker_1.faker.string.sample(10), envVar = values.join(",");
+            // Act
+            setEnv(key, envVar);
             const result = env.resolveArray(key);
             // Assert
             expect(result)
@@ -30,11 +83,33 @@ describe(`env`, () => {
             // Arrange
             const values = [faker_1.faker.word.sample(), faker_1.faker.word.sample(), faker_1.faker.word.sample()], key = faker_1.faker.string.sample(10), delimiter = faker_1.faker.helpers.arrayElement([";", ":", "/"]), envVar = values.join(delimiter);
             // Act
-            process.env[key] = envVar;
+            setEnv(key, envVar);
             const result = env.resolveArray(key, delimiter);
             // Assert
             expect(result)
                 .toEqual(values);
+        });
+        it(`should resolve merged array from all env vars`, async () => {
+            // Arrange
+            const k1 = faker_1.faker.word.sample(), v1 = [faker_1.faker.word.sample(), faker_1.faker.word.sample()], k2 = faker_1.faker.word.sample(), v2 = [faker_1.faker.word.sample()];
+            setEnv(k1, v1.join(","));
+            setEnv(k2, v2.join(","));
+            // Act
+            const result = env.resolveMergedArray([k1, k2]);
+            // Assert
+            expect(result)
+                .toEqual(v1.concat(v2));
+        });
+        function setEnv(name, value) {
+            process.env[name] = value;
+            cleanVars.push(name);
+        }
+        const cleanVars = [];
+        afterEach(() => {
+            for (const v of cleanVars) {
+                delete process.env[v];
+            }
+            cleanVars.splice(0, cleanVars.length);
         });
     });
     describe(`resolveMap`, () => {
