@@ -25,42 +25,26 @@ describe(`resolve-masks`, () => {
             setEnv(k4, v4.join(","));
             let result = [];
             // Act
-            try {
-                result = sut([k1, k2], [k3, k4]);
-                // Assert
-                expect(result)
-                    .toHaveLength(8);
-                expect(result)
-                    .toContain(`**/${v1[0]}`);
-                expect(result)
-                    .toContain(`**/${v1[1]}`);
-                expect(result)
-                    .toContain(`**/${v2[0]}`);
-                expect(result)
-                    .toContain(`**/${v2[1]}`);
-                expect(result)
-                    .toContain(`!**/${v3[0]}`);
-                expect(result)
-                    .toContain(`!**/${v3[1]}`);
-                expect(result)
-                    .toContain(`!**/${v4[0]}`);
-                expect(result)
-                    .toContain(`!**/${v4[1]}`);
-            }
-            catch (e) {
-                console.log(`k1: '${k1}'`);
-                console.log(`k2: '${k2}'`);
-                console.log(`k3: '${k3}'`);
-                console.log(`k4: '${k4}'`);
-                console.log({
-                    [k1]: v1,
-                    [k2]: v2,
-                    [k3]: v3,
-                    [k4]: v4,
-                    result
-                });
-                throw e;
-            }
+            result = sut([k1, k2], [k3, k4]);
+            // Assert
+            expect(result)
+                .toHaveLength(8);
+            expect(result)
+                .toContain(`**/${v1[0]}`);
+            expect(result)
+                .toContain(`**/${v1[1]}`);
+            expect(result)
+                .toContain(`**/${v2[0]}`);
+            expect(result)
+                .toContain(`**/${v2[1]}`);
+            expect(result)
+                .toContain(`!**/${v3[0]}`);
+            expect(result)
+                .toContain(`!**/${v3[1]}`);
+            expect(result)
+                .toContain(`!**/${v4[0]}`);
+            expect(result)
+                .toContain(`!**/${v4[1]}`);
         });
     }
     function setEnv(name, value) {
