@@ -77,8 +77,14 @@ async function loadDefaults() {
       forced = name[0] === '!',
       notYetSet = process.env[name] === undefined;
     if (notYetSet || forced) {
-      debug(`setting env var ${name} to ${value}`);
-      process.env[name.replace(/^!/, "")] = value;
+      const key = name.replace(/^!/, "");
+      if (value) {
+        debug(`deleting env var ${key}`);
+        delete process.env[key];
+      } else {
+        debug(`setting env var ${key} to '${value}'`);
+        process.env[key] = value;
+      }
     } else {
       debug(`env var ${name} is already set, force it by setting !${name}=${value} in ${defaultsFile}`)
     }
