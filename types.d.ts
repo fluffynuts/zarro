@@ -286,6 +286,7 @@ declare global {
         "MAX_CONCURRENCY" |
         "DEV_SMTP_PORT" |
         "DEV_SMTP_INTERFACE_PORT" |
+        "DOTNET_PARALLEL_STAGGER_MS" |
         string;
 
     type FlagEnvVar =
@@ -489,6 +490,7 @@ declare global {
         MAX_CONCURRENCY: NumericEnvVar;
         DEV_SMTP_PORT: NumericEnvVar;
         DEV_SMTP_INTERFACE_PORT: NumericEnvVar;
+        DOTNET_PARALLEL_STAGGER_MS: NumericEnvVar;
     }
 
     type StatFunction = (path: string) => Promise<fs.Stats | null>
