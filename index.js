@@ -80,10 +80,10 @@ async function loadDefaults() {
       const key = name.replace(/^!/, "");
       if (value) {
         debug(`setting env var ${key} to '${value}'`);
-        delete process.env[key];
+        process.env[key] = value;
       } else {
         debug(`deleting env var ${key}`);
-        process.env[key] = value;
+        delete process.env[key];
       }
     } else {
       debug(`env var ${name} is already set, force it by setting !${name}=${value} in ${defaultsFile}`)
