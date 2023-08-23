@@ -79,10 +79,10 @@ async function loadDefaults() {
     if (notYetSet || forced) {
       const key = name.replace(/^!/, "");
       if (value) {
-        debug(`deleting env var ${key}`);
+        debug(`setting env var ${key} to '${value}'`);
         delete process.env[key];
       } else {
-        debug(`setting env var ${key} to '${value}'`);
+        debug(`deleting env var ${key}`);
         process.env[key] = value;
       }
     } else {
