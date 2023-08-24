@@ -11,23 +11,19 @@ describe(`concurrency-limiter`, () => {
         let calls = 0;
         // Act
         await sut(1, async () => {
-            console.log("start 1");
             current.push(1);
             calls++;
             await sleep(1000);
             expect(current)
                 .toEqual([1]);
             current.splice(0, 1);
-            console.log("complete 1");
         }, async () => {
-            console.log("start 2");
             current.push(2);
             calls++;
             await sleep(1000);
             expect(current)
                 .toEqual([2]);
             current.splice(0, 1);
-            console.log("complete 2");
         });
         // Assert
         expect(calls)
