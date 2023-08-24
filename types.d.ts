@@ -155,6 +155,8 @@ declare global {
     }
 
     type Gulp = GulpWithHelp;
+    type RunInParallel = (maxConcurrency: number, ...actions: AsyncVoidVoid[]) => Promise<void>;
+    type Seed = (howMany: number) => any[];
 
     interface GulpVersion {
         major: number;
