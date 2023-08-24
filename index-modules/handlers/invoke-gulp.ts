@@ -110,6 +110,7 @@
       gulp,
       allArgs, {
         env: envVars,
+        stdio: "inherit",
         cwd,
         // default to be interactive, so we can, eg, allow for user to input an OTP
         interactive: true,
