@@ -75,9 +75,9 @@
             gulp,
             allArgs
         });
-        return spawn(gulp, allArgs, Object.assign({ env: envVars, cwd, 
+        return spawn(gulp, allArgs, Object.assign(Object.assign({ env: envVars, cwd, 
             // default to be interactive, so we can, eg, allow for user to input an OTP
-            interactive: true }, opts));
+            interactive: true }, opts), { stdio: "inherit" }));
     }
     module.exports = {
         test: alwaysAccept,

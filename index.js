@@ -134,7 +134,12 @@ async function transpileLocalTasks() {
   try {
     const typescript = require("typescript");
     for (const item of toTranspile) {
-      const output = item.replace(/\.ts/, ".generated.js");
+      const test = item.replace(/\.ts$/, ".js");
+      if (await fileExists(test)) {
+        // assume this is a compilation handled elsewhere
+        continue;
+      }
+      const output = item.replace(/\.ts$/, ".generated.js");
       if (await fileExists(output)) {
         const itemStat = await stat(item);
         const outputStat = await stat(output);
