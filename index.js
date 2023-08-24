@@ -166,9 +166,24 @@ async function transpileLocalTasks() {
 
 (async function () {
   try {
+    const rawArgs = await gatherArgs([ path.join(path.dirname(__dirname), ".bin", "zarro"), __filename ]);
+    const args = [];
+    let shouldChangeDir = false;
+    for (const arg of rawArgs) {
+      if (arg === "--in") {
+        shouldChangeDir = true;
+        continue;
+      }
+      if (shouldChangeDir) {
+        console.log(` --- running in ${arg} ---`);
+        process.chdir(arg);
+        shouldChangeDir = false;
+        continue;
+      }
+      args.push(arg);
+    }
     await loadDefaults();
     await transpileLocalTasks();
-    const args = await gatherArgs([ path.join(path.dirname(__dirname), ".bin", "zarro"), __filename ]);
     const handler = await findHandlerFor(args);
     if (!handler) {
       throw new ZarroError("no handler for current args");
