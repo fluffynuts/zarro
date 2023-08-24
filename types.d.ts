@@ -106,10 +106,11 @@ declare global {
         decompress(data: string|Buffer, target: string | DecompressOptions): Promise<File[]>;
     }
 
+    type LogFunction = (s: string) => void;
     interface HttpClientModule {
         create(
-            infoLogFunction?: (s: string) => void,
-            debugLogFunction?: (s: string) => void
+            infoLogFunction?: LogFunction,
+            debugLogFunction?: LogFunction
         ): HttpClient;
     }
 
@@ -157,6 +158,11 @@ declare global {
     type Gulp = GulpWithHelp;
     type RunInParallel = (maxConcurrency: number, ...actions: AsyncVoidVoid[]) => Promise<void>;
     type Seed = (howMany: number) => any[];
+    type LineBuffer = {
+      new(writer: LogFunction): LineBuffer;
+      append(data: string): void;
+      flush(): void;
+    };
 
     interface GulpVersion {
         major: number;
