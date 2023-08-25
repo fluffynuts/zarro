@@ -73,7 +73,8 @@ declare global {
     type OptionsFactory<T> = (file: vinyl.BufferFile) => T | Promise<T>;
     type ErrorReporter = (e: Error) => Promise<void> | void;
     type GulpCallback =
-        (() => Promise<any> | NodeJS.EventEmitter) | ((done: VoidVoid) => Promise<any> | NodeJS.EventEmitter)
+        (() => Promise<any> | NodeJS.EventEmitter) |
+        ((done: VoidVoid) => Promise<any> | NodeJS.EventEmitter | void)
     type TryDo<T> = (logic: AsyncVoidFunc<T>, retries: number | string, onTransientError?: ErrorReporter, onFinalFailure?: VoidVoid) => Promise<void>;
     type Optional<T> = T | undefined;
     type Nullable<T> = T | null;

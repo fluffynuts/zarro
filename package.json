@@ -38,7 +38,8 @@
     "build-fetch-github-release": "tsc -p gulp-tasks/modules/fetch-github-release/tsconfig.json",
     "gulp": "gulp",
     "test-npm-gulp-task": "echo \"this is a test\"",
-    "verify-up-to-date": "run-s \"zarro -- verify-up-to-date\""
+    "verify-up-to-date": "run-s \"zarro -- verify-up-to-date\"",
+    "seq": "run-s \"zarro -- seq\""
   },
   "dependencies": {
     "@octokit/rest": "^20.0.1",
