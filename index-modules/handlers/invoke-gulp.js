@@ -75,9 +75,22 @@
             gulp,
             allArgs
         });
-        return spawn(gulp, allArgs, Object.assign(Object.assign({ env: envVars, cwd, 
-            // default to be interactive, so we can, eg, allow for user to input an OTP
-            interactive: true }, opts), { stdio: "inherit" }));
+        process.env["RUNNING_AS_ZARRO"] = "1";
+        process.argv = [process.argv[0], process.argv[1]].concat(allArgs);
+        const gulpCli = require("gulp-cli");
+        return gulpCli();
+        //
+        // return spawn(
+        //   gulp,
+        //   allArgs, {
+        //     env: envVars,
+        //     cwd,
+        //     // default to be interactive, so we can, eg, allow for user to input an OTP
+        //     interactive: true,
+        //     ...opts,
+        //     stdio: "inherit",
+        //   }
+        // );
     }
     module.exports = {
         test: alwaysAccept,

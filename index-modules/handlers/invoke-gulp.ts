@@ -76,7 +76,7 @@
     }
   }
 
-  async function invokeGulp(args: string[], opts: SpawnOptions) {
+  async function invokeGulp(args: string[], opts?: SpawnOptions) {
     if (args && args.length === 1 && args[0] === "@") {
       args[0] = process.env.npm_lifecycle_event as string;
     }
@@ -106,17 +106,23 @@
       gulp,
       allArgs
     });
-    return spawn(
-      gulp,
-      allArgs, {
-        env: envVars,
-        cwd,
-        // default to be interactive, so we can, eg, allow for user to input an OTP
-        interactive: true,
-        ...opts,
-        stdio: "inherit",
-      }
-    );
+
+    process.env["RUNNING_AS_ZARRO"] = "1";
+    process.argv = [ process.argv[0], process.argv[1]].concat(allArgs);
+    const gulpCli = require("gulp-cli");
+    return gulpCli();
+    //
+    // return spawn(
+    //   gulp,
+    //   allArgs, {
+    //     env: envVars,
+    //     cwd,
+    //     // default to be interactive, so we can, eg, allow for user to input an OTP
+    //     interactive: true,
+    //     ...opts,
+    //     stdio: "inherit",
+    //   }
+    // );
   }
 
   module.exports = {

@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
+const gulpCliMock = jest.fn();
+jest.mock("gulp-cli", () => gulpCliMock);
 describe(`invoke-gulp`, () => {
-    const spawn = jest.fn(), requireModule = require("../gulp-tasks/modules/require-module");
-    requireModule.mock("spawn", spawn);
     const path = require("path"), isFile = require("../index-modules/is-file"), sut = require("../index-modules/handlers/invoke-gulp");
     describe(`test fn`, () => {
         it(`should always return true (should be final queried)`, async () => {
@@ -20,18 +20,14 @@ describe(`invoke-gulp`, () => {
         describe(`when NO_COLOR env not set`, () => {
             it(`should invoke gulp with all the args`, async () => {
                 // Arrange
+                spyOn(console, "error");
                 const args = ["build", "test"], gulpFile = findStarterGulpFile(), expected = ["--color", "--gulpfile", gulpFile, "--cwd", process.cwd()].concat(args);
                 // Act
                 await sut.handler(args);
                 // Assert
-                expect(spawn)
+                expect(gulpCliMock)
                     .toHaveBeenCalledTimes(1);
-                const calledArgs = spawn.mock.calls[0], usedGulp = calledArgs[0], processArgs = calledArgs[1];
-                expect(usedGulp)
-                    .toBeDefined();
-                expect((await isFile(usedGulp)))
-                    .toBeTrue();
-                expect(processArgs)
+                expect(process.argv.slice(2))
                     .toEqual(expected);
             });
         });
@@ -43,14 +39,9 @@ describe(`invoke-gulp`, () => {
                 // Act
                 await sut.handler(args);
                 // Assert
-                expect(spawn)
+                expect(gulpCliMock)
                     .toHaveBeenCalledTimes(1);
-                const calledArgs = spawn.mock.calls[0], usedGulp = calledArgs[0], processArgs = calledArgs[1];
-                expect(usedGulp)
-                    .toBeDefined();
-                expect((await isFile(usedGulp)))
-                    .toBeTrue();
-                expect(processArgs)
+                expect(process.argv.slice(2))
                     .toEqual(expected);
             });
         });
