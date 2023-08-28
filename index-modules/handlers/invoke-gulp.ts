@@ -85,10 +85,10 @@
       gulpTasksFolder = path.join(projectDir, "gulp-tasks"),
       gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"),
       cwd = process.cwd(),
-      envVars = Object.assign({}, process.env, {
-        GULP_TASKS_FOLDER: gulpTasksFolder,
-        RUNNING_AS_ZARRO: 1
-      }),
+      // envVars = Object.assign({}, process.env, {
+      //   GULP_TASKS_FOLDER: gulpTasksFolder,
+      //   RUNNING_AS_ZARRO: 1
+      // }),
       trueFlags = new Set([ "true", "1", "T", "on" ]),
       noColor = trueFlags.has(`${process.env.NO_COLOR}`),
       allArgs = [

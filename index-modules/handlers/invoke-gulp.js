@@ -57,10 +57,12 @@
         if (args && args.length === 1 && args[0] === "@") {
             args[0] = process.env.npm_lifecycle_event;
         }
-        const gulp = await findGulp(), gulpTasksFolder = path.join(projectDir, "gulp-tasks"), gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"), cwd = process.cwd(), envVars = Object.assign({}, process.env, {
-            GULP_TASKS_FOLDER: gulpTasksFolder,
-            RUNNING_AS_ZARRO: 1
-        }), trueFlags = new Set(["true", "1", "T", "on"]), noColor = trueFlags.has(`${process.env.NO_COLOR}`), allArgs = [
+        const gulp = await findGulp(), gulpTasksFolder = path.join(projectDir, "gulp-tasks"), gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"), cwd = process.cwd(), 
+        // envVars = Object.assign({}, process.env, {
+        //   GULP_TASKS_FOLDER: gulpTasksFolder,
+        //   RUNNING_AS_ZARRO: 1
+        // }),
+        trueFlags = new Set(["true", "1", "T", "on"]), noColor = trueFlags.has(`${process.env.NO_COLOR}`), allArgs = [
             // this will be run via spawn, which now collects output for error
             // reporting, so we have to force color on again because gulp
             // realises that it's being piped

@@ -19,6 +19,9 @@ describe("dotnet-cli", () => {
             original.apply(console, args);
         });
     });
+    const foo = {
+        exe: "",
+    };
     const realSpawn = require("../../../gulp-tasks/modules/spawn"), spawn = jest.fn().mockImplementation((exe, args, opts) => {
         if (args[0] == "nuget" && args[1] == "list") {
             const result = {

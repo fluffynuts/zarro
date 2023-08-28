@@ -108,7 +108,7 @@ describe(`read-git-commit-delta-count`, () => {
                 await execGit("commit", "-m", `"${message}"`);
             }),
             init: () => sandbox.run(() => execGit("init")),
-            branch: (name) => sandbox.run(() => execGit("checkout", "-b", `"${name}"`))
+            branch: (name) => sandbox.run(() => execGit("checkout", "-b", `${name}`))
         };
     }
     async function execGit(...args) {

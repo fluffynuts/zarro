@@ -1,4 +1,4 @@
-const spawn = require("../gulp-tasks/modules/spawn");
+const system = requireModule<System>("system");
 describe(`integration testing`, () => {
   it(`should be able to run with --show-env`, async () => {
     jest.setTimeout(15000);
@@ -10,9 +10,10 @@ describe(`integration testing`, () => {
       stdoutData: string[] = [];
 
     // Act
-    await spawn("node", args, {
+    await system("node", args, {
       stdout: (data: string) => stdoutData.push(data),
-      stderr: (data: string) => console.error(data.toString())
+      stderr: (data: string) => {
+      }
     });
     // Assert
     expect(stdoutData.join(""))
@@ -23,14 +24,14 @@ describe(`integration testing`, () => {
     // Arrange
     jest.setTimeout(15000);
     const args = [
-      "index.js",
-      "test-npm-gulp-task"
-    ],
-    stdoutData: string[] = [];
+        "index.js",
+        "test-npm-gulp-task"
+      ],
+      stdoutData: string[] = [];
     // Act
-    await spawn("node", args, {
+    await system("node", args, {
       stdout: (data: string) => stdoutData.push(data.toString()),
-      stderr: (data: string) => console.log(`stderr: ${data.toString()}`)
+      stderr: (data: string) => {}
     });
     // Assert
     expect(stdoutData.join("\n"))

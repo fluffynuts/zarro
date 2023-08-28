@@ -26,6 +26,7 @@ describe(`spawn`, () => {
         it(`should return the output from the command item`, async () => {
             // Arrange
             jest.spyOn(console, "log");
+            jest.spyOn(console, "error");
             const username = os.userInfo().username.toLowerCase();
             // Act
             const result = await spawn("whoami");

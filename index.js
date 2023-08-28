@@ -5,7 +5,7 @@ const
   { FsEntities, stat, ls, readTextFile, fileExists, folderExists, readTextFileLines, writeTextFile } = require("yafs"),
   path = require("path"),
   debug = require("debug")("zarro"),
-  { ZarroError } = require("./gulp-tasks/modules/zarro-error"),
+  ZarroError = require("./gulp-tasks/modules/zarro-error"),
   { skip, take } = require("./gulp-tasks/modules/linq"),
   gatherArgs = require("./index-modules/gather-args");
 

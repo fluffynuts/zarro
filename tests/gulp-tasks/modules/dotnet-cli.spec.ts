@@ -15,6 +15,9 @@ describe("dotnet-cli", () => {
       original.apply(console, args);
     });
   });
+  const foo = {
+    exe: "",
+  } as SpawnError;
   const
     realSpawn = require("../../../gulp-tasks/modules/spawn"),
     spawn = jest.fn().mockImplementation((exe, args, opts) => {
@@ -29,7 +32,7 @@ describe("dotnet-cli", () => {
             "  3.  Microsoft Visual Studio Offline Packages [Enabled]",
             "      C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\"
           ],
-          stderr: [],
+          stderr: [] as string[],
           exitCode: 0,
           args: [ "list" ],
           executable: "nuget.exe"

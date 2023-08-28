@@ -1,5 +1,5 @@
 "use strict";
-const spawn = require("../gulp-tasks/modules/spawn");
+const system = requireModule("system");
 describe(`integration testing`, () => {
     it(`should be able to run with --show-env`, async () => {
         jest.setTimeout(15000);
@@ -9,9 +9,10 @@ describe(`integration testing`, () => {
             "--show-env"
         ], stdoutData = [];
         // Act
-        await spawn("node", args, {
+        await system("node", args, {
             stdout: (data) => stdoutData.push(data),
-            stderr: (data) => console.error(data.toString())
+            stderr: (data) => {
+            }
         });
         // Assert
         expect(stdoutData.join(""))
@@ -25,9 +26,9 @@ describe(`integration testing`, () => {
             "test-npm-gulp-task"
         ], stdoutData = [];
         // Act
-        await spawn("node", args, {
+        await system("node", args, {
             stdout: (data) => stdoutData.push(data.toString()),
-            stderr: (data) => console.log(`stderr: ${data.toString()}`)
+            stderr: (data) => { }
         });
         // Assert
         expect(stdoutData.join("\n"))

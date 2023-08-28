@@ -5,7 +5,8 @@ global["require" + "Module"] = require("../gulp-tasks/modules/require-module");
 // hence this monkeypatch to restore the prior behavior
 global.spyOn = function (obj, member) {
   const original = obj[member];
-  const result = jest.spyOn(obj, member).mockImplementation(() => {
+  const result = jest.spyOn(obj, member);
+  result.mockImplementation(() => {
   });
   if (!!result.and) {
     return result;
@@ -19,11 +20,67 @@ global.spyOn = function (obj, member) {
     },
     callThrough() {
       original.apply(obj, Array.from(arguments));
-    }
+    },
   };
   Object.defineProperty(result, "and", {
     get() {
       return and;
+    }
+  });
+
+  function mkCallInfo(
+    args,
+    obj,
+    returnValue
+  ) {
+    return {
+      object: obj,
+      args: args,
+      returnValue: returnValue
+    };
+  }
+
+  function findMockValue(spy, index) {
+    const call = spy.mock.results[index];
+    return call
+      ? call.value
+      : undefined;
+  }
+
+  Object.defineProperty(result, "calls", {
+    get() {
+      return {
+        mostRecent() {
+          return mkCallInfo(
+            result.mock.lastCall,
+            obj,
+            findMockValue(result, result.mock.calls.length - 1)
+          );
+        },
+        argsFor(index) {
+          return result.mock.calls[index];
+        },
+        any() {
+          return (result.mock.calls || []).length > 0;
+        },
+        all() {
+          return (result.mock.calls || [])
+            .map((args, i) => mkCallInfo(args, obj, findMockValue(result, i)));
+        },
+        count() {
+          return (result.mock.calls || []).length;
+        },
+        reset() {
+          result.mockClear();
+        },
+        first() {
+          return mkCallInfo(
+            result.mock.calls[0],
+            obj,
+            findMockValue(result, 0)
+          );
+        }
+      };
     }
   });
   return result;
