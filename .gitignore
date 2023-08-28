@@ -90,3 +90,5 @@ __build__
 __sandboxes__
 gulp-tasks/modules/fetch-github-release/src/**/*.js
 build-tools
+tests/gulp-tasks/modules/csproj/bin
+tests/gulp-tasks/modules/csproj/obj

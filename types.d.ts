@@ -848,6 +848,7 @@ declare global {
     exitCode: number;
     stderr: string[];
     stdout: string[];
+    isSpawnError(o: any): o is SpawnError
   }
 
   interface SpawnResult {
@@ -863,6 +864,7 @@ declare global {
     exitCode: number;
     stderr: string[];
     stdout: string[];
+    isSpawnResult(o: any): o is SpawnResult
   }
 
   interface Linq {
@@ -884,7 +886,12 @@ declare global {
     isSpawnResult: (o: any) => o is SpawnResult;
   }
 
-  interface System extends SpawnFunction {
+  type SystemFunction = (program: string, args?: string[], options?: SystemOptions)
+      => Promise<SpawnResult>;
+
+  interface System extends SystemFunction {
+    isError(o: any): o is SpawnError;
+    isResult(o: any): o is SpawnResult;
   }
 
   interface TempFile {

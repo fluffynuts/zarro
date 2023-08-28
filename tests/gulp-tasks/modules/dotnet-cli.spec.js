@@ -19,10 +19,7 @@ describe("dotnet-cli", () => {
             original.apply(console, args);
         });
     });
-    const foo = {
-        exe: "",
-    };
-    const realSpawn = require("../../../gulp-tasks/modules/spawn"), spawn = jest.fn().mockImplementation((exe, args, opts) => {
+    const realSystem = require("../../../gulp-tasks/modules/system"), system = jest.fn().mockImplementation((exe, args, opts) => {
         if (args[0] == "nuget" && args[1] == "list") {
             const result = {
                 stdout: [
@@ -47,9 +44,9 @@ describe("dotnet-cli", () => {
             exitCode: 0
         });
     }), requireModuleActual = require("../../../gulp-tasks/modules/require-module");
-    requireModuleActual.mock("spawn", spawn);
-    spawn.isSpawnError = realSpawn.isSpawnError;
-    spawn.isSpawnResult = realSpawn.isSpawnResult;
+    requireModuleActual.mock("system", system);
+    system.isError = realSystem.isError;
+    system.isResult = realSystem.isResult;
     const sut = requireModule("dotnet-cli");
     const env = requireModule("env");
     const anything = expect.any(Object);
@@ -71,7 +68,7 @@ describe("dotnet-cli", () => {
                 framework
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["clean", target, "--framework", framework], anything);
         });
         it(`should use the provided runtime`, async () => {
@@ -83,7 +80,7 @@ describe("dotnet-cli", () => {
                 runtime
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["clean", target, "--runtime", runtime], anything);
         });
         it(`should use the provided configuration`, async () => {
@@ -95,7 +92,7 @@ describe("dotnet-cli", () => {
                 configuration
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["clean", target, "--configuration", configuration], anything);
         });
         it(`should use the provided configurations`, async () => {
@@ -107,11 +104,11 @@ describe("dotnet-cli", () => {
                 configuration: [configuration1, configuration2]
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledTimes(2);
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledWith("dotnet", ["clean", target, "--configuration", configuration1], anything);
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledWith("dotnet", ["clean", target, "--configuration", configuration2], anything);
         });
         [
@@ -130,7 +127,7 @@ describe("dotnet-cli", () => {
                     verbosity: verbosity
                 });
                 // Assert
-                expect(spawn)
+                expect(system)
                     .toHaveBeenCalledOnceWith("dotnet", ["clean", target, "--verbosity", verbosity], anything);
             });
         });
@@ -145,7 +142,7 @@ describe("dotnet-cli", () => {
                 output
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["clean", target, "--output", output], anything);
         });
     });
@@ -174,7 +171,7 @@ describe("dotnet-cli", () => {
                     verbosity: verbosity
                 });
                 // Assert
-                expect(spawn)
+                expect(system)
                     .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--verbosity", verbosity], anything);
             });
         });
@@ -187,7 +184,7 @@ describe("dotnet-cli", () => {
                 configuration: configuration
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--configuration", configuration], anything);
         });
         it(`should use the provided framework`, async () => {
@@ -199,7 +196,7 @@ describe("dotnet-cli", () => {
                 framework
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--framework", framework], anything);
         });
         it(`should use the provided runtime`, async () => {
@@ -211,7 +208,7 @@ describe("dotnet-cli", () => {
                 runtime
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--runtime", runtime], anything);
         });
         it(`should use the provided architecture`, async () => {
@@ -223,7 +220,7 @@ describe("dotnet-cli", () => {
                 arch
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--arch", arch], anything);
         });
         it(`should use the provided os`, async () => {
@@ -235,7 +232,7 @@ describe("dotnet-cli", () => {
                 os
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--os", os], anything);
         });
         it(`should use the provided version suffix`, async () => {
@@ -247,7 +244,7 @@ describe("dotnet-cli", () => {
                 versionSuffix
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--version-suffix", versionSuffix], anything);
         });
         it(`should be able to skip package restore`, async () => {
@@ -259,7 +256,7 @@ describe("dotnet-cli", () => {
                 noRestore: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--no-restore"], anything);
         });
         it(`should be able to skip dependencies`, async () => {
@@ -271,7 +268,7 @@ describe("dotnet-cli", () => {
                 noDependencies: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--no-dependencies"], anything);
         });
         it(`should be able to skip incremental building`, async () => {
@@ -283,7 +280,7 @@ describe("dotnet-cli", () => {
                 noIncremental: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--no-incremental"], anything);
         });
         it(`should be able to force disable build servers`, async () => {
@@ -295,7 +292,7 @@ describe("dotnet-cli", () => {
                 disableBuildServers: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--disable-build-servers"], anything);
         });
         it(`should be able to build self-contained`, async () => {
@@ -307,7 +304,7 @@ describe("dotnet-cli", () => {
                 selfContained: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--self-contained"], anything);
         });
         it(`should disable build servers on request`, async () => {
@@ -319,7 +316,7 @@ describe("dotnet-cli", () => {
                 disableBuildServers: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--disable-build-servers"], anything);
         });
         it(`should add msbuildProperties, when present`, async () => {
@@ -335,7 +332,7 @@ describe("dotnet-cli", () => {
                 }
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "-p:foo=bar", `-p:quux="wibbles and toast"`, `-p:"spaced arg"="more spaces"`], anything);
         });
         it(`should add additionalArguments, when set`, async () => {
@@ -347,7 +344,7 @@ describe("dotnet-cli", () => {
                 additionalArguments: ["foo", "bar", "quux"]
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["build", target, "foo", "bar", "quux"], anything);
         });
     });
@@ -368,7 +365,7 @@ describe("dotnet-cli", () => {
                 target: expected
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", expected], anything);
         });
         [
@@ -387,7 +384,7 @@ describe("dotnet-cli", () => {
                     verbosity: verbosity
                 });
                 // Assert
-                expect(spawn)
+                expect(system)
                     .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--verbosity", verbosity], anything);
             });
         });
@@ -400,7 +397,7 @@ describe("dotnet-cli", () => {
                 configuration: configuration
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--configuration", configuration], anything);
         });
         it(`should use the provided framework`, async () => {
@@ -412,7 +409,7 @@ describe("dotnet-cli", () => {
                 framework
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--framework", framework], anything);
         });
         it(`should use the provided runtime`, async () => {
@@ -424,7 +421,7 @@ describe("dotnet-cli", () => {
                 runtime
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--runtime", runtime], anything);
         });
         it(`should use the provided architecture`, async () => {
@@ -436,7 +433,7 @@ describe("dotnet-cli", () => {
                 arch
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--arch", arch], anything);
         });
         it(`should use the provided os`, async () => {
@@ -448,7 +445,7 @@ describe("dotnet-cli", () => {
                 os
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--os", os], anything);
         });
         it(`should set --no-build on request`, async () => {
@@ -460,7 +457,7 @@ describe("dotnet-cli", () => {
                 noBuild: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--no-build"], anything);
         });
         it(`should set --no-restore on request`, async () => {
@@ -472,7 +469,7 @@ describe("dotnet-cli", () => {
                 noRestore: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--no-restore"], anything);
         });
         it(`should set a single logger`, async () => {
@@ -489,7 +486,7 @@ describe("dotnet-cli", () => {
                 }
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--logger", "\"console;verbosity=normal;foo=bar\""], anything);
         });
         it(`should add msbuildProperties, when present`, async () => {
@@ -505,7 +502,7 @@ describe("dotnet-cli", () => {
                 }
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "-p:foo=bar", `-p:quux="wibbles and toast"`, `-p:"spaced arg"="more spaces"`], anything);
         });
         it(`should add additionalArguments, when set`, async () => {
@@ -517,7 +514,7 @@ describe("dotnet-cli", () => {
                 additionalArguments: ["foo", "bar", "quux"]
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "foo", "bar", "quux"], anything);
         });
         it(`should set the settings file`, async () => {
@@ -529,7 +526,7 @@ describe("dotnet-cli", () => {
                 settingsFile
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--settings", settingsFile], anything);
         });
         it(`should set env vars`, async () => {
@@ -545,7 +542,7 @@ describe("dotnet-cli", () => {
                 }
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledWith("dotnet", ["test", target, "-e", "foo=bar", "-e", `moo="cow beef"`, "-e", `"moo cow"="yum yum"`], anything);
         });
         it(`should pass through a provided filter`, async () => {
@@ -557,7 +554,7 @@ describe("dotnet-cli", () => {
                 filter: "some filter expression"
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--filter", `"some filter expression"`], anything);
         });
         it(`should pass through output location`, async () => {
@@ -573,9 +570,9 @@ describe("dotnet-cli", () => {
                 output: output2
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--output", output1], anything);
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--output", `"${output2}"`], anything);
         });
         it(`should pass through diagnostics location`, async () => {
@@ -591,9 +588,9 @@ describe("dotnet-cli", () => {
                 diagnostics: diagnostics2
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--diag", diagnostics1], anything);
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["test", target, "--diag", `"${diagnostics2}"`], anything);
         });
     });
@@ -614,7 +611,7 @@ describe("dotnet-cli", () => {
                 target
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target], anything);
         });
         it(`should set the output`, async () => {
@@ -626,7 +623,7 @@ describe("dotnet-cli", () => {
                 output
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--output", output], anything);
         });
         [
@@ -645,7 +642,7 @@ describe("dotnet-cli", () => {
                     verbosity: verbosity
                 });
                 // Assert
-                expect(spawn)
+                expect(system)
                     .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--verbosity", verbosity], anything);
             });
         });
@@ -658,7 +655,7 @@ describe("dotnet-cli", () => {
                 configuration
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--configuration", configuration], anything);
         });
         it(`should disable build on request`, async () => {
@@ -670,7 +667,7 @@ describe("dotnet-cli", () => {
                 noBuild: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--no-build"], anything);
         });
         it(`should include symbols on request`, async () => {
@@ -682,7 +679,7 @@ describe("dotnet-cli", () => {
                 includeSymbols: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--include-symbols"], anything);
         });
         it(`should include source on request`, async () => {
@@ -694,7 +691,7 @@ describe("dotnet-cli", () => {
                 includeSource: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--include-source"], anything);
         });
         it(`should skip restore on request`, async () => {
@@ -706,7 +703,7 @@ describe("dotnet-cli", () => {
                 noRestore: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--no-restore"], anything);
         });
         it(`should pass on the version suffix`, async () => {
@@ -718,7 +715,7 @@ describe("dotnet-cli", () => {
                 versionSuffix
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--version-suffix", versionSuffix], anything);
         });
         it(`should provide quick method for specifying a nuspec file (ie convert to msbuild prop)`, async () => {
@@ -731,7 +728,7 @@ describe("dotnet-cli", () => {
                 ignoreMissingNuspec: false
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, `-p:NuspecFile=${nuspec}`], anything);
         });
         it(`should provide quick method for specifying a nuspec file with spaces (ie convert to msbuild prop)`, async () => {
@@ -744,7 +741,7 @@ describe("dotnet-cli", () => {
                 ignoreMissingNuspec: false
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, `-p:NuspecFile="${nuspec}"`], anything);
         });
         it(`should test if the nuspec file exists by default (local, found)`, async () => {
@@ -757,7 +754,7 @@ describe("dotnet-cli", () => {
                 nuspec: "Package.nuspec"
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", csproj, `-p:NuspecFile=Package.nuspec`], anything);
         });
         it(`should test if the nuspec file exists by default (local, not found)`, async () => {
@@ -769,7 +766,7 @@ describe("dotnet-cli", () => {
                 nuspec: "Package.nuspec"
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", csproj], anything);
         });
         it(`should test if the nuspec file exists by default (relative, found)`, async () => {
@@ -781,7 +778,7 @@ describe("dotnet-cli", () => {
                 nuspec: "pack/Package.nuspec"
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", csproj, `-p:NuspecFile=pack/Package.nuspec`], anything);
         });
         it(`should test if the nuspec file exists by default (absoluet, found)`, async () => {
@@ -793,7 +790,7 @@ describe("dotnet-cli", () => {
                 nuspec
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", csproj, `-p:NuspecFile=${nuspec}`], anything);
         });
     });
@@ -818,7 +815,7 @@ describe("dotnet-cli", () => {
                 apiKey
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org"], anything);
         });
         it(`should set the timeout when provided`, async () => {
@@ -831,7 +828,7 @@ describe("dotnet-cli", () => {
                 timeout
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--timeout", `${timeout}`], anything);
         });
         it(`should set the symbol source when provided`, async () => {
@@ -844,7 +841,7 @@ describe("dotnet-cli", () => {
                 symbolSource
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--symbol-source", symbolSource], anything);
         });
         it(`should set the source when provided`, async () => {
@@ -857,7 +854,7 @@ describe("dotnet-cli", () => {
                 source
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", source], anything);
         });
         it(`should force english output on request`, async () => {
@@ -870,7 +867,7 @@ describe("dotnet-cli", () => {
                 forceEnglishOutput
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--force-english-output"], anything);
         });
         it(`should disable service endpoint on request`, async () => {
@@ -883,7 +880,7 @@ describe("dotnet-cli", () => {
                 noServiceEndpoint
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--no-service-endpoint"], anything);
         });
         it(`should skip duplicates on request`, async () => {
@@ -896,7 +893,7 @@ describe("dotnet-cli", () => {
                 skipDuplicate
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--skip-duplicate"], anything);
         });
         it(`should disable symbols on request`, async () => {
@@ -909,7 +906,7 @@ describe("dotnet-cli", () => {
                 noSymbols
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--no-symbols"], anything);
         });
         it(`should disable buffering on request`, async () => {
@@ -922,7 +919,7 @@ describe("dotnet-cli", () => {
                 disableBuffering
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--disable-buffering"], anything);
         });
         it(`should not disable buffering on request`, async () => {
@@ -935,7 +932,7 @@ describe("dotnet-cli", () => {
                 disableBuffering
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org"], anything);
         });
         it(`should set the symbol api key when provided`, async () => {
@@ -948,7 +945,7 @@ describe("dotnet-cli", () => {
                 symbolApiKey
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--symbol-api-key", symbolApiKey], anything);
         });
     });
@@ -969,7 +966,7 @@ describe("dotnet-cli", () => {
                 target
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target], anything);
         });
         it(`should use the current runtime when set`, async () => {
@@ -981,7 +978,7 @@ describe("dotnet-cli", () => {
                 useCurrentRuntime: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--use-current-runtime"], anything);
         });
         it(`should set the output`, async () => {
@@ -993,7 +990,7 @@ describe("dotnet-cli", () => {
                 output
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--output", output], anything);
         });
         it(`should set the manifest`, async () => {
@@ -1005,7 +1002,7 @@ describe("dotnet-cli", () => {
                 manifest
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--manifest", manifest], anything);
         });
         it(`should skip build on request`, async () => {
@@ -1017,7 +1014,7 @@ describe("dotnet-cli", () => {
                 noBuild: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--no-build"], anything);
         });
         it(`should set the runtime, defaulting to self-contained`, async () => {
@@ -1029,7 +1026,7 @@ describe("dotnet-cli", () => {
                 runtime
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--runtime", runtime, "--self-contained"], anything);
         });
         it(`should set self-contained, when selected`, async () => {
@@ -1042,7 +1039,7 @@ describe("dotnet-cli", () => {
                 selfContained: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--runtime", runtime, "--self-contained"], anything);
         });
         it(`should set self-contained, when deselected`, async () => {
@@ -1055,7 +1052,7 @@ describe("dotnet-cli", () => {
                 selfContained: false
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--runtime", runtime, "--no-self-contained"], anything);
         });
         it(`should set the framework`, async () => {
@@ -1067,7 +1064,7 @@ describe("dotnet-cli", () => {
                 framework
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--framework", framework], anything);
         });
         it(`should set the configuration`, async () => {
@@ -1079,7 +1076,7 @@ describe("dotnet-cli", () => {
                 configuration
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--configuration", configuration], anything);
         });
         it(`should set the version suffix`, async () => {
@@ -1091,7 +1088,7 @@ describe("dotnet-cli", () => {
                 versionSuffix
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--version-suffix", versionSuffix], anything);
         });
         it(`should disable restore on request`, async () => {
@@ -1103,7 +1100,7 @@ describe("dotnet-cli", () => {
                 noRestore: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--no-restore"], anything);
         });
         [
@@ -1122,7 +1119,7 @@ describe("dotnet-cli", () => {
                     verbosity: verbosity
                 });
                 // Assert
-                expect(spawn)
+                expect(system)
                     .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--verbosity", verbosity], anything);
             });
         });
@@ -1135,7 +1132,7 @@ describe("dotnet-cli", () => {
                 arch
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--arch", arch], anything);
         });
         it(`should set the os`, async () => {
@@ -1147,7 +1144,7 @@ describe("dotnet-cli", () => {
                 os
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--os", os], anything);
         });
         it(`should disable build servers on request`, async () => {
@@ -1159,7 +1156,7 @@ describe("dotnet-cli", () => {
                 disableBuildServers: true
             });
             // Assert
-            expect(spawn)
+            expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "--disable-build-servers"], anything);
         });
         describe(`listPackages`, () => {
@@ -1213,7 +1210,7 @@ describe("dotnet-cli", () => {
                             publishContainer: true
                         });
                         // Assert
-                        expect(spawn)
+                        expect(system)
                             .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "-t:PublishContainer"], anything);
                     });
                     it(`should set the container tag`, async () => {
@@ -1226,7 +1223,7 @@ describe("dotnet-cli", () => {
                             containerImageTag: tag
                         });
                         // Assert
-                        expect(spawn)
+                        expect(system)
                             .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "-t:PublishContainer", `-p:ContainerImageTag=${tag}`], anything);
                     });
                     it(`should set the container registry`, async () => {
@@ -1239,7 +1236,7 @@ describe("dotnet-cli", () => {
                             containerRegistry: registry
                         });
                         // Assert
-                        expect(spawn)
+                        expect(system)
                             .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "-t:PublishContainer", `-p:ContainerRegistry=${registry}`], anything);
                     });
                     it(`should set the container image name`, async () => {
@@ -1252,7 +1249,7 @@ describe("dotnet-cli", () => {
                             containerImageName: name
                         });
                         // Assert
-                        expect(spawn)
+                        expect(system)
                             .toHaveBeenCalledOnceWith("dotnet", ["publish", target, "-t:PublishContainer", `-p:ContainerImageName=${name}`], anything);
                     });
                 });
