@@ -5,6 +5,47 @@ const faker_1 = require("@faker-js/faker");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 describe(`env`, () => {
     const env = requireModule("env");
+    describe(`resolveObject`, () => {
+        it(`should return undefined when var not set`, async () => {
+            // Arrange
+            const varname = `${faker_1.faker.word.sample()}_${faker_1.faker.word.sample()}`;
+            expect(process.env[varname])
+                .not.toBeDefined();
+            // Act
+            const result = env.resolveObject(varname);
+            // Assert
+            expect(result)
+                .not.toBeDefined();
+        });
+        it(`should return the json value as an object`, async () => {
+            // Arrange
+            const varname = `${faker_1.faker.word.sample()}_${faker_1.faker.word.sample()}`, expected = { id: faker_1.faker.number.int(), name: faker_1.faker.person.firstName() };
+            envVars.push(varname);
+            process.env[varname] = JSON.stringify(expected);
+            // Act
+            const result = env.resolveObject(varname);
+            // Assert
+            expect(result)
+                .toEqual(expected);
+        });
+        it(`should throw when the json cannot be parsed`, async () => {
+            // Arrange
+            const varname = `${faker_1.faker.word.sample()}_${faker_1.faker.word.sample()}`;
+            envVars.push(varname);
+            process.env[varname] = faker_1.faker.word.words(2);
+            // Act
+            expect(() => env.resolveObject(varname))
+                .toThrow();
+            // Assert
+        });
+        const envVars = [];
+        afterEach(() => {
+            const toDelete = envVars.splice(0, envVars.length);
+            for (const v of toDelete) {
+                delete process.env[v];
+            }
+        });
+    });
     describe(`resolveArray`, () => {
         it(`should resolve undefined var to []`, async () => {
             // Arrange
