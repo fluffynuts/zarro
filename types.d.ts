@@ -20,6 +20,12 @@ import { boolean } from "yargs";
 
 export * from "./gulp-tasks/modules/fetch-github-release/src";
 
+type RequireModuleFunction<T> = (module: string) => T
+
+interface RequireModule<T> extends RequireModuleFunction<T> {
+  debug(): DebugFactory;
+}
+
 declare global {
   function requireModule<T>(module: string): T;
 
@@ -67,6 +73,9 @@ declare global {
 
   }
 
+  type Func<T> = () => T;
+  type DebugLogFunction = (...args: any[]) => void;
+  type DebugFactory = (label: string) => DebugLogFunction;
   type VoidVoid = () => void;
   type AsyncVoidVoid = () => Promise<void>;
   type AsyncVoidFunc<T> = () => Promise<T>;
@@ -76,7 +85,12 @@ declare global {
   type GulpCallback =
     (() => Promise<any> | NodeJS.EventEmitter) |
     ((done: VoidVoid) => Promise<any> | NodeJS.EventEmitter | void)
-  type TryDo<T> = (logic: AsyncVoidFunc<T>, retries: number | string, onTransientError?: ErrorReporter, onFinalFailure?: VoidVoid) => Promise<void>;
+  type TryDo<T> = (
+    logic: AsyncVoidFunc<T>,
+    retries: number | string,
+    onTransientError?: ErrorReporter,
+    onFinalFailure?: VoidVoid
+  ) => Promise<void>;
   type Optional<T> = T | undefined;
   type Nullable<T> = T | null;
   type ResolveNuget = (nugetPath: Optional<string>, errorOnMissing: boolean) => string;
@@ -635,7 +649,7 @@ declare global {
     run<T>(message: string, action: (() => T | Promise<T>)): void;
   };
   type Sleep = (ms: number) => Promise<void>;
-  type Which = (executable: string) => Nullable<string>;
+  type Which = (executable: string) => Optional<string>;
 
   interface Failer {
     promise: Promise<void>;
@@ -645,6 +659,21 @@ declare global {
   type FailAfter = (ms: number, message?: string) => Failer;
 
   type NugetUpdateSelf = (nugetPath: string) => Promise<void>;
+
+  interface TestUtilFinder {
+    latestNUnit(): Optional<string>;
+    latestDotCover(): Optional<string>;
+    latestOpenCover(): Optional<string>;
+    findTool(exeName: string, underFolder?: string): Optional<string>;
+    /**
+     * @deprecated
+     */
+    nunit2Finder(): Optional<string>;
+    /**
+     * @description used to sort arrays of versioned folders
+     */
+    compareVersionArrays(x: number[], y: number[]): number;
+  }
 
   export interface FileSystemUtils {
     folderExists(at: string): Promise<boolean>;
@@ -887,7 +916,7 @@ declare global {
   }
 
   type SystemFunction = (program: string, args?: string[], options?: SystemOptions)
-      => Promise<SpawnResult>;
+    => Promise<SpawnResult>;
 
   interface System extends SystemFunction {
     isError(o: any): o is SpawnError;
@@ -898,6 +927,7 @@ declare global {
     path: string;
     destroy(): void;
   }
+
   type CreateTempFile = (contents?: string | Buffer, at?: string) => Promise<TempFile>;
 
   type AskOptions = {}
@@ -1088,6 +1118,11 @@ declare global {
     fetchReleaseByTag(options: Omit<FetchReleaseOptions, "getRelease"> & { tag: string; }): Promise<string[]>;
     fetchLatestReleaseInfo(options: ListReleasesOptions): Promise<ReleaseInfo>;
     listReleases(options: ListReleasesOptions): Promise<ReleaseInfo[]>;
+  }
+
+  interface InstallLocalTools {
+      install: (required: string | string[], overrideToolsFolder?: string) => Promise<void>;
+      clean: (overrideToolsFolder?: string) => Promise<void>;
   }
 
   // scraped from https://spdx.org/licenses/

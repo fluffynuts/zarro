@@ -1,4 +1,3 @@
-export type Func<T> = () => T;
 export type AsyncFunc<T> = () => Promise<T>;
 
 export async function runInFolder<T>(
