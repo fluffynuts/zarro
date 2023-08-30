@@ -1,5 +1,3 @@
-import { ExecError } from "../../../gulp-tasks/modules/exec";
-
 const exec = require("../../../gulp-tasks/modules/exec") as Exec;
 import "expect-even-more-jest";
 import { Sandbox } from "filesystem-sandbox";

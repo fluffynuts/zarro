@@ -6,7 +6,6 @@ import ansiColors, { StyleFunction } from "ansi-colors";
 import { AlterPackageJsonVersionOptions } from "./gulp-tasks/modules/alter-package-json-version";
 import { RimrafOptions } from "./gulp-tasks/modules/rimraf";
 import { ExecFileOptionsWithBufferEncoding } from "child_process";
-import { IoConsumer, IoHandlers } from "./gulp-tasks/modules/exec";
 import { StatsBase } from "fs";
 import * as vinyl from "vinyl";
 // noinspection ES6PreferShortImport
@@ -584,10 +583,28 @@ declare global {
     type AlterPackageJson = (opts?: AlterPackageJsonVersionOptions) => Promise<void>;
     type Rimraf = (at: string, opts?: RimrafOptions) => Promise<void>;
     type ReadPackageJson = (at?: string) => Promise<PackageIndex>;
+
+    type IoConsumer = (d: string) => void
+    interface IoHandlers {
+        stdout?: IoConsumer;
+        stderr?: IoConsumer;
+    }
+    interface ExecError extends Error {
+        info: {
+            exitCode: number;
+            cmd: string;
+            args: string[];
+            opts?: ExecOpts;
+            stdout: string[];
+            stderr: string[];
+            timedOut: boolean;
+        }
+    }
     type Exec =
         ((cmd: string, args?: string[], opts?: ExecOpts, handlers?: IoHandlers) => Promise<string>) & {
         alwaysSuppressOutput: boolean
     };
+
     type Uniq = (values: any[]) => any[];
     type EnvHelpers = {
         env: (name: string, fallback?: string) => string;
@@ -686,9 +703,16 @@ declare global {
 
     type NugetUpdateSelf = (nugetPath: string) => Promise<void>;
 
+    interface TestUtilFinderOptions {
+        x86?: boolean;
+        platform?: string;
+        architecture?: string;
+        ignoreBetas?: boolean;
+    }
+
     interface TestUtilFinder {
-        latestNUnit(): Optional<string>;
-        latestDotCover(): Optional<string>;
+        latestNUnit(opts?: TestUtilFinderOptions): Optional<string>;
+        latestDotCover(opts?: TestUtilFinderOptions): Optional<string>;
         latestOpenCover(): Optional<string>;
         findTool(exeName: string, underFolder?: string): Optional<string>;
         /**
@@ -1050,6 +1074,30 @@ declare global {
         platform?: string;
         nologo?: boolean;
     }
+
+    interface GulpDotNetCoverExec {
+        dotCover?: string;
+        openCover?: string;
+        nunit?: string;
+    }
+    interface GulpDotNetCoverOptions {
+        failOnError?: boolean;
+        exec?: GulpDotNetCoverExec;
+        baseFilters?: string;
+        exclude?: string[];
+        nunitOptions?: string;
+        allowProjectAssemblyMismatch?: boolean;
+        nunitOutput?: string;
+        coverageReportBase?: string;
+        coverageOutput?: string;
+        agents?: number;
+        testAssemblyFilter: ((f: string) => boolean) | RegExp;
+        coverageTool?: string;
+        testAssemblies: string[];
+    }
+    type GulpDotNetCoverNunitOptions {
+    }
+    type GulpDotNetCover = (opts?: GulpDotNetCoverOptions) => Transform;
 
 
     interface DotNetCommonBuildOptions extends DotNetBaseOptions {
