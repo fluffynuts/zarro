@@ -22,16 +22,18 @@ describe(`spawn`, () => {
   describe(`given command`, () => {
     it(`should run single command item`, async () => {
       // Arrange
-      jest.spyOn(console, "log");
+      spyOn(console, "log");
+      spyOn(console, "error");
       // Act
       await expect(spawn("whoami"))
         .resolves.not.toThrow();
       // Assert
     });
+    
     it(`should return the output from the command item`, async () => {
       // Arrange
-      jest.spyOn(console, "log");
-      jest.spyOn(console, "error");
+      spyOn(console, "log");
+      spyOn(console, "error");
       const
         username = (os.userInfo().username as string).toLowerCase();
       // Act

@@ -8,6 +8,7 @@ const faker_1 = require("@faker-js/faker");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 const path_1 = __importDefault(require("path"));
 describe("dotnet-cli", () => {
+    const { mockModule } = require("../../../gulp-tasks/modules/mock-module");
     let allowLogs = false;
     beforeEach(() => {
         allowLogs = false;
@@ -18,38 +19,42 @@ describe("dotnet-cli", () => {
             }
             original.apply(console, args);
         });
+        mockSystem();
     });
-    const realSystem = require("../../../gulp-tasks/modules/system"), system = jest.fn().mockImplementation((exe, args, opts) => {
-        if (args[0] == "nuget" && args[1] == "list") {
-            const result = {
-                stdout: [
-                    "Registered Sources:",
-                    "  1.  nuget.org [Enabled]",
-                    "      https://api.nuget.org/v3/index.json",
-                    "  2.  custom [Enabled]",
-                    "      https://nuget.custom-domain.com/nuget",
-                    "  3.  Microsoft Visual Studio Offline Packages [Enabled]",
-                    "      C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\"
-                ],
-                stderr: [],
-                exitCode: 0,
-                args: ["list"],
-                executable: "nuget.exe"
-            };
-            return result;
-        }
-        return Promise.resolve({
-            executable: exe,
-            args,
-            exitCode: 0
-        });
-    }), requireModuleActual = require("../../../gulp-tasks/modules/require-module");
-    requireModuleActual.mock("system", system);
-    system.isError = realSystem.isError;
-    system.isResult = realSystem.isResult;
+    const system = jest.fn();
+    system.isError = (o) => o && !!o.exitCode;
+    system.isResult = (o) => o && o.exitCode === 0;
+    mockModule("system", system);
     const sut = requireModule("dotnet-cli");
     const env = requireModule("env");
     const anything = expect.any(Object);
+    function mockSystem() {
+        system.mockImplementation((exe, args, opts) => {
+            if (args[0] == "nuget" && args[1] == "list") {
+                const result = {
+                    stdout: [
+                        "Registered Sources:",
+                        "  1.  nuget.org [Enabled]",
+                        "      https://api.nuget.org/v3/index.json",
+                        "  2.  custom [Enabled]",
+                        "      https://nuget.custom-domain.com/nuget",
+                        "  3.  Microsoft Visual Studio Offline Packages [Enabled]",
+                        "      C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\"
+                    ],
+                    stderr: [],
+                    exitCode: 0,
+                    args: ["list"],
+                    exe: "nuget.exe"
+                };
+                return result;
+            }
+            return Promise.resolve({
+                exe: exe,
+                args,
+                exitCode: 0,
+            });
+        });
+    }
     describe(`clean`, () => {
         const { clean } = sut;
         it(`should be a function`, async () => {

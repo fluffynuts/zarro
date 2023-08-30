@@ -1,7 +1,7 @@
 (function () {
   const
     os = require("os"),
-    requireModule = require("../../gulp-tasks/modules/require-module") as RequireModule,
+    requireModule = require("../../gulp-tasks/modules/require-module") as (<T>(mod: string) => T),
     chalk = requireModule<AnsiColors>("ansi-colors"),
     quoteIfRequired = requireModule<QuoteIfRequired>("quote-if-required"),
     which = require("which"),

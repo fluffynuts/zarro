@@ -27,7 +27,7 @@ interface RequireModule<T> extends RequireModuleFunction<T> {
 }
 
 declare global {
-    function requireModule<T>(module?: string): T;
+    function requireModule<T>(module: string): T;
 
 // copied out of @types/fancy-log because imports are being stupid
     interface Logger {
@@ -878,6 +878,9 @@ declare global {
         keepTempFiles?: boolean;
     }
 
+    /**
+     * @deprecated rather use the better-tested `system` module and SystemError
+     */
     interface SpawnError extends Error {
         new(
             message: string,
@@ -896,7 +899,7 @@ declare global {
     }
 
     /**
-     * @deprecated
+     * @deprecated rather use the better-tested `system` module and SystemResult
      */
     interface SpawnResult {
         new(
@@ -914,22 +917,6 @@ declare global {
         isSpawnResult(o: any): o is SpawnResult
     }
 
-    interface SystemResult {
-        new(
-            executable: string,
-            args: string[],
-            exitCode: number,
-            stderr: string[],
-            stdout: string[]
-        ): SystemResult;
-        executable: string;
-        args: string[];
-        exitCode: number;
-        stderr: string[];
-        stdout: string[];
-        isSpawnResult(o: any): o is SystemResult
-    }
-
     interface Linq {
         last<T>(arr: T[]): Optional<T>;
         first<T>(arr: T[]): Optional<T>;
@@ -937,7 +924,7 @@ declare global {
         take<T>(arr: T[] | IterableIterator<T>, howMany: number): IterableIterator<T>;
     }
 
-    type RequireModule = <T>(name: string) => T;
+    type RequireModuleFn = <T>(name: string) => T;
 
     type SpawnFunction = (program: string, args?: string[], options?: SpawnOptions)
         => Promise<SpawnResult>;
@@ -949,12 +936,47 @@ declare global {
         isSpawnResult: (o: any) => o is SpawnResult;
     }
 
+    interface SystemResult {
+        new(
+            exe: string,
+            args: string[],
+            exitCode: number,
+            stderr: string[],
+            stdout: string[]
+        ): SystemResult;
+        exe: string;
+        args: string[];
+        exitCode: number;
+        stderr: string[];
+        stdout: string[];
+        isSpawnResult(o: any): o is SystemResult
+        isResult(o: any): o is SystemResult;
+    }
+
+    interface SystemError extends Error {
+        new(
+            message: string,
+            exe: string,
+            args: string[] | undefined,
+            exitCode: number,
+            stdout: Nullable<string[]>,
+            stderr: Nullable<string[]>
+        ): SystemError;
+        exe: string;
+        args: string[];
+        exitCode: number;
+        stderr: string[];
+        stdout: string[];
+        isSystemError(o: any): o is SystemError
+        isError(o: any): o is SystemError;
+    }
+
     type SystemFunction = (program: string, args?: string[], options?: SystemOptions)
-        => Promise<SpawnResult>;
+        => Promise<SystemResult | SystemError>;
 
     interface System extends SystemFunction {
-        isError(o: any): o is SpawnError;
-        isResult(o: any): o is SpawnResult;
+        isError(o: any): o is SystemError;
+        isResult(o: any): o is SystemResult;
     }
 
     interface TempFile {
@@ -1056,7 +1078,7 @@ declare global {
 
     interface DotNetNugetPushOptions extends DotNetBaseOptions {
         target: string;
-        apiKey: string;
+        apiKey?: string;
         symbolApiKey?: string;
         disableBuffering?: boolean;
         noSymbols?: boolean;

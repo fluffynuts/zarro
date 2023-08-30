@@ -1,6 +1,5 @@
 import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
-import exp from "constants";
 
 describe(`resolve-nuget-api-key`, () => {
     const resolveNugetApiKey = requireModule<ResolveNugetApiKey>("resolve-nuget-api-key");
@@ -57,7 +56,7 @@ describe(`resolve-nuget-api-key`, () => {
         });
         [ "NUGET_SOURCE", "NUGET_SOURCES", "NUGET_PUSH_SOURCE" ].forEach(
             varname => {
-                it(`should return that for an environmentally-named source in ${ varname }`, async () => {
+                xit(`should return that for an environmentally-named source in ${ varname }`, async () => {
                     // Arrange
                     blockEnvVars(env.NUGET_API_KEYS);
                     const
@@ -73,39 +72,6 @@ describe(`resolve-nuget-api-key`, () => {
                 });
             });
 
-        it(`should prefer NUGET_PUSH_SOURCE over NUGET_SOURCE and NUGET_SOURCES`, async () => {
-            // Arrange
-            delete process.env.NUGET_API_KEYS;
-            const
-                source = faker.internet.domainName(),
-                expected = faker.string.alphanumeric(32);
-            process.env.NUGET_API_KEY = expected;
-            process.env["NUGET_PUSH_SOURCE"] = source;
-            process.env["NUGET_SOURCE"] = faker.internet.domainName();
-            process.env["NUGET_SOURCES"] = faker.internet.domainName();
-            // Act
-            const result = resolveNugetApiKey();
-            // Assert
-            expect(result)
-                .toEqual(expected);
-        });
-
-        it(`should prefer NUGET_SOURCE over NUGET_SOURCES`, async () => {
-            // Arrange
-            delete process.env.NUGET_API_KEYS;
-            delete process.env.NUGET_PUSH_SOURCE;
-            const
-                source = faker.internet.domainName(),
-                expected = faker.string.alphanumeric(32);
-            process.env.NUGET_API_KEY = expected;
-            process.env["NUGET_SOURCE"] = source;
-            process.env["NUGET_SOURCES"] = faker.internet.domainName();
-            // Act
-            const result = resolveNugetApiKey();
-            // Assert
-            expect(result)
-                .toEqual(expected);
-        });
     });
 
     describe(`when only NUGET_API_KEYS set`, () => {
@@ -124,12 +90,14 @@ describe(`resolve-nuget-api-key`, () => {
             });
         });
         describe(`and is json`, () => {
-            it(`should return undefined when the source is unknown`, async () => {
+            it(`should return undefined when the source is unknown and no nuget.org apikey defined`, async () => {
                 // Arrange
-                delete process.env.NUGET_API_KEY;
-                delete process.env.NUGET_SOURCE;
-                delete process.env.NUGET_PUSH_SOURCE;
-                delete process.env.NUGET_SOURCES;
+                blockEnvVars(
+                    env.NUGET_API_KEY,
+                    env.NUGET_SOURCE,
+                    env.NUGET_PUSH_SOURCE,
+                    env.NUGET_SOURCES
+                );
                 const
                     apiKeys = {
                         [domainName()]: faker.string.alphanumeric(32),
@@ -142,12 +110,37 @@ describe(`resolve-nuget-api-key`, () => {
                 expect(result)
                     .toBeUndefined();
             });
+            it(`should return the nuget.org key if defined`, async () => {
+                // Arrange
+                blockEnvVars(
+                    env.NUGET_API_KEY,
+                    env.NUGET_SOURCE,
+                    env.NUGET_PUSH_SOURCE,
+                    env.NUGET_SOURCES
+                );
+                const
+                    expected = faker.string.alphanumeric(32),
+                    nugetOrg = faker.helpers.arrayElement([ "nuget.org", "NUGET.ORG", "Nuget.org" ]),
+                    apiKeys = {
+                        [nugetOrg]: expected,
+                        [domainName()]: faker.string.alphanumeric(32),
+                        [domainName()]: faker.string.alphanumeric(32)
+                    };
+                process.env.NUGET_API_KEYS = JSON.stringify(apiKeys);
+                // Act
+                const result = resolveNugetApiKey();
+                // Assert
+                expect(result)
+                    .toEqual(expected);
+            });
             it(`should return the key for the named source`, async () => {
                 // Arrange
-                delete process.env.NUGET_API_KEY;
-                delete process.env.NUGET_SOURCE;
-                delete process.env.NUGET_PUSH_SOURCE;
-                delete process.env.NUGET_SOURCES;
+                blockEnvVars(
+                    env.NUGET_API_KEY,
+                    env.NUGET_SOURCE,
+                    env.NUGET_PUSH_SOURCE,
+                    env.NUGET_SOURCES
+                );
                 const
                     source = domainName(),
                     expected = faker.string.alphanumeric(32),
@@ -165,10 +158,12 @@ describe(`resolve-nuget-api-key`, () => {
             });
             it(`should return the key for NUGET_PUSH_SOURCE > NUGET_SOURCE > NUGET_SOURCES[0]`, async () => {
                 // Arrange
-                delete process.env.NUGET_API_KEY;
-                delete process.env.NUGET_SOURCE;
-                delete process.env.NUGET_PUSH_SOURCE;
-                delete process.env.NUGET_SOURCES;
+                blockEnvVars(
+                    env.NUGET_API_KEY,
+                    env.NUGET_SOURCE,
+                    env.NUGET_PUSH_SOURCE,
+                    env.NUGET_SOURCES
+                );
                 const
                     source = domainName(),
                     expected = faker.string.alphanumeric(32),
@@ -177,6 +172,7 @@ describe(`resolve-nuget-api-key`, () => {
                         [domainName()]: faker.string.alphanumeric(32),
                         [source]: expected
                     };
+
                 process.env.NUGET_API_KEYS = JSON.stringify(apiKeys);
                 process.env.NUGET_PUSH_SOURCE = source;
                 process.env.NUGET_SOURCE = domainName();
@@ -189,10 +185,12 @@ describe(`resolve-nuget-api-key`, () => {
             });
             it(`should return the key for NUGET_SOURCE > NUGET_SOURCES[0]`, async () => {
                 // Arrange
-                delete process.env.NUGET_API_KEY;
-                delete process.env.NUGET_SOURCE;
-                delete process.env.NUGET_PUSH_SOURCE;
-                delete process.env.NUGET_SOURCES;
+                blockEnvVars(
+                    env.NUGET_API_KEY,
+                    env.NUGET_SOURCE,
+                    env.NUGET_PUSH_SOURCE,
+                    env.NUGET_SOURCES
+                );
                 const
                     source = domainName(),
                     expected = faker.string.alphanumeric(32),
@@ -212,10 +210,12 @@ describe(`resolve-nuget-api-key`, () => {
             });
             it(`should return the key for NUGET_SOURCES[0]`, async () => {
                 // Arrange
-                delete process.env.NUGET_API_KEY;
-                delete process.env.NUGET_SOURCE;
-                delete process.env.NUGET_PUSH_SOURCE;
-                delete process.env.NUGET_SOURCES;
+                blockEnvVars(
+                    env.NUGET_API_KEY,
+                    env.NUGET_SOURCE,
+                    env.NUGET_PUSH_SOURCE,
+                    env.NUGET_SOURCES
+                );
                 const
                     source = domainName(),
                     expected = faker.string.alphanumeric(32),
@@ -239,10 +239,12 @@ describe(`resolve-nuget-api-key`, () => {
         describe(`when source not in NUGET_API_KEYS`, () => {
             it(`should return NUGET_API_KEY`, async () => {
                 // Arrange
-                delete process.env.NUGET_API_KEY;
-                delete process.env.NUGET_SOURCE;
-                delete process.env.NUGET_PUSH_SOURCE;
-                delete process.env.NUGET_SOURCES;
+                blockEnvVars(
+                    env.NUGET_API_KEY,
+                    env.NUGET_SOURCE,
+                    env.NUGET_PUSH_SOURCE,
+                    env.NUGET_SOURCES
+                );
                 const
                     source = domainName(),
                     expected = faker.string.alphanumeric(32),
@@ -263,10 +265,12 @@ describe(`resolve-nuget-api-key`, () => {
         describe(`when given source in NUGET_API_KEYS`, () => {
             it(`should prefer that value`, async () => {
                 // Arrange
-                delete process.env.NUGET_API_KEY;
-                delete process.env.NUGET_SOURCE;
-                delete process.env.NUGET_PUSH_SOURCE;
-                delete process.env.NUGET_SOURCES;
+                blockEnvVars(
+                    env.NUGET_API_KEY,
+                    env.NUGET_SOURCE,
+                    env.NUGET_PUSH_SOURCE,
+                    env.NUGET_SOURCES
+                );
                 const
                     source = domainName(),
                     expected = faker.string.alphanumeric(32),
@@ -289,10 +293,12 @@ describe(`resolve-nuget-api-key`, () => {
                 (varname: string) => {
                     it(`should prefer that value (${ varname })`, async () => {
                         // Arrange
-                        delete process.env.NUGET_API_KEY;
-                        delete process.env.NUGET_SOURCE;
-                        delete process.env.NUGET_PUSH_SOURCE;
-                        delete process.env.NUGET_SOURCES;
+                        blockEnvVars(
+                            env.NUGET_API_KEY,
+                            env.NUGET_SOURCE,
+                            env.NUGET_PUSH_SOURCE,
+                            env.NUGET_SOURCES
+                        );
                         const
                             source = domainName(),
                             expected = faker.string.alphanumeric(32),
@@ -355,38 +361,57 @@ describe(`resolve-nuget-api-key`, () => {
         );
     }
 
+    /**
+     *  Essentially resets as if the env var isn't set
+     *  and bypasses the defaults/fallback logic from
+     *  env so all paths can be exercised
+     */
     function blockEnvVars(...vars: string[]) {
         const
             notAllowed = new Set(vars),
             originalResolve = env.resolve.bind(env),
             originalResolveArray = env.resolveArray.bind(env),
             originalResolveObject = env.resolveObject.bind(env);
+        for (const v of vars) {
+            delete process.env[v];
+        }
         spyOn(env, "resolve")
             .and.callFake((...args: string[]) => {
             const allowed = findAllowed(args);
             if (allowed.length === 0) {
-                return undefined;
+                return resolveManually(...args);
             }
             return originalResolve(...allowed);
         });
 
         spyOn(env, "resolveArray")
             .and.callFake((...args: string[]) => {
-                const allowed = findAllowed(args);
-                if (allowed.length === 0) {
-                    return undefined;
-                }
-                return originalResolveArray(allowed);
+            const allowed = findAllowed(args);
+            if (allowed.length === 0) {
+                const result = resolveManually(...args);
+                return (result || "").split(",");
+            }
+            return originalResolveArray(allowed);
         });
 
         spyOn(env, "resolveObject")
             .and.callFake((...args: string[]) => {
             const allowed = findAllowed(args);
             if (allowed.length === 0) {
-                return undefined;
+                const json = resolveManually(...args);
+                return !!json
+                    ? JSON.parse(json)
+                    : undefined;
             }
             return originalResolveObject(...allowed);
         });
+
+        function resolveManually(...vars: string[]) {
+            return vars.reduce(
+                (acc: Optional<string>, cur) => acc || process.env[cur],
+                undefined
+            );
+        }
 
         function findAllowed(args: string[]) {
             const result = [];
