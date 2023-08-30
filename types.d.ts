@@ -39,11 +39,11 @@ declare global {
     }
 
     interface LogLevels {
-        Debug: string;
-        Info: string;
-        Notice: string;
-        Warning: string;
-        Error: string;
+        Debug: number;
+        Info: number;
+        Notice: number;
+        Warning: number;
+        Error: number;
     }
 
     enum LogThreshold {
@@ -93,7 +93,14 @@ declare global {
     ) => Promise<void>;
     type Optional<T> = T | undefined;
     type Nullable<T> = T | null;
-    type ResolveNuget = (nugetPath: Optional<string>, errorOnMissing: boolean) => string;
+    type DownloadNuget = (targetFolder: string) => Promise<string>;
+    interface ResolveNugetConfig {
+        localNuget: string;
+        nugetDownloadUrl: string;
+    }
+    type FindNpmBase = () => string;
+    type ResolveNugetConfigGenerator = () => ResolveNugetConfig;
+    type ResolveNuget = (nugetPath: Optional<string>, errorOnMissing?: boolean) => string;
     type FindLocalNuget = () => Promise<string>;
 
     type Fetch = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
@@ -131,13 +138,17 @@ declare global {
         ): HttpClient;
     }
 
+    interface SrcOptions {
+        allowEmpty?: boolean;
+    }
+
     interface GulpWithHelp {
         task(name: string, callback: GulpCallback): void;
         task(name: string, help: string, callback: GulpCallback): void;
         task(name: string, dependencies: string[], callback?: GulpCallback): void;
         task(name: string, help: string, dependencies: string[], callback?: GulpCallback): void;
 
-        src(mask: string | string[]): NodeJS.ReadableStream;
+        src(mask: string | string[], opts?: SrcOptions): NodeJS.ReadableStream;
         dest(target: string): NodeJS.WritableStream;
 
         series(...tasks: string[]): (fn: Function) => void;
@@ -735,6 +746,8 @@ declare global {
         warn(...args: any[]): void;
         error(...args: any[]): void;
         fail(...args: any[]): void;
+
+        LogLevels: LogLevels;
     }
 
     interface ParseNugetVersion {
@@ -984,6 +997,16 @@ declare global {
         destroy(): void;
     }
 
+    type ThrowIfNoFiles = (msg: string) => Transform;
+    type LogConfig = (config: any, labels: Dictionary<string>) => void;
+
+    interface NugetRestoreOptions {
+        debug?: boolean;
+        force?: boolean;
+        nuget?: string;
+    }
+    type GulpNugetRestore = (opts: NugetRestoreOptions) => Stream;
+
     type CreateTempFile = (contents?: string | Buffer, at?: string) => Promise<TempFile>;
 
     type AskOptions = {}
@@ -1010,10 +1033,22 @@ declare global {
     interface DotNetBaseOptions extends IoConsumers {
         msbuildProperties?: Dictionary<string>;
         additionalArguments?: string[];
-        verbosity?: DotNetVerbosity;
+        verbosity?: DotNetVerbosity | string;
         // when set, errors are returned instead of thrown
         suppressErrors?: boolean;
         suppressStdIoInErrors?: boolean;
+    }
+
+    type GulpXBuild = (opts?: any) => Transform;
+    type GulpMsBuild = (opts?: any) => Transform;
+
+    interface GulpXBuildOptions {
+        target: string | string[],
+        noConsoleLogger?: boolean;
+        configuration?: string;
+        verbosity?: string;
+        platform?: string;
+        nologo?: boolean;
     }
 
 

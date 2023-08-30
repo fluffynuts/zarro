@@ -29,7 +29,7 @@ describe(`spawn`, () => {
         .resolves.not.toThrow();
       // Assert
     });
-    
+
     it(`should return the output from the command item`, async () => {
       // Arrange
       spyOn(console, "log");
