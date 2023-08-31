@@ -322,7 +322,7 @@ describe(`system`, () => {
             // Arrange
             const sandbox = await filesystem_sandbox_1.Sandbox.create(), script = await sandbox.writeFile("index.js", "console.log('whee');");
             // Act
-            const result = await sut(`"node"`, [script]);
+            const result = await sut(`"node"`, [script], { suppressOutput: true });
             // Assert
             expect(result.exitCode)
                 .toEqual(0);
@@ -331,7 +331,7 @@ describe(`system`, () => {
             // Arrange
             const which = requireModule("which"), sandbox = await filesystem_sandbox_1.Sandbox.create(), script = await sandbox.writeFile("index.js", "console.log('whee');"), node = `"${which("node")}"`;
             // Act
-            const result = await sut(node, [script]);
+            const result = await sut(node, [script], { suppressOutput: true });
             // Assert
             expect(result.exitCode)
                 .toEqual(0);
