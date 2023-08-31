@@ -3,7 +3,6 @@
 import * as fs from "fs";
 import { Stream, Transform } from "stream";
 import ansiColors, { StyleFunction } from "ansi-colors";
-import { AlterPackageJsonVersionOptions } from "./gulp-tasks/modules/alter-package-json-version";
 import { RimrafOptions } from "./gulp-tasks/modules/rimraf";
 import { ExecFileOptionsWithBufferEncoding } from "child_process";
 import { StatsBase } from "fs";
@@ -139,6 +138,7 @@ declare global {
 
     interface SrcOptions {
         allowEmpty?: boolean;
+        read?: boolean
     }
 
     interface GulpWithHelp {
@@ -191,6 +191,8 @@ declare global {
         append(data: string | Buffer): void;
         flush(): void;
     };
+
+    type VerifyExe = (path: string) => Promise<void>;
 
     interface GulpVersion {
         major: number;
@@ -580,6 +582,15 @@ declare global {
     type ReadCsProjPackageVersion = (pathToCsProj: string) => string | undefined;
     type GatherPaths = (pathSpecs: string | string[], throwForNoMatches?: boolean) => Promise<string[]>;
     type PromisifyStream = (stream: Stream) => Promise<void>;
+    interface AlterPackageJsonVersionOptions {
+        packageJsonPath?: string;
+        dryRun?: boolean;
+        strategy?: string;
+        zero?: boolean;
+        loadUnsetFromEnvironment?: boolean;
+        incrementBy?: number
+    }
+
     type AlterPackageJson = (opts?: AlterPackageJsonVersionOptions) => Promise<void>;
     type Rimraf = (at: string, opts?: RimrafOptions) => Promise<void>;
     type ReadPackageJson = (at?: string) => Promise<PackageIndex>;
@@ -630,6 +641,13 @@ declare global {
         baseName: (path: string) => string;
         chopExtension: (path: string) => string;
     }
+
+    interface ObsoleteWarning {
+        reason: string;
+        expires: string;
+    }
+
+    type MakeObsolete = (module: any, data: ObsoleteWarning) => any;
 
     interface TestUtils {
         resolveTestPrefixFor: (path: string) => string;
@@ -725,6 +743,9 @@ declare global {
         compareVersionArrays(x: number[], y: number[]): number;
     }
 
+    /**
+     * @deprecated rather require("yafs")
+     */
     export interface FileSystemUtils {
         folderExists(at: string): Promise<boolean>;
         fileExists(at: string): Promise<boolean>;
@@ -977,13 +998,13 @@ declare global {
         new(
             exe: string,
             args: string[],
-            exitCode: number,
+            exitCode: Optional<number>,
             stderr: string[],
             stdout: string[]
         ): SystemResult;
         exe: string;
         args: string[];
-        exitCode: number;
+        exitCode?: number;
         stderr: string[];
         stdout: string[];
         isSpawnResult(o: any): o is SystemResult
@@ -1030,8 +1051,29 @@ declare global {
         nuget?: string;
     }
     type GulpNugetRestore = (opts: NugetRestoreOptions) => Stream;
+    type LongestStringLength = (strings: string[]) => number;
+    /**
+     * @description generates a version suffix based on the current timestamp and git SHA
+     */
+    type GenerateVersionSuffix = () => string;
+
+    interface GulpPurgeOptions {
+        dryRun?: boolean;
+        debug?: boolean;
+        stopOnErrors?: boolean;
+    }
+    type GulpPurge = (options: GulpPurgeOptions) => Transform;
+    type GulpNpmRun = (gulp: Gulp) => void;
 
     type CreateTempFile = (contents?: string | Buffer, at?: string) => Promise<TempFile>;
+    type MultiSplit = (str: string, delimiters: string[]) => string[];
+
+    type GulpNetFXTestAssemblyFilter = (configuration: string) => Transform;
+    type Pad = (str: string, len: number, isRight?: boolean, padString?: string) => string;
+    type PadLeft = (str: string, len: number, padString?: string) => string;
+    type PadRight = (str: string, len: number, padString?: string) => string;
+    type PathUnquote = (str: string) => string;
+    type ResolveTestMasks = (isDotnetCore?: boolean) => string[];
 
     type AskOptions = {}
     type AskFunction = (message: string, options?: AskOptions) => Promise<string>;
@@ -1091,14 +1133,16 @@ declare global {
         coverageReportBase?: string;
         coverageOutput?: string;
         agents?: number;
-        testAssemblyFilter: ((f: string) => boolean) | RegExp;
+        testAssemblyFilter?: ((f: string) => boolean) | RegExp;
         coverageTool?: string;
-        testAssemblies: string[];
-    }
-    type GulpDotNetCoverNunitOptions {
+        testAssemblies?: string[];
+        debug?: boolean;
+
+        x86?: boolean;
+        platform?: string;
+        architecture?: string;
     }
     type GulpDotNetCover = (opts?: GulpDotNetCoverOptions) => Transform;
-
 
     interface DotNetCommonBuildOptions extends DotNetBaseOptions {
         target: string;
@@ -1200,12 +1244,12 @@ declare global {
         usingFallback: boolean;
     }
 
-    type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<SpawnResult | SpawnError>;
-    type DotNetBuildFunction = (opts: DotNetBuildOptions) => Promise<SpawnResult | SpawnError>;
-    type DotNetPackFunction = (opts: DotNetPackOptions) => Promise<SpawnResult | SpawnError>;
-    type DotNetNugetPushFunction = (opts: DotNetNugetPushOptions) => Promise<SpawnResult | SpawnError>;
-    type DotNetCleanFunction = (opts: DotNetCleanOptions) => Promise<SpawnResult | SpawnError>;
-    type DotNetPublishFunction = (opts: DotNetPublishOptions) => Promise<SpawnResult | SpawnError>;
+    type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<SystemResult | SystemError>;
+    type DotNetBuildFunction = (opts: DotNetBuildOptions) => Promise<SystemResult | SystemError>;
+    type DotNetPackFunction = (opts: DotNetPackOptions) => Promise<SystemResult | SystemError>;
+    type DotNetNugetPushFunction = (opts: DotNetNugetPushOptions) => Promise<SystemResult | SystemError>;
+    type DotNetCleanFunction = (opts: DotNetCleanOptions) => Promise<SystemResult | SystemError>;
+    type DotNetPublishFunction = (opts: DotNetPublishOptions) => Promise<SystemResult | SystemError>;
     type DotNetListPackagesFunction = (projectPath: string) => Promise<DotNetPackageReference[]>;
     type DotNetPublishResolveContainerOptions = (opts: DotNetPublishOptions) => Promise<ResolvedContainerOption[]>;
 

@@ -53,16 +53,11 @@
                 : tryToFindGulpFromOwnNodeModules();
         }
     }
-    async function invokeGulp(args, opts) {
+    async function invokeGulp(args) {
         if (args && args.length === 1 && args[0] === "@") {
             args[0] = process.env.npm_lifecycle_event;
         }
-        const gulp = await findGulp(), gulpTasksFolder = path.join(projectDir, "gulp-tasks"), gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"), cwd = process.cwd(), 
-        // envVars = Object.assign({}, process.env, {
-        //   GULP_TASKS_FOLDER: gulpTasksFolder,
-        //   RUNNING_AS_ZARRO: 1
-        // }),
-        trueFlags = new Set(["true", "1", "T", "on"]), noColor = trueFlags.has(`${process.env.NO_COLOR}`), allArgs = [
+        const gulp = await findGulp(), gulpTasksFolder = path.join(projectDir, "gulp-tasks"), gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"), cwd = process.cwd(), trueFlags = new Set(["true", "1", "T", "on"]), noColor = trueFlags.has(`${process.env.NO_COLOR}`), allArgs = [
             // this will be run via spawn, which now collects output for error
             // reporting, so we have to force color on again because gulp
             // realises that it's being piped
@@ -81,18 +76,6 @@
         process.argv = [process.argv[0], process.argv[1]].concat(allArgs);
         const gulpCli = require("gulp-cli");
         return gulpCli();
-        //
-        // return spawn(
-        //   gulp,
-        //   allArgs, {
-        //     env: envVars,
-        //     cwd,
-        //     // default to be interactive, so we can, eg, allow for user to input an OTP
-        //     interactive: true,
-        //     ...opts,
-        //     stdio: "inherit",
-        //   }
-        // );
     }
     module.exports = {
         test: alwaysAccept,

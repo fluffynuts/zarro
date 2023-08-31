@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 // TODO: this file should be verified as having unix line-endings
 
+require("./gulp-tasks/modules/require-module");
+
 const
   { FsEntities, stat, ls, readTextFile, fileExists, folderExists, readTextFileLines, writeTextFile } = require("yafs"),
   path = require("path"),
   debug = require("debug")("zarro"),
   ZarroError = require("./gulp-tasks/modules/zarro-error"),
-  { skip, take } = require("./gulp-tasks/modules/linq"),
+  { skip } = require("./gulp-tasks/modules/linq"),
   gatherArgs = require("./index-modules/gather-args");
 
 function requireHandler(name) {
@@ -29,7 +31,6 @@ async function findHandlerFor(args) {
       name: handler.name
     });
     if (await handler.test(args)) {
-      debug(`-> handler ${handler.name} is taking control...`);
       return handler.handler;
     }
   }

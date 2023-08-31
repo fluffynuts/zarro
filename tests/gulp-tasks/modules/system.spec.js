@@ -317,4 +317,23 @@ describe(`system`, () => {
                 .toEqual("foo");
         });
     });
+    describe(`timeout`, () => {
+        it(`should spawn the process and kill it after the timeout`, async () => {
+            // Arrange
+            // Act
+            const before = Date.now();
+            const result = await sut("cmd", [], { timeout: 100, suppressOutput: true });
+            const after = Date.now();
+            // Assert
+            const duration = after - before;
+            expect(duration)
+                .toBeGreaterThanOrEqual(100);
+            expect(result.exitCode)
+                .toBeNull();
+            expect(sut.isError(result))
+                .toBeFalse();
+            expect(sut.isResult(result))
+                .toBeTrue();
+        });
+    });
 });

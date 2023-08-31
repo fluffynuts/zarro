@@ -12,12 +12,12 @@ describe(`contains`, () => {
     });
   });
   describe(`given array and nothing to search for`, () => {
-    it(`should return true`, async () => {
+    it(`should return false`, async () => {
       // Arrange
       // Act
       const result = containsAny([1, 2, 3]);
       // Assert
-      expect(result).toBeTrue();
+      expect(result).toBeFalse();
     });
   });
   describe(`given array and one item not in array`, () => {

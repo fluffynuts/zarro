@@ -33,7 +33,11 @@ describe(`init`, () => {
         describe(`when zarro script is missing`, () => {
             it(`should add the zarro script`, async () => {
                 // Arrange
-                spyOn(console, "log");
+                const log = requireModule("log");
+                spyOn(log, "info");
+                spyOn(log, "debug");
+                spyOn(log, "warn");
+                spyOn(log, "notice");
                 const sandbox = await filesystem_sandbox_1.Sandbox.create();
                 const pkg = {};
                 await sandbox.writeFile("package.json", JSON.stringify(pkg));
@@ -41,13 +45,18 @@ describe(`init`, () => {
                 await sut.handler(sandbox.fullPathFor("package.json"));
                 // Assert
                 const contents = await sandbox.readTextFile("package.json");
-                console.log(contents);
                 const newPkg = JSON.parse(contents);
                 expect(newPkg.scripts).toBeDefined();
                 expect(newPkg.scripts["zarro"]).toEqual("zarro");
-                expect(console.log).toHaveBeenCalledWith("run zarro with 'npm run zarro -- {tasks or gulp arguments}')");
-                expect(console.log).toHaveBeenCalledWith("eg: 'npm run zarro -- build' to attempt .net project build");
-                expect(console.log).toHaveBeenCalledWith("get more help with 'npm run zarro -- --help'");
+                expect(log.info).toHaveBeenCalledWith("run zarro with 'npm run zarro -- {tasks or gulp arguments}')");
+                expect(log.info).toHaveBeenCalledWith("eg: 'npm run zarro -- build' to attempt .net project build");
+                expect(log.info).toHaveBeenCalledWith("get more help with 'npm run zarro -- --help'");
+                expect(log.warn)
+                    .not.toHaveBeenCalled();
+                expect(log.notice)
+                    .not.toHaveBeenCalled();
+                expect(log.debug)
+                    .not.toHaveBeenCalled();
             });
         });
     });

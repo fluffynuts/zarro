@@ -76,7 +76,7 @@
     }
   }
 
-  async function invokeGulp(args: string[], opts?: SpawnOptions) {
+  async function invokeGulp(args: string[]) {
     if (args && args.length === 1 && args[0] === "@") {
       args[0] = process.env.npm_lifecycle_event as string;
     }
@@ -85,10 +85,6 @@
       gulpTasksFolder = path.join(projectDir, "gulp-tasks"),
       gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"),
       cwd = process.cwd(),
-      // envVars = Object.assign({}, process.env, {
-      //   GULP_TASKS_FOLDER: gulpTasksFolder,
-      //   RUNNING_AS_ZARRO: 1
-      // }),
       trueFlags = new Set([ "true", "1", "T", "on" ]),
       noColor = trueFlags.has(`${process.env.NO_COLOR}`),
       allArgs = [
@@ -111,18 +107,6 @@
     process.argv = [ process.argv[0], process.argv[1]].concat(allArgs);
     const gulpCli = require("gulp-cli");
     return gulpCli();
-    //
-    // return spawn(
-    //   gulp,
-    //   allArgs, {
-    //     env: envVars,
-    //     cwd,
-    //     // default to be interactive, so we can, eg, allow for user to input an OTP
-    //     interactive: true,
-    //     ...opts,
-    //     stdio: "inherit",
-    //   }
-    // );
   }
 
   module.exports = {

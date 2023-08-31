@@ -7,7 +7,7 @@ require("expect-even-more-jest");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 const path_1 = __importDefault(require("path"));
 const run_in_folder_1 = require("../../test-helpers/run-in-folder");
-const readGitInfo = requireModule("read-git-info"), exec = requireModule("exec"), writeTextFile = requireModule("write-text-file"), readTextFile = requireModule("read-text-file");
+const readGitInfo = requireModule("read-git-info"), exec = requireModule("exec"), { writeTextFile, readTextFile } = require("yafs");
 describe(`read-git-info`, () => {
     if (process.env.RUNNING_IN_GITHUB_ACTION) {
         return it.skip(`- tests don't work well @ GH`, () => {
