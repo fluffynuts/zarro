@@ -105,8 +105,39 @@
 
     process.env["RUNNING_AS_ZARRO"] = "1";
     process.argv = [ process.argv[0], process.argv[1]].concat(allArgs);
-    const gulpCli = require("gulp-cli");
+    const gulpCli = tryRequire("gulp-cli") || tryRequire("gulp/node_modules/gulp-cli");
+    if (!gulpCli) {
+      console.error(
+          chalk.redBright(`
+Unable to load ${chalk.yellowBright("gulp-cli")} module.
+This should have been brought in with gulp, and should
+either be found at one of the following places, depending
+on what npm decided to do at unpack time:
+
+- node_modules/gulp-cli
+- node_modules/gulp/node_modules/gulp-cli
+
+If, however, it's still not available, you can fix this
+by running 'npm install --save-dev gulp-cli'
+
+Please report this if you have to do the above. I'll need
+to know:
+- version of zarro
+- result of 'npm ls gulp-cli'
+`.trim()
+          )
+      );
+      throw new Error(`Unable to load required module: gulp-cli`);
+    }
     return gulpCli();
+  }
+
+  function tryRequire(mod: string) {
+    try {
+      return require(mod);
+    } catch (e) {
+      // suppress;
+    }
   }
 
   module.exports = {
