@@ -321,8 +321,11 @@ describe(`system`, () => {
         it(`should spawn the process and kill it after the timeout`, async () => {
             // Arrange
             // Act
+            const os = require("os");
             const before = Date.now();
-            const result = await sut("cmd", [], { timeout: 100, suppressOutput: true });
+            const result = await sut(os.platform() === "win32"
+                ? "cmd"
+                : "/bin/sh", [], { timeout: 100, suppressOutput: true });
             const after = Date.now();
             // Assert
             const duration = after - before;

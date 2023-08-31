@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const os = require("os"), requireModule = require("../../gulp-tasks/modules/require-module"), chalk = requireModule("ansi-colors"), quoteIfRequired = requireModule("quote-if-required"), which = require("which"), { splitPath } = requireModule("path-utils"), path = require("path"), isFile = require("../is-file"), isDir = require("../is-dir"), debug = require("debug")("zarro::invoke-gulp"), projectDir = path.dirname(path.dirname(__dirname)), ZarroError = requireModule("zarro-error"), spawn = requireModule("spawn");
+    const os = require("os"), requireModule = require("../../gulp-tasks/modules/require-module"), chalk = requireModule("ansi-colors"), quoteIfRequired = requireModule("quote-if-required"), which = require("which"), { splitPath } = requireModule("path-utils"), path = require("path"), isFile = require("../is-file"), isDir = require("../is-dir"), debug = require("debug")("zarro::invoke-gulp"), projectDir = path.dirname(path.dirname(__dirname)), ZarroError = requireModule("zarro-error");
     function alwaysAccept() {
         return true;
     }

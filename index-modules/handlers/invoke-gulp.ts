@@ -11,8 +11,7 @@
     isDir = require("../is-dir"),
     debug = require("debug")("zarro::invoke-gulp"),
     projectDir = path.dirname(path.dirname(__dirname)),
-    ZarroError = requireModule<ZarroError>("zarro-error"),
-    spawn = requireModule<Spawn>("spawn");
+    ZarroError = requireModule<ZarroError>("zarro-error");
 
   function alwaysAccept() {
     return true;
