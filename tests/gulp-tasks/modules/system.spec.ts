@@ -375,6 +375,38 @@ describe(`system`, () => {
         });
     });
 
+    describe(`quoting woes`, () => {
+        it(`should resolve the quoted in-path program`, async () => {
+            // Arrange
+            const
+                sandbox = await Sandbox.create(),
+                script = await sandbox.writeFile("index.js", "console.log('whee');");
+            // Act
+            const result = await sut(`"node"`, [ script ], { suppressOutput: true });
+            // Assert
+            expect(result.exitCode)
+                .toEqual(0);
+        });
+
+        it(`should resolve the quoted full-pathed program`, async () => {
+            // Arrange
+            const
+                which = requireModule<Which>("which"),
+                sandbox = await Sandbox.create(),
+                script = await sandbox.writeFile("index.js", "console.log('whee');"),
+                node = `"${which("node")}"`;
+            // Act
+            const result = await sut(node, [ script ], { suppressOutput: true });
+            // Assert
+            expect(result.exitCode)
+                .toEqual(0);
+        });
+
+        afterEach(async () => {
+            await Sandbox.destroyAll();
+        });
+    });
+
     describe(`timeout`, () => {
         it(`should spawn the process and kill it after the timeout`, async () => {
             // Arrange

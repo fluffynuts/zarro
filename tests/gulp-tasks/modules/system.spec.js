@@ -317,6 +317,29 @@ describe(`system`, () => {
                 .toEqual("foo");
         });
     });
+    describe(`quoting woes`, () => {
+        it(`should resolve the quoted in-path program`, async () => {
+            // Arrange
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), script = await sandbox.writeFile("index.js", "console.log('whee');");
+            // Act
+            const result = await sut(`"node"`, [script]);
+            // Assert
+            expect(result.exitCode)
+                .toEqual(0);
+        });
+        it(`should resolve the quoted full-pathed program`, async () => {
+            // Arrange
+            const which = requireModule("which"), sandbox = await filesystem_sandbox_1.Sandbox.create(), script = await sandbox.writeFile("index.js", "console.log('whee');"), node = `"${which("node")}"`;
+            // Act
+            const result = await sut(node, [script]);
+            // Assert
+            expect(result.exitCode)
+                .toEqual(0);
+        });
+        afterEach(async () => {
+            await filesystem_sandbox_1.Sandbox.destroyAll();
+        });
+    });
     describe(`timeout`, () => {
         it(`should spawn the process and kill it after the timeout`, async () => {
             // Arrange
