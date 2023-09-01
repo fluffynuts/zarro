@@ -1,5 +1,6 @@
 import "expect-even-more-jest";
 const { parseNugetVersion } = require("../../../gulp-tasks/modules/parse-nuget-version");
+const Version = requireModule<Version>("version");
 
 describe(`parse-nuget-package-filename`, () => {
   it(`should parse release file name`, async () => {
@@ -8,12 +9,12 @@ describe(`parse-nuget-package-filename`, () => {
       input = "packageId.1.2.3.nupkg",
       expected = {
         id: "packageId",
-        version: {
-          major: 1,
-          minor: 2,
-          patch: 3,
-          tag: ""
-        }
+        version: new Version(
+          1,
+          2,
+          3,
+          ""
+        )
       } as PackageInfo;
     // Act
     const result = parseNugetVersion(input);
@@ -28,12 +29,12 @@ describe(`parse-nuget-package-filename`, () => {
       input = "packageId.1.2.3",
       expected = {
         id: "packageId",
-        version: {
+        version: new Version({
           major: 1,
           minor: 2,
           patch: 3,
           tag: ""
-        }
+        })
       } as PackageInfo;
     // Act
     const result = parseNugetVersion(input);
@@ -48,12 +49,12 @@ describe(`parse-nuget-package-filename`, () => {
       input = "packageId.1.2.3-123123123.abc123.nupkg",
       expected = {
         id: "packageId",
-        version: {
+        version: new Version({
           major: 1,
           minor: 2,
           patch: 3,
           tag: "123123123.abc123"
-        }
+        })
       } as PackageInfo;
     // Act
     const result = parseNugetVersion(input);
@@ -68,12 +69,12 @@ describe(`parse-nuget-package-filename`, () => {
       input = "packageId.10.20.343-123123123.abc123.nupkg",
       expected = {
         id: "packageId",
-        version: {
+        version: new Version({
           major: 10,
           minor: 20,
           patch: 343,
           tag: "123123123.abc123"
-        }
+        })
       } as PackageInfo;
     // Act
     const result = parseNugetVersion(input);
@@ -88,12 +89,12 @@ describe(`parse-nuget-package-filename`, () => {
       input = "package.Id.10.20.343-123123123.abc123.nupkg",
       expected = {
         id: "package.Id",
-        version: {
+        version: new Version({
           major: 10,
           minor: 20,
           patch: 343,
           tag: "123123123.abc123"
-        }
+        })
       } as PackageInfo;
     // Act
     const result = parseNugetVersion(input);
@@ -108,12 +109,12 @@ describe(`parse-nuget-package-filename`, () => {
       input = "10.20.343-123123123.abc123.nupkg",
       expected = {
         id: "",
-        version: {
+        version: new Version({
           major: 10,
           minor: 20,
           patch: 343,
           tag: "123123123.abc123"
-        }
+        })
       } as PackageInfo;
     // Act
     const result = parseNugetVersion(input);
@@ -132,12 +133,12 @@ describe(`parse-nuget-package-filename`, () => {
       input = "package0.Id.10.20.343-123123123.abc123.nupkg",
       expected = {
         id: "package0.Id",
-        version: {
+        version: new Version({
           major: 10,
           minor: 20,
           patch: 343,
           tag: "123123123.abc123"
-        }
+        })
       } as PackageInfo;
     // Act
     const result = parseNugetVersion(input);
@@ -152,12 +153,12 @@ describe(`parse-nuget-package-filename`, () => {
       input = "package0.Id33.10.20.343-123123123.abc123.nupkg",
       expected = {
         id: "package0.Id33",
-        version: {
+        version: new Version({
           major: 10,
           minor: 20,
           patch: 343,
           tag: "123123123.abc123"
-        }
+        })
       } as PackageInfo;
     // Act
     const result = parseNugetVersion(input);

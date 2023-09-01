@@ -14,7 +14,6 @@ import {
     ReleaseInfo
 } from "./gulp-tasks/modules/fetch-github-release/src";
 import { DecompressOptions, File } from "decompress";
-import { boolean } from "yargs";
 import { BufferFile } from "vinyl";
 
 export * from "./gulp-tasks/modules/fetch-github-release/src";
@@ -226,8 +225,23 @@ declare global {
 
     type VerifyExe = (path: string) => Promise<void>;
 
+    interface VersionInfo {
+      major: number;
+      minor?: number;
+      patch?: number;
+      tag?: string;
+    }
+
     interface Version {
-      new(version: string | number[]): Version;
+      major: number;
+      minor: number;
+      patch: number;
+      tag: string;
+      isPreRelease: boolean;
+      version: number[];
+
+      new(version: string | number[] | VersionInfo): Version;
+      new(major: number, minor?: number, patch?: number, tag?: string): Version;
       isGreaterThan(other: Version | string | number[]): boolean;
       isLessThan(other: Version | string | number[]): boolean;
       equals(other: Version | string | number): boolean;
@@ -676,11 +690,6 @@ declare global {
     };
 
     interface Version {
-        major: number;
-        minor: number;
-        patch: number;
-        tag: string;
-        isPreRelease: boolean;
     }
 
     interface PackageInfo {
