@@ -614,9 +614,10 @@ declare global {
     type StatFunction = (path: string) => Promise<fs.Stats | null>
 
     interface GitSha {
-        currentGitSHA(): string;
-        currentShortSHA(): string;
         fetchGitSha(): Promise<string>;
+        init(): Promise<void>;
+        currentShortSHA: () => string;
+        currentGitSHA: () => string;
     }
 
     interface ZarroError extends Error {
@@ -639,8 +640,9 @@ declare global {
         version: string,
         strategy: string,
         zeroLowerOrder?: boolean,
-        incrementBy?: number
-    ) => Promise<string>;
+        incrementBy?: number,
+        isBeta?: boolean
+    ) => string;
     type ReadPackageVersion = (packageJsonPath?: string) => Promise<string | undefined>;
     type ReadNuspecVersion = (pathToNuspec: string) => Promise<string | undefined>;
     // FIXME: is this used anywhere? should be supplanted by csproj-utils

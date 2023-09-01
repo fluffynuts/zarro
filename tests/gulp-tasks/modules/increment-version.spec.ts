@@ -1,5 +1,5 @@
 const sut = require("../../../gulp-tasks/modules/increment-version") as IncrementVersion;
-const { currentShortSHA } = require("../../../gulp-tasks/modules/git-sha") as GitSha;
+const { fetchShortGitSha } = require("../../../gulp-tasks/modules/git-sha") as GitSha;
 import "expect-even-more-jest";
 
 describe(`increment-version`, function() {
@@ -25,7 +25,7 @@ describe(`increment-version`, function() {
           day = zeroPad(d.getDate()),
           hour = zeroPad(d.getHours()),
           minute = zeroPad(d.getMinutes()),
-          sha = currentShortSHA(),
+          sha = await fetchShortGitSha(),
           expected = `1.1.2-${ year }${ month }${ day }${ hour }${ minute }.${ sha }`;
         // Act
         const result = sut(input, "prerelease");
@@ -49,7 +49,7 @@ describe(`increment-version`, function() {
           day = zeroPad(d.getDate()),
           hour = zeroPad(d.getHours()),
           minute = zeroPad(d.getMinutes()),
-          sha = currentShortSHA(),
+          sha = await fetchShortGitSha(),
           expected = `1.1.1-${ year }${ month }${ day }${ hour }${ minute }.${ sha }`;
         // Act
         const result = sut(input, "prerelease");
