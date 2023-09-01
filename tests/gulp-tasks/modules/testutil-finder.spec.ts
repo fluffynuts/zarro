@@ -1,5 +1,4 @@
 import "expect-even-more-jest";
-import { compare } from "semver";
 
 describe(`testutil-finder`, () => {
   describe(`compareVersionArrays`, () => {

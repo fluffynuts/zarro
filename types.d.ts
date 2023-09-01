@@ -226,6 +226,14 @@ declare global {
 
     type VerifyExe = (path: string) => Promise<void>;
 
+    interface Version {
+      new(version: string | number[]): Version;
+      isGreaterThan(other: Version | string | number[]): boolean;
+      isLessThan(other: Version | string | number[]): boolean;
+      equals(other: Version | string | number): boolean;
+      compareWith(other: Version | string | number): number;
+    }
+
     interface NUnitRunnerOptions {
         result: string;
         agents: number;
