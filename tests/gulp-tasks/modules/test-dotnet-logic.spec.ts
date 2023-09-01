@@ -11,8 +11,8 @@ describe(`test-dotnet-logic`, () => {
             // Arrange
             spyOn(console, "log");
             const
-                // sandbox = await createRepoSandbox(),
-                project = await findProject("C:\\code\\opensource\\NExpect", "NExpect.Matchers.NSubstitute.Tests"),
+                sandbox = await createRepoSandbox(),
+                project = await findProject(sandbox.path, "NExpect.Matchers.NSubstitute.Tests"),
                 testResults = {
                     quackersEnabled: true,
                     failed: 0,
