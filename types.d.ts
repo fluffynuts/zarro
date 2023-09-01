@@ -641,8 +641,8 @@ declare global {
         zeroLowerOrder?: boolean,
         incrementBy?: number
     ) => Promise<string>;
-    type ReadPackageVersion = (packageJsonPath?: string) => string | undefined;
-    type ReadNuspecVersion = (pathToNuspec: string) => string | undefined;
+    type ReadPackageVersion = (packageJsonPath?: string) => Promise<string | undefined>;
+    type ReadNuspecVersion = (pathToNuspec: string) => Promise<string | undefined>;
     // FIXME: is this used anywhere? should be supplanted by csproj-utils
     type ReadCsProjVersion = (pathToCsProj: string) => string | undefined;
     type ReadCsProjPackageVersion = (pathToCsProj: string) => string | undefined;
