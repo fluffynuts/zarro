@@ -93,3 +93,4 @@ build-tools
 tests/gulp-tasks/modules/csproj/bin
 tests/gulp-tasks/modules/csproj/obj
 tsconfig.tsbuildinfo
+buildreports
