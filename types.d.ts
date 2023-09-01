@@ -918,6 +918,8 @@ declare global {
     type StringConsumer = (data: string) => void;
     type ProcessIO = string | StringConsumer;
 
+    type UpdateNuspecVersion = (fileOrXml: string, newVersion: string) => Promise<string>;
+
     interface SpawnOptions {
         windowsHide?: boolean;
         timeout?: number;
