@@ -15,6 +15,7 @@ describe(`test-dotnet-logic`, () => {
                 failed: 0,
                 skipped: 0,
                 failureSummary: [],
+                slowSummary: [],
                 started: 0,
                 passed: 0
             };

@@ -204,7 +204,8 @@ declare global {
         skipped: number;
         failed: number;
         started: number;
-        failureSummary: string[]
+        failureSummary: string[];
+        slowSummary: string[];
     }
 
     interface TestDotNetLogic {
