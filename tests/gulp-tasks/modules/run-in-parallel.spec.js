@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
-describe(`concurrency-limiter`, () => {
+describe(`run-in-parallel`, () => {
     const sut = requireModule("run-in-parallel");
     const sleep = requireModule("sleep");
     const seed = requireModule("seed");
@@ -52,5 +52,21 @@ describe(`concurrency-limiter`, () => {
             .toEqual(total);
         expect(maxActive)
             .toEqual(concurrency);
+    });
+    it(`something like test-dotnet`, async () => {
+        // Arrange
+        const collected = [];
+        // Act
+        const tasks = [
+            async () => await collect(1),
+            async () => await collect(2),
+            async () => await collect(3),
+        ];
+        await sut(2, ...tasks);
+        // Assert
+        async function collect(value) {
+            await sleep(100);
+            collected.push(value);
+        }
     });
 });

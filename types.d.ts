@@ -15,6 +15,7 @@ import {
 } from "./gulp-tasks/modules/fetch-github-release/src";
 import { DecompressOptions, File } from "decompress";
 import { boolean } from "yargs";
+import { BufferFile } from "vinyl";
 
 export * from "./gulp-tasks/modules/fetch-github-release/src";
 
@@ -184,7 +185,10 @@ declare global {
     }
 
     type Gulp = GulpWithHelp;
-    type RunInParallel = (maxConcurrency: number, ...actions: AsyncVoidVoid[]) => Promise<void>;
+    type RunInParallel = (
+        maxConcurrency: number,
+        ...actions: AsyncVoidVoid[]
+    ) => Promise<void>;
     type Seed = (howMany: number) => any[];
     type LineBuffer = {
         new(writer: LogFunction): LineBuffer;
@@ -192,7 +196,46 @@ declare global {
         flush(): void;
     };
 
+    type DotNetTester = (configuration: string, source: string[]) => Promise<void>;
+
+    interface TestResults {
+        quackersEnabled: boolean;
+        passed: number;
+        skipped: number;
+        failed: number;
+        started: number;
+        failureSummary: string[]
+    }
+
+    interface TestDotNetLogic {
+        runTests: () => Promise<void>;
+        testWithNunitCli: DotNetTester;
+        testAsDotnetCore: DotNetTester;
+        shouldTestInParallel: (testProjectPaths: string[]) => Promise<boolean>;
+        testOneDotNetCoreProject: (
+            target: string,
+            configuration: string,
+            verbosity: string,
+            testResults: TestResults,
+            runningInParallel: boolean,
+            forceBuild?: boolean,
+            suppressOutput?: boolean
+        ) => Promise<SystemResult | SystemError>;
+    }
+
     type VerifyExe = (path: string) => Promise<void>;
+
+    interface NUnitRunnerOptions {
+        result: string;
+        agents: number;
+        labels: string;
+        process: string;
+    }
+    interface GulpNUnitRunnerOptions {
+        executable: Optional<string>;
+        options: NUnitRunnerOptions;
+    }
+    type GulpNunitRunner = (options: GulpNUnitRunnerOptions) => Transform;
 
     interface GulpVersion {
         major: number;
@@ -1068,7 +1111,7 @@ declare global {
     type CreateTempFile = (contents?: string | Buffer, at?: string) => Promise<TempFile>;
     type MultiSplit = (str: string, delimiters: string[]) => string[];
 
-    type GulpNetFXTestAssemblyFilter = (configuration: string) => Transform;
+    type GulpNetFXTestAssemblyFilter = (configuration: string) => ((f: BufferFile) => boolean);
     type Pad = (str: string, len: number, isRight?: boolean, padString?: string) => string;
     type PadLeft = (str: string, len: number, padString?: string) => string;
     type PadRight = (str: string, len: number, padString?: string) => string;
@@ -1103,6 +1146,7 @@ declare global {
         // when set, errors are returned instead of thrown
         suppressErrors?: boolean;
         suppressStdIoInErrors?: boolean;
+        suppressOutput?: boolean;
     }
 
     type GulpXBuild = (opts?: any) => Transform;

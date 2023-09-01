@@ -665,7 +665,7 @@ describe("dotnet-cli", () => {
             // Assert
             expect(system)
                 .toHaveBeenCalledOnceWith(
-                    "dotnet", [ "test", target, "--logger", "\"console;verbosity=normal;foo=bar\"" ],
+                    "dotnet", [ "test", target, "--logger", "console;verbosity=normal;foo=bar" ],
                     anything
                 )
         });
