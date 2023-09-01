@@ -106,6 +106,15 @@ describe(`exec`, () => {
         }
         // Assert
     });
+    it(`should run the command from the provided working dir`, async () => {
+        // Arrange
+        const sandbox = await filesystem_sandbox_1.Sandbox.create();
+        // Act
+        const result = await exec("pwd", [], { cwd: sandbox.path });
+        // Assert
+        expect(result.trim())
+            .toEqual(sandbox.path);
+    });
     afterAll(async () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
     });
