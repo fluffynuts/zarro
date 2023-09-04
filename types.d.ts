@@ -1249,7 +1249,12 @@ declare global {
         noRestore?: boolean;
         versionSuffix?: string;
         nuspec?: string;
-        ignoreMissingNuspec?: boolean
+      /**
+       * @description when the specified Package.nuspec is not
+       * found and this flag is set, then pack() will silently
+       * drop the option; otherwise an error will be thrown.
+       */
+      ignoreMissingNuspec?: boolean
     }
 
     interface DotNetBuildOptions extends DotNetCommonBuildOptions {

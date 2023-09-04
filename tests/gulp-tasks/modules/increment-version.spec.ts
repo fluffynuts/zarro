@@ -1,8 +1,14 @@
 const sut = require("../../../gulp-tasks/modules/increment-version") as IncrementVersion;
-const { fetchShortGitSha } = require("../../../gulp-tasks/modules/git-sha") as GitSha;
+const {
+  currentShortSHA,
+  init
+} = (require("../../../gulp-tasks/modules/git-sha") as GitSha);
 import "expect-even-more-jest";
 
-describe(`increment-version`, function() {
+describe(`increment-version`, function () {
+  beforeAll(async () => {
+    await init();
+  });
   it(`should be a function`, async () => {
     // Arrange
     // Act
@@ -20,13 +26,13 @@ describe(`increment-version`, function() {
         spyOn(Date, "now").and.callFake(() => now);
         const
           input = "1.1.1",
-          year = `${ d.getFullYear() }`.substring(2),
+          year = `${d.getFullYear()}`.substring(2),
           month = zeroPad(d.getMonth() + 1),
           day = zeroPad(d.getDate()),
           hour = zeroPad(d.getHours()),
           minute = zeroPad(d.getMinutes()),
-          sha = await fetchShortGitSha(),
-          expected = `1.1.2-${ year }${ month }${ day }${ hour }${ minute }.${ sha }`;
+          sha = currentShortSHA(),
+          expected = `1.1.2-${year}${month}${day}${hour}${minute}.${sha}`;
         // Act
         const result = sut(input, "prerelease");
         // Assert
@@ -44,13 +50,13 @@ describe(`increment-version`, function() {
         spyOn(Date, "now").and.callFake(() => now);
         const
           input = "1.1.1-2301011112.abcdef0",
-          year = `${ d.getFullYear() }`.substring(2),
+          year = `${d.getFullYear()}`.substring(2),
           month = zeroPad(d.getMonth() + 1),
           day = zeroPad(d.getDate()),
           hour = zeroPad(d.getHours()),
           minute = zeroPad(d.getMinutes()),
-          sha = await fetchShortGitSha(),
-          expected = `1.1.1-${ year }${ month }${ day }${ hour }${ minute }.${ sha }`;
+          sha = currentShortSHA(),
+          expected = `1.1.1-${year}${month}${day}${hour}${minute}.${sha}`;
         // Act
         const result = sut(input, "prerelease");
         // Assert
@@ -60,7 +66,7 @@ describe(`increment-version`, function() {
     });
 
     function zeroPad(num: number): string {
-      return num < 10 ? `0${ num }` : `${ num }`;
+      return num < 10 ? `0${num}` : `${num}`;
     }
   });
 

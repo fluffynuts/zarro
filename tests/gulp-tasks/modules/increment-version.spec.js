@@ -1,9 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const sut = require("../../../gulp-tasks/modules/increment-version");
-const { fetchShortGitSha } = require("../../../gulp-tasks/modules/git-sha");
+const { currentShortSHA, init } = require("../../../gulp-tasks/modules/git-sha");
 require("expect-even-more-jest");
 describe(`increment-version`, function () {
+    beforeAll(async () => {
+        await init();
+    });
     it(`should be a function`, async () => {
         // Arrange
         // Act
@@ -16,7 +19,7 @@ describe(`increment-version`, function () {
                 // Arrange
                 const now = Date.now(), d = new Date(now);
                 spyOn(Date, "now").and.callFake(() => now);
-                const input = "1.1.1", year = `${d.getFullYear()}`.substring(2), month = zeroPad(d.getMonth() + 1), day = zeroPad(d.getDate()), hour = zeroPad(d.getHours()), minute = zeroPad(d.getMinutes()), sha = await fetchShortGitSha(), expected = `1.1.2-${year}${month}${day}${hour}${minute}.${sha}`;
+                const input = "1.1.1", year = `${d.getFullYear()}`.substring(2), month = zeroPad(d.getMonth() + 1), day = zeroPad(d.getDate()), hour = zeroPad(d.getHours()), minute = zeroPad(d.getMinutes()), sha = currentShortSHA(), expected = `1.1.2-${year}${month}${day}${hour}${minute}.${sha}`;
                 // Act
                 const result = sut(input, "prerelease");
                 // Assert
@@ -29,7 +32,7 @@ describe(`increment-version`, function () {
                 // Arrange
                 const now = Date.now(), d = new Date(now);
                 spyOn(Date, "now").and.callFake(() => now);
-                const input = "1.1.1-2301011112.abcdef0", year = `${d.getFullYear()}`.substring(2), month = zeroPad(d.getMonth() + 1), day = zeroPad(d.getDate()), hour = zeroPad(d.getHours()), minute = zeroPad(d.getMinutes()), sha = await fetchShortGitSha(), expected = `1.1.1-${year}${month}${day}${hour}${minute}.${sha}`;
+                const input = "1.1.1-2301011112.abcdef0", year = `${d.getFullYear()}`.substring(2), month = zeroPad(d.getMonth() + 1), day = zeroPad(d.getDate()), hour = zeroPad(d.getHours()), minute = zeroPad(d.getMinutes()), sha = currentShortSHA(), expected = `1.1.1-${year}${month}${day}${hour}${minute}.${sha}`;
                 // Act
                 const result = sut(input, "prerelease");
                 // Assert

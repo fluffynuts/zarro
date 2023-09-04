@@ -22,7 +22,8 @@ describe(`resolve-git-remote`, () => {
 
   it(`should return undefined when there is no remote`, async () => {
     // Arrange
-    const sandbox = await Sandbox.create();
+    const
+      sandbox = await Sandbox.create();
     // Act
     const result = await resolveGitRemote(sandbox.path.toString());
     // Assert

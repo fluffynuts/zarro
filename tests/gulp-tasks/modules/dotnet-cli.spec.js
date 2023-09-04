@@ -9,6 +9,8 @@ const filesystem_sandbox_1 = require("filesystem-sandbox");
 const path_1 = __importDefault(require("path"));
 describe("dotnet-cli", () => {
     const { mockModule } = require("../../../gulp-tasks/modules/mock-module");
+    const realUpdateNuspecVersion = requireModule("update-nuspec-version");
+    const log = requireModule("log");
     let allowLogs = false;
     beforeEach(() => {
         allowLogs = false;
@@ -20,8 +22,19 @@ describe("dotnet-cli", () => {
             original.apply(console, args);
         });
         mockSystem();
+        mockUpdatePackageNuspec();
     });
+    const updateNuspecVersion = jest.fn();
+    const updateNuspecVersionPre = jest.fn();
+    mockModule("update-nuspec-version", updateNuspecVersion);
+    function mockUpdatePackageNuspec() {
+        updateNuspecVersion.mockImplementation(async (fileOrXml, newVersion) => {
+            updateNuspecVersionPre(fileOrXml, newVersion);
+            return realUpdateNuspecVersion(fileOrXml, newVersion);
+        });
+    }
     const system = jest.fn();
+    const systemPre = jest.fn();
     system.isError = (o) => o && !!o.exitCode;
     system.isResult = (o) => o && o.exitCode === 0;
     mockModule("system", system);
@@ -30,6 +43,7 @@ describe("dotnet-cli", () => {
     const anything = expect.any(Object);
     function mockSystem() {
         system.mockImplementation((exe, args, opts) => {
+            systemPre(exe, args, opts);
             if (args[0] == "nuget" && args[1] == "list") {
                 const result = {
                     stdout: [
@@ -723,27 +737,80 @@ describe("dotnet-cli", () => {
             expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", target, "--version-suffix", versionSuffix], anything);
         });
-        it(`should provide quick method for specifying a nuspec file (ie convert to msbuild prop)`, async () => {
-            // Arrange
-            const target = faker_1.faker.string.alphanumeric(), nuspec = faker_1.faker.string.alphanumeric();
-            // Act
-            await pack({
-                target,
-                nuspec,
-                ignoreMissingNuspec: false
+        describe(`when nuspec is specified`, () => {
+            it(`should provide quick method for specifying a nuspec file (ie convert to msbuild prop)`, async () => {
+                // Arrange
+                const target = faker_1.faker.string.alphanumeric(), sandbox = await filesystem_sandbox_1.Sandbox.create(), nuspec = await sandbox.writeFile(`${faker_1.faker.string.alphanumeric()}.nuspec`, packageNuspec);
+                // Act
+                await pack({
+                    target,
+                    nuspec,
+                });
+                // Assert
+                expect(system)
+                    .toHaveBeenCalledOnceWith("dotnet", ["pack", target, `-p:NuspecFile=${nuspec}`], anything);
             });
-            // Assert
-            expect(system)
-                .toHaveBeenCalledOnceWith("dotnet", ["pack", target, `-p:NuspecFile=${nuspec}`], anything);
+            function randomVersion() {
+                return `${faker_1.faker.number.int({
+                    min: 1,
+                    max: 5
+                })}.${faker_1.faker.number.int({
+                    min: 0,
+                    max: 9
+                })}.${faker_1.faker.number.int({
+                    min: 0,
+                    max: 9
+                })}`;
+            }
+            it(`should modify the version in the nuspec file during packing, when versionSuffix is provided`, async () => {
+                // `dotnet pack` will ignore the --version-suffix provided on the CLI when using a package nuspec file - instead,
+                // the version will come wholly from the Package.nuspec, so we have to slide that in during packing
+                // Arrange
+                spyOn(log, "warn");
+                const target = faker_1.faker.string.alphanumeric(), versionSuffix = randomVersion(), sandbox = await filesystem_sandbox_1.Sandbox.create(), nuspec = await sandbox.writeFile("Package.nuspec", packageNuspec), calls = [];
+                updateNuspecVersionPre.mockImplementation((fileOrXml, newVersion) => {
+                    calls.push({
+                        method: "updateNuspecVersion",
+                        args: [fileOrXml, newVersion]
+                    });
+                });
+                systemPre.mockImplementation((exe, args, opts) => {
+                    calls.push({
+                        method: "system",
+                        args: [exe, args, opts]
+                    });
+                });
+                // Act
+                await pack({
+                    target,
+                    nuspec,
+                    versionSuffix
+                });
+                // Assert
+                expect(updateNuspecVersion)
+                    .toHaveBeenCalledWith(nuspec, versionSuffix);
+                const q = nuspec.indexOf(" ") > -1 ? '"' : '';
+                expect(system)
+                    .toHaveBeenCalledOnceWith("dotnet", ["pack", target, `-p:NuspecFile=${q}${nuspec}${q}`], anything);
+                expect(updateNuspecVersion)
+                    .toHaveBeenCalledWith(nuspec, "1.0.158");
+                expect(calls.map(o => o.method))
+                    .toEqual([
+                    "updateNuspecVersion",
+                    "system",
+                    "updateNuspecVersion"
+                ]);
+                expect(log.warn)
+                    .toHaveBeenCalledOnceWith(expect.stringMatching(new RegExp(`will be temporarily set to ${versionSuffix}`)));
+            });
         });
         it(`should provide quick method for specifying a nuspec file with spaces (ie convert to msbuild prop)`, async () => {
             // Arrange
-            const target = faker_1.faker.string.alphanumeric(), nuspec = `${faker_1.faker.string.alphanumeric()} ${faker_1.faker.string.alphanumeric()}`;
+            const target = faker_1.faker.string.alphanumeric(), sandbox = await filesystem_sandbox_1.Sandbox.create(), nuspec = await sandbox.writeFile(`${faker_1.faker.string.alphanumeric()} ${faker_1.faker.string.alphanumeric()}.nuspec`, packageNuspec);
             // Act
             await pack({
                 target,
-                nuspec,
-                ignoreMissingNuspec: false
+                nuspec
             });
             // Assert
             expect(system)
@@ -764,15 +831,13 @@ describe("dotnet-cli", () => {
         });
         it(`should test if the nuspec file exists by default (local, not found)`, async () => {
             // Arrange
-            const sandbox = await filesystem_sandbox_1.Sandbox.create(), project = faker_1.faker.word.sample(), folder = await sandbox.mkdir(project), csproj = await sandbox.writeFile(`${project}/${project}.csproj`, "");
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), project = faker_1.faker.word.sample(), csproj = await sandbox.writeFile(`${project}/${project}.csproj`, "");
             // Act
-            await pack({
+            await expect(pack({
                 target: csproj,
                 nuspec: "Package.nuspec"
-            });
+            })).rejects.toThrow(/nuspec file not found/);
             // Assert
-            expect(system)
-                .toHaveBeenCalledOnceWith("dotnet", ["pack", csproj], anything);
         });
         it(`should test if the nuspec file exists by default (relative, found)`, async () => {
             // Arrange
@@ -786,7 +851,7 @@ describe("dotnet-cli", () => {
             expect(system)
                 .toHaveBeenCalledOnceWith("dotnet", ["pack", csproj, `-p:NuspecFile=pack/Package.nuspec`], anything);
         });
-        it(`should test if the nuspec file exists by default (absoluet, found)`, async () => {
+        it(`should test if the nuspec file exists by default (absolute, found)`, async () => {
             // Arrange
             const sandbox = await filesystem_sandbox_1.Sandbox.create(), project = faker_1.faker.word.sample(), folder = await sandbox.mkdir(project), sub = await sandbox.mkdir(`${project}/pack`), csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""), nuspec = await sandbox.writeFile(`${project}/pack/Package.nuspec`, "");
             // Act
@@ -825,7 +890,10 @@ describe("dotnet-cli", () => {
         });
         it(`should set the timeout when provided`, async () => {
             // Arrange
-            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), timeout = faker_1.faker.number.int({ min: 100, max: 500 });
+            const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), timeout = faker_1.faker.number.int({
+                min: 100,
+                max: 500
+            });
             // Act
             await nugetPush({
                 target,
@@ -1178,11 +1246,26 @@ describe("dotnet-cli", () => {
                 allowLogs = true;
                 // Arrange
                 const expected = [
-                    { id: "microsoft.net.test.sdk", version: "17.4.1" },
-                    { id: "NSubstitute", version: "4.4.0" },
-                    { id: "nunit", version: "3.13.3" },
-                    { id: "nunit3testadapter", version: "4.3.1" },
-                    { id: "system.valuetuple", version: "4.5.0" },
+                    {
+                        id: "microsoft.net.test.sdk",
+                        version: "17.4.1"
+                    },
+                    {
+                        id: "NSubstitute",
+                        version: "4.4.0"
+                    },
+                    {
+                        id: "nunit",
+                        version: "3.13.3"
+                    },
+                    {
+                        id: "nunit3testadapter",
+                        version: "4.3.1"
+                    },
+                    {
+                        id: "system.valuetuple",
+                        version: "4.5.0"
+                    },
                 ];
                 // Act
                 const result = await listPackages(exampleCsProj);
@@ -1514,4 +1597,63 @@ describe("dotnet-cli", () => {
 </Project>
     `;
     });
+    const packageNuspec = `
+  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<package>
+  <metadata>
+    <id>NExpect.Matchers.AspNetCore</id>
+    <version>1.0.158</version>
+    <title>NExpect.Matchers.AspNetCore</title>
+    <authors>Davyd McColl</authors>
+    <owners>Davyd McColl</owners>
+    <description>&#xD;&#xD;&#xD;&#xD;&#xD;
+        ASP.Net core extensions for NExpect&#xD;&#xD;&#xD;&#xD;&#xD;
+    </description>
+    <releaseNotes>&#xD;&#xD;&#xD;&#xD;&#xD;
+    </releaseNotes>
+    <summary>&#xD;&#xD;&#xD;&#xD;&#xD;
+      NExpect Provides Expect() syntax for doing assertions in .NET. Framework-agnostic, throwing&#xD;&#xD;&#xD;&#xD;&#xD;
+      UnmetExpectationExceptions for failures. Assertion exception type can be overridden at run-time.&#xD;&#xD;&#xD;&#xD;&#xD;
+      NExpect has grammar inspired by Chai and extensibility inspired by Jasmine.&#xD;&#xD;&#xD;&#xD;&#xD;
+      &#xD;&#xD;&#xD;&#xD;&#xD;
+      This library adds ASP.Net core extensions for NExpect so you can test your&#xD;&#xD;&#xD;&#xD;&#xD;
+      [Route] and [Http*] annotations like so:&#xD;&#xD;&#xD;&#xD;&#xD;
+      \`\`\`&#xD;&#xD;&#xD;&#xD;&#xD;
+      Expect(typeof(SomeController)&#xD;&#xD;&#xD;&#xD;&#xD;
+      .To.Have.Method(nameof(SomeController.MethodName))&#xD;&#xD;&#xD;&#xD;&#xD;
+      .Supporting(HttpMethod.Delete)&#xD;&#xD;&#xD;&#xD;&#xD;
+      .And(HttpMethod.Post)&#xD;&#xD;&#xD;&#xD;&#xD;
+      .With.Route("first-route")&#xD;&#xD;&#xD;&#xD;&#xD;
+      .And.Route("second-route");&#xD;&#xD;&#xD;&#xD;&#xD;
+      \`\`\`&#xD;&#xD;&#xD;&#xD;&#xD;
+    </summary>
+    <language>en-US</language>
+    <projectUrl>https://github.com/fluffynuts/NExpect</projectUrl>
+    <icon>icon.png</icon>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">BSD-3-Clause</license>
+    <copyright>Copyright 2019</copyright>
+    <dependencies>
+      <group targetFramework="net452">
+        <dependency id="NExpect" version="1.0.159"/>
+        <dependency id="Microsoft.AspNetCore.Mvc.Core" version="4.1.0"/>
+      </group>
+      <group targetFramework="netstandard2.0">
+        <dependency id="NExpect" version="1.0.159"/>
+        <dependency id="Microsoft.AspNetCore.Mvc.Core" version="4.1.0"/>
+      </group>
+    </dependencies>
+    <references/>
+    <tags/>
+  </metadata>
+  <files>
+    <file src="icon.png" target="" />
+    <file src="bin\\BuildForRelease\\netstandard2.0\\NExpect.Matchers.AspNetCore.xml" target="lib\\net452"/>
+    <file src="bin\\BuildForRelease\\netstandard2.0\\NExpect.Matchers.AspNetCore.dll" target="lib\\netstandard2.0"/>
+    <file src="bin\\BuildForRelease\\netstandard2.0\\NExpect.Matchers.AspNetCore.xml" target="lib\\netstandard2.0"/>
+    <file src="bin\\BuildForRelease\\netstandard2.0\\NExpect.Matchers.AspNetCore.pdb" target="lib\\netstandard2.0"/>
+    <file src="bin\\BuildForRelease\\netstandard2.0\\NExpect.Matchers.AspNetCore.deps.json" target="lib\\netstandard2.0"/>
+  </files>
+</package>
+  `;
 });

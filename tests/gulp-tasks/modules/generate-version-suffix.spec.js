@@ -7,9 +7,6 @@ describe(`generate-version-suffix`, () => {
     if (!(sut())) {
         throw new Error(`no sha set yet`);
     }
-    else {
-        console.log(sut());
-    }
     beforeAll(async () => {
         await init();
     });
@@ -19,10 +16,6 @@ describe(`generate-version-suffix`, () => {
         const result = sut();
         // Assert
         const parts = result.split(".");
-        console.log({
-            result,
-            parts
-        });
         expect(parts.length)
             .toEqual(2);
         expect(parts[0])
