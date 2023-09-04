@@ -8,6 +8,7 @@ const faker_1 = require("@faker-js/faker");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 const path_1 = __importDefault(require("path"));
 describe("dotnet-cli", () => {
+    const realSystem = requireModule("system");
     const { mockModule } = require("../../../gulp-tasks/modules/mock-module");
     const realUpdateNuspecVersion = requireModule("update-nuspec-version");
     const log = requireModule("log");
@@ -41,10 +42,15 @@ describe("dotnet-cli", () => {
     const sut = requireModule("dotnet-cli");
     const env = requireModule("env");
     const anything = expect.any(Object);
+    let bypassSystemMock = false;
     function mockSystem() {
+        bypassSystemMock = false;
         system.mockImplementation((exe, args, opts) => {
             systemPre(exe, args, opts);
-            if (args[0] == "nuget" && args[1] == "list") {
+            if (bypassSystemMock) {
+                return realSystem(exe, args, opts);
+            }
+            if (args[0] === "nuget" && args[1] === "list" && args[2] === "source") {
                 const result = {
                     stdout: [
                         "Registered Sources:",
@@ -52,7 +58,7 @@ describe("dotnet-cli", () => {
                         "      https://api.nuget.org/v3/index.json",
                         "  2.  custom [Enabled]",
                         "      https://nuget.custom-domain.com/nuget",
-                        "  3.  Microsoft Visual Studio Offline Packages [Enabled]",
+                        "  3.  Microsoft Visual Studio Offline Packages [Disabled]",
                         "      C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\"
                     ],
                     stderr: [],
@@ -1596,6 +1602,73 @@ describe("dotnet-cli", () => {
   <Import Project="..\\MonoForFramework.targets"/>
 </Project>
     `;
+    });
+    describe(`listNugetSources`, () => {
+        /*
+          mocked 'dotnet nuget list sources' output is:
+                "  1.  nuget.org [Enabled]",
+                "      https://api.nuget.org/v3/index.json",
+                "  2.  custom [Enabled]",
+                "      https://nuget.custom-domain.com/nuget",
+                "  3.  Microsoft Visual Studio Offline Packages [Disabled]",
+                "      C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\"
+         */
+        const { listNugetSources } = sut;
+        it(`should return all the nuget sources`, async () => {
+            // Arrange
+            const expected = [{
+                    name: "nuget.org",
+                    url: "https://api.nuget.org/v3/index.json",
+                    enabled: true
+                }, {
+                    name: "custom",
+                    url: "https://nuget.custom-domain.com/nuget",
+                    enabled: true
+                }, {
+                    name: "Microsoft Visual Studio Offline Packages",
+                    url: "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\",
+                    enabled: false
+                }];
+            // Act
+            const result = await listNugetSources();
+            // Assert
+            expect(result)
+                .toEqual(expected);
+        });
+    });
+    describe(`addNugetSource / removeNugetSource`, () => {
+        const { addNugetSource, listNugetSources, removeNugetSource } = sut;
+        it(`should be able to add and remove the source (by name)`, async () => {
+            // Arrange
+            bypassSystemMock = true;
+            const src = {
+                name: faker_1.faker.string.alphanumeric(5),
+                url: faker_1.faker.internet.url(),
+            };
+            // Act
+            await addNugetSource(src);
+            let configuredSources = await listNugetSources();
+            expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
+                .toExist();
+            await removeNugetSource(src.name);
+            // Assert
+            configuredSources = await listNugetSources();
+            expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
+                .not.toExist();
+        });
+    });
+    describe(`addNugetSource`, () => {
+        const { addNugetSource } = sut;
+        it(`should set the required name and url args`, async () => {
+            // Arrange
+            const name = faker_1.faker.string.alphanumeric(), url = faker_1.faker.internet.url();
+            // Act
+            await addNugetSource({
+                name,
+                url
+            });
+            // Assert
+        });
     });
     const packageNuspec = `
   <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

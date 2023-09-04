@@ -1303,6 +1303,16 @@ declare global {
         diagnostics?: string;
     }
 
+    interface DotNetNugetAddSourceOptions {
+      name: string;
+      url: string;
+      username?: string;
+      password?: string;
+      storePasswordInClearText?: boolean;
+      validAuthenticationTypes?: string;
+      configFile?: string;
+    }
+
     interface DotNetPackageReference {
         id: string;
         version: string;
@@ -1323,6 +1333,17 @@ declare global {
     type DotNetPublishFunction = (opts: DotNetPublishOptions) => Promise<SystemResult | SystemError>;
     type DotNetListPackagesFunction = (projectPath: string) => Promise<DotNetPackageReference[]>;
     type DotNetPublishResolveContainerOptions = (opts: DotNetPublishOptions) => Promise<ResolvedContainerOption[]>;
+    type DotNetAddNugetSourceFunction = (opts: DotNetNugetAddSourceOptions) => Promise<void>;
+    type DotNetRemoveNugetSourceFunction = (nameOrUrlOrPartial: string) => Promise<void>;
+    type DotNetListNugetSourcesFunction = () => Promise<NugetSource[]>;
+
+    interface AddNugetSourceOptions {
+      name: string;
+      url: string;
+    }
+    interface NugetSource extends AddNugetSourceOptions {
+      enabled: boolean;
+    }
 
     interface DotNetCli {
         clean: DotNetCleanFunction;
@@ -1333,6 +1354,9 @@ declare global {
         publish: DotNetPublishFunction;
         listPackages: DotNetListPackagesFunction;
         resolveContainerOptions: DotNetPublishResolveContainerOptions;
+        listNugetSources: DotNetListNugetSourcesFunction;
+        addNugetSource: DotNetAddNugetSourceFunction;
+        removeNugetSource: DotNetRemoveNugetSourceFunction;
     }
 
     type ReadCsProjNode = (csproj: string) => Promise<string>;
