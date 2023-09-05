@@ -51,7 +51,24 @@ describe(`find-local-nuget`, () => {
         });
         expect(contents)
             .toContain("nuget.exe");
-    });
+    }, 30000);
+    it(`should be able to install nuget package in dir via resolved nuget path`, async () => {
+        const system = requireModule("system");
+        // Arrange
+        spyOn(console, "log");
+        spyOn(console, "error");
+        const sandbox = await filesystem_sandbox_1.Sandbox.create(), toolsFolder = await sandbox.mkdir("build-tools");
+        process.env.BUILD_TOOLS_FOLDER = toolsFolder;
+        // Act
+        const nuget = await findLocalNuget();
+        await sandbox.run(async () => {
+            await system(nuget, ["install", "PeanutButter.TempDb.Runner"]);
+        });
+        // Assert
+        const dirs = await (0, yafs_1.ls)(sandbox.path, { entities: yafs_1.FsEntities.folders });
+        expect(dirs.find(o => o.indexOf("PeanutButter.TempDb.Runner") > -1))
+            .not.toBeUndefined();
+    }, 30000);
     afterEach(async () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
     });

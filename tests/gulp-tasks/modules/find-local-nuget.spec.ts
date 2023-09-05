@@ -33,7 +33,27 @@ describe(`find-local-nuget`, () => {
       });
     expect(contents)
       .toContain("nuget.exe");
-  });
+  }, 30000);
+
+  it(`should be able to install nuget package in dir via resolved nuget path`, async () => {
+    const system = requireModule<System>("system");
+    // Arrange
+    spyOn(console, "log");
+    spyOn(console, "error");
+    const
+      sandbox = await Sandbox.create(),
+      toolsFolder = await sandbox.mkdir("build-tools");
+    process.env.BUILD_TOOLS_FOLDER = toolsFolder;
+    // Act
+    const nuget = await findLocalNuget();
+    await sandbox.run(async () => {
+      await system(nuget, [ "install", "PeanutButter.TempDb.Runner" ])
+    });
+    // Assert
+    const dirs = await ls(sandbox.path, { entities: FsEntities.folders });
+    expect(dirs.find(o => o.indexOf("PeanutButter.TempDb.Runner") > -1))
+      .not.toBeUndefined();
+  }, 30000);
 
   afterEach(async () => {
     await Sandbox.destroyAll();
