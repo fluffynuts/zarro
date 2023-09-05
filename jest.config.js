@@ -6,8 +6,9 @@ function determineMaxWorkers() {
 }
 
 function determineTestTimeout() {
-  return envNumber("TEST_TIMEOUT", 10000);
+  return envNumber("TEST_TIMEOUT", 30000);
 }
+
 
 function envNumber(name, fallback) {
   const

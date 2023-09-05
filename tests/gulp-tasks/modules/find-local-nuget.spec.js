@@ -29,9 +29,9 @@ const path = __importStar(require("path"));
 const yafs_1 = require("yafs");
 describe(`find-local-nuget`, () => {
     const findLocalNuget = requireModule("find-local-nuget");
-    const os = require("os"), isWindows = os.platform() === "win32";
+    const { debuggerIsAttached } = require("debugger-is-attached"), os = require("os"), isWindows = os.platform() === "win32";
     beforeAll(() => {
-        process.env.SUPPRESS_DOWNLOAD_PROGRESS = "1";
+        // process.env.SUPPRESS_DOWNLOAD_PROGRESS = "1";
     });
     it(`should download nuget.exe to the build tools folder`, async () => {
         // Arrange
@@ -54,7 +54,7 @@ describe(`find-local-nuget`, () => {
         });
         expect(contents)
             .toContain("nuget.exe");
-    }, 30000);
+    });
     it(`should be able to install nuget package in dir via resolved nuget path`, async () => {
         const system = requireModule("system");
         // Arrange
@@ -71,7 +71,7 @@ describe(`find-local-nuget`, () => {
         const dirs = await (0, yafs_1.ls)(sandbox.path, { entities: yafs_1.FsEntities.folders });
         expect(dirs.find(o => o.indexOf("PeanutButter.TempDb.Runner") > -1))
             .not.toBeUndefined();
-    }, 30000);
+    });
     afterAll(async () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
     });

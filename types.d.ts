@@ -1,11 +1,11 @@
 // noinspection JSUnusedGlobalSymbols
 
 import * as fs from "fs";
-import {Stream, Transform} from "stream";
-import ansiColors, {StyleFunction} from "ansi-colors";
-import {RimrafOptions} from "./gulp-tasks/modules/rimraf";
-import {ExecFileOptionsWithBufferEncoding} from "child_process";
-import {StatsBase} from "fs";
+import { Stream, Transform } from "stream";
+import ansiColors, { StyleFunction } from "ansi-colors";
+import { RimrafOptions } from "./gulp-tasks/modules/rimraf";
+import { ExecFileOptionsWithBufferEncoding } from "child_process";
+import { StatsBase } from "fs";
 import * as vinyl from "vinyl";
 // noinspection ES6PreferShortImport
 import {
@@ -13,8 +13,8 @@ import {
   ListReleasesOptions,
   ReleaseInfo
 } from "./gulp-tasks/modules/fetch-github-release/src";
-import {DecompressOptions, File} from "decompress";
-import {BufferFile} from "vinyl";
+import { DecompressOptions, File } from "decompress";
+import { BufferFile } from "vinyl";
 
 export * from "./gulp-tasks/modules/fetch-github-release/src";
 
@@ -327,6 +327,9 @@ declare global {
     excludeVar: StringEnvVar | StringEnvVar[],
     modifierFunction?: StringMap
   ) => string[];
+
+  type ShimNuget = (pathToNuget: string) => string;
+  type Retry<T> = (fn: (() => Promise<T>), attempt?: number, maxAttempts?: number, wait?: number) => Promise<T>;
 
   type VersionIncrementStrategy =
     "major" | "minor" | "patch" | "prerelease";
@@ -1324,7 +1327,7 @@ declare global {
 
   interface DotNetPublishOptions
     extends DotNetCommonBuildOptions,
-            DotNetPublishContainerOptions {
+      DotNetPublishContainerOptions {
     useCurrentRuntime?: boolean;
     manifest?: string;
     noBuild?: boolean;

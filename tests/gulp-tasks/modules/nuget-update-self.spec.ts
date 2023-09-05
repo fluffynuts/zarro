@@ -30,7 +30,7 @@ describe(`nuget-update-self`, () => {
       expect(systemMock)
         .toHaveBeenCalledWith(
           shim,
-          [ nuget, "update", "-self" ],
+          [ "update", "-self" ],
           expect.anything()
         );
     }

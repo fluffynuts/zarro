@@ -18,7 +18,7 @@ describe(`nuget-update-self`, () => {
         else {
             const shim = path.join(path.dirname(nuget), "nuget");
             expect(systemMock)
-                .toHaveBeenCalledWith(shim, [nuget, "update", "-self"], expect.anything());
+                .toHaveBeenCalledWith(shim, ["update", "-self"], expect.anything());
         }
     });
     beforeEach(() => setupSystemMock());
