@@ -67,7 +67,9 @@ import { Test } from "@jest/test-result";
 
   const prioritise = new Set<string>([
     "test-dotnet-logic",
-    "dotnet-cli"
+    "dotnet-cli",
+    "find-local-nuget",
+    "nuget-update-self"
   ]);
 
   function isLess(

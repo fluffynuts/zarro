@@ -52,7 +52,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
     }
     const prioritise = new Set([
         "test-dotnet-logic",
-        "dotnet-cli"
+        "dotnet-cli",
+        "find-local-nuget",
+        "nuget-update-self"
     ]);
     function isLess(a, b) {
         const aBaseName = specName(a.path);

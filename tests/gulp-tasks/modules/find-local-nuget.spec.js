@@ -30,6 +30,9 @@ const yafs_1 = require("yafs");
 describe(`find-local-nuget`, () => {
     const findLocalNuget = requireModule("find-local-nuget");
     const os = require("os"), isWindows = os.platform() === "win32";
+    beforeAll(() => {
+        process.env.SUPPRESS_DOWNLOAD_PROGRESS = "1";
+    });
     it(`should download nuget.exe to the build tools folder`, async () => {
         // Arrange
         spyOn(console, "log");
@@ -69,7 +72,7 @@ describe(`find-local-nuget`, () => {
         expect(dirs.find(o => o.indexOf("PeanutButter.TempDb.Runner") > -1))
             .not.toBeUndefined();
     }, 30000);
-    afterEach(async () => {
+    afterAll(async () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
     });
 });

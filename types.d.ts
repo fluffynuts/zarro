@@ -466,6 +466,7 @@ declare global {
     "DOTNET_PUBLISH_CONTAINER" |
     "ZARRO_ALLOW_FILE_RESOLUTION" |
     "NPM_PUBLISH_SKIP_OTP" |
+    "SKIP_NUGET_UPDATE" |
     string;
 
   type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
@@ -633,6 +634,7 @@ declare global {
     DOTNET_PUBLISH_CONTAINER: FlagEnvVar;
     ZARRO_ALLOW_FILE_RESOLUTION: FlagEnvVar;
     NPM_PUBLISH_SKIP_OTP: FlagEnvVar;
+    SKIP_NUGET_UPDATE: FlagEnvVar;
 
     BUILD_MAX_CPU_COUNT: NumericEnvVar;
     MAX_NUNIT_AGENTS: NumericEnvVar;
@@ -1150,9 +1152,8 @@ declare global {
     stderr: string[];
     stdout: string[];
 
-    isSpawnResult(o: any): o is SystemResult
-
-    isResult(o: any): o is SystemResult;
+    isResult(): this is SystemResult;
+    isError(): this is SystemError;
   }
 
   interface SystemError
@@ -1172,9 +1173,8 @@ declare global {
     stderr: string[];
     stdout: string[];
 
-    isSystemError(o: any): o is SystemError
-
     isError(o: any): o is SystemError;
+    isResult(o: any): o is SystemError;
   }
 
   type SystemFunction = (program: string, args?: string[], options?: SystemOptions)

@@ -10,6 +10,10 @@ describe(`find-local-nuget`, () => {
     os = require("os"),
     isWindows = os.platform() === "win32";
 
+  beforeAll(() => {
+    process.env.SUPPRESS_DOWNLOAD_PROGRESS = "1";
+  });
+
   it(`should download nuget.exe to the build tools folder`, async () => {
     // Arrange
     spyOn(console, "log");
@@ -55,7 +59,7 @@ describe(`find-local-nuget`, () => {
       .not.toBeUndefined();
   }, 30000);
 
-  afterEach(async () => {
+  afterAll(async () => {
     await Sandbox.destroyAll();
   });
 });
