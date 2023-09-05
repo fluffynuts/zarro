@@ -1,27 +1,14 @@
 import "expect-even-more-jest";
-import {faker} from "@faker-js/faker";
-import {Sandbox} from "filesystem-sandbox";
+import { faker } from "@faker-js/faker";
+import { Sandbox } from "filesystem-sandbox";
 import path from "path";
 
 describe("dotnet-cli", () => {
   const realSystem = requireModule<System>("system");
-  const {mockModule} = require("../../../gulp-tasks/modules/mock-module");
+  const { mockModule } = require("../../../gulp-tasks/modules/mock-module");
   const realUpdateNuspecVersion = requireModule<UpdateNuspecVersion>("update-nuspec-version");
   const log = requireModule<Log>("log");
   let allowLogs = false;
-
-  beforeEach(() => {
-    allowLogs = false;
-    const original = console.log;
-    spyOn(console, "log").and.callFake((...args: any[]) => {
-      if (!allowLogs) {
-        return;
-      }
-      original.apply(console, args);
-    });
-    mockSystem();
-    mockUpdatePackageNuspec();
-  });
 
   const updateNuspecVersion = jest.fn();
   const updateNuspecVersionPre = jest.fn();
@@ -45,8 +32,15 @@ describe("dotnet-cli", () => {
 
   let bypassSystemMock = false;
 
-  function mockSystem() {
-    bypassSystemMock = false;
+  function mockSystem(
+    passThroughToRealSystem?: boolean
+  ) {
+    try {
+      throw new Error('');
+    } catch (e) {
+      const err = e as Error;
+    }
+    bypassSystemMock = !!passThroughToRealSystem;
     system.mockImplementation((exe, args, opts) => {
       systemPre(exe, args, opts);
       if (bypassSystemMock) {
@@ -65,7 +59,7 @@ describe("dotnet-cli", () => {
           ],
           stderr: [] as string[],
           exitCode: 0,
-          args: ["list"],
+          args: [ "list" ],
           exe: "nuget.exe"
         } as SystemResult;
         return result;
@@ -74,12 +68,13 @@ describe("dotnet-cli", () => {
         exe: exe,
         args,
         exitCode: 0,
-      } as SystemResult);
+        __is_mocked__: true
+      } as unknown as SystemResult);
     });
   }
 
   describe(`clean`, () => {
-    const {clean} = sut;
+    const { clean } = sut;
     it(`should be a function`, async () => {
       // Arrange
       // Act
@@ -101,7 +96,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["clean", target, "--framework", framework],
+          "dotnet", [ "clean", target, "--framework", framework ],
           anything
         );
     });
@@ -119,7 +114,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["clean", target, "--runtime", runtime],
+          "dotnet", [ "clean", target, "--runtime", runtime ],
           anything
         );
     });
@@ -137,7 +132,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["clean", target, "--configuration", configuration],
+          "dotnet", [ "clean", target, "--configuration", configuration ],
           anything
         );
     });
@@ -151,19 +146,19 @@ describe("dotnet-cli", () => {
       // Act
       await clean({
         target,
-        configuration: [configuration1, configuration2]
+        configuration: [ configuration1, configuration2 ]
       });
       // Assert
       expect(system)
         .toHaveBeenCalledTimes(2);
       expect(system)
         .toHaveBeenCalledWith(
-          "dotnet", ["clean", target, "--configuration", configuration1],
+          "dotnet", [ "clean", target, "--configuration", configuration1 ],
           anything
         );
       expect(system)
         .toHaveBeenCalledWith(
-          "dotnet", ["clean", target, "--configuration", configuration2],
+          "dotnet", [ "clean", target, "--configuration", configuration2 ],
           anything
         );
     });
@@ -187,7 +182,7 @@ describe("dotnet-cli", () => {
         // Assert
         expect(system)
           .toHaveBeenCalledOnceWith(
-            "dotnet", ["clean", target, "--verbosity", verbosity],
+            "dotnet", [ "clean", target, "--verbosity", verbosity ],
             anything
           );
       });
@@ -208,7 +203,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["clean", target, "--output", output],
+          "dotnet", [ "clean", target, "--output", output ],
           anything
         );
     });
@@ -216,7 +211,7 @@ describe("dotnet-cli", () => {
   });
 
   describe(`build`, () => {
-    const {build} = sut;
+    const { build } = sut;
     it(`should be a function`, async () => {
       // Arrange
       // Act
@@ -243,7 +238,7 @@ describe("dotnet-cli", () => {
         // Assert
         expect(system)
           .toHaveBeenCalledOnceWith(
-            "dotnet", ["build", target, "--verbosity", verbosity],
+            "dotnet", [ "build", target, "--verbosity", verbosity ],
             anything
           );
       });
@@ -262,7 +257,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--configuration", configuration],
+          "dotnet", [ "build", target, "--configuration", configuration ],
           anything
         )
     });
@@ -280,7 +275,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--framework", framework],
+          "dotnet", [ "build", target, "--framework", framework ],
           anything
         )
     });
@@ -298,7 +293,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--runtime", runtime],
+          "dotnet", [ "build", target, "--runtime", runtime ],
           anything
         )
     });
@@ -316,7 +311,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--arch", arch],
+          "dotnet", [ "build", target, "--arch", arch ],
           anything
         )
     });
@@ -334,7 +329,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--os", os],
+          "dotnet", [ "build", target, "--os", os ],
           anything
         )
     });
@@ -352,7 +347,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--version-suffix", versionSuffix],
+          "dotnet", [ "build", target, "--version-suffix", versionSuffix ],
           anything
         )
     });
@@ -369,7 +364,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--no-restore"],
+          "dotnet", [ "build", target, "--no-restore" ],
           anything
         )
     });
@@ -386,7 +381,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--no-dependencies"],
+          "dotnet", [ "build", target, "--no-dependencies" ],
           anything
         )
     });
@@ -403,7 +398,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--no-incremental"],
+          "dotnet", [ "build", target, "--no-incremental" ],
           anything
         )
     });
@@ -420,7 +415,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--disable-build-servers"],
+          "dotnet", [ "build", target, "--disable-build-servers" ],
           anything
         )
     });
@@ -437,7 +432,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--self-contained"],
+          "dotnet", [ "build", target, "--self-contained" ],
           anything
         )
     });
@@ -454,7 +449,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "--disable-build-servers"],
+          "dotnet", [ "build", target, "--disable-build-servers" ],
           anything
         )
     });
@@ -475,7 +470,7 @@ describe("dotnet-cli", () => {
       expect(system)
         .toHaveBeenCalledOnceWith(
           "dotnet",
-          ["build", target, "-p:foo=bar", `-p:quux="wibbles and toast"`, `-p:"spaced arg"="more spaces"`],
+          [ "build", target, "-p:foo=bar", `-p:quux="wibbles and toast"`, `-p:"spaced arg"="more spaces"` ],
           anything
         );
     });
@@ -486,19 +481,19 @@ describe("dotnet-cli", () => {
       // Act
       await build({
         target,
-        additionalArguments: ["foo", "bar", "quux"]
+        additionalArguments: [ "foo", "bar", "quux" ]
       });
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["build", target, "foo", "bar", "quux"],
+          "dotnet", [ "build", target, "foo", "bar", "quux" ],
           anything
         )
     });
   });
 
   describe(`test`, () => {
-    const {test} = sut;
+    const { test } = sut;
     it(`should be a function`, async () => {
       // Arrange
       // Act
@@ -517,7 +512,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", expected],
+          "dotnet", [ "test", expected ],
           anything
         )
     });
@@ -541,7 +536,7 @@ describe("dotnet-cli", () => {
         // Assert
         expect(system)
           .toHaveBeenCalledOnceWith(
-            "dotnet", ["test", target, "--verbosity", verbosity],
+            "dotnet", [ "test", target, "--verbosity", verbosity ],
             anything
           );
       });
@@ -560,7 +555,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--configuration", configuration],
+          "dotnet", [ "test", target, "--configuration", configuration ],
           anything
         )
     });
@@ -578,7 +573,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--framework", framework],
+          "dotnet", [ "test", target, "--framework", framework ],
           anything
         )
     });
@@ -596,7 +591,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--runtime", runtime],
+          "dotnet", [ "test", target, "--runtime", runtime ],
           anything
         )
     });
@@ -614,7 +609,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--arch", arch],
+          "dotnet", [ "test", target, "--arch", arch ],
           anything
         )
     });
@@ -632,7 +627,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--os", os],
+          "dotnet", [ "test", target, "--os", os ],
           anything
         )
     });
@@ -649,7 +644,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--no-build"],
+          "dotnet", [ "test", target, "--no-build" ],
           anything
         )
     });
@@ -666,7 +661,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--no-restore"],
+          "dotnet", [ "test", target, "--no-restore" ],
           anything
         )
     });
@@ -689,7 +684,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--logger", "console;verbosity=normal;foo=bar"],
+          "dotnet", [ "test", target, "--logger", "console;verbosity=normal;foo=bar" ],
           anything
         )
     });
@@ -710,7 +705,7 @@ describe("dotnet-cli", () => {
       expect(system)
         .toHaveBeenCalledOnceWith(
           "dotnet",
-          ["test", target, "-p:foo=bar", `-p:quux="wibbles and toast"`, `-p:"spaced arg"="more spaces"`],
+          [ "test", target, "-p:foo=bar", `-p:quux="wibbles and toast"`, `-p:"spaced arg"="more spaces"` ],
           anything
         );
     });
@@ -721,12 +716,12 @@ describe("dotnet-cli", () => {
       // Act
       await test({
         target,
-        additionalArguments: ["foo", "bar", "quux"]
+        additionalArguments: [ "foo", "bar", "quux" ]
       });
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "foo", "bar", "quux"],
+          "dotnet", [ "test", target, "foo", "bar", "quux" ],
           anything
         )
     });
@@ -744,7 +739,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--settings", settingsFile],
+          "dotnet", [ "test", target, "--settings", settingsFile ],
           anything
         )
     });
@@ -765,7 +760,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledWith(
-          "dotnet", ["test", target, "-e", "foo=bar", "-e", `moo="cow beef"`, "-e", `"moo cow"="yum yum"`],
+          "dotnet", [ "test", target, "-e", "foo=bar", "-e", `moo="cow beef"`, "-e", `"moo cow"="yum yum"` ],
           anything
         )
     });
@@ -782,7 +777,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--filter", `"some filter expression"`],
+          "dotnet", [ "test", target, "--filter", `"some filter expression"` ],
           anything
         )
     });
@@ -792,7 +787,7 @@ describe("dotnet-cli", () => {
       const
         target = faker.word.sample(),
         output1 = faker.string.alphanumeric(),
-        output2 = `${faker.string.alphanumeric()} ${faker.string.alphanumeric()}`;
+        output2 = `${ faker.string.alphanumeric() } ${ faker.string.alphanumeric() }`;
       // Act
       await test({
         target,
@@ -805,12 +800,12 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--output", output1],
+          "dotnet", [ "test", target, "--output", output1 ],
           anything
         )
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--output", `"${output2}"`],
+          "dotnet", [ "test", target, "--output", `"${ output2 }"` ],
           anything
         )
     });
@@ -820,7 +815,7 @@ describe("dotnet-cli", () => {
       const
         target = faker.word.sample(),
         diagnostics1 = faker.string.alphanumeric(),
-        diagnostics2 = `${faker.string.alphanumeric()} ${faker.string.alphanumeric()}`;
+        diagnostics2 = `${ faker.string.alphanumeric() } ${ faker.string.alphanumeric() }`;
       // Act
       await test({
         target,
@@ -833,12 +828,12 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--diag", diagnostics1],
+          "dotnet", [ "test", target, "--diag", diagnostics1 ],
           anything
         )
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["test", target, "--diag", `"${diagnostics2}"`],
+          "dotnet", [ "test", target, "--diag", `"${ diagnostics2 }"` ],
           anything
         )
     });
@@ -846,7 +841,7 @@ describe("dotnet-cli", () => {
   });
 
   describe(`pack`, () => {
-    const {pack} = sut;
+    const { pack } = sut;
     it(`should be a function`, async () => {
       // Arrange
       // Act
@@ -864,7 +859,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", target],
+          "dotnet", [ "pack", target ],
           anything
         )
     });
@@ -882,7 +877,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", target, "--output", output],
+          "dotnet", [ "pack", target, "--output", output ],
           anything
         )
     });
@@ -905,7 +900,7 @@ describe("dotnet-cli", () => {
         // Assert
         expect(system)
           .toHaveBeenCalledOnceWith(
-            "dotnet", ["pack", target, "--verbosity", verbosity],
+            "dotnet", [ "pack", target, "--verbosity", verbosity ],
             anything
           );
       });
@@ -924,7 +919,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", target, "--configuration", configuration],
+          "dotnet", [ "pack", target, "--configuration", configuration ],
           anything
         )
     });
@@ -941,7 +936,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", target, "--no-build"],
+          "dotnet", [ "pack", target, "--no-build" ],
           anything
         )
     });
@@ -958,7 +953,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", target, "--include-symbols"],
+          "dotnet", [ "pack", target, "--include-symbols" ],
           anything
         )
     });
@@ -974,7 +969,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", target, "--include-source"],
+          "dotnet", [ "pack", target, "--include-source" ],
           anything
         )
     });
@@ -990,7 +985,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", target, "--no-restore"],
+          "dotnet", [ "pack", target, "--no-restore" ],
           anything
         )
     });
@@ -1008,7 +1003,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", target, "--version-suffix", versionSuffix],
+          "dotnet", [ "pack", target, "--version-suffix", versionSuffix ],
           anything
         )
     });
@@ -1020,7 +1015,7 @@ describe("dotnet-cli", () => {
           target = faker.string.alphanumeric(),
           sandbox = await Sandbox.create(),
           nuspec = await sandbox.writeFile(
-            `${faker.string.alphanumeric()}.nuspec`,
+            `${ faker.string.alphanumeric() }.nuspec`,
             packageNuspec
           );
         // Act
@@ -1031,7 +1026,7 @@ describe("dotnet-cli", () => {
         // Assert
         expect(system)
           .toHaveBeenCalledOnceWith(
-            "dotnet", ["pack", target, `-p:NuspecFile=${nuspec}`],
+            "dotnet", [ "pack", target, `-p:NuspecFile=${ nuspec }` ],
             anything
           )
       });
@@ -1078,7 +1073,7 @@ describe("dotnet-cli", () => {
           (fileOrXml: string, newVersion: string) => {
             calls.push({
               method: "updateNuspecVersion",
-              args: [fileOrXml, newVersion]
+              args: [ fileOrXml, newVersion ]
             });
           }
         );
@@ -1086,7 +1081,7 @@ describe("dotnet-cli", () => {
           (exe: string, args: string[], opts: SystemOptions) => {
             calls.push({
               method: "system",
-              args: [exe, args, opts]
+              args: [ exe, args, opts ]
             });
           });
         // Act
@@ -1101,7 +1096,7 @@ describe("dotnet-cli", () => {
         const q = nuspec.indexOf(" ") > -1 ? '"' : '';
         expect(system)
           .toHaveBeenCalledOnceWith(
-            "dotnet", ["pack", target, `-p:NuspecFile=${q}${nuspec}${q}`],
+            "dotnet", [ "pack", target, `-p:NuspecFile=${ q }${ nuspec }${ q }` ],
             anything
           )
         expect(updateNuspecVersion)
@@ -1128,7 +1123,7 @@ describe("dotnet-cli", () => {
           target = faker.string.alphanumeric(),
           sandbox = await Sandbox.create(),
           nuspec = await sandbox.writeFile(
-            `${faker.string.alphanumeric()} ${faker.string.alphanumeric()}.nuspec`,
+            `${ faker.string.alphanumeric() } ${ faker.string.alphanumeric() }.nuspec`,
             packageNuspec
           );
         // Act
@@ -1139,7 +1134,7 @@ describe("dotnet-cli", () => {
         // Assert
         expect(system)
           .toHaveBeenCalledOnceWith(
-            "dotnet", ["pack", target, `-p:NuspecFile="${nuspec}"`],
+            "dotnet", [ "pack", target, `-p:NuspecFile="${ nuspec }"` ],
             anything
           )
       }
@@ -1150,8 +1145,8 @@ describe("dotnet-cli", () => {
       const
         sandbox = await Sandbox.create(),
         project = faker.word.sample(),
-        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, "");
-      await sandbox.writeFile(`${project}/Package.nuspec`, "");
+        csproj = await sandbox.writeFile(`${ project }/${ project }.csproj`, "");
+      await sandbox.writeFile(`${ project }/Package.nuspec`, "");
 
       // Act
       await pack({
@@ -1161,7 +1156,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", csproj, `-p:NuspecFile=Package.nuspec`],
+          "dotnet", [ "pack", csproj, `-p:NuspecFile=Package.nuspec` ],
           anything
         )
     });
@@ -1171,7 +1166,7 @@ describe("dotnet-cli", () => {
       const
         sandbox = await Sandbox.create(),
         project = faker.word.sample(),
-        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, "");
+        csproj = await sandbox.writeFile(`${ project }/${ project }.csproj`, "");
       // Act
       await expect(pack({
         target: csproj,
@@ -1186,9 +1181,9 @@ describe("dotnet-cli", () => {
         sandbox = await Sandbox.create(),
         project = faker.word.sample(),
         folder = await sandbox.mkdir(project),
-        sub = await sandbox.mkdir(`${project}/pack`),
-        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""),
-        nuspec = await sandbox.writeFile(`${project}/pack/Package.nuspec`, "");
+        sub = await sandbox.mkdir(`${ project }/pack`),
+        csproj = await sandbox.writeFile(`${ project }/${ project }.csproj`, ""),
+        nuspec = await sandbox.writeFile(`${ project }/pack/Package.nuspec`, "");
       // Act
       await pack({
         target: csproj,
@@ -1197,7 +1192,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", csproj, `-p:NuspecFile=pack/Package.nuspec`],
+          "dotnet", [ "pack", csproj, `-p:NuspecFile=pack/Package.nuspec` ],
           anything
         )
     });
@@ -1208,9 +1203,9 @@ describe("dotnet-cli", () => {
         sandbox = await Sandbox.create(),
         project = faker.word.sample(),
         folder = await sandbox.mkdir(project),
-        sub = await sandbox.mkdir(`${project}/pack`),
-        csproj = await sandbox.writeFile(`${project}/${project}.csproj`, ""),
-        nuspec = await sandbox.writeFile(`${project}/pack/Package.nuspec`, "");
+        sub = await sandbox.mkdir(`${ project }/pack`),
+        csproj = await sandbox.writeFile(`${ project }/${ project }.csproj`, ""),
+        nuspec = await sandbox.writeFile(`${ project }/pack/Package.nuspec`, "");
       // Act
       await pack({
         target: csproj,
@@ -1219,7 +1214,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["pack", csproj, `-p:NuspecFile=${nuspec}`],
+          "dotnet", [ "pack", csproj, `-p:NuspecFile=${ nuspec }` ],
           anything
         )
     });
@@ -1231,7 +1226,7 @@ describe("dotnet-cli", () => {
   })
 
   describe(`nugetPush`, () => {
-    const {nugetPush} = sut;
+    const { nugetPush } = sut;
     it(`should be a function`, async () => {
       // Arrange
       // Act
@@ -1252,7 +1247,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org"],
+          "dotnet", [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org" ],
           anything
         )
     });
@@ -1275,7 +1270,7 @@ describe("dotnet-cli", () => {
       expect(system)
         .toHaveBeenCalledOnceWith(
           "dotnet",
-          ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--timeout", `${timeout}`],
+          [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--timeout", `${ timeout }` ],
           anything
         )
     });
@@ -1295,7 +1290,7 @@ describe("dotnet-cli", () => {
       expect(system)
         .toHaveBeenCalledOnceWith(
           "dotnet",
-          ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--symbol-source", symbolSource],
+          [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--symbol-source", symbolSource ],
           anything
         )
     });
@@ -1314,7 +1309,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", source],
+          "dotnet", [ "nuget", "push", target, "--api-key", apiKey, "--source", source ],
           anything
         )
     });
@@ -1334,7 +1329,7 @@ describe("dotnet-cli", () => {
       expect(system)
         .toHaveBeenCalledOnceWith(
           "dotnet",
-          ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--force-english-output"],
+          [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--force-english-output" ],
           anything
         )
     });
@@ -1354,7 +1349,7 @@ describe("dotnet-cli", () => {
       expect(system)
         .toHaveBeenCalledOnceWith(
           "dotnet",
-          ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--no-service-endpoint"],
+          [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--no-service-endpoint" ],
           anything
         )
     });
@@ -1374,7 +1369,7 @@ describe("dotnet-cli", () => {
       expect(system)
         .toHaveBeenCalledOnceWith(
           "dotnet",
-          ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--skip-duplicate"],
+          [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--skip-duplicate" ],
           anything
         )
     });
@@ -1393,7 +1388,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--no-symbols"],
+          "dotnet", [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--no-symbols" ],
           anything
         )
     });
@@ -1413,7 +1408,7 @@ describe("dotnet-cli", () => {
       expect(system)
         .toHaveBeenCalledOnceWith(
           "dotnet",
-          ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--disable-buffering"],
+          [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--disable-buffering" ],
           anything
         )
     });
@@ -1432,7 +1427,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org"],
+          "dotnet", [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org" ],
           anything
         )
     });
@@ -1452,14 +1447,25 @@ describe("dotnet-cli", () => {
       expect(system)
         .toHaveBeenCalledOnceWith(
           "dotnet",
-          ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--symbol-api-key", symbolApiKey],
+          [ "nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--symbol-api-key", symbolApiKey ],
           anything
         )
     });
   });
 
+  describe(`removeNugetSource fuzziness`, () => {
+    it(`should be able to remove source by partial url`, async () => {
+      // Arrange
+      bypassSystemMock = true;
+      const
+        target = faker.word
+      // Act
+      // Assert
+    });
+  });
+
   describe(`publish`, () => {
-    const {publish} = sut;
+    const { publish } = sut;
     it(`should be a function`, async () => {
       // Arrange
       // Act
@@ -1479,7 +1485,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target],
+          "dotnet", [ "publish", target ],
           anything
         )
     });
@@ -1496,7 +1502,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--use-current-runtime"],
+          "dotnet", [ "publish", target, "--use-current-runtime" ],
           anything
         )
     });
@@ -1514,7 +1520,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--output", output],
+          "dotnet", [ "publish", target, "--output", output ],
           anything
         )
     });
@@ -1532,7 +1538,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--manifest", manifest],
+          "dotnet", [ "publish", target, "--manifest", manifest ],
           anything
         )
     });
@@ -1549,7 +1555,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--no-build"],
+          "dotnet", [ "publish", target, "--no-build" ],
           anything
         )
     });
@@ -1568,7 +1574,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--runtime", runtime, "--self-contained"],
+          "dotnet", [ "publish", target, "--runtime", runtime, "--self-contained" ],
           anything
         )
     });
@@ -1587,7 +1593,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--runtime", runtime, "--self-contained"],
+          "dotnet", [ "publish", target, "--runtime", runtime, "--self-contained" ],
           anything
         )
     });
@@ -1606,7 +1612,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--runtime", runtime, "--no-self-contained"],
+          "dotnet", [ "publish", target, "--runtime", runtime, "--no-self-contained" ],
           anything
         )
     });
@@ -1624,7 +1630,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--framework", framework],
+          "dotnet", [ "publish", target, "--framework", framework ],
           anything
         )
     });
@@ -1642,7 +1648,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--configuration", configuration],
+          "dotnet", [ "publish", target, "--configuration", configuration ],
           anything
         )
     });
@@ -1660,7 +1666,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--version-suffix", versionSuffix],
+          "dotnet", [ "publish", target, "--version-suffix", versionSuffix ],
           anything
         )
     });
@@ -1677,7 +1683,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--no-restore"],
+          "dotnet", [ "publish", target, "--no-restore" ],
           anything
         )
     });
@@ -1701,7 +1707,7 @@ describe("dotnet-cli", () => {
         // Assert
         expect(system)
           .toHaveBeenCalledOnceWith(
-            "dotnet", ["publish", target, "--verbosity", verbosity],
+            "dotnet", [ "publish", target, "--verbosity", verbosity ],
             anything
           );
       });
@@ -1720,7 +1726,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--arch", arch],
+          "dotnet", [ "publish", target, "--arch", arch ],
           anything
         )
     });
@@ -1738,7 +1744,7 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--os", os],
+          "dotnet", [ "publish", target, "--os", os ],
           anything
         )
     });
@@ -1755,13 +1761,13 @@ describe("dotnet-cli", () => {
       // Assert
       expect(system)
         .toHaveBeenCalledOnceWith(
-          "dotnet", ["publish", target, "--disable-build-servers"],
+          "dotnet", [ "publish", target, "--disable-build-servers" ],
           anything
         )
     });
 
     describe(`listPackages`, () => {
-      const {listPackages} = sut;
+      const { listPackages } = sut;
       const exampleCsProj = path.join(
         __dirname,
         "csproj",
@@ -1841,7 +1847,7 @@ describe("dotnet-cli", () => {
             // Assert
             expect(system)
               .toHaveBeenCalledOnceWith(
-                "dotnet", ["publish", target, "-t:PublishContainer"],
+                "dotnet", [ "publish", target, "-t:PublishContainer" ],
                 anything
               );
           });
@@ -1858,7 +1864,7 @@ describe("dotnet-cli", () => {
             // Assert
             expect(system)
               .toHaveBeenCalledOnceWith(
-                "dotnet", ["publish", target, "-t:PublishContainer", `-p:ContainerImageTag=${tag}`],
+                "dotnet", [ "publish", target, "-t:PublishContainer", `-p:ContainerImageTag=${ tag }` ],
                 anything
               );
           });
@@ -1876,7 +1882,7 @@ describe("dotnet-cli", () => {
             expect(system)
               .toHaveBeenCalledOnceWith(
                 "dotnet",
-                ["publish", target, "-t:PublishContainer", `-p:ContainerRegistry=${registry}`],
+                [ "publish", target, "-t:PublishContainer", `-p:ContainerRegistry=${ registry }` ],
                 anything
               );
           });
@@ -1894,7 +1900,7 @@ describe("dotnet-cli", () => {
             expect(system)
               .toHaveBeenCalledOnceWith(
                 "dotnet",
-                ["publish", target, "-t:PublishContainer", `-p:ContainerImageName=${name}`],
+                [ "publish", target, "-t:PublishContainer", `-p:ContainerImageName=${ name }` ],
                 anything
               );
           });
@@ -1904,7 +1910,7 @@ describe("dotnet-cli", () => {
   });
 
   describe(`resolveContainerOptions`, () => {
-    const {resolveContainerOptions} = sut;
+    const { resolveContainerOptions } = sut;
     it(`should be a function`, async () => {
       // Arrange
       // Act
@@ -1917,7 +1923,7 @@ describe("dotnet-cli", () => {
       // Arrange
       const
         sandbox = await Sandbox.create(),
-        projFile = `${faker.word.sample()}.csproj`,
+        projFile = `${ faker.word.sample() }.csproj`,
         expected = {
           option: "containerImageTag",
           value: "1.2.3",
@@ -1941,7 +1947,7 @@ describe("dotnet-cli", () => {
       // Arrange
       const
         sandbox = await Sandbox.create(),
-        projFile = `${faker.word.sample()}.csproj`,
+        projFile = `${ faker.word.sample() }.csproj`,
         expected = {
           option: "containerImageTag",
           value: "3.5.4",
@@ -1964,7 +1970,7 @@ describe("dotnet-cli", () => {
       // Arrange
       const
         sandbox = await Sandbox.create(),
-        projFile = `${faker.word.sample()}.csproj`,
+        projFile = `${ faker.word.sample() }.csproj`,
         registry = faker.internet.domainName(),
         expected = {
           option: "containerRegistry",
@@ -1989,7 +1995,7 @@ describe("dotnet-cli", () => {
       // Arrange
       const
         sandbox = await Sandbox.create(),
-        projFile = `${faker.word.sample()}.csproj`,
+        projFile = `${ faker.word.sample() }.csproj`,
         expected = {
           option: "containerRegistry",
           value: "foo.bar.com",
@@ -2012,7 +2018,7 @@ describe("dotnet-cli", () => {
       // Arrange
       const
         sandbox = await Sandbox.create(),
-        projFile = `${faker.word.sample()}.csproj`,
+        projFile = `${ faker.word.sample() }.csproj`,
         expected = {
           option: "containerRegistry",
           value: "localhost",
@@ -2038,7 +2044,7 @@ describe("dotnet-cli", () => {
       // Arrange
       const
         sandbox = await Sandbox.create(),
-        projFile = `${faker.word.sample()}.csproj`,
+        projFile = `${ faker.word.sample() }.csproj`,
         containerImageName = faker.word.sample(),
         expected = {
           option: "containerImageName",
@@ -2063,7 +2069,7 @@ describe("dotnet-cli", () => {
       // Arrange
       const
         sandbox = await Sandbox.create(),
-        projFile = `${faker.word.sample()}.csproj`,
+        projFile = `${ faker.word.sample() }.csproj`,
         expected = {
           option: "containerImageName",
           value: "yellow-submarine",
@@ -2087,7 +2093,7 @@ describe("dotnet-cli", () => {
       const
         sandbox = await Sandbox.create(),
         projectName = faker.word.sample(),
-        projFile = `${projectName}.csproj`,
+        projFile = `${ projectName }.csproj`,
         expected = {
           option: "containerImageName",
           value: "Foo.Bar",
@@ -2114,7 +2120,7 @@ describe("dotnet-cli", () => {
       const
         sandbox = await Sandbox.create(),
         projectName = faker.word.sample(),
-        projFile = `${projectName}.csproj`,
+        projFile = `${ projectName }.csproj`,
         expected = {
           option: "containerImageName",
           value: projectName,
@@ -2232,7 +2238,7 @@ describe("dotnet-cli", () => {
     const { listNugetSources } = sut;
     it(`should return all the nuget sources`, async () => {
       // Arrange
-      const expected = [{
+      const expected = [ {
         name: "nuget.org",
         url: "https://api.nuget.org/v3/index.json",
         enabled: true
@@ -2244,7 +2250,7 @@ describe("dotnet-cli", () => {
         name: "Microsoft Visual Studio Offline Packages",
         url: "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\",
         enabled: false
-      }] satisfies NugetSource[];
+      } ] satisfies NugetSource[];
       // Act
       const result = await listNugetSources();
       // Assert
@@ -2253,15 +2259,139 @@ describe("dotnet-cli", () => {
     });
   });
 
-  describe(`addNugetSource / removeNugetSource`, () => {
-    const { addNugetSource, listNugetSources, removeNugetSource } = sut;
-    it(`should be able to add and remove the source (by name)`, async () => {
+  describe(`addNugetSource`, () => {
+    const { addNugetSource } = sut;
+    it(`should set auth on request`, async () => {
       // Arrange
-      bypassSystemMock = true;
       const src = {
         name: faker.string.alphanumeric(5),
         url: faker.internet.url(),
-      } satisfies AddNugetSourceOptions;
+        username: faker.string.alphanumeric(5),
+        password: faker.string.alphanumeric(5),
+      } satisfies DotNetNugetAddSourceOptions;
+      // Act
+      await addNugetSource(src);
+      // Assert
+      expect(system)
+        .toHaveBeenCalledWith(
+          "dotnet",
+          [ "nuget", "add", "source",
+            "--name", src.name,
+            "--username", src.username,
+            "--password", src.password,
+            src.url
+          ], anything
+        );
+    });
+
+    it(`should request clearText passwords on request`, async () => {
+      // Arrange
+      const src = {
+        name: faker.string.alphanumeric(5),
+        url: faker.internet.url(),
+        username: faker.string.alphanumeric(5),
+        password: faker.string.alphanumeric(5),
+        storePasswordInClearText: true
+      } satisfies DotNetNugetAddSourceOptions;
+      // Act
+      await addNugetSource(src);
+      // Assert
+      expect(system)
+        .toHaveBeenCalledWith(
+          "dotnet",
+          [ "nuget", "add", "source",
+            "--name", src.name,
+            "--username", src.username,
+            "--password", src.password,
+            "--store-password-in-clear-text",
+            src.url
+          ], anything
+        );
+    });
+
+    it(`should pass through valid auth types when set`, async () => {
+      // Arrange
+      const src = {
+        name: faker.string.alphanumeric(5),
+        url: faker.internet.url(),
+        username: faker.string.alphanumeric(5),
+        password: faker.string.alphanumeric(5),
+        validAuthenticationTypes: "foo,bar"
+      } satisfies DotNetNugetAddSourceOptions;
+      // Act
+      await addNugetSource(src);
+      // Assert
+      expect(system)
+        .toHaveBeenCalledWith(
+          "dotnet",
+          [ "nuget", "add", "source",
+            "--name", src.name,
+            "--username", src.username,
+            "--password", src.password,
+            "--valid-authentication-types", src.validAuthenticationTypes,
+            src.url
+          ], anything
+        );
+    });
+
+    it(`should pass through config file path when set`, async () => {
+      // Arrange
+      const src = {
+        name: faker.string.alphanumeric(5),
+        url: faker.internet.url(),
+        username: faker.string.alphanumeric(5),
+        password: faker.string.alphanumeric(5),
+        configFile: faker.string.alphanumeric(10)
+      } satisfies DotNetNugetAddSourceOptions;
+      // Act
+      await addNugetSource(src);
+      // Assert
+      expect(system)
+        .toHaveBeenCalledWith(
+          "dotnet",
+          [ "nuget", "add", "source",
+            "--name", src.name,
+            "--username", src.username,
+            "--password", src.password,
+            "--configfile", src.configFile,
+            src.url
+          ], anything
+        );
+    });
+  });
+
+  describe(`addNugetSource / removeNugetSource`, () => {
+    beforeEach(() => {
+      mockSystem(true);
+    });
+    const {
+      addNugetSource,
+      listNugetSources,
+      removeNugetSource
+    } = sut;
+
+    it(`system should work`, async () => {
+      // Arrange
+      expect(bypassSystemMock)
+        .toBeTrue();
+      const
+        sandbox = await Sandbox.create(),
+        js = await sandbox.writeFile("foo.js", "console.log('foo');");
+      // Act
+      const result = await system(
+        "node",
+        [ js ]
+      );
+      // Assert
+      expect(result.stdout)
+        .toEqual([ "foo" ]);
+    });
+    it(`should be able to add and remove the source (by name)`, async () => {
+      // Arrange
+      const src = {
+        name: faker.string.alphanumeric(5),
+        url: faker.internet.url(),
+      } satisfies DotNetNugetAddSourceOptions;
       // Act
       await addNugetSource(src);
       let configuredSources = await listNugetSources();
@@ -2273,24 +2403,309 @@ describe("dotnet-cli", () => {
       expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
         .not.toExist();
     });
-  });
 
-  describe(`addNugetSource`, () => {
-    const {addNugetSource} = sut;
-    it(`should set the required name and url args`, async () => {
+    it(`should be able to add disabled source`, async () => {
+      // Arrange
+      const src = {
+        name: faker.string.alphanumeric(5),
+        url: faker.internet.url(),
+        enabled: false
+      } satisfies DotNetNugetAddSourceOptions;
+      // Act
+      await addNugetSource(src);
+      // Assert
+      let configuredSources = await listNugetSources();
+      const match = configuredSources.find(
+        o => o.name === src.name && o.url === src.url
+      );
+      expect(match)
+        .toExist();
+      expect(match?.enabled)
+        .toBeFalse();
+    });
+
+    it(`should be able to remove source by url`, async () => {
+      // Arrange
+      const src = {
+        name: faker.string.alphanumeric(5),
+        url: faker.internet.url(),
+      } satisfies DotNetNugetAddSourceOptions;
+      // Act
+      await addNugetSource(src);
+      let configuredSources = await listNugetSources();
+      expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
+        .toExist();
+      await removeNugetSource(src.url);
+      // Assert
+      configuredSources = await listNugetSources();
+      expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
+        .not.toExist();
+    });
+
+    it(`should be able to remove source by host`, async () => {
+      // Arrange
+      const src = {
+          name: faker.string.alphanumeric(5),
+          url: faker.internet.url(),
+        } satisfies DotNetNugetAddSourceOptions,
+        url = new URL(src.url);
+      // Act
+      await addNugetSource(src);
+      let configuredSources = await listNugetSources();
+      expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
+        .toExist();
+      await removeNugetSource(url.host);
+      // Assert
+      configuredSources = await listNugetSources();
+      expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
+        .not.toExist();
+    });
+
+    it(`should refuse to remove if more than one source matched`, async () => {
       // Arrange
       const
-        name = faker.string.alphanumeric(),
-        url = faker.internet.url();
+        url1 = "https://nuget.pkg.github.com/projectA/index.json",
+        url2 = "https://nuget.pkg.github.com/projectB/index.json",
+        src1 = {
+          name: randomSourceName(),
+          url: url1,
+        } satisfies DotNetNugetAddSourceOptions,
+        src2 = {
+          name: randomSourceName(),
+          url: url2
+        }
       // Act
-      await addNugetSource({
-        name,
-        url
-      });
+      await addNugetSource(src1);
+      await addNugetSource(src2);
+      await expect(removeNugetSource("nuget.pkg.github.com"))
+        .rejects.toThrow(/multiple/);
       // Assert
+    });
 
+  });
+
+  describe(`disableNuGetSource`, () => {
+    const {
+      addNugetSource,
+      disableNugetSource
+    } = sut;
+    beforeEach(() => bypassSystemMock = true);
+    it(`should disable the disabled source by name`, async () => {
+      // Arrange
+      const src = {
+        name: faker.word.sample(),
+        url: faker.internet.url(),
+        enabled: false
+      } satisfies NugetSource;
+      await addNugetSource(src);
+      // Act
+      await disableNugetSource(src.name);
+      // Assert
+      const result = (await listNugetSources())
+        .find(o => o.name === src.name);
+      expect(result)
+        .toExist();
+      expect(result?.enabled)
+        .toBeFalse();
+    });
+
+    it(`should disable the disabled source by url`, async () => {
+      // Arrange
+      const src = {
+        name: faker.word.sample(),
+        url: faker.internet.url(),
+        enabled: false
+      } satisfies NugetSource;
+      await addNugetSource(src);
+      // Act
+      await disableNugetSource(src.url);
+      // Assert
+      const result = (await listNugetSources())
+        .find(o => o.name === src.name);
+      expect(result)
+        .toExist();
+      expect(result?.enabled)
+        .toBeFalse();
+    });
+
+    it(`should disable the disabled source by full source`, async () => {
+      // Arrange
+      const src = {
+        name: faker.word.sample(),
+        url: faker.internet.url(),
+        enabled: false
+      } satisfies NugetSource;
+      await addNugetSource(src);
+      // Act
+      await disableNugetSource(src);
+      // Assert
+      const result = (await listNugetSources())
+        .find(o => o.name === src.name);
+      expect(result)
+        .toExist();
+      expect(result?.enabled)
+        .toBeFalse();
     });
   });
+
+  beforeEach(() => {
+    allowLogs = false;
+    const original = console.log;
+    spyOn(console, "log").and.callFake((...args: any[]) => {
+      if (!allowLogs) {
+        return;
+      }
+      original.apply(console, args);
+    });
+    mockSystem();
+    mockUpdatePackageNuspec();
+  });
+
+  beforeAll(async () => {
+    usedSourceNames.clear();
+    mockSystem();
+    await storeAllKnownNugetSources();
+  });
+
+  afterAll(async () => {
+    await restoreAllKnownNugetSources();
+  });
+  const usedSourceNames = new Set<string>();
+
+  function randomSourceName() {
+    let result: string;
+    do {
+      result = `${ faker.word.sample() }-${ faker.word.sample() }`;
+    } while (usedSourceNames.has(result));
+    usedSourceNames.add(result);
+    return result;
+  }
+
+  const knownSources = [] as NugetSource[];
+
+  const { listNugetSources } = sut;
+
+  async function storeAllKnownNugetSources() {
+    await runWithRealSystem(async () => {
+      const sources = await listNugetSources();
+      knownSources.push(...sources);
+    });
+  }
+
+  async function runWithRealSystem(
+    fn: AsyncVoidVoid
+  ): Promise<void> {
+    const oldMockBypass = bypassSystemMock;
+    bypassSystemMock = true;
+    try {
+      await fn();
+    } catch (e) {
+      throw e;
+    } finally {
+      bypassSystemMock = oldMockBypass;
+    }
+  }
+
+  async function restoreAllKnownNugetSources() {
+    await runWithRealSystem(async () => {
+      const
+        toRestore = knownSources.splice(0, knownSources.length),
+        currentSources = await listNugetSources(),
+        toRemove = [] as NugetSource[],
+        toDisable = [] as NugetSource[],
+        toAdd = [] as NugetSource[],
+        toEnable = [] as NugetSource[];
+      for (const source of toRestore) {
+        const match = currentSources.find(
+          o => o.name === source.name && o.url === source.url
+        );
+        if (match) {
+          if (match.enabled === source.enabled) {
+            continue;
+          }
+          if (source.enabled) {
+            toEnable.push(source);
+          } else {
+            toDisable.push(source);
+          }
+        } else {
+          toAdd.push(source);
+        }
+      }
+
+      for (const source of currentSources) {
+        const match = toRestore.find(
+          o => o.name === source.name && o.url === source.url
+        );
+        if (match) {
+          if (match.enabled === source.enabled) {
+            continue;
+          }
+          if (source.enabled) {
+            toDisable.push(source);
+          } else {
+            toEnable.push(source);
+          }
+        } else {
+          toRemove.push(source);
+        }
+      }
+
+      await addNugetSources(toAdd);
+      await removeNugetSources(toRemove);
+      await enableNugetSources(toEnable);
+      await disableNugetSources(toDisable);
+    });
+  }
+
+  async function addNugetSources(
+    toAdd: NugetSource[]
+  ): Promise<void> {
+    const { addNugetSource } = sut;
+    await runOnSources(
+      toAdd,
+      addNugetSource
+    );
+  }
+
+  async function removeNugetSources(
+    toRemove: NugetSource[]
+  ): Promise<void> {
+    const { removeNugetSource } = sut;
+    await runOnSources(
+      toRemove,
+      removeNugetSource
+    );
+  }
+
+  async function enableNugetSources(
+    toEnable: NugetSource[]
+  ): Promise<void> {
+    const { enableNugetSource } = sut;
+    await runOnSources(
+      toEnable,
+      enableNugetSource
+    );
+  }
+
+  async function disableNugetSources(
+    toDisable: NugetSource[]
+  ): Promise<void> {
+    const { disableNugetSource } = sut;
+    await runOnSources(
+      toDisable,
+      disableNugetSource
+    );
+  }
+
+  async function runOnSources(
+    sources: NugetSource[],
+    fn: (o: NugetSource) => Promise<void>
+  ) {
+    for (const source of sources) {
+      await fn(source);
+    }
+  }
 
   const packageNuspec = `
   <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

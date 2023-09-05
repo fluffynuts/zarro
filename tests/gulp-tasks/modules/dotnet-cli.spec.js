@@ -13,18 +13,6 @@ describe("dotnet-cli", () => {
     const realUpdateNuspecVersion = requireModule("update-nuspec-version");
     const log = requireModule("log");
     let allowLogs = false;
-    beforeEach(() => {
-        allowLogs = false;
-        const original = console.log;
-        spyOn(console, "log").and.callFake((...args) => {
-            if (!allowLogs) {
-                return;
-            }
-            original.apply(console, args);
-        });
-        mockSystem();
-        mockUpdatePackageNuspec();
-    });
     const updateNuspecVersion = jest.fn();
     const updateNuspecVersionPre = jest.fn();
     mockModule("update-nuspec-version", updateNuspecVersion);
@@ -43,8 +31,14 @@ describe("dotnet-cli", () => {
     const env = requireModule("env");
     const anything = expect.any(Object);
     let bypassSystemMock = false;
-    function mockSystem() {
-        bypassSystemMock = false;
+    function mockSystem(passThroughToRealSystem) {
+        try {
+            throw new Error('');
+        }
+        catch (e) {
+            const err = e;
+        }
+        bypassSystemMock = !!passThroughToRealSystem;
         system.mockImplementation((exe, args, opts) => {
             systemPre(exe, args, opts);
             if (bypassSystemMock) {
@@ -72,6 +66,7 @@ describe("dotnet-cli", () => {
                 exe: exe,
                 args,
                 exitCode: 0,
+                __is_mocked__: true
             });
         });
     }
@@ -1028,6 +1023,15 @@ describe("dotnet-cli", () => {
                 .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org", "--symbol-api-key", symbolApiKey], anything);
         });
     });
+    describe(`removeNugetSource fuzziness`, () => {
+        it(`should be able to remove source by partial url`, async () => {
+            // Arrange
+            bypassSystemMock = true;
+            const target = faker_1.faker.word;
+            // Act
+            // Assert
+        });
+    });
     describe(`publish`, () => {
         const { publish } = sut;
         it(`should be a function`, async () => {
@@ -1636,11 +1640,109 @@ describe("dotnet-cli", () => {
                 .toEqual(expected);
         });
     });
+    describe(`addNugetSource`, () => {
+        const { addNugetSource } = sut;
+        it(`should set auth on request`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.string.alphanumeric(5),
+                url: faker_1.faker.internet.url(),
+                username: faker_1.faker.string.alphanumeric(5),
+                password: faker_1.faker.string.alphanumeric(5),
+            };
+            // Act
+            await addNugetSource(src);
+            // Assert
+            expect(system)
+                .toHaveBeenCalledWith("dotnet", ["nuget", "add", "source",
+                "--name", src.name,
+                "--username", src.username,
+                "--password", src.password,
+                src.url
+            ], anything);
+        });
+        it(`should request clearText passwords on request`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.string.alphanumeric(5),
+                url: faker_1.faker.internet.url(),
+                username: faker_1.faker.string.alphanumeric(5),
+                password: faker_1.faker.string.alphanumeric(5),
+                storePasswordInClearText: true
+            };
+            // Act
+            await addNugetSource(src);
+            // Assert
+            expect(system)
+                .toHaveBeenCalledWith("dotnet", ["nuget", "add", "source",
+                "--name", src.name,
+                "--username", src.username,
+                "--password", src.password,
+                "--store-password-in-clear-text",
+                src.url
+            ], anything);
+        });
+        it(`should pass through valid auth types when set`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.string.alphanumeric(5),
+                url: faker_1.faker.internet.url(),
+                username: faker_1.faker.string.alphanumeric(5),
+                password: faker_1.faker.string.alphanumeric(5),
+                validAuthenticationTypes: "foo,bar"
+            };
+            // Act
+            await addNugetSource(src);
+            // Assert
+            expect(system)
+                .toHaveBeenCalledWith("dotnet", ["nuget", "add", "source",
+                "--name", src.name,
+                "--username", src.username,
+                "--password", src.password,
+                "--valid-authentication-types", src.validAuthenticationTypes,
+                src.url
+            ], anything);
+        });
+        it(`should pass through config file path when set`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.string.alphanumeric(5),
+                url: faker_1.faker.internet.url(),
+                username: faker_1.faker.string.alphanumeric(5),
+                password: faker_1.faker.string.alphanumeric(5),
+                configFile: faker_1.faker.string.alphanumeric(10)
+            };
+            // Act
+            await addNugetSource(src);
+            // Assert
+            expect(system)
+                .toHaveBeenCalledWith("dotnet", ["nuget", "add", "source",
+                "--name", src.name,
+                "--username", src.username,
+                "--password", src.password,
+                "--configfile", src.configFile,
+                src.url
+            ], anything);
+        });
+    });
     describe(`addNugetSource / removeNugetSource`, () => {
+        beforeEach(() => {
+            mockSystem(true);
+        });
         const { addNugetSource, listNugetSources, removeNugetSource } = sut;
+        it(`system should work`, async () => {
+            // Arrange
+            expect(bypassSystemMock)
+                .toBeTrue();
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), js = await sandbox.writeFile("foo.js", "console.log('foo');");
+            // Act
+            const result = await system("node", [js]);
+            // Assert
+            expect(result.stdout)
+                .toEqual(["foo"]);
+        });
         it(`should be able to add and remove the source (by name)`, async () => {
             // Arrange
-            bypassSystemMock = true;
             const src = {
                 name: faker_1.faker.string.alphanumeric(5),
                 url: faker_1.faker.internet.url(),
@@ -1656,20 +1758,246 @@ describe("dotnet-cli", () => {
             expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
                 .not.toExist();
         });
-    });
-    describe(`addNugetSource`, () => {
-        const { addNugetSource } = sut;
-        it(`should set the required name and url args`, async () => {
+        it(`should be able to add disabled source`, async () => {
             // Arrange
-            const name = faker_1.faker.string.alphanumeric(), url = faker_1.faker.internet.url();
+            const src = {
+                name: faker_1.faker.string.alphanumeric(5),
+                url: faker_1.faker.internet.url(),
+                enabled: false
+            };
             // Act
-            await addNugetSource({
-                name,
-                url
-            });
+            await addNugetSource(src);
+            // Assert
+            let configuredSources = await listNugetSources();
+            const match = configuredSources.find(o => o.name === src.name && o.url === src.url);
+            expect(match)
+                .toExist();
+            expect(match === null || match === void 0 ? void 0 : match.enabled)
+                .toBeFalse();
+        });
+        it(`should be able to remove source by url`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.string.alphanumeric(5),
+                url: faker_1.faker.internet.url(),
+            };
+            // Act
+            await addNugetSource(src);
+            let configuredSources = await listNugetSources();
+            expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
+                .toExist();
+            await removeNugetSource(src.url);
+            // Assert
+            configuredSources = await listNugetSources();
+            expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
+                .not.toExist();
+        });
+        it(`should be able to remove source by host`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.string.alphanumeric(5),
+                url: faker_1.faker.internet.url(),
+            }, url = new URL(src.url);
+            // Act
+            await addNugetSource(src);
+            let configuredSources = await listNugetSources();
+            expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
+                .toExist();
+            await removeNugetSource(url.host);
+            // Assert
+            configuredSources = await listNugetSources();
+            expect(configuredSources.find(o => o.name === src.name && o.url === src.url))
+                .not.toExist();
+        });
+        it(`should refuse to remove if more than one source matched`, async () => {
+            // Arrange
+            const url1 = "https://nuget.pkg.github.com/projectA/index.json", url2 = "https://nuget.pkg.github.com/projectB/index.json", src1 = {
+                name: randomSourceName(),
+                url: url1,
+            }, src2 = {
+                name: randomSourceName(),
+                url: url2
+            };
+            // Act
+            await addNugetSource(src1);
+            await addNugetSource(src2);
+            await expect(removeNugetSource("nuget.pkg.github.com"))
+                .rejects.toThrow(/multiple/);
             // Assert
         });
     });
+    describe(`disableNuGetSource`, () => {
+        const { addNugetSource, disableNugetSource } = sut;
+        beforeEach(() => bypassSystemMock = true);
+        it(`should disable the disabled source by name`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.word.sample(),
+                url: faker_1.faker.internet.url(),
+                enabled: false
+            };
+            await addNugetSource(src);
+            // Act
+            await disableNugetSource(src.name);
+            // Assert
+            const result = (await listNugetSources())
+                .find(o => o.name === src.name);
+            expect(result)
+                .toExist();
+            expect(result === null || result === void 0 ? void 0 : result.enabled)
+                .toBeFalse();
+        });
+        it(`should disable the disabled source by url`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.word.sample(),
+                url: faker_1.faker.internet.url(),
+                enabled: false
+            };
+            await addNugetSource(src);
+            // Act
+            await disableNugetSource(src.url);
+            // Assert
+            const result = (await listNugetSources())
+                .find(o => o.name === src.name);
+            expect(result)
+                .toExist();
+            expect(result === null || result === void 0 ? void 0 : result.enabled)
+                .toBeFalse();
+        });
+        it(`should disable the disabled source by full source`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.word.sample(),
+                url: faker_1.faker.internet.url(),
+                enabled: false
+            };
+            await addNugetSource(src);
+            // Act
+            await disableNugetSource(src);
+            // Assert
+            const result = (await listNugetSources())
+                .find(o => o.name === src.name);
+            expect(result)
+                .toExist();
+            expect(result === null || result === void 0 ? void 0 : result.enabled)
+                .toBeFalse();
+        });
+    });
+    beforeEach(() => {
+        allowLogs = false;
+        const original = console.log;
+        spyOn(console, "log").and.callFake((...args) => {
+            if (!allowLogs) {
+                return;
+            }
+            original.apply(console, args);
+        });
+        mockSystem();
+        mockUpdatePackageNuspec();
+    });
+    beforeAll(async () => {
+        usedSourceNames.clear();
+        mockSystem();
+        await storeAllKnownNugetSources();
+    });
+    afterAll(async () => {
+        await restoreAllKnownNugetSources();
+    });
+    const usedSourceNames = new Set();
+    function randomSourceName() {
+        let result;
+        do {
+            result = `${faker_1.faker.word.sample()}-${faker_1.faker.word.sample()}`;
+        } while (usedSourceNames.has(result));
+        usedSourceNames.add(result);
+        return result;
+    }
+    const knownSources = [];
+    const { listNugetSources } = sut;
+    async function storeAllKnownNugetSources() {
+        await runWithRealSystem(async () => {
+            const sources = await listNugetSources();
+            knownSources.push(...sources);
+        });
+    }
+    async function runWithRealSystem(fn) {
+        const oldMockBypass = bypassSystemMock;
+        bypassSystemMock = true;
+        try {
+            await fn();
+        }
+        catch (e) {
+            throw e;
+        }
+        finally {
+            bypassSystemMock = oldMockBypass;
+        }
+    }
+    async function restoreAllKnownNugetSources() {
+        await runWithRealSystem(async () => {
+            const toRestore = knownSources.splice(0, knownSources.length), currentSources = await listNugetSources(), toRemove = [], toDisable = [], toAdd = [], toEnable = [];
+            for (const source of toRestore) {
+                const match = currentSources.find(o => o.name === source.name && o.url === source.url);
+                if (match) {
+                    if (match.enabled === source.enabled) {
+                        continue;
+                    }
+                    if (source.enabled) {
+                        toEnable.push(source);
+                    }
+                    else {
+                        toDisable.push(source);
+                    }
+                }
+                else {
+                    toAdd.push(source);
+                }
+            }
+            for (const source of currentSources) {
+                const match = toRestore.find(o => o.name === source.name && o.url === source.url);
+                if (match) {
+                    if (match.enabled === source.enabled) {
+                        continue;
+                    }
+                    if (source.enabled) {
+                        toDisable.push(source);
+                    }
+                    else {
+                        toEnable.push(source);
+                    }
+                }
+                else {
+                    toRemove.push(source);
+                }
+            }
+            await addNugetSources(toAdd);
+            await removeNugetSources(toRemove);
+            await enableNugetSources(toEnable);
+            await disableNugetSources(toDisable);
+        });
+    }
+    async function addNugetSources(toAdd) {
+        const { addNugetSource } = sut;
+        await runOnSources(toAdd, addNugetSource);
+    }
+    async function removeNugetSources(toRemove) {
+        const { removeNugetSource } = sut;
+        await runOnSources(toRemove, removeNugetSource);
+    }
+    async function enableNugetSources(toEnable) {
+        const { enableNugetSource } = sut;
+        await runOnSources(toEnable, enableNugetSource);
+    }
+    async function disableNugetSources(toDisable) {
+        const { disableNugetSource } = sut;
+        await runOnSources(toDisable, disableNugetSource);
+    }
+    async function runOnSources(sources, fn) {
+        for (const source of sources) {
+            await fn(source);
+        }
+    }
     const packageNuspec = `
   <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <package>
