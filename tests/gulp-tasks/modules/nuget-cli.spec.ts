@@ -13,11 +13,12 @@ describe(`nuget-cli`, () => {
       objectContaining,
       anything
     } = expect,
+    sut = requireModule<NugetCli>("nuget-cli"),
     SystemResult = requireModule<SystemResult>("system-result");
 
 
   describe(`install`, () => {
-    const { install } = requireModule<NugetCli>("nuget-cli");
+    const { install } = sut;
 
     it(`should attempt to install the requested package`, async () => {
       // Arrange
@@ -479,6 +480,41 @@ describe(`nuget-cli`, () => {
           );
       });
 
+    });
+  });
+
+  describe(`clearing cache`, () => {
+    const {
+      clearHttpCache,
+      clearAllCache
+    } = sut;
+    describe(`clearAllCache`, () => {
+      it(`should clear all cache `, async () => {
+        // Arrange
+        // Act
+        await clearAllCache();
+        // Assert
+        expect(systemMock)
+          .toHaveBeenCalledOnceWith(
+            nuget,
+            [ "locals", "-clear" ],
+            objectContaining({ suppressOutput: true })
+          );
+      });
+    });
+    describe(`clearHttpCache`, () => {
+      it(`should clear the http cache only`, async () => {
+        // Arrange
+        // Act
+        await clearHttpCache();
+        // Assert
+        expect(systemMock)
+          .toHaveBeenCalledOnceWith(
+            nuget,
+            [ "locals", "http-cache", "-clear" ],
+            objectContaining({ suppressOutput: true })
+          );
+      });
     });
   });
 

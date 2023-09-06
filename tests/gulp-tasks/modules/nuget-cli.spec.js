@@ -8,9 +8,9 @@ describe(`nuget-cli`, () => {
     const resolveNugetMock = jest.fn();
     jest.doMock("../../../gulp-tasks/modules/resolve-nuget", () => resolveNugetMock);
     let nuget = "/path/to/nuget";
-    const { objectContaining, anything } = expect, SystemResult = requireModule("system-result");
+    const { objectContaining, anything } = expect, sut = requireModule("nuget-cli"), SystemResult = requireModule("system-result");
     describe(`install`, () => {
-        const { install } = requireModule("nuget-cli");
+        const { install } = sut;
         it(`should attempt to install the requested package`, async () => {
             // Arrange
             const packageId = randomPackageId();
@@ -303,6 +303,29 @@ describe(`nuget-cli`, () => {
                 // Assert
                 expect(systemMock)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-ForceEnglishOutput"], objectContaining({ suppressOutput: true }));
+            });
+        });
+    });
+    describe(`clearing cache`, () => {
+        const { clearHttpCache, clearAllCache } = sut;
+        describe(`clearAllCache`, () => {
+            it(`should clear all cache `, async () => {
+                // Arrange
+                // Act
+                await clearAllCache();
+                // Assert
+                expect(systemMock)
+                    .toHaveBeenCalledOnceWith(nuget, ["locals", "-clear"], objectContaining({ suppressOutput: true }));
+            });
+        });
+        describe(`clearHttpCache`, () => {
+            it(`should clear the http cache only`, async () => {
+                // Arrange
+                // Act
+                await clearHttpCache();
+                // Assert
+                expect(systemMock)
+                    .toHaveBeenCalledOnceWith(nuget, ["locals", "http-cache", "-clear"], objectContaining({ suppressOutput: true }));
             });
         });
     });

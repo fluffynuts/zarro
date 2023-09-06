@@ -1256,6 +1256,8 @@ declare global {
 
   interface NugetCli {
     install: (opts: NugetInstallOptions) => Promise<void>;
+    clearAllCache(): Promise<void>;
+    clearHttpCache(): Promise<void>;
   }
 
   type CreateTempFile = (contents?: string | Buffer, at?: string) => Promise<TempFile>;
