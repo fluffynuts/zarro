@@ -2594,7 +2594,6 @@ chucked:
     });
     const {
       addNugetSource,
-      listNugetSources,
       tryFindConfiguredNugetSource
     } = sut;
     it(`should find the source by name`, async () => {

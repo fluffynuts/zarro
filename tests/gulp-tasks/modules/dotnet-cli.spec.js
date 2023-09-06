@@ -1927,7 +1927,7 @@ chucked:
         beforeEach(() => {
             bypassSystemMock = true;
         });
-        const { addNugetSource, listNugetSources, tryFindConfiguredNugetSource } = sut;
+        const { addNugetSource, tryFindConfiguredNugetSource } = sut;
         it(`should find the source by name`, async () => {
             // Arrange
             const src = {
