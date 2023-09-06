@@ -1,20 +1,16 @@
 // noinspection JSUnusedGlobalSymbols
 
 import * as fs from "fs";
+import { StatsBase } from "fs";
 import { Stream, Transform } from "stream";
 import ansiColors, { StyleFunction } from "ansi-colors";
 import { RimrafOptions } from "./gulp-tasks/modules/rimraf";
 import { ExecFileOptionsWithBufferEncoding } from "child_process";
-import { StatsBase } from "fs";
 import * as vinyl from "vinyl";
-// noinspection ES6PreferShortImport
-import {
-  FetchReleaseOptions,
-  ListReleasesOptions,
-  ReleaseInfo
-} from "./gulp-tasks/modules/fetch-github-release/src";
-import { DecompressOptions, File } from "decompress";
 import { BufferFile } from "vinyl";
+// noinspection ES6PreferShortImport
+import { FetchReleaseOptions, ListReleasesOptions, ReleaseInfo } from "./gulp-tasks/modules/fetch-github-release/src";
+import { DecompressOptions, File } from "decompress";
 
 export * from "./gulp-tasks/modules/fetch-github-release/src";
 
@@ -102,7 +98,7 @@ declare global {
     retries: number | string,
     onTransientError?: ErrorReporter,
     onFinalFailure?: VoidVoid
-  ) => Promise<void>;
+  ) => Promise<T>;
   type Optional<T> = T | undefined;
   type Nullable<T> = T | null;
   type DownloadNuget = (targetFolder: string) => Promise<string>;
@@ -114,7 +110,7 @@ declare global {
 
   type FindNpmBase = () => string;
   type ResolveNugetConfigGenerator = () => ResolveNugetConfig;
-  type ResolveNuget = (nugetPath: Optional<string>, errorOnMissing?: boolean) => string;
+  type ResolveNuget = (nugetPath?: string, errorOnMissing?: boolean) => string;
   type FindLocalNuget = () => Promise<string>;
 
   type Fetch = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
@@ -1222,7 +1218,43 @@ declare global {
 
   type GulpPurge = (options: GulpPurgeOptions) => Transform;
   type GulpNpmRun = (gulp: Gulp) => void;
-  type NugetCli = (args: string[], opts?: SystemOptions) => Promise<void>;
+  type Nuget = (args: string[], opts?: SystemOptions) => Promise<void>;
+
+  interface CliSupport {
+    pushIfSet: (args: string[], value: Optional<string | number>, cliSwitch: string) => void;
+    pushFlag: (args: string[], value: Optional<boolean>, cliSwitch: string) => void;
+  }
+
+  interface NugetInstallOptions {
+    packageId: string;
+    version?: string;
+    outputDirectory?: string;
+    dependencyVersion?: string;
+    framework?: string;
+    excludeVersion?: string;
+    preRelease?: boolean;
+    requireConsent?: boolean;
+    solutionDirectory?: string;
+    source?: string;
+    fallbackSource?: string;
+    noCache?: boolean;
+    directDownload?: boolean;
+    disableParallelProcessing?: boolean;
+    packageSaveMode?: NugetPackageSaveMode;
+    verbosity?: NugetVerbosity;
+    nonInteractive?: boolean;
+    configFile?: string;
+    forceEnglishOutput?: boolean;
+
+    systemOptions?: SystemOptions;
+  }
+
+  type NugetPackageSaveMode = "nuspec" | "nupkg" | "nuspec;nupkg";
+  type NugetVerbosity = "normal" | "quiet" | "detailed";
+
+  interface NugetCli {
+    install: (opts: NugetInstallOptions) => Promise<void>;
+  }
 
   type CreateTempFile = (contents?: string | Buffer, at?: string) => Promise<TempFile>;
   type MultiSplit = (str: string, delimiters: string[]) => string[];
