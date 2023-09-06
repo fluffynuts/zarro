@@ -1884,6 +1884,62 @@ describe("dotnet-cli", () => {
                 .toBeFalse();
         });
     });
+    describe(`tryFindConfiguredNugetSource`, () => {
+        beforeEach(() => {
+            bypassSystemMock = true;
+        });
+        const { addNugetSource, listNugetSources, tryFindConfiguredNugetSource } = sut;
+        it(`should find the source by name`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.word.sample(),
+                url: faker_1.faker.internet.url(),
+                enabled: true
+            };
+            // Act
+            await addNugetSource(src);
+            const result = await tryFindConfiguredNugetSource(src.name);
+            // Assert
+            expect(result)
+                .toEqual(src);
+        });
+        it(`should find the source by host`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.word.sample(),
+                url: faker_1.faker.internet.url(),
+                enabled: true
+            }, url = new URL(src.url), host = url.host;
+            // Act
+            await addNugetSource(src);
+            const result = await tryFindConfiguredNugetSource(host);
+            // Assert
+            expect(result)
+                .toEqual(src);
+        });
+        it(`should find the source by url`, async () => {
+            // Arrange
+            const src = {
+                name: faker_1.faker.word.sample(),
+                url: faker_1.faker.internet.url(),
+                enabled: true
+            };
+            // Act
+            await addNugetSource(src);
+            const result = await tryFindConfiguredNugetSource(src.url);
+            // Assert
+            expect(result)
+                .toEqual(src);
+        });
+        it(`should return undefined when no match`, async () => {
+            // Arrange
+            // Act
+            const result = await tryFindConfiguredNugetSource(faker_1.faker.internet.url());
+            // Assert
+            expect(result)
+                .not.toBeDefined();
+        });
+    });
     beforeEach(() => {
         allowLogs = false;
         const original = console.log;
