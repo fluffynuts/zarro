@@ -27,7 +27,7 @@ describe(`download-nuget`, () => {
     // Assert
     expect(await fileExists(expected))
       .toBeTrue();
-  }, 15000);
+  });
 
   afterEach(async () => {
     await Sandbox.destroyAll();

@@ -47,20 +47,37 @@ Object.defineProperty(exports, "__esModule", { value: true });
                 debug(`${a.path} == ${b.path}`);
                 return 0;
             });
+            debug("sorted result", result.map(t => t.path));
             return result;
         }
     }
-    const prioritise = new Set([
+    const prioritise = [
         "test-dotnet-logic",
         "dotnet-cli",
         "find-local-nuget",
         "nuget-update-self"
-    ]);
+    ];
     function isLess(a, b) {
-        const aBaseName = specName(a.path);
-        if (prioritise.has(aBaseName)) {
-            debug(`'${a.path}' is prioritised`);
-            return true;
+        const aBaseName = specName(a.path), bBaseName = specName(b.path), aIndex = prioritise.indexOf(aBaseName), bIndex = prioritise.indexOf(bBaseName);
+        if (aIndex > -1) {
+            if (bIndex > -1) {
+                if (bIndex < aIndex) {
+                    logWinner(b, a);
+                    return false;
+                }
+                else {
+                    logWinner(a, b);
+                    return true;
+                }
+            }
+            else {
+                logWinner(a, b);
+                return true;
+            }
+        }
+        else if (bIndex > -1) {
+            logWinner(b, a);
+            return false;
         }
         if (a.path === b.path) {
             return false;
@@ -70,15 +87,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
         }
         return a.fileSize < b.fileSize;
     }
-    function specName(p) {
-        const basename = path.basename(p);
-        return chopExtension(basename).replace(/\.spec$/, "");
+    function logWinner(winner, loser) {
+        debug(`'${winner.path}' is prioritised over '${loser.path}'`);
     }
     function isGreater(a, b) {
-        const bBaseName = specName(a.path);
-        if (prioritise.has(bBaseName)) {
-            debug(`'${b.path}' is prioritised`);
-            return false;
+        const aBaseName = specName(a.path), bBaseName = specName(b.path), aIndex = prioritise.indexOf(aBaseName), bIndex = prioritise.indexOf(bBaseName);
+        if (aIndex > -1) {
+            if (bIndex > -1) {
+                if (bIndex < aIndex) {
+                    logWinner(b, a);
+                    return true;
+                }
+                else {
+                    logWinner(a, b);
+                    return false;
+                }
+            }
+            else {
+                logWinner(a, b);
+                return false;
+            }
+        }
+        else if (bIndex > -1) {
+            logWinner(b, a);
+            return true;
         }
         if (a.path === b.path) {
             return false; // why are there 2? who knows.
@@ -88,6 +120,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
             return a.duration > b.duration;
         }
         return a.fileSize > b.fileSize;
+    }
+    function specName(p) {
+        const basename = path.basename(p);
+        return chopExtension(basename).replace(/\.spec$/, "");
     }
     module.exports = ZarroTestSequencer;
 })();

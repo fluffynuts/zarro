@@ -46,16 +46,17 @@ import { Test } from "@jest/test-result";
       }
       const result = copy.sort((a: TestWithFileSize, b: TestWithFileSize) => {
         if (isLess(a, b)) {
-          debug(`${a.path} < ${b.path}`);
+          debug(`${ a.path } < ${ b.path }`);
           return -1;
         }
         if (isGreater(a, b)) {
-          debug(`${a.path} > ${b.path}`);
+          debug(`${ a.path } > ${ b.path }`);
           return 1;
         }
-        debug(`${a.path} == ${b.path}`);
+        debug(`${ a.path } == ${ b.path }`);
         return 0;
       });
+      debug("sorted result", result.map(t => t.path));
       return result;
     }
   }
@@ -65,21 +66,38 @@ import { Test } from "@jest/test-result";
     fileSize: number;
   }
 
-  const prioritise = new Set<string>([
+  const prioritise = [
     "test-dotnet-logic",
     "dotnet-cli",
     "find-local-nuget",
     "nuget-update-self"
-  ]);
+  ];
 
   function isLess(
     a: TestWithFileSize,
     b: TestWithFileSize
   ): boolean {
-    const aBaseName = specName(a.path);
-    if (prioritise.has(aBaseName)) {
-      debug(`'${a.path}' is prioritised`);
-      return true;
+    const
+      aBaseName = specName(a.path),
+      bBaseName = specName(b.path),
+      aIndex = prioritise.indexOf(aBaseName),
+      bIndex = prioritise.indexOf(bBaseName);
+    if (aIndex > -1) {
+      if (bIndex > -1) {
+        if (bIndex < aIndex) {
+          logWinner(b, a);
+          return false;
+        } else {
+          logWinner(a, b);
+          return true;
+        }
+      } else {
+        logWinner(a, b);
+        return true;
+      }
+    } else if (bIndex > -1) {
+      logWinner(b, a);
+      return false;
     }
 
     if (a.path === b.path) {
@@ -91,19 +109,35 @@ import { Test } from "@jest/test-result";
     return a.fileSize < b.fileSize;
   }
 
-  function specName(
-    p: string
+  function logWinner(
+    winner: TestWithFileSize,
+    loser: TestWithFileSize
   ) {
-    const
-      basename = path.basename(p);
-    return chopExtension(basename).replace(/\.spec$/, "");
+    debug(`'${ winner.path }' is prioritised over '${ loser.path }'`);
   }
 
   function isGreater(a: TestWithFileSize, b: TestWithFileSize): boolean {
-    const bBaseName = specName(a.path);
-    if (prioritise.has(bBaseName)) {
-      debug(`'${b.path}' is prioritised`);
-      return false;
+    const
+      aBaseName = specName(a.path),
+      bBaseName = specName(b.path),
+      aIndex = prioritise.indexOf(aBaseName),
+      bIndex = prioritise.indexOf(bBaseName);
+    if (aIndex > -1) {
+      if (bIndex > -1) {
+        if (bIndex < aIndex) {
+          logWinner(b, a);
+          return true;
+        } else {
+          logWinner(a, b);
+          return false;
+        }
+      } else {
+        logWinner(a, b);
+        return false;
+      }
+    } else if (bIndex > -1) {
+      logWinner(b, a);
+      return true;
     }
     if (a.path === b.path) {
       return false; // why are there 2? who knows.
@@ -113,6 +147,14 @@ import { Test } from "@jest/test-result";
       return a.duration > b.duration;
     }
     return a.fileSize > b.fileSize;
+  }
+
+  function specName(
+    p: string
+  ) {
+    const
+      basename = path.basename(p);
+    return chopExtension(basename).replace(/\.spec$/, "");
   }
 
   module.exports = ZarroTestSequencer;

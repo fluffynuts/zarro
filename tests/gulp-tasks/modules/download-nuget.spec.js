@@ -48,7 +48,7 @@ describe(`download-nuget`, () => {
         // Assert
         expect(await (0, yafs_1.fileExists)(expected))
             .toBeTrue();
-    }, 15000);
+    });
     afterEach(async () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
     });

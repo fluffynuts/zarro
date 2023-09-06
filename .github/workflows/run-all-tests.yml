@@ -24,7 +24,7 @@ jobs:
     - name: Test
       env:
         RUNNING_IN_GITHUB_ACTION: 1
-        TEST_TIMEOUT: 15000
+        TEST_TIMEOUT: 30000
         MAX_WORKERS: 1
       run: |
         npm ci

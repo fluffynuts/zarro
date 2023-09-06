@@ -1,7 +1,6 @@
 const system = requireModule<System>("system");
 describe(`integration testing`, () => {
   it(`should be able to run with --show-env`, async () => {
-    jest.setTimeout(15000);
     // Arrange
     const args = [
         "index.js",
@@ -41,6 +40,6 @@ describe(`integration testing`, () => {
     // Assert
     expect(stdoutData.join("\n"))
       .toContain("this is a test");
-  }, 15000);
+  });
 
 });

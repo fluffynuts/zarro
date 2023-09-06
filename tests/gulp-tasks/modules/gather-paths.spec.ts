@@ -11,7 +11,6 @@ describe(`gather-paths module`, () => {
 
   describe(`function`, () => {
     it(`should find js files`, async () => {
-      jest.setTimeout(15000);
       // Arrange
       // Act
       const result = await sut([
