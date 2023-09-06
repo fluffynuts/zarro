@@ -1154,6 +1154,7 @@ declare global {
     stdout: string[];
 
     isResult(): this is SystemResult;
+
     isError(): this is SystemError;
   }
 
@@ -1175,6 +1176,7 @@ declare global {
     stdout: string[];
 
     isError(o: any): o is SystemError;
+
     isResult(o: any): o is SystemError;
   }
 
@@ -1362,7 +1364,7 @@ declare global {
 
   interface DotNetPublishOptions
     extends DotNetCommonBuildOptions,
-      DotNetPublishContainerOptions {
+            DotNetPublishContainerOptions {
     useCurrentRuntime?: boolean;
     manifest?: string;
     noBuild?: boolean;

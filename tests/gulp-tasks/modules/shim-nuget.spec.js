@@ -56,7 +56,7 @@ describe(`shim-nuget`, () => {
                 expect(result)
                     .toEqual(sandboxShim);
                 const contents = await (0, yafs_1.readTextFile)(result);
-                expect(contents.indexOf("#!/bin/bash"))
+                expect(contents.indexOf("#!/bin/sh"))
                     .toEqual(0);
                 expect(contents)
                     .toContain("mono");
