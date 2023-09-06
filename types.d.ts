@@ -1138,7 +1138,12 @@ declare global {
     isSpawnResult: (o: any) => o is SpawnResult;
   }
 
-  interface SystemResult {
+  interface SystemCommand {
+    exe: string;
+    args: string[];
+  }
+
+  interface SystemResult extends SystemCommand {
     new(
       exe: string,
       args: string[],
@@ -1147,8 +1152,6 @@ declare global {
       stdout: string[]
     ): SystemResult;
 
-    exe: string;
-    args: string[];
     exitCode?: number;
     stderr: string[];
     stdout: string[];
@@ -1159,7 +1162,7 @@ declare global {
   }
 
   interface SystemError
-    extends Error {
+    extends Error, SystemCommand {
     new(
       message: string,
       exe: string,
@@ -1169,8 +1172,6 @@ declare global {
       stderr: Nullable<string[]>
     ): SystemError;
 
-    exe: string;
-    args: string[];
     exitCode: number;
     stderr: string[];
     stdout: string[];
