@@ -22,20 +22,25 @@ describe(`integration testing`, () => {
 
   it(`should be able to run an npm task as if it were a gulp task`, async () => {
     // Arrange
-    jest.setTimeout(15000);
     const args = [
         "index.js",
         "test-npm-gulp-task"
       ],
       stdoutData: string[] = [];
     // Act
-    await system("node", args, {
-      stdout: (data: string) => stdoutData.push(data.toString()),
-      stderr: (data: string) => {}
-    });
+    try {
+      await system("node", args, {
+        stdout: (data: string) => stdoutData.push(data.toString()),
+        stderr: (data: string) => {
+        }
+      });
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
     // Assert
     expect(stdoutData.join("\n"))
       .toContain("this is a test");
-  });
+  }, 15000);
 
 });

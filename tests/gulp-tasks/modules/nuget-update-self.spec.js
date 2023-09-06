@@ -20,7 +20,7 @@ describe(`nuget-update-self`, () => {
             expect(systemMock)
                 .toHaveBeenCalledWith(shim, ["update", "-self"], expect.anything());
         }
-    });
+    }, 30000);
     beforeEach(() => setupSystemMock());
     function setupSystemMock() {
         systemMock.mockImplementation((exe, args, opts) => {

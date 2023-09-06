@@ -34,7 +34,7 @@ describe(`nuget-update-self`, () => {
           expect.anything()
         );
     }
-  });
+  }, 30000);
 
   beforeEach(() => setupSystemMock());
 

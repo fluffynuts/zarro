@@ -790,6 +790,8 @@ declare global {
     skipDuplicates?: boolean;
   }
 
+  type IsWindows = () => boolean;
+
   type PackOptions = {
     basePath?: string;
     excludeEmptyDirectories?: boolean;
@@ -1220,6 +1222,7 @@ declare global {
 
   type GulpPurge = (options: GulpPurgeOptions) => Transform;
   type GulpNpmRun = (gulp: Gulp) => void;
+  type NugetCli = (args: string[], opts?: SystemOptions) => Promise<void>;
 
   type CreateTempFile = (contents?: string | Buffer, at?: string) => Promise<TempFile>;
   type MultiSplit = (str: string, delimiters: string[]) => string[];
