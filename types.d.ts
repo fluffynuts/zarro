@@ -1486,7 +1486,7 @@ declare global {
   type DotNetListNugetSourcesFunction = () => Promise<NugetSource[]>;
   type DotNetEnableNugetSourceFunction = (source: string | NugetSource) => Promise<void>;
   type DotNetDisableNugetSourceFunction = (source: string | NugetSource) => Promise<void>;
-  type DotNetTryMatchNugetSourceFunction = (nameOrUrlOrHostOrSpec: string | Partial<NugetSource>) => Promise<Optional<string>>;
+  type DotNetTryMatchNugetSourceFunction = (nameOrUrlOrHostOrSpec: string | Partial<NugetSource> | RegExp) => Promise<Optional<string>>;
 
   interface DotNetCli {
     clean: DotNetCleanFunction;

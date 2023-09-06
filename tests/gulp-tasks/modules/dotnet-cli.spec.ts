@@ -2477,11 +2477,51 @@ describe("dotnet-cli", () => {
       // Act
       await addNugetSource(src1);
       await addNugetSource(src2);
-      await expect(removeNugetSource("nuget.pkg.github.com"))
-        .rejects.toThrow(/multiple/);
+      await expect(
+        removeNugetSource("nuget.pkg.github.com")
+      ).rejects.toThrow(/multiple/);
       // Assert
     });
+  });
 
+  describe.skip(`clear extraneous sources`, () => {
+    beforeEach(() => {
+      bypassSystemMock = true;
+    });
+    const { removeNugetSource } = sut;
+    // if you're trying to clean up some massive source noise, modify the array
+    // below and run the test
+    const keep = new Set([
+      "nuget.org",
+      "github-codeo",
+      "github-fluffynuts",
+      "codeo",
+      "Microsoft Visual Studio Offline Packages"
+    ]);
+    it(`should keep only the keepers`, async () => {
+      // Arrange
+      bypassNugetSourceRestore = true;
+      const sources = await listNugetSources();
+      // Act
+      const kept = [] as string[], chucked = [] as string[];
+      for (const source of sources) {
+        if (keep.has(source.name)) {
+          kept.push(source.name);
+        } else {
+          chucked.push(source.name);
+        }
+      }
+      for (const source of chucked) {
+        await removeNugetSource(source);
+      }
+      console.warn(`
+kept:
+  ${kept.join("\n  ")}
+chucked:
+  ${chucked.join("\n  ")}
+  `.trim());
+      // Assert
+    });
   });
 
   describe(`disableNuGetSource`, () => {
@@ -2592,10 +2632,10 @@ describe("dotnet-cli", () => {
     it(`should find the source by url`, async () => {
       // Arrange
       const src = {
-          name: faker.word.sample(),
-          url: faker.internet.url(),
-          enabled: true
-        };
+        name: faker.word.sample(),
+        url: faker.internet.url(),
+        enabled: true
+      };
       // Act
       await addNugetSource(src);
       const result = await tryFindConfiguredNugetSource(src.url);
@@ -2613,6 +2653,23 @@ describe("dotnet-cli", () => {
       // Assert
       expect(result)
         .not.toBeDefined();
+    });
+
+    it(`should return single partial url match`, async () => {
+      // Arrange
+      const src = {
+        name: faker.word.sample(),
+        url: `https://nuget.pkg.github.com/organisation/index.json`,
+        enabled: true
+      };
+      // Act
+      await addNugetSource(src);
+      const result = await tryFindConfiguredNugetSource(
+        /nuget.pkg.github.com\/organisation/
+      );
+      // Assert
+      expect(result)
+        .toEqual(src);
     });
   });
 
@@ -2654,6 +2711,7 @@ describe("dotnet-cli", () => {
   const { listNugetSources } = sut;
 
   async function storeAllKnownNugetSources() {
+    bypassNugetSourceRestore = false;
     await runWithRealSystem(async () => {
       const sources = await listNugetSources();
       knownSources.push(...sources);
@@ -2674,7 +2732,11 @@ describe("dotnet-cli", () => {
     }
   }
 
+  let bypassNugetSourceRestore = false;
   async function restoreAllKnownNugetSources() {
+    if (bypassNugetSourceRestore) {
+      return;
+    }
     await runWithRealSystem(async () => {
       const
         toRestore = knownSources.splice(0, knownSources.length),
