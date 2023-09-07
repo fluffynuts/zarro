@@ -1208,6 +1208,18 @@ declare global {
     nuget?: string;
   }
 
+  enum ZarroTestPackage {
+    local,
+    beta,
+    latest
+  }
+  interface TestZarroOptions {
+    package: ZarroTestPackage;
+    tasks: string | string[];
+    rollback?: boolean;
+  }
+  type TestZarro = (opts: TestZarroOptions) => Promise<void>;
+
   type GulpNugetRestore = (opts: NugetRestoreOptions) => Stream;
   type LongestStringLength = (strings: string[]) => number;
   /**
