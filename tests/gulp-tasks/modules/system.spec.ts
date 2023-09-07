@@ -56,7 +56,7 @@ describe(`system`, () => {
                 await Sandbox.destroyAll();
             });
         });
-        
+
         describe(`npm script`, () => {
             it(`should run it and return the result`, async () => {
                 // Arrange
