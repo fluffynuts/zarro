@@ -3,7 +3,6 @@
         requireModule = require("../../gulp-tasks/modules/require-module") as RequireModuleFn;
 
     function test(args: string[]): boolean {
-        console.log(`create-task test`, args);
         return new Set<string>(args || []).has("--create-task");
     }
 

@@ -2,7 +2,6 @@
 (function () {
     const requireModule = require("../../gulp-tasks/modules/require-module");
     function test(args) {
-        console.log(`create-task test`, args);
         return new Set(args || []).has("--create-task");
     }
     async function createTask() {
