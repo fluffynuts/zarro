@@ -58,8 +58,8 @@ gulp 3 tasks to run under gulp 4.
 3. start adding scripts! for example:
     ```json
    "scripts": {
-       "build": "zarro build",
-       "test": "zarro test-dotnet",
+       "build": "zarro @",
+       "test": "zarro @",
        "zarro": "zarro"
    }
     ```
@@ -68,7 +68,22 @@ ones to download tooling, as required) so that when test-time comes, assemblies
 are already built (required for .NET Framework / NUnit runner, and optimised for
 `dotnet` by performing the build and testing without rebuild)).
 
+Add new custom tasks by invoking `zarro --create-task` to guide you through
+the process. This will create a skeleton task file for you under `local-tasks`
+with some of the boiler-plating already done.
+
 ## What's in the box
+
+### Direct invocations
+| command-line switch | action                                                              |
+|---------------------|---------------------------------------------------------------------|
+| --create-task       | guids you through creating a new local task written in typescript   |
+| --help              | shows how to use zarro                                              |
+| --init              | adds a "zarro" npm script to make zarro invocations easier          |
+| --show-env          | shows the observed environment variables and what tasks they affect |
+| --tasks             | lists the task tree (built-in and yours                             |
+
+### Built-in tasks
 There are an array of pre-defined tasks you get out of the box with zarro. I hope to eventually
 provide more documentation for them, but running `zarro --tasks` should tell you something
 similar to:
@@ -122,7 +137,6 @@ similar to:
     - will check against {remote}/{main branch} if possible
 
 
-Running the above would also list any custom tasks you have defined
 
 ## Zarro doesn't do what I want out of the box
 
@@ -131,6 +145,8 @@ tasks with environment variables. Running `npm run zarro -- --show-env` will sho
 all observed environment variables and where they are applicable. I suggest using
 `cross-env` and applying these variables in one place, to keep things simpler. For
 example, [NExpect](https://github.com/fluffynuts/NExpect) does the following:
+
+### Traditional configuration via environment variables
 
 ```json
 "scripts": {
@@ -147,6 +163,35 @@ in the above:
    on another package dependency)
 - similarly `TEST_EXCLUDE` excludes PeanutButter tests
 - similarly, `PACK_INCLUDE` and `PACK_EXCLUDE` control nuget packing within NExpect
+
+### Updated configuration
+Zarro will automatically create a `.zarro-defaults` next to your `package.json` if it
+is not found. In here, we can add key-value-pairs of environment variables to set
+when running zarro. These values will be overridden by any existing environment variables,
+so if you need to override a variable which is set on the hosting system, you should
+use `cross-env` as above. However, for many situations, specifying environment variables
+in `.zarro-defaults` makes npm script setup a lot easier. For example, if we use `.zarro-defaults`,
+we can modify the example above:
+
+
+Update package.json with:
+```json
+"scripts": {
+  "build": "zarro @",
+  "test": "zarro test-dotnet"
+}
+```
+Update .zarro-defaults to contain:
+```
+DOTNET_CORE=1
+BUILD_EXCLUDE=src/PeanutButter/**/*
+PACK_INCLUDE=*
+PACK_EXCLUDE=*Tests*,CoreConsumer,src/PeanutButter/**/*
+TEST_EXCLUDE=src/PeanutButter/**/*
+```
+
+Note also here the shorthand of `@` - if a task has the same name as the npm script
+used to invoke it, this is a quick way to surface that task to `npm run` -space.
 
 ## Custom tasks
 
@@ -216,6 +261,8 @@ though there are some exceptions. Some modules may be of interest to custom task
             - `true` for: "yes", "true" or "1"
             - `false` for: "no", "false" or "0"
             - throws for unknown values
+- `system`
+  - function to run other process and get back stdio results from said processes
 - `resolve-masks`
     - single function to resolve an array of masks that could be used in a `gulp.src`
         where those masks can be inclusive or exclusive
