@@ -6,8 +6,9 @@ const {init} = requireModule("git-sha");
 
 const
     {FsEntities, stat, ls, readTextFile, fileExists, folderExists, readTextFileLines, writeTextFile} = require("yafs"),
+    log = require("./gulp-tasks/modules/log"),
     path = require("path"),
-    debug = require("debug")("zarro"),
+    debug = require("debug")("zarro::main"),
     ZarroError = require("./gulp-tasks/modules/zarro-error"),
     {skip} = require("./gulp-tasks/modules/linq"),
     gatherArgs = require("./index-modules/gather-args");
@@ -21,6 +22,7 @@ const handlers = [
     requireHandler("init"),
     requireHandler("help"),
     requireHandler("show-env"),
+    requireHandler("create-task"),
     // must always come last as it will always volunteer to handle
     requireHandler("invoke-gulp")
 ];
@@ -32,6 +34,7 @@ async function findHandlerFor(args) {
             name: handler.name
         });
         if (await handler.test(args)) {
+            debug(`  -> invoking handler: ${handler.name}`);
             return handler.handler;
         }
     }
@@ -69,7 +72,7 @@ async function loadDefaults() {
             continue;
         }
         if (looksInvalid(code)) {
-            console.warn(`invalid config line in ${defaultsFile}:\n${line}`);
+            log.warn(`invalid config line in ${defaultsFile}:\n${line}`);
             continue;
         }
         const
@@ -163,7 +166,7 @@ async function transpileLocalTasks() {
             await writeTextFile(output, transpiled);
         }
     } catch (e) {
-        console.error(`one or more typescript modules could not be transpiled:\n${e}`);
+        log.error(`one or more typescript modules could not be transpiled:\n${e}`);
     }
 }
 
@@ -178,7 +181,7 @@ async function transpileLocalTasks() {
                 continue;
             }
             if (shouldChangeDir) {
-                console.log(` --- running in ${arg} ---`);
+                log.info(` --- running in ${arg} ---`);
                 process.chdir(arg);
                 shouldChangeDir = false;
                 continue;

@@ -703,6 +703,8 @@ declare global {
     incrementBy?: number
   }
 
+  type GuessIndent = (text: string) => number;
+
   type AlterPackageJson = (opts?: AlterPackageJsonVersionOptions) => Promise<void>;
   type Rimraf = (at: string, opts?: RimrafOptions) => Promise<void>;
   type ReadPackageJson = (at?: string) => Promise<PackageIndex>;
@@ -1271,7 +1273,11 @@ declare global {
   type PathUnquote = (str: string) => string;
   type ResolveTestMasks = (isDotnetCore?: boolean) => string[];
 
-  type AskOptions = {}
+  interface AskOptions {
+    inputStream?: NodeJS.ReadStream,
+    outputStream?: NodeJS.WriteStream,
+    validator?: (s: string) => boolean;
+  }
   type AskFunction = (message: string, options?: AskOptions) => Promise<string>;
   type Ask = {
     ask: AskFunction
