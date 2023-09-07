@@ -161,7 +161,7 @@ env.associate([
         await mkdir(container);
         await writeTextFile(
             target, `
-/// <reference path="../node_modules/zarro/
+/// <reference path="../node_modules/zarro/types.d.ts" />
 (function() {
 ${whyClosure}
     const

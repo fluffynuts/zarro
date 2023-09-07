@@ -111,7 +111,7 @@ env.associate([
         const path = require("path"), { mkdir, writeTextFile } = require("yafs"), whyClosure = includeHelp ? closureHelp : "", help = includeHelp ? createTaskHelp(safeName) : "", example = includeHelp ? createExampleModuleUsage(safeName) : "", container = path.dirname(target);
         await mkdir(container);
         await writeTextFile(target, `
-/// <reference path="../node_modules/zarro/
+/// <reference path="../node_modules/zarro/types.d.ts" />
 (function() {
 ${whyClosure}
     const
