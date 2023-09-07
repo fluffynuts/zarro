@@ -22,14 +22,24 @@ jobs:
         with:
           node-version: '16'
       - name: Build & Test NExpect
-        env:
-          RUNNING_IN_GITHUB_ACTION: 1
-          TEST_TIMEOUT: 30000
-          MAX_WORKERS: 1
         run: |
           git clone https://github.com/fluffynuts/NExpect
           cd NExpect
           npm ci
           npm test
-          npm pack
-
+          npm run pack
+          cd -
+      - name: Build & Test Quackers
+        run: |
+          git clone https://github.com/fluffynuts/quackers
+          cd quackers
+          npm ci
+          npm test
+          npm run pack
+          cd -
+      - name: Build PeanutButter
+        run: |
+          git clone https://github.com/PeanutButter
+          cd PeanutButter
+          npm run build
+          cd -
