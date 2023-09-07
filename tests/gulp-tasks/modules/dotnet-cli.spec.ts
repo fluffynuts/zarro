@@ -1031,6 +1031,45 @@ describe("dotnet-cli", () => {
           )
       });
 
+      it(`should allow for optional nuspec path via trailing ?`, async () => {
+        // Arrange
+        const
+          target = faker.string.alphanumeric();
+        // Act
+        await expect(pack({
+          target,
+          nuspec: "Package.nuspec?"
+        }))
+          .resolves.not.toThrow();
+        // Assert
+        expect(system)
+          .toHaveBeenCalledOnceWith(
+            "dotnet",
+            [ "pack", target ],
+            anything
+          );
+      });
+
+      it(`should use the optional nuspec when it's available`, async () => {
+        // Arrange
+        const
+          sandbox = await Sandbox.create(),
+          target = await sandbox.writeFile(faker.string.alphanumeric(), "(csproj)"),
+          nuspec = await sandbox.writeFile("MooCakes.nuspec", "(nuspec)");
+        // Act
+        await pack({
+          target,
+          nuspec: "MooCakes.nuspec?"
+        });
+        // Assert
+        expect(system)
+          .toHaveBeenCalledOnceWith(
+            "dotnet",
+            [ "pack", target, `-p:NuspecFile=MooCakes.nuspec` ],
+            anything
+          );
+      });
+
       function randomVersion() {
         return `${
           faker.number.int({
@@ -2503,7 +2542,8 @@ describe("dotnet-cli", () => {
       bypassNugetSourceRestore = true;
       const sources = await listNugetSources();
       // Act
-      const kept = [] as string[], chucked = [] as string[];
+      const kept = [] as string[],
+        chucked = [] as string[];
       for (const source of sources) {
         if (keep.has(source.name)) {
           kept.push(source.name);
@@ -2516,9 +2556,9 @@ describe("dotnet-cli", () => {
       }
       console.warn(`
 kept:
-  ${kept.join("\n  ")}
+  ${ kept.join("\n  ") }
 chucked:
-  ${chucked.join("\n  ")}
+  ${ chucked.join("\n  ") }
   `.trim());
       // Assert
     });
@@ -2732,6 +2772,7 @@ chucked:
   }
 
   let bypassNugetSourceRestore = false;
+
   async function restoreAllKnownNugetSources() {
     if (bypassNugetSourceRestore) {
       return;
