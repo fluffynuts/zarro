@@ -42,7 +42,7 @@ describe(`system`, () => {
                     bat = `${ faker.word.words(1) }.bat`;
                 await sandbox.writeFile(bat, "@echo hello world");
                 // Act
-                const result = await sut(sandbox.fullPathFor(bat));
+                const result = await sut(sandbox.fullPathFor(bat), ["foo"]);
                 // Assert
                 expect(result.exitCode)
                     .toEqual(0);
@@ -50,6 +50,24 @@ describe(`system`, () => {
                     .toContain("hello world");
                 expect(console.log)
                     .toHaveBeenCalledWith("hello world");
+            });
+
+            afterEach(async () => {
+                await Sandbox.destroyAll();
+            });
+        });
+        
+        describe(`npm script`, () => {
+            it(`should run it and return the result`, async () => {
+                // Arrange
+                spyOn(console, "log");
+                // Act
+                const result = await sut("npm", [ "run", "echo" ]);
+                // Assert
+                expect(result.exitCode)
+                    .toEqual(0);
+                expect(result.stdout)
+                    .toContain("foo");
             });
 
             afterEach(async () => {
