@@ -2,7 +2,10 @@
 // https://jestjs.io/docs/en/configuration.html
 
 function determineMaxWorkers() {
-  return envNumber("MAX_CONCURRENCY", 2);
+  const fallback = Math.round(os.cpus().length / 2);
+  const result = envNumber("MAX_CONCURRENCY", fallback);
+  console.log(`Running tests with concurrency: ${result}`);
+  return result;
 }
 
 function determineTestTimeout() {

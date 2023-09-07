@@ -1,4 +1,4 @@
-name: Integration "Tests"
+name: Integration Tests
 
 on:
   push:
@@ -26,6 +26,7 @@ jobs:
           git clone https://github.com/fluffynuts/NExpect
           cd NExpect
           npm ci
+          npm install --save-dev zarro@beta
           npm test
           npm run pack
           cd -
@@ -34,6 +35,7 @@ jobs:
           git clone https://github.com/fluffynuts/quackers
           cd quackers
           npm ci
+          npm install --save-dev zarro@beta
           npm test
           npm run pack
           cd -
@@ -41,5 +43,7 @@ jobs:
         run: |
           git clone https://github.com/PeanutButter
           cd PeanutButter
-          npm run build
+          npm ci
+          npm install --save-dev zarro@beta
+          npm run zarro -- build-nuget-packages
           cd -
