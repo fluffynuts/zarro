@@ -1208,11 +1208,7 @@ declare global {
     nuget?: string;
   }
 
-  enum ZarroTestPackage {
-    local,
-    beta,
-    latest
-  }
+  type ZarroTestPackage = "local" | "beta" | "latest";
   interface TestZarroOptions {
     package: ZarroTestPackage;
     tasks: string | string[];
