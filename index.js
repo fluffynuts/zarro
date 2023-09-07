@@ -5,7 +5,16 @@ const requireModule = require("./gulp-tasks/modules/require-module");
 const {init} = requireModule("git-sha");
 
 const
-    {FsEntities, stat, ls, readTextFile, fileExists, folderExists, readTextFileLines, writeTextFile} = require("yafs"),
+    {
+        FsEntities,
+        stat,
+        ls,
+        readTextFile,
+        fileExists,
+        folderExists,
+        readTextFileLines,
+        writeTextFile
+    } = require("yafs"),
     log = require("./gulp-tasks/modules/log"),
     path = require("path"),
     debug = require("debug")("zarro::main"),
