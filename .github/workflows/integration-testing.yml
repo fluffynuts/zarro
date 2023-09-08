@@ -26,9 +26,7 @@ jobs:
           git clone https://github.com/fluffynuts/NExpect
           cd NExpect
           npm ci
-          npm install --save-dev zarro@beta
-          npm test
-          npm run pack
+          npm run test-zarro
           cd -
       - name: Build & Test Quackers
         run: |

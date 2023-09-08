@@ -1670,7 +1670,7 @@ describe("dotnet-cli", () => {
         it(`should set auth on request`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.string.alphanumeric(5),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
                 username: faker_1.faker.string.alphanumeric(5),
                 password: faker_1.faker.string.alphanumeric(5),
@@ -1689,7 +1689,7 @@ describe("dotnet-cli", () => {
         it(`should request clearText passwords on request`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.string.alphanumeric(5),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
                 username: faker_1.faker.string.alphanumeric(5),
                 password: faker_1.faker.string.alphanumeric(5),
@@ -1710,7 +1710,7 @@ describe("dotnet-cli", () => {
         it(`should pass through valid auth types when set`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.string.alphanumeric(5),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
                 username: faker_1.faker.string.alphanumeric(5),
                 password: faker_1.faker.string.alphanumeric(5),
@@ -1731,7 +1731,7 @@ describe("dotnet-cli", () => {
         it(`should pass through config file path when set`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.string.alphanumeric(5),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
                 username: faker_1.faker.string.alphanumeric(5),
                 password: faker_1.faker.string.alphanumeric(5),
@@ -1769,7 +1769,7 @@ describe("dotnet-cli", () => {
         it(`should be able to add and remove the source (by name)`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.string.alphanumeric(5),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
             };
             // Act
@@ -1786,7 +1786,7 @@ describe("dotnet-cli", () => {
         it(`should be able to add disabled source`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.string.alphanumeric(5),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
                 enabled: false
             };
@@ -1803,7 +1803,7 @@ describe("dotnet-cli", () => {
         it(`should be able to remove source by url`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.string.alphanumeric(5),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
             };
             // Act
@@ -1820,7 +1820,7 @@ describe("dotnet-cli", () => {
         it(`should be able to remove source by host`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.string.alphanumeric(5),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
             }, url = new URL(src.url);
             // Act
@@ -1896,7 +1896,7 @@ chucked:
         it(`should disable the disabled source by name`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.word.sample(),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
                 enabled: false
             };
@@ -1914,7 +1914,7 @@ chucked:
         it(`should disable the disabled source by url`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.word.sample(),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
                 enabled: false
             };
@@ -1932,7 +1932,7 @@ chucked:
         it(`should disable the disabled source by full source`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.word.sample(),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
                 enabled: false
             };
@@ -1956,7 +1956,7 @@ chucked:
         it(`should find the source by name`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.word.sample(),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
                 enabled: true
             };
@@ -1970,7 +1970,7 @@ chucked:
         it(`should find the source by host`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.word.sample(),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
                 enabled: true
             }, url = new URL(src.url), host = url.host;
@@ -1984,7 +1984,7 @@ chucked:
         it(`should find the source by url`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.word.sample(),
+                name: randomSourceName(),
                 url: faker_1.faker.internet.url(),
                 enabled: true
             };
@@ -2006,7 +2006,7 @@ chucked:
         it(`should return single partial url match`, async () => {
             // Arrange
             const src = {
-                name: faker_1.faker.word.sample(),
+                name: randomSourceName(),
                 url: `https://nuget.pkg.github.com/organisation/index.json`,
                 enabled: true
             };
