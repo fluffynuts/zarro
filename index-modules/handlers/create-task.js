@@ -30,16 +30,16 @@ Task name: `, {
         }
     }
     async function surfaceTaskAsNpmScript(task) {
-        const { readTextFile, writeTextFile } = require("yafs"), filename = "package.json", log = requireModule("log"), guessIndent = requireModule("guess-indent"), raw = await readTextFile(filename), indent = guessIndent(raw), packageJson = JSON.parse(raw);
-        if (!packageJson.scripts) {
-            packageJson.scripts = {};
+        const { readTextFile, writeTextFile } = require("yafs"), filename = "package.json", log = requireModule("log"), guessIndent = requireModule("guess-indent"), raw = await readTextFile(filename), indent = guessIndent(raw), packageIndex = JSON.parse(raw);
+        if (!packageIndex.scripts) {
+            packageIndex.scripts = {};
         }
-        if (packageJson.scripts(task)) {
+        if (packageIndex.scripts[task]) {
             log.error(`Not adding npm script '${task}': already exists.`);
             return;
         }
-        packageJson.scripts[task] = "zarro @";
-        const newJson = JSON.stringify(packageJson, null, indent);
+        packageIndex.scripts[task] = "zarro @";
+        const newJson = JSON.stringify(packageIndex, null, indent);
         await writeTextFile(filename, newJson);
     }
     function createTaskHelp(safeName) {

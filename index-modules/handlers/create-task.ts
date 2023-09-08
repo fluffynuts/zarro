@@ -65,17 +65,17 @@ Task name: `, {
             guessIndent = requireModule<GuessIndent>("guess-indent"),
             raw = await readTextFile(filename),
             indent = guessIndent(raw),
-            packageJson = JSON.parse(raw);
+            packageIndex = JSON.parse(raw) as PackageIndex;
 
-        if (!packageJson.scripts) {
-            packageJson.scripts = {};
+        if (!packageIndex.scripts) {
+            packageIndex.scripts = {};
         }
-        if (packageJson.scripts(task)) {
+        if (packageIndex.scripts[task]) {
             log.error(`Not adding npm script '${task}': already exists.`);
             return;
         }
-        packageJson.scripts[task] = "zarro @";
-        const newJson = JSON.stringify(packageJson, null, indent);
+        packageIndex.scripts[task] = "zarro @";
+        const newJson = JSON.stringify(packageIndex, null, indent);
         await writeTextFile(filename, newJson);
     }
 

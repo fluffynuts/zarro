@@ -35,15 +35,12 @@ jobs:
           git clone https://github.com/fluffynuts/quackers
           cd quackers
           npm ci
-          npm install --save-dev zarro@beta
-          npm test
-          npm run pack
+          npm run test-zarro
           cd -
       - name: Build PeanutButter
         run: |
           git clone https://github.com/PeanutButter
           cd PeanutButter
           npm ci
-          npm install --save-dev zarro@beta
-          npm run zarro -- build-nuget-packages
+          npm run test-zarro
           cd -
