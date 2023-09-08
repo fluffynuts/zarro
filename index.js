@@ -21,7 +21,6 @@ const
     ZarroError = require("./gulp-tasks/modules/zarro-error"),
     {skip} = require("./gulp-tasks/modules/linq"),
     gatherArgs = require("./index-modules/gather-args");
-const { TranspileOptions, TranspileOutput } = require("typescript");
 
 function requireHandler(name) {
     const result = require(`./index-modules/handlers/${name}`);
@@ -76,7 +75,7 @@ async function loadDefaults() {
         lines = await readTextFileLines(defaultsFile);
     for (const line of lines) {
         const
-            [code, comment] = splitComment(line);
+            [code, _] = splitComment(line);
         if (isEmpty(code)) {
             // comment-only line or empty line
             continue;
@@ -153,26 +152,31 @@ async function transpileLocalTasks() {
         throw new Error(`TypeScript not installed, unable to transpile local tasks: \n- ${toTranspile.join("\n -")}`);
     }
 
-
     try {
         const { transpileModule, ModuleKind } = require("typescript");
-        for (const item of toTranspile) {
-            const test = item.replace(/\.ts$/, ".js");
+        for (const src of toTranspile) {
+            const test = src.replace(/\.ts$/, ".js");
             if (await fileExists(test)) {
                 // assume this is a compilation handled elsewhere
                 continue;
             }
-            const output = item.replace(/\.ts$/, ".generated.js");
+            const output = src.replace(/\.ts$/, ".generated.js");
             if (await fileExists(output)) {
-                const itemStat = await stat(item);
-                const outputStat = await stat(output);
-                if (itemStat.mtime <= outputStat.mtime) {
-                    debug(`${item} modified after ${output}; skipping transpile`);
+                const srcStat = await stat(src);
+                const outStat = await stat(output);
+
+                const srcLastModified = srcStat.mtime.getTime();
+                const outLastModified = outStat.mtime.getTime();
+
+
+                if (srcLastModified <= outLastModified) {
+                    debug(`${src} modified after ${output}; skipping transpile`);
                     continue;
                 }
+                debug(`will transpile: ${src}`);
             }
-            debug(`transpiling ${item}`);
-            const contents = await readTextFile(item);
+            debug(`transpiling ${src}`);
+            const contents = await readTextFile(src);
             const transpiled = transpileModule(contents, {
                 compilerOptions: {
                     esModuleInterop: true,
