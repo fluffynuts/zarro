@@ -21,6 +21,7 @@ const
     ZarroError = require("./gulp-tasks/modules/zarro-error"),
     {skip} = require("./gulp-tasks/modules/linq"),
     gatherArgs = require("./index-modules/gather-args");
+const { TranspileOptions, TranspileOutput } = require("typescript");
 
 function requireHandler(name) {
     const result = require(`./index-modules/handlers/${name}`);
@@ -147,7 +148,14 @@ async function transpileLocalTasks() {
     }
 
     try {
-        const typescript = require("typescript");
+        require("typescript");
+    } catch (e) {
+        throw new Error(`TypeScript not installed, unable to transpile local tasks: \n- ${toTranspile.join("\n -")}`);
+    }
+
+
+    try {
+        const { transpileModule, ModuleKind } = require("typescript");
         for (const item of toTranspile) {
             const test = item.replace(/\.ts$/, ".js");
             if (await fileExists(test)) {
@@ -165,10 +173,10 @@ async function transpileLocalTasks() {
             }
             debug(`transpiling ${item}`);
             const contents = await readTextFile(item);
-            const transpiled = typescript.transpileModule(contents, {
+            const transpiled = transpileModule(contents, {
                 compilerOptions: {
                     esModuleInterop: true,
-                    module: typescript.ModuleKind.CommonJS
+                    module: ModuleKind.CommonJS
                 }
             }).outputText;
             debug(`writing transpiled file: ${output}`);
