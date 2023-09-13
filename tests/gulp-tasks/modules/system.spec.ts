@@ -436,11 +436,14 @@ describe(`system`, () => {
                     ? "cmd"
                     : "/bin/sh",
                 [],
-                { timeout: 100, suppressOutput: true }
+                { timeout: 100 }
             );
             const after = Date.now();
             // Assert
             const duration = after - before;
+            console.log({
+              result
+            });
             expect(duration)
                 .toBeGreaterThanOrEqual(100);
             expect(result.exitCode)
