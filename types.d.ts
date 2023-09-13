@@ -337,6 +337,8 @@ declare global {
     "BUILD_INCLUDE" |
     "BUILD_EXCLUDE" |
     "BUILD_ADDITIONAL_EXCLUDE" |
+    "BUILD_FRAMEWORK" |
+    "BUILD_RUNTIME" |
     "NUNIT_ARCHITECTURE" |
     "BUILD_REPORT_XML" |
     "NUNIT_LABELS" |
@@ -524,6 +526,8 @@ declare global {
     BUILD_INCLUDE: StringEnvVar;
     BUILD_EXCLUDE: StringEnvVar;
     BUILD_ADDITIONAL_EXCLUDE: StringEnvVar;
+    BUILD_FRAMEWORK: StringEnvVar;
+    BUILD_RUNTIME: StringEnvVar;
     NUNIT_ARCHITECTURE: StringEnvVar;
     BUILD_REPORT_XML: StringEnvVar;
     NUNIT_LABELS: StringEnvVar; // for now, at least
