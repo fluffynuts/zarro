@@ -1230,7 +1230,11 @@ declare global {
   }
 
   type GulpPurge = (options: GulpPurgeOptions) => Transform;
-  type GulpNpmRun = (gulp: Gulp) => void;
+
+  interface GulpNpmRun {
+    gulpNpmRun: (gulp: Gulp) => void;
+    isNpmScript: (name: string) => boolean;
+  }
   type Nuget = (args: string[], opts?: SystemOptions) => Promise<void>;
 
   interface CliSupport {

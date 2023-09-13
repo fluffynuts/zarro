@@ -42,7 +42,8 @@
     "test-npm-gulp-task": "echo \"this is a test\"",
     "verify-up-to-date": "run-s \"zarro -- verify-up-to-date\"",
     "echo": "echo foo",
-    "seq": "run-s \"zarro -- seq\""
+    "seq": "run-s \"zarro -- seq\"",
+    "invalid": "node index.js invalid"
   },
   "dependencies": {
     "@octokit/rest": "^20.0.1",
