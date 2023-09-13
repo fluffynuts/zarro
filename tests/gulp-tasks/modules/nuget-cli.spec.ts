@@ -1,7 +1,9 @@
 import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
+import { Sandbox } from "filesystem-sandbox";
 
 describe(`nuget-cli`, () => {
+  const path = require("path");
   const systemMock = jest.fn();
   jest.doMock("../../../gulp-tasks/modules/system", () => systemMock);
   const resolveNugetMock = jest.fn();
@@ -58,8 +60,9 @@ describe(`nuget-cli`, () => {
       it(`should observe outputDirectory`, async () => {
         // Arrange
         const
+          sandbox = await Sandbox.create(),
           packageId = randomPackageId(),
-          outputDirectory = faker.system.directoryPath();
+          outputDirectory = path.join(sandbox.path, "nuget-target");
         // Act
         await install({
           packageId,
@@ -542,6 +545,9 @@ describe(`nuget-cli`, () => {
 
   beforeEach(() => {
     setupMocks();
+  });
+  afterEach(async () => {
+    await Sandbox.destroyAll();
   });
 
   let i = 0;

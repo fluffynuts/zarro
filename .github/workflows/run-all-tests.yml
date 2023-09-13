@@ -23,6 +23,7 @@ jobs:
         node-version: '16'
     - name: Test
       env:
+        SUPPRESS_DOWNLOAD_PROGRESS: 1
         RUNNING_IN_GITHUB_ACTION: 1
         TEST_TIMEOUT: 30000
         MAX_WORKERS: 1
