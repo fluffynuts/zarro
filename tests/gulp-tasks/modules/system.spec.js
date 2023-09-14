@@ -362,9 +362,7 @@ describe(`system`, () => {
             // Act
             const os = require("os");
             const before = Date.now();
-            const result = await sut(os.platform() === "win32"
-                ? "cmd"
-                : "/bin/sh", [], { timeout: 100, suppressOutput: true });
+            const result = await sut(`node -e "(async function() { await new Promise(resolve => setTimeout(resolve, 5000)); })()"`, [], { timeout: 100 });
             const after = Date.now();
             // Assert
             const duration = after - before;
