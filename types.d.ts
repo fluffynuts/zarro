@@ -101,7 +101,7 @@ declare global {
   ) => Promise<T>;
   type Optional<T> = T | undefined;
   type Nullable<T> = T | null;
-  type DownloadNuget = (targetFolder: string) => Promise<string>;
+  type DownloadNuget = (targetFolder: string, quiet?: boolean) => Promise<string>;
 
   interface ResolveNugetConfig {
     localNuget: string;
