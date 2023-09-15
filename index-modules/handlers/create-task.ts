@@ -1,86 +1,113 @@
 (function () {
+  const
+    requireModule = require("../../gulp-tasks/modules/require-module") as RequireModuleFn;
+
+  function test(args: string[]): boolean {
+    return new Set<string>(args || []).has("--create-task");
+  }
+
+  async function createTask() {
     const
-        requireModule = require("../../gulp-tasks/modules/require-module") as RequireModuleFn;
-
-    function test(args: string[]): boolean {
-        return new Set<string>(args || []).has("--create-task");
-    }
-
-    async function createTask() {
-        const
-            log = requireModule<Log>("log"),
-            kebabCase = require("lodash.kebabcase"),
-            path = require("path"),
-            { fileExists } = require("yafs"),
-            { ask } = requireModule<Ask>("ask"),
-            taskName = await ask(`Please provide a task name.
+      log = requireModule<Log>("log"),
+      kebabCase = require("lodash.kebabcase"),
+      path = require("path"),
+      { fileExists } = require("yafs"),
+      { ask } = requireModule<Ask>("ask"),
+      taskName = await ask(`Please provide a task name.
 It will be kebab-cased for you, so you can type a short sentence if you like.
 For example, if you type "Do the things", your task will be called "do-the-things"
 Task name: `, {
-                validator: (s: string) => !!s
-            }),
-            safeName = kebabCase(taskName.replace(/"/g, "")),
-            yesValues = [ "Y", "yes", "Yes", "y", "", ],
-            yes = new Set<string>(yesValues),
-            noValues = [ "N", "no", "No", "n" ],
-            no = new Set<string>(noValues),
-            yesNo = new Set<string>(yesValues.concat(noValues)),
-            yesNoValidator = (s: string) => {
-                s = `${ s }`.trim();
-                return yesNo.has(s);
-            },
-            includeHelpRaw = await ask(
-                "Include helpful commentary? (Y/n)", {
-                    validator: yesNoValidator
-                }
-            ),
-            includeHelp = yes.has(includeHelpRaw),
-            surfaceTaskRaw = await ask(
-                `Surface this task in package.json so you can 'npm run ${ safeName }? (Y/n): `
-            ),
-            surfaceTask = yes.has(surfaceTaskRaw),
-            tsFile = `${ safeName }.ts`;
-        const targetPath = path.join("local-tasks", tsFile);
-        if (await fileExists(targetPath)) {
-            log.error(`local task file already exists: ${ targetPath }`);
-            process.exit(1);
-        } else {
-            await generateSkeletonTaskFileAt(
-                targetPath,
-                safeName,
-                includeHelp
-            );
-            log.info(`task file created at ${ targetPath }`);
-            if (surfaceTask) {
-                await surfaceTaskAsNpmScript(safeName);
-            }
+        validator: (s: string) => !!s
+      }),
+      safeName = kebabCase(taskName.replace(/"/g, "")),
+      yesValues = [ "Y", "yes", "Yes", "y", "", ],
+      yes = new Set<string>(yesValues),
+      noValues = [ "N", "no", "No", "n" ],
+      no = new Set<string>(noValues),
+      yesNo = new Set<string>(yesValues.concat(noValues)),
+      yesNoValidator = (s: string) => {
+        s = `${ s }`.trim();
+        return yesNo.has(s);
+      },
+      includeHelpRaw = await ask(
+        "Include helpful commentary? (Y/n)", {
+          validator: yesNoValidator
         }
+      ),
+      includeHelp = yes.has(includeHelpRaw),
+      surfaceTaskRaw = await ask(
+        `Surface this task in package.json so you can 'npm run ${ safeName }? (Y/n): `
+      ),
+      surfaceTask = yes.has(surfaceTaskRaw),
+      tsFile = `${ safeName }.ts`;
+    const targetPath = path.join("local-tasks", tsFile);
+    if (await fileExists(targetPath)) {
+      log.error(`local task file already exists: ${ targetPath }`);
+      process.exit(1);
+    } else {
+      await generateSkeletonTaskFileAt(
+        targetPath,
+        safeName,
+        includeHelp
+      );
+      await ensureGeneratedTaskFilesAreIgnored();
+      log.info(`task file created at ${ targetPath }`);
+      if (surfaceTask) {
+        await surfaceTaskAsNpmScript(safeName);
+      }
     }
+  }
 
-    async function surfaceTaskAsNpmScript(task: string): Promise<void> {
-        const
-            { readTextFile, writeTextFile } = require("yafs"),
-            filename = "package.json",
-            log = requireModule<Log>("log"),
-            guessIndent = requireModule<GuessIndent>("guess-indent"),
-            raw = await readTextFile(filename),
-            indent = guessIndent(raw),
-            packageIndex = JSON.parse(raw) as PackageIndex;
+  async function ensureGeneratedTaskFilesAreIgnored() {
+    const
+      ignoreFile = ".gitignore",
+      configLine = "local-tasks/*.generated.js",
+      {
+        fileExists,
+        readTextFile,
+        writeTextFile
+      } = require("yafs");
 
-        if (!packageIndex.scripts) {
-            packageIndex.scripts = {};
-        }
-        if (packageIndex.scripts[task]) {
-            log.error(`Not adding npm script '${task}': already exists.`);
-            return;
-        }
-        packageIndex.scripts[task] = "zarro @";
-        const newJson = JSON.stringify(packageIndex, null, indent);
-        await writeTextFile(filename, newJson);
+    if (!await fileExists(ignoreFile)) {
+      return;
     }
+    const
+      contents = await readTextFile(ignoreFile),
+      lines = contents.split("\n").map((l: string) => l.trim());
+    if (lines.includes(configLine)) {
+      return;
+    }
+    lines.push(configLine);
+    await writeTextFile(ignoreFile, lines.join("\n"));
+  }
 
-    function createTaskHelp(safeName: string) {
-        return `
+  async function surfaceTaskAsNpmScript(task: string): Promise<void> {
+    const
+      {
+        readTextFile,
+        writeTextFile
+      } = require("yafs"),
+      filename = "package.json",
+      log = requireModule<Log>("log"),
+      guessIndent = requireModule<GuessIndent>("guess-indent"),
+      raw = await readTextFile(filename),
+      indent = guessIndent(raw),
+      packageIndex = JSON.parse(raw) as PackageIndex;
+
+    if (!packageIndex.scripts) {
+      packageIndex.scripts = {};
+    }
+    if (packageIndex.scripts[task]) {
+      log.error(`Not adding npm script '${ task }': already exists.`);
+      return;
+    }
+    packageIndex.scripts[task] = "zarro @";
+    const newJson = JSON.stringify(packageIndex, null, indent);
+    await writeTextFile(filename, newJson);
+  }
+
+  function createTaskHelp(safeName: string) {
+    return `
 /*
 *   requireModule<T>() is available within any zarro task file
 *   so you can easily get ahold of modules used within zarro.
@@ -134,9 +161,9 @@ env.associate([
     "${ safeName }"
 ]);
 `;
-    }
+  }
 
-    const closureHelp = `
+  const closureHelp = `
 // TypeScript local tasks must be wrapped in a closure to prevent multiple
 //   requireModule<T>(...) calls from clashing with each other in TS-land.
 //   This is not a requirement if you're creating a JavaScript task, but then
@@ -145,24 +172,27 @@ env.associate([
 //   .generated.js extension. You do not need to transpile anything yourself.
 `.trim();
 
-    async function generateSkeletonTaskFileAt(
-        target: string,
-        safeName: string,
-        includeHelp: boolean
-    ): Promise<void> {
-        const
-            path = require("path"),
-            { mkdir, writeTextFile } = require("yafs"),
-            whyClosure = includeHelp ? closureHelp : "",
-            help = includeHelp ? createTaskHelp(safeName) : "",
-            example = includeHelp ? createExampleModuleUsage(safeName) : "",
-            container = path.dirname(target);
-        await mkdir(container);
-        await writeTextFile(
-            target, `
+  async function generateSkeletonTaskFileAt(
+    target: string,
+    safeName: string,
+    includeHelp: boolean
+  ): Promise<void> {
+    const
+      path = require("path"),
+      {
+        mkdir,
+        writeTextFile
+      } = require("yafs"),
+      whyClosure = includeHelp ? closureHelp : "",
+      help = includeHelp ? createTaskHelp(safeName) : "",
+      example = includeHelp ? createExampleModuleUsage(safeName) : "",
+      container = path.dirname(target);
+    await mkdir(container);
+    await writeTextFile(
+      target, `
 /// <reference path="../node_modules/zarro/types.d.ts" />
 (function() {
-${whyClosure}
+${ whyClosure }
     const
       gulp = requireModule<Gulp>("gulp"),
       env = requireModule<Env>("env");
@@ -173,11 +203,11 @@ ${whyClosure}
         return Promise.resolve();
     });
 })();`.trim()
-        );
-    }
+    );
+  }
 
-    function createExampleModuleUsage(safeName: string) {
-        return `// you can surface this task to be run as 'npm run ${ safeName }'
+  function createExampleModuleUsage(safeName: string) {
+    return `// you can surface this task to be run as 'npm run ${ safeName }'
     // by adding this to your scripts section in package.json
     // "${ safeName }": "zarro @",
 
@@ -200,10 +230,10 @@ ${whyClosure}
         result: env.resolveFlag(env.DRY_RUN)
     });
     `.trim();
-    }
+  }
 
-    module.exports = {
-        test: test,
-        handler: createTask
-    };
+  module.exports = {
+    test: test,
+    handler: createTask
+  };
 })();
