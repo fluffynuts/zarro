@@ -23,11 +23,24 @@ Task name: `, {
         }
         else {
             await generateSkeletonTaskFileAt(targetPath, safeName, includeHelp);
+            await ensureGeneratedTaskFilesAreIgnored();
             log.info(`task file created at ${targetPath}`);
             if (surfaceTask) {
                 await surfaceTaskAsNpmScript(safeName);
             }
         }
+    }
+    async function ensureGeneratedTaskFilesAreIgnored() {
+        const ignoreFile = ".gitignore", configLine = "local-tasks/*.generated.js", { fileExists, readTextFile, writeTextFile } = require("yafs");
+        if (!await fileExists(ignoreFile)) {
+            return;
+        }
+        const contents = await readTextFile(ignoreFile), lines = contents.split("\n").map((l) => l.trim());
+        if (lines.includes(configLine)) {
+            return;
+        }
+        lines.push(configLine);
+        await writeTextFile(ignoreFile, lines.join("\n"));
     }
     async function surfaceTaskAsNpmScript(task) {
         const { readTextFile, writeTextFile } = require("yafs"), filename = "package.json", log = requireModule("log"), guessIndent = requireModule("guess-indent"), raw = await readTextFile(filename), indent = guessIndent(raw), packageIndex = JSON.parse(raw);

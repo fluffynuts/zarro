@@ -40,6 +40,15 @@ describe(`shim-nuget`, () => {
                 expect(result)
                     .toEqual(nugetPath);
             });
+            it(`should dequote the path if necessary`, async () => {
+                // Arrange
+                const sandbox = await filesystem_sandbox_1.Sandbox.create(), nugetPath = await sandbox.writeFile("foo bar/nuget.exe", "");
+                // Act
+                const result = sut(`"${nugetPath}"`);
+                // Assert
+                expect(result)
+                    .toEqual(nugetPath);
+            });
         });
     }
     else {
