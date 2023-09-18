@@ -560,6 +560,12 @@ describe(`nuget-cli`, () => {
     });
   });
 
+  const nugetOrgSource = {
+    name: "nuget.org",
+    url: "https://api.nuget.org/v3/index.json",
+    enabled: true
+  } satisfies NugetSource;
+
   describe(`adding sources`, () => {
     const {
       addSource
@@ -567,11 +573,7 @@ describe(`nuget-cli`, () => {
     it(`should add the source when not found`, async () => {
       // Arrange
       mockAvailableSources([
-        {
-          name: "nuget.org",
-          url: "https://api.nuget.org/v3/index.json",
-          enabled: true
-        }
+        nugetOrgSource
       ]);
       const
         configFile = faker.system.filePath(),
@@ -611,6 +613,196 @@ describe(`nuget-cli`, () => {
           expect.objectContaining({ suppressOutput: true })
         );
     });
+
+    it(`should not add the source if found, enabled, by name`, async () => {
+      // Arrange
+      const
+        name = faker.string.alphanumeric(),
+        url = faker.internet.url(),
+        enabled = true;
+      mockAvailableSources([
+        nugetOrgSource,
+        {
+          url,
+          name,
+          enabled
+        }
+      ])
+      // Act
+      await addSource({
+        name,
+        url,
+        enabled
+      });
+      // Assert
+      expect(systemMock)
+        .not.toHaveBeenCalledWith(
+        expect.stringContaining("nuget"),
+        expect.arrayContaining([ "add", "source" ])
+      );
+    });
+
+    it(`should enable the source if found, disabled, by name`, async () => {
+      // Arrange
+      const
+        name = faker.string.alphanumeric(),
+        url = faker.internet.url(),
+        enabled = false;
+      mockAvailableSources([
+        nugetOrgSource,
+        {
+          url,
+          name,
+          enabled
+        }
+      ])
+      // Act
+      await addSource({
+        name,
+        url,
+        enabled
+      });
+      // Assert
+      expect(systemMock)
+        .not.toHaveBeenCalledWith(
+        expect.stringContaining("nuget"),
+        expect.arrayContaining([ "add", "source" ])
+      );
+      expect(systemMock)
+        .toHaveBeenCalledWith(
+          expect.stringContaining("nuget"),
+          [ "source", "enable", "-Name", name ],
+          expect.objectContaining({ suppressOutput: true })
+        );
+    });
+  });
+
+  describe(`enabling sources`, () => {
+    const { enableSource } = requireModule<NugetCli>("nuget-cli");
+    it(`should enable the existing, disabled source`, async () => {
+      // Arrange
+      const
+        name = faker.string.alphanumeric(),
+        randomCasedName = randomCase(name),
+        url = faker.internet.url(),
+        enabled = false;
+      mockAvailableSources([
+        nugetOrgSource,
+        {
+          url,
+          name,
+          enabled
+        }
+      ])
+      // Act
+      await enableSource(randomCasedName);
+      // Assert
+      expect(systemMock)
+        .toHaveBeenCalledWith(
+          expect.stringContaining("nuget"),
+          [ "source", "enable", "-Name", randomCasedName ],
+          expect.objectContaining({ suppressOutput: true })
+        );
+    });
+
+    it(`should do nothing when the source exists and is enabled`, async () => {
+      // Arrange
+      const
+        name = faker.string.alphanumeric(),
+        randomCasedName = randomCase(name),
+        url = faker.internet.url(),
+        enabled = true;
+      mockAvailableSources([
+        nugetOrgSource,
+        {
+          url,
+          name,
+          enabled
+        }
+      ])
+      // Act
+      await enableSource(randomCasedName);
+      expect(systemMock)
+        .not.toHaveBeenCalledWith(
+        expect.stringContaining("nuget"),
+        [ "source", "enable", "-Name", randomCasedName ],
+        expect.objectContaining({ suppressOutput: true })
+      );
+      // Assert
+    });
+
+    it(`should throw if the source is not known`, async () => {
+      // Arrange
+      mockAvailableSources([ nugetOrgSource ]);
+      // Act
+      await expect(enableSource(faker.string.alphanumeric()))
+        .rejects.toThrow(/source is unknown/i);
+      // Assert
+    });
+  });
+
+  describe(`disabling sources`, () => {
+    const { disableSource } = requireModule<NugetCli>("nuget-cli");
+    it(`should disable the existing, enabled source`, async () => {
+      // Arrange
+      const
+        name = faker.string.alphanumeric(),
+        randomCasedName = randomCase(name),
+        url = faker.internet.url(),
+        enabled = true;
+      mockAvailableSources([
+        nugetOrgSource,
+        {
+          url,
+          name,
+          enabled
+        }
+      ])
+      // Act
+      await disableSource(randomCasedName);
+      // Assert
+      expect(systemMock)
+        .toHaveBeenCalledWith(
+          expect.stringContaining("nuget"),
+          [ "source", "disable", "-Name", randomCasedName ],
+          expect.objectContaining({ suppressOutput: true })
+        );
+    });
+
+    it(`should do nothing when the source exists and is disabled`, async () => {
+      // Arrange
+      const
+        name = faker.string.alphanumeric(),
+        randomCasedName = randomCase(name),
+        url = faker.internet.url(),
+        enabled = false;
+      mockAvailableSources([
+        nugetOrgSource,
+        {
+          url,
+          name,
+          enabled
+        }
+      ])
+      // Act
+      await disableSource(randomCasedName);
+      expect(systemMock)
+        .not.toHaveBeenCalledWith(
+        expect.stringContaining("nuget"),
+        [ "source", "disable", "-Name", randomCasedName ],
+        expect.objectContaining({ suppressOutput: true })
+      );
+      // Assert
+    });
+
+    it(`should throw if the source is not known`, async () => {
+      // Arrange
+      mockAvailableSources([ nugetOrgSource ]);
+      // Act
+      await expect(disableSource(faker.string.alphanumeric()))
+        .rejects.toThrow(/source is unknown/i);
+      // Assert
+    });
   });
 
   function mockAvailableSources(sources: NugetSource[]) {
@@ -632,6 +824,24 @@ describe(`nuget-cli`, () => {
           .build();
       }
     });
+  }
+
+  function randomCase(str: string): string {
+    const collector = [];
+    for (const c of (str || "")) {
+      collector.push(
+        faker.datatype.boolean()
+          ? c
+          : swapCase(c)
+      )
+    }
+    return collector.join("");
+  }
+
+  function swapCase(c: string) {
+    return c.toUpperCase() === c
+      ? c.toLowerCase()
+      : c.toUpperCase();
   }
 
   function randomPackageId() {

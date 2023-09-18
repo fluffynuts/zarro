@@ -1290,6 +1290,8 @@ declare global {
     clearHttpCache(): Promise<void>;
     listSources(): Promise<NugetSource[]>;
     addSource(src: NugetAddSourceOptions): Promise<void>;
+    enableSource(name: string): Promise<void>;
+    disableSource(name: string): Promise<void>;
   }
 
   type ParseNugetSources = (lines: string[]) => NugetSource[];
