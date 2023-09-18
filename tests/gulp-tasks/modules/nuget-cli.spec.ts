@@ -1,10 +1,13 @@
 import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
 import { Sandbox } from "filesystem-sandbox";
+import Spy = jasmine.Spy;
+import Mock = jest.Mock;
 
 describe(`nuget-cli`, () => {
   const path = require("path");
-  const systemMock = jest.fn();
+  const systemMock = jest.fn() as unknown as System;
+  let isSystemError = false;
   jest.doMock("../../../gulp-tasks/modules/system", () => systemMock);
   const resolveNugetMock = jest.fn();
   jest.doMock("../../../gulp-tasks/modules/resolve-nuget", () => resolveNugetMock);
@@ -521,6 +524,42 @@ describe(`nuget-cli`, () => {
     });
   });
 
+  describe(`list sources`, () => {
+    const { listSources } = requireModule<NugetCli>("nuget-cli");
+    it(`should list the sources`, async () => {
+      // Arrange
+      (systemMock as any as Mock).mockImplementation(() => {
+        return new SystemResult(
+          "",
+          [],
+          0,
+          [],
+          `
+1.  nuget.org [Enabled]
+    https://api.nuget.org/v3/index.json
+2.  codeo [Enabled]
+    https://nuget.codeo.co.za/nuget
+3.  github-fluffynuts [Enabled]
+    https://nuget.pkg.github.com/fluffynuts/index.json
+4.  github-codeo [Enabled]
+    https://nuget.pkg.github.com/codeo-za/index.json
+5.  Microsoft Visual Studio Offline Packages [Enabled]
+    C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\
+        `.trim().split("\n").map(s => s.trim()));
+      });
+      // Act
+      const result = await listSources();
+      // Assert
+      expect(result.length)
+        .toBeGreaterThan(0);
+      expect(result.find(o =>
+        o.name == "nuget.org" &&
+        o.url == "https://api.nuget.org/v3/index.json" &&
+        o.enabled
+      )).toExist();
+    });
+  });
+
   function randomPackageId() {
     return faker.word.words(3)
       .replace(/\s+/g, ".");
@@ -554,7 +593,7 @@ describe(`nuget-cli`, () => {
 
   function setupMocks() {
     nuget = `/${ i++ }/path/to/nuget`;
-    systemMock.mockImplementation((exe: string, args: string[], opts: SystemOptions) => {
+    (systemMock as unknown as Mock).mockImplementation((exe: string, args: string[], opts: SystemOptions) => {
       return new SystemResult(
         exe,
         args || [],
@@ -563,6 +602,8 @@ describe(`nuget-cli`, () => {
         []
       );
     });
+    (systemMock as any).isError = jest.fn().mockImplementation(() => isSystemError);
+    (systemMock as any).isResult = jest.fn().mockImplementation(() => !isSystemError);
     resolveNugetMock.mockImplementation(() => nuget);
   }
 });

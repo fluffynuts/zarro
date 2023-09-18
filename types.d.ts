@@ -1277,7 +1277,10 @@ declare global {
     install: (opts: NugetInstallOptions) => Promise<void>;
     clearAllCache(): Promise<void>;
     clearHttpCache(): Promise<void>;
+    listSources(): Promise<NugetSource[]>;
   }
+
+  type ParseNugetSources = (lines: string[]) => NugetSource[];
 
   type CreateTempFile = (contents?: string | Buffer, at?: string) => Promise<TempFile>;
   type MultiSplit = (str: string, delimiters: string[]) => string[];
