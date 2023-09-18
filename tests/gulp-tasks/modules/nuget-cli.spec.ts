@@ -1,7 +1,6 @@
 import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
 import { Sandbox } from "filesystem-sandbox";
-import Spy = jasmine.Spy;
 import Mock = jest.Mock;
 
 describe(`nuget-cli`, () => {
@@ -528,37 +527,112 @@ describe(`nuget-cli`, () => {
     const { listSources } = requireModule<NugetCli>("nuget-cli");
     it(`should list the sources`, async () => {
       // Arrange
-      (systemMock as any as Mock).mockImplementation(() => {
-        return new SystemResult(
-          "",
-          [],
-          0,
-          [],
-          `
-1.  nuget.org [Enabled]
-    https://api.nuget.org/v3/index.json
-2.  codeo [Enabled]
-    https://nuget.codeo.co.za/nuget
-3.  github-fluffynuts [Enabled]
-    https://nuget.pkg.github.com/fluffynuts/index.json
-4.  github-codeo [Enabled]
-    https://nuget.pkg.github.com/codeo-za/index.json
-5.  Microsoft Visual Studio Offline Packages [Enabled]
-    C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\
-        `.trim().split("\n").map(s => s.trim()));
-      });
+      const
+        customUrl = faker.internet.url(),
+        customEnabled = faker.datatype.boolean();
+      mockAvailableSources([
+        {
+          name: "nuget.org",
+          url: "https://api.nuget.org/v3/index.json",
+          enabled: true
+        },
+        {
+          name: "custom",
+          url: customUrl,
+          enabled: customEnabled
+        }
+      ]);
       // Act
       const result = await listSources();
       // Assert
       expect(result.length)
-        .toBeGreaterThan(0);
+        .toEqual(2);
       expect(result.find(o =>
         o.name == "nuget.org" &&
         o.url == "https://api.nuget.org/v3/index.json" &&
         o.enabled
       )).toExist();
+      expect(result.find(o =>
+        o.name == "custom" &&
+        o.url == customUrl &&
+        o.enabled == customEnabled
+      )).toExist();
     });
   });
+
+  describe(`adding sources`, () => {
+    const {
+      addSource
+    } = requireModule<NugetCli>("nuget-cli");
+    it(`should add the source when not found`, async () => {
+      // Arrange
+      mockAvailableSources([
+        {
+          name: "nuget.org",
+          url: "https://api.nuget.org/v3/index.json",
+          enabled: true
+        }
+      ]);
+      const
+        configFile = faker.system.filePath(),
+        password = faker.string.alphanumeric(),
+        expectedName = faker.word.sample(),
+        expectedUrl = faker.internet.url(),
+        username = faker.string.alphanumeric(),
+        validAuthenticationTypes = faker.string.alphanumeric(),
+        storePasswordInClearText = true;
+      // Act
+      await addSource({
+        name: expectedName,
+        url: expectedUrl,
+        enabled: true,
+        configFile,
+        password,
+        storePasswordInClearText,
+        username,
+        validAuthenticationTypes
+      });
+      // Assert
+      expect(systemMock)
+        .toHaveBeenCalledOnceWith(
+          expect.stringContaining("nuget"),
+          [
+            "add", "source",
+            "-Name", expectedName,
+            "-Source", expectedUrl,
+            "-Username", username,
+            "-Password", password,
+            "-StorePasswordInClearText",
+            "-NonInteractive",
+            "-ValidAuthenticationTypes", validAuthenticationTypes,
+            "-ConfigFile", configFile,
+            "-ForceEnglishOutput"
+          ],
+          expect.objectContaining({ suppressOutput: true })
+        );
+    });
+  });
+
+  function mockAvailableSources(sources: NugetSource[]) {
+    (systemMock as any as Mock).mockImplementation((
+      exe: string,
+      args: string[],
+      opts?: SystemOptions
+    ) => {
+      if ([ "sources", "list" ].every((el, idx) => el === args[idx])) {
+        const lines = [] as string[];
+        let idx = 1;
+        for (const src of sources) {
+          lines.push(`${ idx++ }.  ${ src.name } [${ (src.enabled ? "Enabled" : "Disabled") }]`);
+          lines.push(`    ${ src.url }`);
+        }
+        return SystemResult.create()
+          .withArgs(args)
+          .withStdOut(lines)
+          .build();
+      }
+    });
+  }
 
   function randomPackageId() {
     return faker.word.words(3)

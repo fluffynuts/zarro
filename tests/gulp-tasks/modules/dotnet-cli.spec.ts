@@ -2307,7 +2307,7 @@ describe("dotnet-cli", () => {
         url: faker.internet.url(),
         username: faker.string.alphanumeric(5),
         password: faker.string.alphanumeric(5),
-      } satisfies DotNetNugetAddSourceOptions;
+      } satisfies NugetAddSourceOptions;
       // Act
       await addNugetSource(src);
       // Assert
@@ -2331,7 +2331,7 @@ describe("dotnet-cli", () => {
         username: faker.string.alphanumeric(5),
         password: faker.string.alphanumeric(5),
         storePasswordInClearText: true
-      } satisfies DotNetNugetAddSourceOptions;
+      } satisfies NugetAddSourceOptions;
       // Act
       await addNugetSource(src);
       // Assert
@@ -2356,7 +2356,7 @@ describe("dotnet-cli", () => {
         username: faker.string.alphanumeric(5),
         password: faker.string.alphanumeric(5),
         validAuthenticationTypes: "foo,bar"
-      } satisfies DotNetNugetAddSourceOptions;
+      } satisfies NugetAddSourceOptions;
       // Act
       await addNugetSource(src);
       // Assert
@@ -2381,7 +2381,7 @@ describe("dotnet-cli", () => {
         username: faker.string.alphanumeric(5),
         password: faker.string.alphanumeric(5),
         configFile: faker.string.alphanumeric(10)
-      } satisfies DotNetNugetAddSourceOptions;
+      } satisfies NugetAddSourceOptions;
       // Act
       await addNugetSource(src);
       // Assert
@@ -2430,7 +2430,7 @@ describe("dotnet-cli", () => {
       const src = {
         name: randomSourceName(),
         url: faker.internet.url(),
-      } satisfies DotNetNugetAddSourceOptions;
+      } satisfies NugetAddSourceOptions;
       // Act
       await addNugetSource(src);
       let configuredSources = await listNugetSources();
@@ -2449,7 +2449,7 @@ describe("dotnet-cli", () => {
         name: randomSourceName(),
         url: faker.internet.url(),
         enabled: false
-      } satisfies DotNetNugetAddSourceOptions;
+      } satisfies NugetAddSourceOptions;
       // Act
       await addNugetSource(src);
       // Assert
@@ -2468,7 +2468,7 @@ describe("dotnet-cli", () => {
       const src = {
         name: randomSourceName(),
         url: faker.internet.url(),
-      } satisfies DotNetNugetAddSourceOptions;
+      } satisfies NugetAddSourceOptions;
       // Act
       await addNugetSource(src);
       let configuredSources = await listNugetSources();
@@ -2486,7 +2486,7 @@ describe("dotnet-cli", () => {
       const src = {
           name: randomSourceName(),
           url: faker.internet.url(),
-        } satisfies DotNetNugetAddSourceOptions,
+        } satisfies NugetAddSourceOptions,
         url = new URL(src.url);
       // Act
       await addNugetSource(src);
@@ -2508,7 +2508,7 @@ describe("dotnet-cli", () => {
         src1 = {
           name: randomSourceName(),
           url: url1,
-        } satisfies DotNetNugetAddSourceOptions,
+        } satisfies NugetAddSourceOptions,
         src2 = {
           name: randomSourceName(),
           url: url2

@@ -111,7 +111,7 @@ declare global {
   type FindNpmBase = () => string;
   type ResolveNugetConfigGenerator = () => ResolveNugetConfig;
   type ResolveNuget = (nugetPath?: string, errorOnMissing?: boolean) => string;
-  type FindLocalNuget = () => Promise<string>;
+  type FindLocalNuget = (quiet?: boolean) => Promise<string>;
 
   type Fetch = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
@@ -1149,7 +1149,8 @@ declare global {
     args: string[];
   }
 
-  interface SystemResult extends SystemCommand {
+  interface SystemResultImpl
+    extends SystemCommand {
     new(
       exe: string,
       args: string[],
@@ -1163,9 +1164,21 @@ declare global {
     stdout: string[];
 
     isResult(): this is SystemResult;
-
     isError(): this is SystemError;
   }
+
+  interface SystemResultBuilder {
+    withExe(exe: string): SystemResultBuilder;
+    withArgs(args: string[]): SystemResultBuilder;
+    withExitCode(code: number): SystemResultBuilder;
+    withStdErr(lines: string[] | string): SystemResultBuilder;
+    withStdOut(lines: string[] | string): SystemResultBuilder;
+    build(): SystemResult;
+  }
+
+  type SystemResult = {
+    create(): SystemResultBuilder;
+  } & SystemResultImpl;
 
   interface SystemError
     extends Error, SystemCommand {
@@ -1193,13 +1206,11 @@ declare global {
   interface System
     extends SystemFunction {
     isError(o: any): o is SystemError;
-
     isResult(o: any): o is SystemResult;
   }
 
   interface TempFile {
     path: string;
-
     destroy(): void;
   }
 
@@ -1278,6 +1289,7 @@ declare global {
     clearAllCache(): Promise<void>;
     clearHttpCache(): Promise<void>;
     listSources(): Promise<NugetSource[]>;
+    addSource(src: NugetAddSourceOptions): Promise<void>;
   }
 
   type ParseNugetSources = (lines: string[]) => NugetSource[];
@@ -1476,7 +1488,7 @@ declare global {
     enabled: boolean;
   }
 
-  interface DotNetNugetAddSourceOptions {
+  interface NugetAddSourceOptions {
     name: string;
     url: string;
     username?: string;
@@ -1507,7 +1519,7 @@ declare global {
   type DotNetPublishFunction = (opts: DotNetPublishOptions) => Promise<SystemResult | SystemError>;
   type DotNetListPackagesFunction = (projectPath: string) => Promise<DotNetPackageReference[]>;
   type DotNetPublishResolveContainerOptions = (opts: DotNetPublishOptions) => Promise<ResolvedContainerOption[]>;
-  type DotNetNugetAddSourceFunction = (opts: DotNetNugetAddSourceOptions) => Promise<void>;
+  type DotNetNugetAddSourceFunction = (opts: NugetAddSourceOptions) => Promise<void>;
   type DotNetRemoveNugetSourceFunction = (source: string | NugetSource) => Promise<void>;
   type DotNetListNugetSourcesFunction = () => Promise<NugetSource[]>;
   type DotNetEnableNugetSourceFunction = (source: string | NugetSource) => Promise<void>;
