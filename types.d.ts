@@ -81,6 +81,42 @@ declare global {
 
   }
 
+  interface Log {
+    setThreshold(level: number): void;
+
+    debug(...args: any[]): void;
+
+    info(...args: any[]): void;
+
+    notice(...args: any[]): void;
+
+    warn(...args: any[]): void;
+
+    /**
+     * @deprecated this is a link back to .warn(...)
+     */
+    warning(...args: any[]): void;
+
+    error(...args: any[]): void;
+
+    /**
+     *  @deprecated this is a link back to .error(...)
+     */
+    fail(...args: any[]): void;
+
+    ok(): void;
+
+    suppressTimestamps(): void;
+
+    showTimestamps(): void;
+
+    LogLevels: LogLevels;
+
+    threshold: LogThreshold;
+
+  }
+
+
   type Func<T> = () => T;
   type DebugLogFunction = (...args: any[]) => void;
   type DebugFactory = (label: string) => DebugLogFunction;
@@ -913,26 +949,6 @@ declare global {
   type GitTagFromCsProj = (options?: GitTagOptions) => Stream;
   type GitFetch = (all: boolean) => Promise<void>;
   type NugetPush = (packageFile: string, sourceName?: string, options?: NugetPushOpts) => Promise<void>;
-
-  interface Log {
-    setThreshold(level: number): void;
-
-    debug(...args: any[]): void;
-
-    log(...args: any[]): void;
-
-    info(...args: any[]): void;
-
-    notice(...args: any[]): void;
-
-    warn(...args: any[]): void;
-
-    error(...args: any[]): void;
-
-    fail(...args: any[]): void;
-
-    LogLevels: LogLevels;
-  }
 
   interface ParseNugetVersion {
     parseNugetVersion(versionStringOrFileName: string): Version;
