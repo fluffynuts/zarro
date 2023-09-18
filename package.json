@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.144.255",
+  "version": "1.144.257",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
