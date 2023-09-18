@@ -180,7 +180,8 @@ async function transpileLocalTasks() {
             const transpiled = transpileModule(contents, {
                 compilerOptions: {
                     esModuleInterop: true,
-                    module: ModuleKind.CommonJS
+                    module: ModuleKind.CommonJS,
+                    target: "es2017"
                 }
             }).outputText;
             debug(`writing transpiled file: ${output}`);
