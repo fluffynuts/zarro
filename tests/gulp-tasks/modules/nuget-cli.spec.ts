@@ -599,7 +599,7 @@ describe(`nuget-cli`, () => {
         .toHaveBeenCalledOnceWith(
           expect.stringContaining("nuget"),
           [
-            "add", "source",
+            "source", "add",
             "-Name", expectedName,
             "-Source", expectedUrl,
             "-Username", username,
@@ -638,7 +638,7 @@ describe(`nuget-cli`, () => {
       expect(systemMock)
         .not.toHaveBeenCalledWith(
         expect.stringContaining("nuget"),
-        expect.arrayContaining([ "add", "source" ])
+        expect.arrayContaining([ "source", "add" ])
       );
     });
 
@@ -666,7 +666,7 @@ describe(`nuget-cli`, () => {
       expect(systemMock)
         .not.toHaveBeenCalledWith(
         expect.stringContaining("nuget"),
-        expect.arrayContaining([ "add", "source" ])
+        expect.arrayContaining([ "source", "add" ])
       );
       expect(systemMock)
         .toHaveBeenCalledWith(
