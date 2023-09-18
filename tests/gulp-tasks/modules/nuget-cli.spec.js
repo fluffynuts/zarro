@@ -389,7 +389,7 @@ describe(`nuget-cli`, () => {
             // Assert
             expect(systemMock)
                 .toHaveBeenCalledOnceWith(expect.stringContaining("nuget"), [
-                "add", "source",
+                "source", "add",
                 "-Name", expectedName,
                 "-Source", expectedUrl,
                 "-Username", username,
@@ -420,7 +420,7 @@ describe(`nuget-cli`, () => {
             });
             // Assert
             expect(systemMock)
-                .not.toHaveBeenCalledWith(expect.stringContaining("nuget"), expect.arrayContaining(["add", "source"]));
+                .not.toHaveBeenCalledWith(expect.stringContaining("nuget"), expect.arrayContaining(["source", "add"]));
         });
         it(`should enable the source if found, disabled, by name`, async () => {
             // Arrange
@@ -441,7 +441,7 @@ describe(`nuget-cli`, () => {
             });
             // Assert
             expect(systemMock)
-                .not.toHaveBeenCalledWith(expect.stringContaining("nuget"), expect.arrayContaining(["add", "source"]));
+                .not.toHaveBeenCalledWith(expect.stringContaining("nuget"), expect.arrayContaining(["source", "add"]));
             expect(systemMock)
                 .toHaveBeenCalledWith(expect.stringContaining("nuget"), ["source", "enable", "-Name", name], expect.objectContaining({ suppressOutput: true }));
         });
