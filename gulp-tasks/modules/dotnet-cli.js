@@ -158,6 +158,30 @@
             return runDotNetWith(args, opts);
         });
     }
+    const emojiLabels = {
+        testing: `🧪 Testing`,
+        packing: `📦 Packing`,
+        building: `🏗️ Building`,
+        cleaning: `🧹 Cleaning`,
+        publishing: `🚀 Publishing`,
+    };
+    const asciiLabels = {
+        testing: `>>> Testing`,
+        packing: `[_] Packing`,
+        building: `+++ Building`,
+        cleaning: `--- Cleaning`,
+        publishing: `*** Publishing`,
+    };
+    const labels = env.resolveFlag(env.NO_COLOR)
+        ? asciiLabels
+        : emojiLabels;
+    function label(str) {
+        const match = Object.keys(labels)
+            .find(s => s.toLowerCase() === str.toLowerCase());
+        return !!match
+            ? labels[match]
+            : str;
+    }
     async function test(opts) {
         return runOnAllConfigurations("Testing", opts, configuration => {
             const args = [
@@ -382,10 +406,16 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     }
     function parseNuspecPath(p) {
         if (!p) {
-            return { resolvedPath: p, isOptional: false };
+            return {
+                resolvedPath: p,
+                isOptional: false
+            };
         }
         const isOptional = !!p.match(/\?$/), resolvedPath = p.replace(/\?$/, "");
-        return { isOptional, resolvedPath };
+        return {
+            isOptional,
+            resolvedPath
+        };
     }
     async function tryResolveValidPathToNuspec(opts) {
         if (!opts.nuspec) {
