@@ -42,7 +42,7 @@ describe(`requireModule`, () => {
         isWindows = os.platform() === "win32";
     if (!isWindows) {
         // on windows, case-sensitivity won't matter at all, ofc
-        it(`should find the module with invalid casing on a Good Operating System`, async () => {
+        it(`should find the module with invalid casing on a Good Operating System (1)`, async () => {
             // Arrange
             spyOn(console, "warn");
             let result: Optional<DotNetCli>;
@@ -57,6 +57,23 @@ describe(`requireModule`, () => {
             expect(console.warn)
                 .toHaveBeenCalledWith(
                     expect.stringContaining("closest match 'dotnet-cli'")
+                );
+        });
+        it(`should find the module with invalid casing on a Good Operating System (2)`, async () => {
+            // Arrange
+            spyOn(console, "warn");
+            let result: Optional<System>;
+            // Act
+            expect(() => result = requireModule<System>("System"))
+                .not.toThrow();
+            // Assert
+            expect(result)
+                .toBeDefined();
+            expect(result)
+                .toBeFunction();
+            expect(console.warn)
+                .toHaveBeenCalledWith(
+                    expect.stringContaining("closest match 'system'")
                 );
         });
     }
