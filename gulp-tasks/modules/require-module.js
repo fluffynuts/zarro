@@ -53,12 +53,6 @@
     }
     function isFuzzyMatch(left, right) {
         const l = fuzzify(left), r = fuzzify(right);
-        console.log({
-            left,
-            l,
-            right,
-            r
-        });
         return l === r;
     }
     function fuzzify(str) {
