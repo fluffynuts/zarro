@@ -17,6 +17,23 @@
     const readNuspecVersion = requireModule("read-nuspec-version");
     const log = requireModule("log");
     const env = requireModule("env");
+    const emojiLabels = {
+        testing: `🧪 Testing`,
+        packing: `📦 Packing`,
+        building: `🏗️ Building`,
+        cleaning: `🧹 Cleaning`,
+        publishing: `🚀 Publishing`,
+    };
+    const asciiLabels = {
+        testing: `>>> Testing`,
+        packing: `[_] Packing`,
+        building: `+++ Building`,
+        cleaning: `--- Cleaning`,
+        publishing: `*** Publishing`,
+    };
+    const labels = env.resolveFlag(env.NO_COLOR)
+        ? asciiLabels
+        : emojiLabels;
     let defaultNugetSource;
     function showHeader(label) {
         console.log(yellow(label));
@@ -78,7 +95,7 @@
                 throw new ZarroError(`container publish logic requires a nuget package reference for '${requiredContainerPackage}' on project '${opts.target}'`);
             }
         }
-        return runOnAllConfigurations(`Publishing`, opts, configuration => {
+        return runOnAllConfigurations(label(`Publishing`), opts, configuration => {
             const args = [
                 "publish",
                 q(opts.target)
@@ -126,7 +143,7 @@
         pushMsbuildProperty(args, name, value);
     }
     async function clean(opts) {
-        return runOnAllConfigurations(`Cleaning`, opts, configuration => {
+        return runOnAllConfigurations(label(`Cleaning`), opts, configuration => {
             const args = [
                 "clean",
                 q(opts.target)
@@ -141,7 +158,7 @@
         });
     }
     async function build(opts) {
-        return runOnAllConfigurations("Building", opts, configuration => {
+        return runOnAllConfigurations(label("Building"), opts, configuration => {
             const args = [
                 "build",
                 q(opts.target)
@@ -158,23 +175,6 @@
             return runDotNetWith(args, opts);
         });
     }
-    const emojiLabels = {
-        testing: `🧪 Testing`,
-        packing: `📦 Packing`,
-        building: `🏗️ Building`,
-        cleaning: `🧹 Cleaning`,
-        publishing: `🚀 Publishing`,
-    };
-    const asciiLabels = {
-        testing: `>>> Testing`,
-        packing: `[_] Packing`,
-        building: `+++ Building`,
-        cleaning: `--- Cleaning`,
-        publishing: `*** Publishing`,
-    };
-    const labels = env.resolveFlag(env.NO_COLOR)
-        ? asciiLabels
-        : emojiLabels;
     function label(str) {
         const match = Object.keys(labels)
             .find(s => s.toLowerCase() === str.toLowerCase());
@@ -183,7 +183,7 @@
             : str;
     }
     async function test(opts) {
-        return runOnAllConfigurations("Testing", opts, configuration => {
+        return runOnAllConfigurations(label("Testing"), opts, configuration => {
             const args = [
                 "test",
                 q(opts.target)
@@ -353,7 +353,7 @@
         }
     }
     async function pack(opts) {
-        return runOnAllConfigurations("Packing", opts, async (configuration) => {
+        return runOnAllConfigurations(label("Packing"), opts, async (configuration) => {
             const copy = Object.assign(Object.assign({}, opts), { msbuildProperties: Object.assign({}, opts.msbuildProperties) });
             copy.nuspec = await tryResolveValidPathToNuspec(copy);
             const args = [
