@@ -1,0 +1,6 @@
+dist
+*.tgz
+node_modules/
+.eslintcache
+.idea
+src/**/*.js

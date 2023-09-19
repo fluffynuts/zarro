@@ -1,0 +1,9 @@
+node_modules
+*.swp
+*.swo
+*.un~
+npm-debug.log*
+modules/nuget.exe
+modules/nuget.exe.completed
+modules/nuget.exe.part
+.idea
