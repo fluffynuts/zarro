@@ -20,6 +20,7 @@ jobs:
             7.0.306
       - uses: actions/setup-node@v2-beta
         with:
+          # intentionally use 16 to ensure the fetch polyfill is being brought in
           node-version: '16'
       - name: Build & Test NExpect
         run: |
@@ -37,7 +38,7 @@ jobs:
           cd -
       - name: Build PeanutButter
         run: |
-          git clone https://github.com/PeanutButter
+          git clone https://github.com/fluffynuts/PeanutButter
           cd PeanutButter
           npm ci
           npm run test-zarro

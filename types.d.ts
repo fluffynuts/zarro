@@ -1239,9 +1239,9 @@ declare global {
     nuget?: string;
   }
 
-  type ZarroTestPackage = "local" | "beta" | "latest";
+  type ZarroTestPackage = "local" | "beta" | "latest" | string;
   interface TestZarroOptions {
-    package: ZarroTestPackage;
+    packageVersion: ZarroTestPackage;
     tasks: string | string[];
     rollback?: boolean;
   }
