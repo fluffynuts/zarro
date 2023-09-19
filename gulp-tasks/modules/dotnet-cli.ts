@@ -242,6 +242,32 @@
     );
   }
 
+  const emojiLabels = {
+    testing: `🧪 Testing`,
+    packing: `📦 Packing`,
+    building: `🏗️ Building`,
+    cleaning: `🧹 Cleaning`,
+    publishing: `🚀 Publishing`,
+  } as Dictionary<string>;
+  const asciiLabels = {
+    testing: `>>> Testing`,
+    packing: `[_] Packing`,
+    building: `+++ Building`,
+    cleaning: `--- Cleaning`,
+    publishing: `*** Publishing`,
+  } as Dictionary<string>;
+  const labels = env.resolveFlag(env.NO_COLOR)
+    ? asciiLabels
+    : emojiLabels;
+
+  function label(str: string): string {
+    const match = Object.keys(labels)
+      .find(s => s.toLowerCase() === str.toLowerCase());
+    return !!match
+      ? labels[match]
+      : str;
+  }
+
   async function test(
     opts: DotNetTestOptions
   ): Promise<SystemResult | SystemError> {
@@ -451,6 +477,7 @@
       return urlOrHost;
     }
   }
+
   function isNugetSource(obj: any): obj is NugetSource {
     return typeof obj === "object" &&
            typeof obj.name === "string" &&
@@ -555,12 +582,18 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     p: Optional<string>
   ): { resolvedPath: Optional<string>, isOptional: boolean } {
     if (!p) {
-      return { resolvedPath: p, isOptional: false };
+      return {
+        resolvedPath: p,
+        isOptional: false
+      };
     }
     const
       isOptional = !!p.match(/\?$/),
       resolvedPath = p.replace(/\?$/, "");
-    return { isOptional, resolvedPath };
+    return {
+      isOptional,
+      resolvedPath
+    };
   }
 
   async function tryResolveValidPathToNuspec(
@@ -569,7 +602,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     if (!opts.nuspec) {
       return opts.nuspec;
     }
-    const { isOptional, resolvedPath } = parseNuspecPath(opts.nuspec);
+    const {
+      isOptional,
+      resolvedPath
+    } = parseNuspecPath(opts.nuspec);
     if (path.isAbsolute(resolvedPath) && await fileExists(resolvedPath)) {
       return opts.nuspec;
     }
@@ -590,7 +626,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
   async function resolveAbsoluteNuspecPath(
     opts: DotNetPackOptions
   ): Promise<string> {
-    const { resolvedPath, isOptional } = parseNuspecPath(opts.nuspec);
+    const {
+      resolvedPath,
+      isOptional
+    } = parseNuspecPath(opts.nuspec);
     if (!resolvedPath) {
       throw new ZarroError(`unable to resolve path to nuspec: no nuspec provided`);
     }
@@ -622,7 +661,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       return false;
     }
 
-    const { isOptional, resolvedPath } = parseNuspecPath(opts.nuspec);
+    const {
+      isOptional,
+      resolvedPath
+    } = parseNuspecPath(opts.nuspec);
 
     const
       target = opts.target;
