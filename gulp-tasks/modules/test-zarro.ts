@@ -4,7 +4,8 @@
       [`local`]: undefined,
       [`beta`]: "zarro@beta",
       [`latest`]: "zarro@latest"
-    } as Dictionary<Optional<string>>;
+    } as Dictionary<Optional<string>>,
+    readPackageJson = requireModule<ReadPackageJson>("read-package-json");
 
   async function testZarro(opts: TestZarroOptions): Promise<void> {
     const
@@ -28,6 +29,10 @@
         "npm",
         [ "install", "--no-save", toInstall ]
       );
+      const installedPackageIndex = await readPackageJson(
+        "node_modules/zarro/package.json"
+      );
+      console.warn(`Running tests with zarro@${installedPackageIndex.version}`);
     }
 
     try {
@@ -45,5 +50,6 @@
       }
     }
   }
+
   module.exports = testZarro;
 })();
