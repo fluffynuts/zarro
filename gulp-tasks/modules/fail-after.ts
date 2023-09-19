@@ -1,10 +1,8 @@
-import Timeout = NodeJS.Timeout;
-
 (function() {
   class Failer {
     public promise: Promise<void>;
 
-    private _timer?: Timeout;
+    private _timer?: any;
     private _cancelled = false;
 
     constructor(public ms: number, message?: string) {
