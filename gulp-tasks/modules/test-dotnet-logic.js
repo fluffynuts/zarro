@@ -161,7 +161,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
         const concurrency = testInParallel
             ? env.resolveNumber("MAX_CONCURRENCY")
             : 1;
-        console.log(`Will run tests for project${testProjectPaths.length === 1 ? "" : "s"}:`);
+        console.log(`Will run tests for project${testProjectPaths.length === 1 ? "" : "s"} with concurrency ${concurrency}:`);
         for (const projectPath of testProjectPaths) {
             console.log(`  ${projectPath}`);
         }

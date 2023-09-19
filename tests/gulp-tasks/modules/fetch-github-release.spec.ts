@@ -33,5 +33,5 @@ describe(`fetch-github-release`, function() {
       lowercased.find(o => o === "mailpit.exe");
     expect(mailpit)
       .toBeDefined();
-  }, 30000);
+  });
 });

@@ -33,7 +33,6 @@
 
         let result: T;
         let modulePath = path.join(__dirname, mod);
-        debugger;
         try {
             debug({
                 label: "attempt to require",

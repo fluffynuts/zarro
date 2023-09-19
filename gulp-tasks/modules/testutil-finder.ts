@@ -216,7 +216,6 @@
                     thisFileExtension = path.extname(p),
                     parts = p.split(/[\\\/]/g),
                     filename = parts[parts.length - 1];
-                debugger;
                 if (thisFileExtension) {
                     if (exeHasExtension) {
                         return filename.toLowerCase() === exeName.toLowerCase()
@@ -229,7 +228,6 @@
                 }
             })
             .sort();
-        debugger;
         return allResults[0] || which(exeName);
     }
 

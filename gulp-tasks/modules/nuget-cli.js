@@ -76,7 +76,6 @@
             throw new Error(`url not specified`);
         }
         const existing = await listSources(), haveByName = existing.find(o => o.name === src.name), isEnabled = haveByName && haveByName.enabled, sameUrl = haveByName && haveByName.url == src.url;
-        debugger;
         if (haveByName && sameUrl) {
             log.info(`Nuget source '${src.name}' already registered`);
             if (!isEnabled) {

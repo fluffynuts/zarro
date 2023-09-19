@@ -119,7 +119,6 @@
       isEnabled = haveByName && haveByName.enabled,
       sameUrl = haveByName && haveByName.url == src.url;
 
-    debugger;
     if (haveByName && sameUrl) {
       log.info(`Nuget source '${ src.name }' already registered`);
       if (!isEnabled) {

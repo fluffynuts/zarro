@@ -10,7 +10,7 @@ function determineMaxWorkers() {
 }
 
 function determineTestTimeout() {
-  return envNumber("TEST_TIMEOUT", 30000);
+  return envNumber("TEST_TIMEOUT", 90000);
 }
 
 

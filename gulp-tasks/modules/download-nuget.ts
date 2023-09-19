@@ -17,7 +17,6 @@
         const
             downloader = HttpClient.create();
         downloader.suppressProgress = !!quiet;
-        debugger;
         const downloaded = await downloader.download(
             url,
             path.join(targetFolder, "nuget.exe")
