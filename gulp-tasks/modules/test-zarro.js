@@ -4,7 +4,7 @@
         [`local`]: undefined,
         [`beta`]: "zarro@beta",
         [`latest`]: "zarro@latest"
-    };
+    }, readPackageJson = requireModule("read-package-json");
     async function testZarro(opts) {
         const log = requireModule("log"), system = requireModule("system");
         if (!opts) {
@@ -20,6 +20,8 @@
         const toInstall = packageLookup[opts.packageVersion];
         if (toInstall) {
             await system("npm", ["install", "--no-save", toInstall]);
+            const installedPackageIndex = await readPackageJson("node_modules/zarro/package.json");
+            console.warn(`Running tests with zarro@${installedPackageIndex.version}`);
         }
         try {
             for (const task of taskArray) {
