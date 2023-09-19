@@ -2,7 +2,6 @@ export {}
 const
   gitFactory = require("simple-git"),
   gutil = requireModule<GulpUtil>("gulp-util"),
-  spawn = requireModule<Spawn>("spawn"),
   gulp = requireModule<GulpWithHelp>("gulp"),
   gitTag = requireModule<GitTag>("git-tag"),
   gitPushTags = requireModule<GitPushTags>("git-push-tags"),
@@ -12,16 +11,6 @@ const
 
 function log(str: string) {
   gutil.log(gutil.colors.green(str));
-}
-
-async function tryPublish(dryRun: boolean) {
-  if (dryRun) {
-    log("would publish...");
-  } else {
-    await spawn("npm", ["publish"], {
-      interactive: true
-    });
-  }
 }
 
 async function commitAll(
@@ -62,28 +51,16 @@ async function tagRelease(dryRun: boolean) {
     version = await readPackageVersion(),
     tag = `v${ version }`;
 
-  // must commit all of gulp-tasks first so the updated module ends up committed with zarro
-  await commitAll(dryRun, "gulp-tasks", `:bookmark: goes with zarro v${ version }`);
   await commitAll(dryRun, ".", ":bookmark: bump package version");
 
   // can tag in parallel
-  await Promise.all([
-    gitTag({
-      tag,
-      dryRun,
-      where: "."
-    }),
-    gitTag({
-      tag,
-      dryRun,
-      where: "gulp-tasks"
-    }),
-  ]);
+  await gitTag({
+    tag,
+    dryRun,
+    where: "."
+  });
 
   // can push in parallel, if it's quick enough so that the GH action doesn't
   // fail to get the submodule...
-  await Promise.all([
-    push(dryRun, "."),
-    push(dryRun, "gulp-tasks")
-  ]);
+  await push(dryRun, ".");
 }

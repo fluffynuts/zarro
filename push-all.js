@@ -5,14 +5,9 @@ const
 (async function (){
   try {
     const
-      gulpTasksGit = gitFactory("gulp-tasks"),
       rootGit = gitFactory(".");
 
     process.stdout.write(`${ cyanBright("pushing...") }`);
-    await Promise.all([
-      gulpTasksGit.push(),
-      gulpTasksGit.pushTags(),
-    ]);
     await Promise.all([
       rootGit.push(),
       rootGit.pushTags()

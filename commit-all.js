@@ -9,6 +9,7 @@ async function addAllAndCommit(git, message) {
 }
 
 (async function () {
+  console.warn("Rather use regular ol' git...");
   let message = yargs.argv._.join(" ").trim();
   if (!message) {
     message = await ask("commit message: ");
@@ -19,10 +20,8 @@ async function addAllAndCommit(git, message) {
   }
   try {
     const
-      gulpTasksGit = gitFactory("gulp-tasks"),
       rootGit = gitFactory(".");
 
-    await addAllAndCommit(gulpTasksGit, message);
     await addAllAndCommit(rootGit, message);
     process.exit(0);
   } catch (e) {

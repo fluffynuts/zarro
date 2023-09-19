@@ -1,18 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const gitFactory = require("simple-git"), gutil = requireModule("gulp-util"), spawn = requireModule("spawn"), gulp = requireModule("gulp"), gitTag = requireModule("git-tag"), gitPushTags = requireModule("git-push-tags"), gitPush = requireModule("git-push"), env = requireModule("env"), readPackageVersion = requireModule("read-package-version");
+const gitFactory = require("simple-git"), gutil = requireModule("gulp-util"), gulp = requireModule("gulp"), gitTag = requireModule("git-tag"), gitPushTags = requireModule("git-push-tags"), gitPush = requireModule("git-push"), env = requireModule("env"), readPackageVersion = requireModule("read-package-version");
 function log(str) {
     gutil.log(gutil.colors.green(str));
-}
-async function tryPublish(dryRun) {
-    if (dryRun) {
-        log("would publish...");
-    }
-    else {
-        await spawn("npm", ["publish"], {
-            interactive: true
-        });
-    }
 }
 async function commitAll(dryRun, where, comment) {
     if (dryRun) {
@@ -40,26 +30,14 @@ gulp.task("git-tag-and-push", async () => {
 });
 async function tagRelease(dryRun) {
     const version = await readPackageVersion(), tag = `v${version}`;
-    // must commit all of gulp-tasks first so the updated module ends up committed with zarro
-    await commitAll(dryRun, "gulp-tasks", `:bookmark: goes with zarro v${version}`);
     await commitAll(dryRun, ".", ":bookmark: bump package version");
     // can tag in parallel
-    await Promise.all([
-        gitTag({
-            tag,
-            dryRun,
-            where: "."
-        }),
-        gitTag({
-            tag,
-            dryRun,
-            where: "gulp-tasks"
-        }),
-    ]);
+    await gitTag({
+        tag,
+        dryRun,
+        where: "."
+    });
     // can push in parallel, if it's quick enough so that the GH action doesn't
     // fail to get the submodule...
-    await Promise.all([
-        push(dryRun, "."),
-        push(dryRun, "gulp-tasks")
-    ]);
+    await push(dryRun, ".");
 }
