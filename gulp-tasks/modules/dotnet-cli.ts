@@ -29,6 +29,24 @@
   const log = requireModule<Log>("log");
   const env = requireModule<Env>("env");
 
+  const emojiLabels = {
+    testing: `🧪 Testing`,
+    packing: `📦 Packing`,
+    building: `🏗️ Building`,
+    cleaning: `🧹 Cleaning`,
+    publishing: `🚀 Publishing`,
+  } as Dictionary<string>;
+  const asciiLabels = {
+    testing: `>>> Testing`,
+    packing: `[_] Packing`,
+    building: `+++ Building`,
+    cleaning: `--- Cleaning`,
+    publishing: `*** Publishing`,
+  } as Dictionary<string>;
+  const labels = env.resolveFlag(env.NO_COLOR)
+    ? asciiLabels
+    : emojiLabels;
+
   let defaultNugetSource: string;
 
   function showHeader(label: string) {
@@ -108,7 +126,7 @@
       }
     }
     return runOnAllConfigurations(
-      `Publishing`,
+      label(`Publishing`),
       opts,
       configuration => {
         const args = [
@@ -198,7 +216,7 @@
     opts: DotNetCleanOptions
   ): Promise<SystemResult | SystemError> {
     return runOnAllConfigurations(
-      `Cleaning`,
+      label(`Cleaning`),
       opts,
       configuration => {
         const args = [
@@ -220,7 +238,7 @@
     opts: DotNetBuildOptions
   ): Promise<SystemResult | SystemError> {
     return runOnAllConfigurations(
-      "Building",
+      label("Building"),
       opts,
       configuration => {
         const args = [
@@ -242,24 +260,6 @@
     );
   }
 
-  const emojiLabels = {
-    testing: `🧪 Testing`,
-    packing: `📦 Packing`,
-    building: `🏗️ Building`,
-    cleaning: `🧹 Cleaning`,
-    publishing: `🚀 Publishing`,
-  } as Dictionary<string>;
-  const asciiLabels = {
-    testing: `>>> Testing`,
-    packing: `[_] Packing`,
-    building: `+++ Building`,
-    cleaning: `--- Cleaning`,
-    publishing: `*** Publishing`,
-  } as Dictionary<string>;
-  const labels = env.resolveFlag(env.NO_COLOR)
-    ? asciiLabels
-    : emojiLabels;
-
   function label(str: string): string {
     const match = Object.keys(labels)
       .find(s => s.toLowerCase() === str.toLowerCase());
@@ -272,7 +272,7 @@
     opts: DotNetTestOptions
   ): Promise<SystemResult | SystemError> {
     return runOnAllConfigurations(
-      "Testing",
+      label("Testing"),
       opts,
       configuration => {
         const args = [
@@ -517,7 +517,7 @@
     opts: DotNetPackOptions
   ): Promise<SystemResult | SystemError> {
     return runOnAllConfigurations(
-      "Packing",
+      label("Packing"),
       opts,
       async configuration => {
         const copy = {
