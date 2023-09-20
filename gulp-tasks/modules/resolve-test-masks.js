@@ -5,7 +5,7 @@
         if (isDotnetCore === undefined) {
             isDotnetCore = env.resolveFlag("DOTNET_CORE");
         }
-        return resolveMasks("TEST_INCLUDE", "TEST_EXCLUDE", p => {
+        return resolveMasks([env.TEST_INCLUDE, env.TEST_ADDITIONAL_INCLUDE], [env.TEST_EXCLUDE, env.TEST_ADDITIONAL_EXCLUDE], p => {
             if (p.match(/\*\*$/)) {
                 p += "/*";
             }

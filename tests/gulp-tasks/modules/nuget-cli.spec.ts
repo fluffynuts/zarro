@@ -10,6 +10,7 @@ describe(`nuget-cli`, () => {
   jest.doMock("../../../gulp-tasks/modules/system", () => systemMock);
   const resolveNugetMock = jest.fn();
   jest.doMock("../../../gulp-tasks/modules/resolve-nuget", () => resolveNugetMock);
+  const log = requireModule<Log>("log");
 
   let nuget = "/path/to/nuget";
   const
@@ -889,5 +890,6 @@ describe(`nuget-cli`, () => {
     (systemMock as any).isError = jest.fn().mockImplementation(() => isSystemError);
     (systemMock as any).isResult = jest.fn().mockImplementation(() => !isSystemError);
     resolveNugetMock.mockImplementation(() => nuget);
+    spyOn(log, "info");
   }
 });
