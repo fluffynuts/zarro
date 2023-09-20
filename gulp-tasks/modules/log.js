@@ -94,7 +94,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
             this._timestamp = true;
         }
         _print(args, ...styles) {
-            debugger;
             let message;
             if (typeof args[0] === "string") {
                 message = args[0];
