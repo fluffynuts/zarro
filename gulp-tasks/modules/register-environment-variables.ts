@@ -202,6 +202,16 @@
     });
 
     env.register({
+      name: "TEST_ADDITIONAL_EXCLUDE",
+      help: "And additional list of test exclusions - perhaps you'd like a subset test task?"
+    });
+
+    env.register({
+      name: "TEST_ADDITIONAL_INCLUDE",
+      help: "And additional list of test inclusions - perhaps you'd like a superset test task?"
+    });
+
+    env.register({
       name: "TEST_VERBOSITY",
       help: `Verbosity of reporting for dotnet core testing: ${ msbuildVerbosityOptions }`,
       default: "normal"

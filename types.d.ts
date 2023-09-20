@@ -380,7 +380,9 @@ declare global {
     "NUNIT_LABELS" |
     "NUNIT_PROCESS" |
     "TEST_INCLUDE" |
+    "TEST_ADDITIONAL_INCLUDE" |
     "TEST_EXCLUDE" |
+    "TEST_ADDITIONAL_EXCLUDE" |
     "TEST_VERBOSITY" |
     "BUILD_TOOLSVERSION" |
     "BUILD_TARGETS" |
@@ -569,7 +571,9 @@ declare global {
     NUNIT_LABELS: StringEnvVar; // for now, at least
     NUNIT_PROCESS: StringEnvVar;
     TEST_INCLUDE: StringEnvVar;
+    TEST_ADDITIONAL_INCLUDE: StringEnvVar;
     TEST_EXCLUDE: StringEnvVar;
+    TEST_ADDITIONAL_EXCLUDE: StringEnvVar;
     TEST_VERBOSITY: StringEnvVar; // for now, at least
     BUILD_TOOLSVERSION: StringEnvVar;
     BUILD_TARGETS: StringEnvVar;
