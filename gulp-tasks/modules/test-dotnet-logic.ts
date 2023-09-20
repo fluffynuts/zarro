@@ -178,9 +178,9 @@ import {StyleFunction} from "ansi-colors";
       }
     } else {
       if (parallelFlag) {
-        log.info(`parallel testing was disabled: you should reference Quackers.TestLogger in all test projects for correct output multiplexing`);
+        log.warn(`parallel testing was disabled: you should reference Quackers.TestLogger in all test projects for correct output multiplexing`);
       } else {
-        log.info(`parallel testing could not be automatically enabled: you should reference Quackers.TestLogger in all test projects for correct output multiplexing`);
+        log.warn(`parallel testing could not be automatically enabled: you should reference Quackers.TestLogger in all test projects for correct output multiplexing`);
       }
     }
   }
@@ -193,17 +193,19 @@ import {StyleFunction} from "ansi-colors";
       allProjectsReferenceQuackers = true;
     for (const project of testProjectPaths) {
       if (!await projectReferencesQuackers(project)) {
+        if (env.resolveFlag(env.DOTNET_TEST_PARALLEL)) {
+          log.warn(`Parallel testing for dotnet targets disabled because '${project}' does not reference Quackers.TestLogger`);
+        }
         allProjectsReferenceQuackers = false;
         break;
       }
     }
 
     if (process.env[parallelVar] === undefined) {
-      for (const project of testProjectPaths) {
-        if (!await projectReferencesQuackers(project)) {
-          testInParallel = false;
-          break;
-        }
+      // automatically test in parallel if possible
+      testInParallel = allProjectsReferenceQuackers;
+      if (testInParallel) {
+      } else {
       }
     } else if (parallelFlag && !allProjectsReferenceQuackers) {
       testInParallel = false;

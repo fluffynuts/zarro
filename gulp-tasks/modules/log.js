@@ -57,7 +57,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
             this._print(args, "grey");
         }
         info(...args) {
-            if (this._threshold >= INFO) {
+            if (this._threshold > INFO) {
                 return;
             }
             this._print(args, "yellow");
@@ -67,7 +67,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
             this.warn(...args);
         }
         warn(...args) {
-            if (this._threshold >= WARNING) {
+            if (this._threshold > WARNING) {
                 return;
             }
             this._print(args, "magenta");
@@ -87,13 +87,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
             }
             this._print(args, "cyan");
         }
-        suppressTimeStamps() {
+        suppressTimestamps() {
             this._timestamp = false;
         }
-        showTimeStamps() {
+        showTimestamps() {
             this._timestamp = true;
         }
         _print(args, ...styles) {
+            debugger;
             let message;
             if (typeof args[0] === "string") {
                 message = args[0];

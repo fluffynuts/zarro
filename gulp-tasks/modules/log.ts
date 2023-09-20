@@ -68,7 +68,7 @@ import { StyleFunction } from "ansi-colors";
       this._print(args, "grey");
     }
     info(...args: any[]) {
-      if (this._threshold >= INFO) {
+      if (this._threshold > INFO) {
           return;
       }
       this._print(args, "yellow");
@@ -78,7 +78,7 @@ import { StyleFunction } from "ansi-colors";
         this.warn(...args);
     }
     warn(...args: any[]) {
-      if (this._threshold >= WARNING) {
+      if (this._threshold > WARNING) {
           return;
       }
       this._print(args, "magenta");
@@ -98,10 +98,10 @@ import { StyleFunction } from "ansi-colors";
       }
       this._print(args, "cyan");
     }
-    suppressTimeStamps() {
+    suppressTimestamps() {
       this._timestamp = false;
     }
-    showTimeStamps() {
+    showTimestamps() {
       this._timestamp = true;
     }
     _print(args: any[], ...styles: (keyof(StyleFunction))[]) {

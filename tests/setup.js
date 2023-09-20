@@ -21,6 +21,9 @@ global.spyOn = function (obj, member) {
     callThrough() {
       original.apply(obj, Array.from(arguments));
     },
+    stub() {
+      result.mockImplementation(() => {});
+    }
   };
   Object.defineProperty(result, "and", {
     get() {
