@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.144.271",
+  "version": "1.144.273",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -15,9 +15,8 @@
     "clean-cache": "rimraf .jest-cache",
     "pretest": "run-s clean-cache build verify-submodules",
     "test": "jest",
-    "quick-test": "jest",
-    "clear-console": "console-cls",
     "quick-test": "jest -o --no-cache",
+    "clear-console": "console-cls",
     "autotest-once": "run-s clear-console build quick-test",
     "autotest": "nodemon -w gulp-tasks/**/*.ts -i gulp-tasks/modules/fetch-github-release -w tests/**/*.ts -w types.d.ts -x \"npm run autotest-once || cd .\" -e ts",
     "autotest-full-once": "run-s clear-console build test",
