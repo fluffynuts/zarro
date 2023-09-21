@@ -169,7 +169,10 @@ async function transpileTasksUnder(folder) {
   }
 
   try {
-    const { transpileModule, ModuleKind } = require("typescript");
+    const
+      { ExecStepContext } = require("exec-step"),
+      ctx = new ExecStepContext(),
+      { transpileModule, ModuleKind } = require("typescript");
     for (const src of toTranspile) {
       const test = src.replace(/\.ts$/, ".js");
       if (await fileExists(test)) {
@@ -186,22 +189,25 @@ async function transpileTasksUnder(folder) {
 
 
         if (srcLastModified <= outLastModified) {
-          debug(`${ src } modified after ${ output }; skipping transpile`);
+          debug(`${ output } modified after ${ src }; skipping transpile`);
           continue;
         }
         debug(`will transpile: ${ src }`);
       }
-      debug(`transpiling ${ src }`);
-      const contents = await readTextFile(src);
-      const transpiled = transpileModule(contents, {
-        compilerOptions: {
-          esModuleInterop: true,
-          module: ModuleKind.CommonJS,
-          target: "es2017"
+      await ctx.exec(
+        `transpiling ${ src }`,
+        async () => {
+          const contents = await readTextFile(src);
+          const transpiled = transpileModule(contents, {
+            compilerOptions: {
+              esModuleInterop: true,
+              module: ModuleKind.CommonJS,
+              target: "es2017"
+            }
+          }).outputText;
+          await writeTextFile(output, transpiled);
         }
-      }).outputText;
-      debug(`writing transpiled file: ${ output }`);
-      await writeTextFile(output, transpiled);
+      );
     }
   } catch (e) {
     log.error(`one or more typescript modules could not be transpiled:\n${ e }`);
