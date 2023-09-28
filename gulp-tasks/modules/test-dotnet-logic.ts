@@ -1,5 +1,5 @@
-import {BufferFile} from "vinyl";
-import {StyleFunction} from "ansi-colors";
+import { BufferFile } from "vinyl";
+import { StyleFunction } from "ansi-colors";
 
 (function () {
   const
@@ -12,8 +12,8 @@ import {StyleFunction} from "ansi-colors";
     QUACKERS_SLOW_SUMMARY_START = "::SSS::",
     QUACKERS_SLOW_SUMMARY_COMPLETE = "::SSC::",
     quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length,
-    quackersFullSummaryStartMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_START}`,
-    quackersFullSummaryCompleteMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_COMPLETE}`,
+    quackersFullSummaryStartMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_START }`,
+    quackersFullSummaryCompleteMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_COMPLETE }`,
     {
       rm,
       ls,
@@ -35,8 +35,8 @@ import {StyleFunction} from "ansi-colors";
     resolveTestMasks = requireModule<ResolveTestMasks>("resolve-test-masks"),
     logConfig = requireModule<LogConfig>("log-config"),
     gatherPaths = requireModule<GatherPaths>("gather-paths"),
-    {test} = requireModule<DotNetCli>("dotnet-cli"),
-    {resolveTestPrefixFor} = requireModule<TestUtils>("test-utils"),
+    { test } = requireModule<DotNetCli>("dotnet-cli"),
+    { resolveTestPrefixFor } = requireModule<TestUtils>("test-utils"),
     buildReportFolder = path.dirname(env.resolve("BUILD_REPORT_XML")),
     Version = requireModule<Version>("version"),
     netFrameworkTestAssemblyFilter = requireModule<GulpNetFXTestAssemblyFilter>("netfx-test-assembly-filter"),
@@ -51,7 +51,7 @@ import {StyleFunction} from "ansi-colors";
     const testMasks = resolveTestMasks(dotNetCore),
       configuration = env.resolve("BUILD_CONFIGURATION"),
       tester = dotNetCore
-        ? testAsDotnetCore
+        ? testAsDotNetCore
         : testWithNunitCli;
 
     debug({
@@ -79,7 +79,7 @@ import {StyleFunction} from "ansi-colors";
     });
 
     for (const f of agentLogs.concat(internalTraces)) {
-      debug(`delete test diagnostic: ${f}`);
+      debug(`delete test diagnostic: ${ f }`);
       await rm(f);
     }
   }
@@ -137,7 +137,7 @@ import {StyleFunction} from "ansi-colors";
       config.options.process = nunitProcess;
       logInfo.process = "Process model for NUnit";
     }
-    log.info(`Using NUnit runner at ${config.executable}`);
+    log.info(`Using NUnit runner at ${ config.executable }`);
     log.info("Find files:", source);
     logConfig(config.options, logInfo);
     debug({
@@ -194,7 +194,7 @@ import {StyleFunction} from "ansi-colors";
     for (const project of testProjectPaths) {
       if (!await projectReferencesQuackers(project)) {
         if (env.resolveFlag(env.DOTNET_TEST_PARALLEL)) {
-          log.warn(`Parallel testing for dotnet targets disabled because '${project}' does not reference Quackers.TestLogger`);
+          log.warn(`Parallel testing for dotnet targets disabled because '${ project }' does not reference Quackers.TestLogger`);
         }
         allProjectsReferenceQuackers = false;
         break;
@@ -214,10 +214,36 @@ import {StyleFunction} from "ansi-colors";
     return testInParallel;
   }
 
-  async function testAsDotnetCore(
+  const verbosityLookup = {
+    "q": 0,
+    "quiet": 0,
+    "m": 1,
+    "minimal": 1,
+    "n": 2,
+    "normal": 2,
+    "d": 3,
+    "detailed": 3,
+    "diag": 4,
+    "diagnostic": 5
+  } as Dictionary<number>;
+
+  function ensureAtLeastNormal(verbosity: string): string {
+    const level = verbosityLookup[`${ verbosity }`.toLowerCase()];
+    if (level === undefined) {
+      return "normal";
+    }
+    if (level < 2) {
+      return "normal";
+    }
+    // higher levels of verbosity seem to have similar-enough
+    // test output (build is just hella noisy)
+    return verbosity;
+  }
+
+  async function testAsDotNetCore(
     configuration: string,
     testProjects: string[]
-  ) {
+  ): Promise<TestResults> {
     const
       runInParallel = requireModule<RunInParallel>("run-in-parallel"),
       testResults = {
@@ -227,8 +253,9 @@ import {StyleFunction} from "ansi-colors";
         skipped: 0,
         failureSummary: [],
         slowSummary: [],
-        started: Date.now()
-      },
+        started: Date.now(),
+        fullLog: []
+      } satisfies TestResults,
       testProcessResults = [] as (SystemResult | SystemError)[],
       testProjectPaths = await gatherPaths(testProjects, true),
       verbosity = env.resolve("BUILD_VERBOSITY");
@@ -239,19 +266,20 @@ import {StyleFunction} from "ansi-colors";
       ? env.resolveNumber("MAX_CONCURRENCY")
       : 1;
 
-    console.log(`Will run tests for project${testProjectPaths.length === 1 ? "" : "s"} with concurrency ${concurrency}:`);
+    console.log(`Will run tests for project${ testProjectPaths.length === 1 ? "" : "s" } with concurrency ${ concurrency }:`);
     for (const projectPath of testProjectPaths) {
-      console.log(`  ${projectPath}`);
+      console.log(`  ${ projectPath }`);
     }
 
+    const dotnetCoreVerbosity = ensureAtLeastNormal(verbosity);
     const tasks = testProjectPaths.map(
       (path, idx) => {
         return async () => {
-          debug(`${idx}  start test run ${path}`);
+          debug(`${ idx }  start test run ${ path }`);
           const result = await testOneDotNetCoreProject(
             path,
             configuration,
-            verbosity,
+            dotnetCoreVerbosity,
             testResults,
             true
           );
@@ -269,6 +297,7 @@ import {StyleFunction} from "ansi-colors";
       console.log("If you install Quackers.TestLogger into your test projects, you'll get a lot more info here!");
     }
     throwIfAnyFailed(testProcessResults);
+    return testResults;
   }
 
   function throwIfAnyFailed(
@@ -295,7 +324,7 @@ import {StyleFunction} from "ansi-colors";
       }
     }
     if (allErrors.length) {
-      throw new Error(`One or more test runs failed:\n\t${allErrors.join("\n\t")}`);
+      throw new Error(`One or more test runs failed:\n\t${ allErrors.join("\n\t") }`);
     }
   }
 
@@ -321,11 +350,11 @@ import {StyleFunction} from "ansi-colors";
     logSlow(testResults, cyan);
     console.log(yellow(`
 Test Run Summary
-  Overall result: ${overallResultFor(testResults)}
-  Test Count: ${total}, Passed: ${testResults.passed}, Failed: ${testResults.failed}, Skipped: ${testResults.skipped}, Slow: ${testResults.slowSummary.length}
-  Start time: ${dateString(testResults.started)}
-    End time: ${dateString(now)}
-    Duration: ${runTime}
+  Overall result: ${ overallResultFor(testResults) }
+  Test Count: ${ total }, Passed: ${ testResults.passed }, Failed: ${ testResults.failed }, Skipped: ${ testResults.skipped }, Slow: ${ testResults.slowSummary.length }
+  Start time: ${ dateString(testResults.started) }
+    End time: ${ dateString(now) }
+    Duration: ${ runTime }
 `));
     console.log("\n");
   }
@@ -360,7 +389,7 @@ Test Run Summary
     if (!lines || lines.length == 0) {
       return;
     }
-    console.log(`\n${heading}`);
+    console.log(`\n${ heading }`);
     let
       blankLines = 0,
       failIndex = 1;
@@ -374,7 +403,7 @@ Test Run Summary
       if (blankLines > 1) {
         continue;
       }
-      const substituted = line.replace(marker, `[${failIndex}]`);
+      const substituted = line.replace(marker, `[${ failIndex }]`);
       if (substituted !== line) {
         failIndex++;
       }
@@ -402,7 +431,7 @@ Test Run Summary
     const
       ms = totalMs % 1000,
       seconds = Math.floor(totalMs / 1000);
-    return `${seconds}.${ms} seconds`;
+    return `${ seconds }.${ ms } seconds`;
   }
 
   async function testOneDotNetCoreProject(
@@ -423,7 +452,8 @@ Test Run Summary
         // -> suppress when running in parallel (and by default when sequential)
         haveSeenQuackersLog: runningInParallel || env.resolveFlag("DOTNET_TEST_QUIET_QUACKERS"),
         testResults,
-        target
+        target,
+        fullLog: [] as string[]
       };
     const
       useQuackers = await projectReferencesQuackers(target),
@@ -435,14 +465,17 @@ Test Run Summary
         : undefined,
       loggers = useQuackers
         ? generateQuackersLoggerConfig(target)
-        : generateBuiltinConsoleLoggerConfig();
+        : generateBuiltinConsoleLoggerConfig(),
+      finalVerbosity = useQuackers
+        ? ensureAtLeastNormal(verbosity)
+        : verbosity;
     await mkdir(buildReportFolder);
     addTrxLoggerTo(loggers, target);
     testResults.quackersEnabled = testResults.quackersEnabled || useQuackers;
     try {
-      return await test({
+      const result = await test({
         target,
-        verbosity,
+        verbosity: finalVerbosity,
         configuration,
         noBuild: !forceBuild,
         msbuildProperties: env.resolveMap("MSBUILD_PROPERTIES"),
@@ -452,6 +485,7 @@ Test Run Summary
         suppressOutput,
         suppressErrors: true // we want to collect the errors later, not die when one happens
       });
+      return result;
     } catch (e) {
       debug("WARN: catching SystemError instead of retrieving it");
       const err = e as SystemError;
@@ -466,7 +500,7 @@ Test Run Summary
     const
       proj = baseName(target),
       projName = chopExtension(proj),
-      logFileName = path.resolve(path.join(buildReportFolder, `${projName}.trx`));
+      logFileName = path.resolve(path.join(buildReportFolder, `${ projName }.trx`));
     loggers.trx = {
       logFileName
     };
@@ -478,6 +512,7 @@ Test Run Summary
     inFailureSummary: boolean;
     testResults: TestResults;
     haveSeenQuackersLog: boolean;
+    fullLog: string[];
   }
 
   function quackersStdOutHandler(
@@ -485,11 +520,15 @@ Test Run Summary
     s: string
   ) {
     s = s || "";
+    state.fullLog.push(s);
+    debug(`[test output] ${ s }`);
     if (s.startsWith(quackersFullSummaryStartMarker)) {
+      debug("  summary starts");
       state.inSummary = true;
       return;
     }
     if (s.startsWith(quackersFullSummaryCompleteMarker)) {
+      debug("  summary ends");
       state.inSummary = false;
       return;
     }
@@ -552,7 +591,7 @@ Test Run Summary
     if (!state.haveSeenQuackersLog || isQuackersLog) {
       console.log(stripQuackersLogPrefix(s));
     } else {
-      debug(`discarding log: "${s}"`);
+      debug(`discarding log: "${ s }"`);
     }
   }
 
@@ -562,7 +601,7 @@ Test Run Summary
   ) {
     const
       parts = line.split(":").map(p => p.trim().toLowerCase()),
-      numericPart = line.match(/\d+/) || ["0"],
+      numericPart = line.match(/\d+/) || [ "0" ],
       count = parseInt(numericPart[0]);
     switch (parts[0]) {
       case "passed":
@@ -599,7 +638,7 @@ Test Run Summary
           recommendedVersion = "1.0.16",
           ver = new Version(packageRef.groups["version"]);
         if (ver.isLessThan(recommendedVersion)) {
-          console.warn(`${csproj}: Quackers.TestLogger is out of date. Please upgrade to at least version ${recommendedVersion}`);
+          console.warn(`${ csproj }: Quackers.TestLogger is out of date. Please upgrade to at least version ${ recommendedVersion }`);
         }
         return quackersRefCache[csproj] = true;
       }
@@ -660,8 +699,9 @@ Test Run Summary
   module.exports = {
     runTests,
     testWithNunitCli,
-    testAsDotnetCore,
     shouldTestInParallel,
-    testOneDotNetCoreProject
+    testOneDotNetCoreProject,
+    testAsDotNetCore,
+    ensureAtLeastNormal
   };
 })();

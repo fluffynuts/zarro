@@ -1,33 +1,83 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const realSystem = requireModule("system");
+const fakeSystem = jest.fn();
+jest.doMock("../../../gulp-tasks/modules/system", () => fakeSystem);
 require("expect-even-more-jest");
-const filesystem_sandbox_1 = require("filesystem-sandbox");
 const yafs_1 = require("yafs");
+const path = __importStar(require("path"));
+const SystemError = requireModule("system-error");
+const SystemResult = requireModule("system-result");
 describe(`test-dotnet-logic`, () => {
-    const system = requireModule("system");
     describe(`testOneDotNetCoreProject`, () => {
+        beforeEach(() => {
+            fakeSystem.mockImplementation((exe, args, options) => realSystem(exe, args, options));
+            const hax = fakeSystem;
+            hax.isError = (arg) => arg instanceof SystemError;
+            hax.isSystemError = hax.isError;
+        });
         const { testOneDotNetCoreProject } = requireModule("test-dotnet-logic");
         it(`should test the project`, async () => {
             // Arrange
             spyOn(console, "log");
-            const sandbox = await createRepoSandbox(), project = await findProject(sandbox.path, "NExpect.Matchers.NSubstitute.Tests"), testResults = {
+            const project = await findProject("Project1.Tests"), testResults = {
                 quackersEnabled: true,
                 failed: 0,
                 skipped: 0,
                 failureSummary: [],
                 slowSummary: [],
                 started: 0,
-                passed: 0
+                passed: 0,
+                fullLog: []
             };
             // Act
             const result = await testOneDotNetCoreProject(project, "Debug", "normal", testResults, true, true, true);
             // Assert
-            console.log(result);
             expect(result.exitCode)
                 .toEqual(0);
-        }, 300000);
+            expect(result.stdout.find(line => line.match(/^total tests: \d+/i))).toExist();
+            expect(result.stdout.find(line => line.match(/^\s+passed: \d+/i))).toExist();
+            const args = fakeSystem.mock.calls[0];
+            let nextShouldBeNormal = false;
+            for (const arg of args) {
+                if (arg === "--verbosity") {
+                    nextShouldBeNormal = true;
+                    continue;
+                }
+                if (!nextShouldBeNormal) {
+                    continue;
+                }
+                expect(arg)
+                    .toEqual("normal");
+                break;
+            }
+        }, 30000);
     });
-    async function findProject(basedir, name) {
+    async function findProject(name) {
+        const basedir = path.dirname(path.dirname(path.dirname(__dirname)));
         const matches = await (0, yafs_1.ls)(basedir, {
             entities: yafs_1.FsEntities.files,
             recurse: true,
@@ -43,12 +93,4 @@ describe(`test-dotnet-logic`, () => {
     afterAll(async () => {
         // await Sandbox.destroyAll();
     });
-    async function createRepoSandbox() {
-        const sandbox = await filesystem_sandbox_1.Sandbox.create();
-        await sandbox.run(() => system("git clone https://github.com/fluffynuts/NExpect .", [], {
-            suppressOutput: true
-        }));
-        await sandbox.run(() => system("git submodule update --init", [], { suppressOutput: true }));
-        return sandbox;
-    }
 });

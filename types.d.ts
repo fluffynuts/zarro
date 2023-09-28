@@ -248,8 +248,6 @@ declare global {
     flush(): void;
   };
 
-  type DotNetTester = (configuration: string, source: string[]) => Promise<void>;
-
   interface TestResults {
     quackersEnabled: boolean;
     passed: number;
@@ -258,12 +256,15 @@ declare global {
     started: number;
     failureSummary: string[];
     slowSummary: string[];
+    fullLog: string[];
   }
+
+  type DotNetTester = (configuration: string, source: string[]) => Promise<TestResults>;
 
   interface TestDotNetLogic {
     runTests: () => Promise<void>;
     testWithNunitCli: DotNetTester;
-    testAsDotnetCore: DotNetTester;
+    testAsDotNetCore: DotNetTester;
     shouldTestInParallel: (testProjectPaths: string[]) => Promise<boolean>;
     testOneDotNetCoreProject: (
       target: string,

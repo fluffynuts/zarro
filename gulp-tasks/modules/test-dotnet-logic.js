@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
         await mkdir(buildReportFolder);
         const dotNetCore = env.resolveFlag("DOTNET_CORE");
         const testMasks = resolveTestMasks(dotNetCore), configuration = env.resolve("BUILD_CONFIGURATION"), tester = dotNetCore
-            ? testAsDotnetCore
+            ? testAsDotNetCore
             : testWithNunitCli;
         debug({
             tester,
@@ -150,7 +150,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
         logParallelState(testInParallel, parallelFlag);
         return testInParallel;
     }
-    async function testAsDotnetCore(configuration, testProjects) {
+    const verbosityLookup = {
+        "q": 0,
+        "quiet": 0,
+        "m": 1,
+        "minimal": 1,
+        "n": 2,
+        "normal": 2,
+        "d": 3,
+        "detailed": 3,
+        "diag": 4,
+        "diagnostic": 5
+    };
+    function ensureAtLeastNormal(verbosity) {
+        const level = verbosityLookup[`${verbosity}`.toLowerCase()];
+        if (level === undefined) {
+            return "normal";
+        }
+        if (level < 2) {
+            return "normal";
+        }
+        // higher levels of verbosity seem to have similar-enough
+        // test output (build is just hella noisy)
+        return verbosity;
+    }
+    async function testAsDotNetCore(configuration, testProjects) {
         const runInParallel = requireModule("run-in-parallel"), testResults = {
             quackersEnabled: false,
             passed: 0,
@@ -158,7 +182,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
             skipped: 0,
             failureSummary: [],
             slowSummary: [],
-            started: Date.now()
+            started: Date.now(),
+            fullLog: []
         }, testProcessResults = [], testProjectPaths = await gatherPaths(testProjects, true), verbosity = env.resolve("BUILD_VERBOSITY");
         const testInParallel = await shouldTestInParallel(testProjectPaths);
         const concurrency = testInParallel
@@ -168,10 +193,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
         for (const projectPath of testProjectPaths) {
             console.log(`  ${projectPath}`);
         }
+        const dotnetCoreVerbosity = ensureAtLeastNormal(verbosity);
         const tasks = testProjectPaths.map((path, idx) => {
             return async () => {
                 debug(`${idx}  start test run ${path}`);
-                const result = await testOneDotNetCoreProject(path, configuration, verbosity, testResults, true);
+                const result = await testOneDotNetCoreProject(path, configuration, dotnetCoreVerbosity, testResults, true);
                 testProcessResults.push(result);
             };
         });
@@ -183,6 +209,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
             console.log("If you install Quackers.TestLogger into your test projects, you'll get a lot more info here!");
         }
         throwIfAnyFailed(testProcessResults);
+        return testResults;
     }
     function throwIfAnyFailed(testProcessResults) {
         const allErrors = [];
@@ -286,7 +313,8 @@ Test Run Summary
             // -> suppress when running in parallel (and by default when sequential)
             haveSeenQuackersLog: runningInParallel || env.resolveFlag("DOTNET_TEST_QUIET_QUACKERS"),
             testResults,
-            target
+            target,
+            fullLog: []
         };
         const useQuackers = await projectReferencesQuackers(target), stderr = useQuackers
             ? console.error
@@ -294,14 +322,16 @@ Test Run Summary
             ? quackersStdOutHandler.bind(null, quackersState)
             : undefined, loggers = useQuackers
             ? generateQuackersLoggerConfig(target)
-            : generateBuiltinConsoleLoggerConfig();
+            : generateBuiltinConsoleLoggerConfig(), finalVerbosity = useQuackers
+            ? ensureAtLeastNormal(verbosity)
+            : verbosity;
         await mkdir(buildReportFolder);
         addTrxLoggerTo(loggers, target);
         testResults.quackersEnabled = testResults.quackersEnabled || useQuackers;
         try {
-            return await test({
+            const result = await test({
                 target,
-                verbosity,
+                verbosity: finalVerbosity,
                 configuration,
                 noBuild: !forceBuild,
                 msbuildProperties: env.resolveMap("MSBUILD_PROPERTIES"),
@@ -311,6 +341,7 @@ Test Run Summary
                 suppressOutput,
                 suppressErrors: true // we want to collect the errors later, not die when one happens
             });
+            return result;
         }
         catch (e) {
             debug("WARN: catching SystemError instead of retrieving it");
@@ -326,11 +357,15 @@ Test Run Summary
     }
     function quackersStdOutHandler(state, s) {
         s = s || "";
+        state.fullLog.push(s);
+        debug(`[test output] ${s}`);
         if (s.startsWith(quackersFullSummaryStartMarker)) {
+            debug("  summary starts");
             state.inSummary = true;
             return;
         }
         if (s.startsWith(quackersFullSummaryCompleteMarker)) {
+            debug("  summary ends");
             state.inSummary = false;
             return;
         }
@@ -476,8 +511,9 @@ Test Run Summary
     module.exports = {
         runTests,
         testWithNunitCli,
-        testAsDotnetCore,
         shouldTestInParallel,
-        testOneDotNetCoreProject
+        testOneDotNetCoreProject,
+        testAsDotNetCore,
+        ensureAtLeastNormal
     };
 })();

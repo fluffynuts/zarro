@@ -1,0 +1,15 @@
+{
+  "name": "dotnet-core-unit-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "cross-env DOTNET_CORE=1 zarro test-dotnet"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "zarro": "^1.144.281"
+  }
+}

@@ -1,18 +1,33 @@
+const realSystem = requireModule<System>("system");
+const fakeSystem = jest.fn();
+jest.doMock("../../../gulp-tasks/modules/system", () => fakeSystem);
 import "expect-even-more-jest";
-import {Sandbox} from "filesystem-sandbox";
-import {FsEntities, ls} from "yafs";
+import { FsEntities, ls } from "yafs";
+import * as path from "path";
+
+const SystemError = requireModule<SystemError>("system-error");
+const SystemResult = requireModule<SystemResult>("system-result");
 
 describe(`test-dotnet-logic`, () => {
-  const system = requireModule<System>("system");
-
   describe(`testOneDotNetCoreProject`, () => {
-    const {testOneDotNetCoreProject} = requireModule<TestDotNetLogic>("test-dotnet-logic");
+    beforeEach(() => {
+      fakeSystem.mockImplementation((
+        exe: string,
+        args?: string[],
+        options?: SystemOptions
+      ) => realSystem(exe, args, options));
+      const hax = fakeSystem as any;
+      hax.isError = (arg: any) => arg instanceof SystemError;
+      hax.isSystemError = hax.isError;
+    });
+    const { testOneDotNetCoreProject } = requireModule<TestDotNetLogic>("test-dotnet-logic");
     it(`should test the project`, async () => {
       // Arrange
       spyOn(console, "log");
       const
-        sandbox = await createRepoSandbox(),
-        project = await findProject(sandbox.path, "NExpect.Matchers.NSubstitute.Tests"),
+        project = await findProject(
+          "Project1.Tests"
+        ),
         testResults = {
           quackersEnabled: true,
           failed: 0,
@@ -20,7 +35,8 @@ describe(`test-dotnet-logic`, () => {
           failureSummary: [],
           slowSummary: [],
           started: 0,
-          passed: 0
+          passed: 0,
+          fullLog: []
         } satisfies TestResults;
       // Act
       const result = await testOneDotNetCoreProject(
@@ -33,16 +49,42 @@ describe(`test-dotnet-logic`, () => {
         true
       );
       // Assert
-      console.log(result);
       expect(result.exitCode)
         .toEqual(0);
-    }, 300000);
+      expect(result.stdout.find(
+        line => line.match(/^total tests: \d+/i)
+      )).toExist();
+      expect(result.stdout.find(
+        line => line.match(/^\s+passed: \d+/i)
+      )).toExist();
+      const args = fakeSystem.mock.calls[0];
+      let nextShouldBeNormal = false;
+      for (const arg of args) {
+        if (arg === "--verbosity") {
+          nextShouldBeNormal = true;
+          continue;
+        }
+        if (!nextShouldBeNormal) {
+          continue;
+        }
+        expect(arg)
+          .toEqual("normal");
+        break;
+      }
+    }, 30000);
   });
 
   async function findProject(
-    basedir: string,
     name: string
   ): Promise<string> {
+    const basedir =
+      path.dirname(
+        path.dirname(
+          path.dirname(
+            __dirname
+          )
+        )
+      );
     const matches = await ls(
       basedir, {
         entities: FsEntities.files,
@@ -53,7 +95,7 @@ describe(`test-dotnet-logic`, () => {
     );
     const result = matches[0];
     if (!result) {
-      throw new Error(`Can't find project: '${name}' under '${basedir}'`);
+      throw new Error(`Can't find project: '${ name }' under '${ basedir }'`);
     }
     return matches[0];
   }
@@ -62,20 +104,4 @@ describe(`test-dotnet-logic`, () => {
     // await Sandbox.destroyAll();
   });
 
-  async function createRepoSandbox(): Promise<Sandbox> {
-    const
-      sandbox = await Sandbox.create();
-    await sandbox.run(
-      () => system(
-        "git clone https://github.com/fluffynuts/NExpect .",
-        [], {
-          suppressOutput: true
-        }
-      )
-    );
-    await sandbox.run(
-      () => system("git submodule update --init", [], {suppressOutput: true})
-    );
-    return sandbox;
-  }
 });

@@ -6,7 +6,6 @@ describe(`log`, () => {
   describe(`when threshold at or lower than log level`, () => {
     beforeEach(() => {
       log.setThreshold(log.LogLevels.Info);
-      debugger;
       log.showTimestamps();
     });
 
@@ -72,7 +71,6 @@ describe(`log`, () => {
   describe(`when threshold higher than log level`, () => {
     beforeEach(() => {
       log.setThreshold(log.LogLevels.Info);
-      debugger;
       log.showTimestamps();
     });
 

@@ -3,7 +3,6 @@
     const system = requireModule("system");
     const { types } = require("util");
     const { isRegExp } = types;
-    const { isError } = system;
     const ZarroError = requireModule("zarro-error");
     const path = require("path");
     const { fileExists, readTextFile } = require("yafs");
@@ -526,7 +525,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         for (const configuration of configurations) {
             showHeader(`${label} ${q(opts.target)} with configuration ${configuration}${detailedInfoFor(opts)}`);
             const thisResult = await toRun(configuration);
-            if (isError(thisResult)) {
+            if (system.isError(thisResult)) {
                 return thisResult;
             }
             lastResult = thisResult;

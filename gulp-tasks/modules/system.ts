@@ -229,7 +229,7 @@ ${ tempFileContents }
                 message: string,
                 exitCode?: number
             ) {
-                if (system.isError(result)) {
+                if (SystemError.isError(result)) {
                     const errorDetails = gatherErrorDetails(result);
                     if (errorDetails) {
                         message = `${ message }\n${ errorDetails }`;

@@ -155,7 +155,7 @@ ${tempFileContents}
                 return [info.exe, (info.args || []).map(q).join(" ")].join(" ");
             }
             function generateError(message, exitCode) {
-                if (system.isError(result)) {
+                if (SystemError.isError(result)) {
                     const errorDetails = gatherErrorDetails(result);
                     if (errorDetails) {
                         message = `${message}\n${errorDetails}`;
