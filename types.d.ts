@@ -507,6 +507,7 @@ declare global {
     "ZARRO_ALLOW_FILE_RESOLUTION" |
     "NPM_PUBLISH_SKIP_OTP" |
     "SKIP_NUGET_UPDATE" |
+    "PACK_INCREMENT_MINOR_ON_FIRST_PRERELEASE" |
     string;
 
   type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
@@ -679,6 +680,7 @@ declare global {
     ZARRO_ALLOW_FILE_RESOLUTION: FlagEnvVar;
     NPM_PUBLISH_SKIP_OTP: FlagEnvVar;
     SKIP_NUGET_UPDATE: FlagEnvVar;
+    PACK_INCREMENT_MINOR_ON_FIRST_PRERELEASE: FlagEnvVar;
 
     BUILD_MAX_CPU_COUNT: NumericEnvVar;
     MAX_NUNIT_AGENTS: NumericEnvVar;
@@ -1363,6 +1365,8 @@ declare global {
     suppressErrors?: boolean;
     suppressStdIoInErrors?: boolean;
     suppressOutput?: boolean;
+
+    env?: Dictionary<string>;
   }
 
   type GulpXBuild = (opts?: any) => Transform;
