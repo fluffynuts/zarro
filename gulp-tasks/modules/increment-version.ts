@@ -54,7 +54,7 @@
     } else {
       const shouldIncrementMinorForPreRelease = env.resolveFlag(
         env.PACK_INCREMENT_MINOR_ON_FIRST_PRERELEASE
-      ) && currentVersionIsPreRelease;
+      ) && !currentVersionIsPreRelease;
 
       // bump the minor if this is the first pre-release
       if (shouldIncrementMinorForPreRelease) {

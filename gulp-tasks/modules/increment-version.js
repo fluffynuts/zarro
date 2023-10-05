@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const ZarroError = requireModule("zarro-error"), generateVersionSuffix = requireModule("generate-version-suffix");
+    const env = requireModule("env"), ZarroError = requireModule("zarro-error"), generateVersionSuffix = requireModule("generate-version-suffix");
     function zeroFrom(parts, startIndex) {
         for (let i = startIndex; i < parts.length; i++) {
             parts[i] = 0;
@@ -19,7 +19,7 @@
         "patch": 2
     };
     module.exports = function incrementVersion(version, strategy, zeroLowerOrder = true, incrementBy = 1) {
-        const dashedParts = version.split("-"), parts = dashedParts[0].split(".").map(i => parseInt(i));
+        const dashedParts = version.split("-"), currentVersionIsPreRelease = dashedParts.length > 1, parts = dashedParts[0].split(".").map(i => parseInt(i));
         let toIncrement = incrementLookup[(strategy || "").toLowerCase()];
         if (toIncrement === undefined) {
             throw new ZarroError(`Unknown version increment strategy: ${strategy}\n try one of 'major', 'minor' or 'patch'`);
@@ -35,8 +35,9 @@
             }
         }
         else {
+            const shouldIncrementMinorForPreRelease = env.resolveFlag(env.PACK_INCREMENT_MINOR_ON_FIRST_PRERELEASE) && !currentVersionIsPreRelease;
             // bump the minor if this is the first pre-release
-            if (dashedParts.length === 1) {
+            if (shouldIncrementMinorForPreRelease) {
                 incrementAt(parts, 2, 1);
             }
         }
