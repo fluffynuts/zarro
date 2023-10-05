@@ -619,6 +619,12 @@
     });
 
     env.register({
+      name: "PACK_INCREMENT_MINOR_ON_FIRST_PRERELEASE",
+      help: "Flag: on the first pre-release, increment the patch number so that the prerelease version reflects the expected final version",
+      default: "true"
+    });
+
+    env.register({
       name: "PACK_VERSION",
       help: "Override versioning in nuspec"
     });
