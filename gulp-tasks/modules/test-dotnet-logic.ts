@@ -5,15 +5,17 @@ import { StyleFunction } from "ansi-colors";
   const
     QUACKERS_LOG_PREFIX = "::",
     QUACKERS_SUMMARY_START = `::SS::`,
-    QUACKERS_SUMMARY_COMPLETE = `::SC::`,
+    QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`,
     QUACKERS_FAILURES_MARKER = `::SF::`,
     QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::",
     QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::",
     QUACKERS_SLOW_SUMMARY_START = "::SSS::",
     QUACKERS_SLOW_SUMMARY_COMPLETE = "::SSC::",
+    QUACKERS_VERBOSE_SUMMARY = "true",
+    QUACKERS_OUTPUT_FAILURES_INLINE = "true",
     quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length,
     quackersFullSummaryStartMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_START }`,
-    quackersFullSummaryCompleteMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_COMPLETE }`,
+    quackersFullSummaryCompleteMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_COMPLETE_MARKER }`,
     {
       rm,
       ls,
@@ -464,8 +466,10 @@ Test Run Summary
         ? quackersStdOutHandler.bind(null, quackersState)
         : undefined,
       loggers = useQuackers
-        ? generateQuackersLoggerConfig(target)
+        ? { quackers: {} }
         : generateBuiltinConsoleLoggerConfig(),
+      prefix = resolveTestPrefixFor(target),
+      testEnvironment = generateQuackersEnvironmentVariables(prefix),
       finalVerbosity = useQuackers
         ? ensureAtLeastNormal(verbosity)
         : verbosity;
@@ -483,7 +487,8 @@ Test Run Summary
         stderr,
         stdout,
         suppressOutput,
-        suppressErrors: true // we want to collect the errors later, not die when one happens
+        suppressErrors: true, // we want to collect the errors later, not die when one happens
+        env: testEnvironment
       });
       return result;
     } catch (e) {
@@ -632,6 +637,7 @@ Test Run Summary
       contents = await readTextFile(csproj),
       lines = contents.split("\n").map((l: string) => l.trim());
     for (const line of lines) {
+      // FIXME: this requires the packageref to be all on one line, which it may not be, if crafted by a human
       const packageRef = line.match(/<PackageReference\s+Include="Quackers.TestLogger"\s+Version="(?<version>[\d.]+)"/);
       if (packageRef) {
         const
@@ -657,31 +663,25 @@ Test Run Summary
     };
   }
 
-  function generateQuackersLoggerConfig(
-    target: string
+  function generateQuackersEnvironmentVariables(
+    prefix: string
   ) {
-    const quackers = {
-      logprefix: QUACKERS_LOG_PREFIX,
-      summaryStartMarker: QUACKERS_SUMMARY_START,
-      summaryCompleteMarker: QUACKERS_SUMMARY_COMPLETE,
-      failureStartMarker: QUACKERS_FAILURES_MARKER,
-      slowSummaryStartMarker: QUACKERS_SLOW_SUMMARY_START,
-      slowSummaryCompleteMarker: QUACKERS_SLOW_SUMMARY_COMPLETE,
-      verboseSummary: "true",
-      outputFailuresInline: "true",
-      failureIndexPlaceholder: QUACKERS_FAILURE_INDEX_PLACEHOLDER,
-      slowIndexPlaceholder: QUACKERS_SLOW_INDEX_PLACEHOLDER
+    const vars = {
+      QUACKERS_LOG_PREFIX,
+      QUACKERS_SUMMARY_START,
+      QUACKERS_SUMMARY_COMPLETE: QUACKERS_SUMMARY_COMPLETE_MARKER,
+      QUACKERS_FAILURES_MARKER,
+      QUACKERS_SLOW_SUMMARY_START,
+      QUACKERS_SLOW_SUMMARY_COMPLETE,
+      QUACKERS_VERBOSE_SUMMARY,
+      QUACKERS_OUTPUT_FAILURES_INLINE,
+      QUACKERS_FAILURE_INDEX_PLACEHOLDER,
+      QUACKERS_SLOW_INDEX_PLACEHOLDER
     } as Dictionary<string>;
-    const prefix = resolveTestPrefixFor(target);
     if (prefix) {
-      quackers.testNamePrefix = prefix;
+      vars.QUACKERS_TEST_NAME_PREFIX = prefix;
     }
-    // quackers also accepts env vars, but the ones we're setting here
-    // are kinda required for zarro to operate as expected; fortunately,
-    // cli args supercede env vars in quackers' world
-    return {
-      quackers
-    };
+    return vars;
   }
 
   function isDistinctFile(

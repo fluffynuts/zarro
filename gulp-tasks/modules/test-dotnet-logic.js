@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 (function () {
-    const QUACKERS_LOG_PREFIX = "::", QUACKERS_SUMMARY_START = `::SS::`, QUACKERS_SUMMARY_COMPLETE = `::SC::`, QUACKERS_FAILURES_MARKER = `::SF::`, QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::", QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::", QUACKERS_SLOW_SUMMARY_START = "::SSS::", QUACKERS_SLOW_SUMMARY_COMPLETE = "::SSC::", quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length, quackersFullSummaryStartMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_START}`, quackersFullSummaryCompleteMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_COMPLETE}`, { rm, ls, FsEntities, readTextFile, mkdir } = require("yafs"), gulp = requireModule("gulp"), log = requireModule("log"), path = require("path"), gulpDebug = require("gulp-debug"), debug = requireModule("debug")(__filename), filter = require("gulp-filter"), ansiColors = requireModule("ansi-colors"), promisifyStream = requireModule("promisify-stream"), nunitRunner = requireModule("gulp-nunit-runner"), testUtilFinder = requireModule("testutil-finder"), env = requireModule("env"), resolveTestMasks = requireModule("resolve-test-masks"), logConfig = requireModule("log-config"), gatherPaths = requireModule("gather-paths"), { test } = requireModule("dotnet-cli"), { resolveTestPrefixFor } = requireModule("test-utils"), buildReportFolder = path.dirname(env.resolve("BUILD_REPORT_XML")), Version = requireModule("version"), netFrameworkTestAssemblyFilter = requireModule("netfx-test-assembly-filter"), { baseName, chopExtension } = requireModule("path-utils");
+    const QUACKERS_LOG_PREFIX = "::", QUACKERS_SUMMARY_START = `::SS::`, QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`, QUACKERS_FAILURES_MARKER = `::SF::`, QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::", QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::", QUACKERS_SLOW_SUMMARY_START = "::SSS::", QUACKERS_SLOW_SUMMARY_COMPLETE = "::SSC::", QUACKERS_VERBOSE_SUMMARY = "true", QUACKERS_OUTPUT_FAILURES_INLINE = "true", quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length, quackersFullSummaryStartMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_START}`, quackersFullSummaryCompleteMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_COMPLETE_MARKER}`, { rm, ls, FsEntities, readTextFile, mkdir } = require("yafs"), gulp = requireModule("gulp"), log = requireModule("log"), path = require("path"), gulpDebug = require("gulp-debug"), debug = requireModule("debug")(__filename), filter = require("gulp-filter"), ansiColors = requireModule("ansi-colors"), promisifyStream = requireModule("promisify-stream"), nunitRunner = requireModule("gulp-nunit-runner"), testUtilFinder = requireModule("testutil-finder"), env = requireModule("env"), resolveTestMasks = requireModule("resolve-test-masks"), logConfig = requireModule("log-config"), gatherPaths = requireModule("gather-paths"), { test } = requireModule("dotnet-cli"), { resolveTestPrefixFor } = requireModule("test-utils"), buildReportFolder = path.dirname(env.resolve("BUILD_REPORT_XML")), Version = requireModule("version"), netFrameworkTestAssemblyFilter = requireModule("netfx-test-assembly-filter"), { baseName, chopExtension } = requireModule("path-utils");
     async function runTests() {
         await mkdir(buildReportFolder);
         const dotNetCore = env.resolveFlag("DOTNET_CORE");
@@ -321,8 +321,8 @@ Test Run Summary
             : undefined, stdout = useQuackers
             ? quackersStdOutHandler.bind(null, quackersState)
             : undefined, loggers = useQuackers
-            ? generateQuackersLoggerConfig(target)
-            : generateBuiltinConsoleLoggerConfig(), finalVerbosity = useQuackers
+            ? { quackers: {} }
+            : generateBuiltinConsoleLoggerConfig(), prefix = resolveTestPrefixFor(target), testEnvironment = generateQuackersEnvironmentVariables(prefix), finalVerbosity = useQuackers
             ? ensureAtLeastNormal(verbosity)
             : verbosity;
         await mkdir(buildReportFolder);
@@ -339,7 +339,8 @@ Test Run Summary
                 stderr,
                 stdout,
                 suppressOutput,
-                suppressErrors: true // we want to collect the errors later, not die when one happens
+                suppressErrors: true,
+                env: testEnvironment
             });
             return result;
         }
@@ -456,6 +457,7 @@ Test Run Summary
         }
         const contents = await readTextFile(csproj), lines = contents.split("\n").map((l) => l.trim());
         for (const line of lines) {
+            // FIXME: this requires the packageref to be all on one line, which it may not be, if crafted by a human
             const packageRef = line.match(/<PackageReference\s+Include="Quackers.TestLogger"\s+Version="(?<version>[\d.]+)"/);
             if (packageRef) {
                 const recommendedVersion = "1.0.16", ver = new Version(packageRef.groups["version"]);
@@ -477,29 +479,23 @@ Test Run Summary
             }
         };
     }
-    function generateQuackersLoggerConfig(target) {
-        const quackers = {
-            logprefix: QUACKERS_LOG_PREFIX,
-            summaryStartMarker: QUACKERS_SUMMARY_START,
-            summaryCompleteMarker: QUACKERS_SUMMARY_COMPLETE,
-            failureStartMarker: QUACKERS_FAILURES_MARKER,
-            slowSummaryStartMarker: QUACKERS_SLOW_SUMMARY_START,
-            slowSummaryCompleteMarker: QUACKERS_SLOW_SUMMARY_COMPLETE,
-            verboseSummary: "true",
-            outputFailuresInline: "true",
-            failureIndexPlaceholder: QUACKERS_FAILURE_INDEX_PLACEHOLDER,
-            slowIndexPlaceholder: QUACKERS_SLOW_INDEX_PLACEHOLDER
+    function generateQuackersEnvironmentVariables(prefix) {
+        const vars = {
+            QUACKERS_LOG_PREFIX,
+            QUACKERS_SUMMARY_START,
+            QUACKERS_SUMMARY_COMPLETE: QUACKERS_SUMMARY_COMPLETE_MARKER,
+            QUACKERS_FAILURES_MARKER,
+            QUACKERS_SLOW_SUMMARY_START,
+            QUACKERS_SLOW_SUMMARY_COMPLETE,
+            QUACKERS_VERBOSE_SUMMARY,
+            QUACKERS_OUTPUT_FAILURES_INLINE,
+            QUACKERS_FAILURE_INDEX_PLACEHOLDER,
+            QUACKERS_SLOW_INDEX_PLACEHOLDER
         };
-        const prefix = resolveTestPrefixFor(target);
         if (prefix) {
-            quackers.testNamePrefix = prefix;
+            vars.QUACKERS_TEST_NAME_PREFIX = prefix;
         }
-        // quackers also accepts env vars, but the ones we're setting here
-        // are kinda required for zarro to operate as expected; fortunately,
-        // cli args supercede env vars in quackers' world
-        return {
-            quackers
-        };
+        return vars;
     }
     function isDistinctFile(filePath, seenFiles) {
         const basename = path.basename(filePath), result = seenFiles.indexOf(basename) === -1;

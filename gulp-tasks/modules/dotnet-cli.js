@@ -654,7 +654,8 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
                 stdout: opts.stdout,
                 stderr: opts.stderr,
                 suppressOutput: opts.suppressOutput,
-                suppressStdIoInErrors: opts.suppressStdIoInErrors
+                suppressStdIoInErrors: opts.suppressStdIoInErrors,
+                env: opts.env
             });
             return result;
         }
@@ -702,7 +703,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         for (const loggerName of Object.keys(loggers)) {
             const build = [loggerName];
             const options = loggers[loggerName];
-            for (const key of Object.keys(options)) {
+            for (const key of Object.keys(options || {})) {
                 const value = options[key];
                 build.push([key, value].join("="));
             }
