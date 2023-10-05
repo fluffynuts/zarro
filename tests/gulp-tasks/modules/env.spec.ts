@@ -290,7 +290,7 @@ describe(`env`, () => {
         it(`should resolve the default value when the env var is not set`, async () => {
             // Arrange
             const
-                key = faker.word.sample();
+                key = faker.string.alphanumeric(16);
             env.register({
                              name: key as AnyEnvVar,
                              help: "some help",
