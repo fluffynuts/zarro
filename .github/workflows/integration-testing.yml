@@ -26,20 +26,20 @@ jobs:
         run: |
           git clone https://github.com/fluffynuts/NExpect
           cd NExpect
-          npm ci
+          npm i
           npm run test-zarro
           cd -
       - name: Build & Test Quackers
         run: |
           git clone https://github.com/fluffynuts/quackers
           cd quackers
-          npm ci
+          npm i
           npm run test-zarro
           cd -
       - name: Build PeanutButter
         run: |
           git clone https://github.com/fluffynuts/PeanutButter
           cd PeanutButter
-          npm ci
+          npm i
           npm run test-zarro
           cd -
