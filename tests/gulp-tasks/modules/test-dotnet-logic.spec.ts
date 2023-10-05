@@ -6,7 +6,6 @@ import { FsEntities, ls } from "yafs";
 import * as path from "path";
 
 const SystemError = requireModule<SystemError>("system-error");
-const SystemResult = requireModule<SystemResult>("system-result");
 
 describe(`test-dotnet-logic`, () => {
   describe(`testOneDotNetCoreProject`, () => {
@@ -49,6 +48,9 @@ describe(`test-dotnet-logic`, () => {
         true
       );
       // Assert
+      if (result.exitCode !== 0) {
+        console.warn(result.stdout.join("\n"));
+      }
       expect(result.exitCode)
         .toEqual(0);
       expect(result.stdout.find(

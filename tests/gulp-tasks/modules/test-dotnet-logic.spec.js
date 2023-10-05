@@ -30,7 +30,6 @@ require("expect-even-more-jest");
 const yafs_1 = require("yafs");
 const path = __importStar(require("path"));
 const SystemError = requireModule("system-error");
-const SystemResult = requireModule("system-result");
 describe(`test-dotnet-logic`, () => {
     describe(`testOneDotNetCoreProject`, () => {
         beforeEach(() => {
@@ -56,6 +55,9 @@ describe(`test-dotnet-logic`, () => {
             // Act
             const result = await testOneDotNetCoreProject(project, "Debug", "normal", testResults, true, true, true);
             // Assert
+            if (result.exitCode !== 0) {
+                console.warn(result.stdout.join("\n"));
+            }
             expect(result.exitCode)
                 .toEqual(0);
             expect(result.stdout.find(line => line.match(/^total tests: \d+/i))).toExist();

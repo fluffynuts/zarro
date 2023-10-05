@@ -195,7 +195,6 @@
             pushNoRestore(args, opts);
             pushLoggers(args, opts.loggers);
             pushMsbuildProperties(args, opts);
-            pushEnvVars(args, opts.env);
             pushAdditionalArgs(args, opts);
             // there's a lot of stdio/stderr from tests, and it
             // should be shown already - including it in the
@@ -686,15 +685,6 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     }
     function hasMsbuildProperties(opts) {
         return opts !== undefined && opts.msbuildProperties !== undefined;
-    }
-    function pushEnvVars(args, env) {
-        if (!env) {
-            return;
-        }
-        for (const key of Object.keys(env)) {
-            args.push("-e");
-            args.push(`${q(key)}=${q(env[key])}`);
-        }
     }
     function pushLoggers(args, loggers) {
         if (!loggers) {

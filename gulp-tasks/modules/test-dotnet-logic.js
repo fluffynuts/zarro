@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 (function () {
-    const QUACKERS_LOG_PREFIX = "::", QUACKERS_SUMMARY_START = `::SS::`, QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`, QUACKERS_FAILURES_MARKER = `::SF::`, QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::", QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::", QUACKERS_SLOW_SUMMARY_START = "::SSS::", QUACKERS_SLOW_SUMMARY_COMPLETE = "::SSC::", QUACKERS_VERBOSE_SUMMARY = "true", QUACKERS_OUTPUT_FAILURES_INLINE = "true", quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length, quackersFullSummaryStartMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_START}`, quackersFullSummaryCompleteMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_COMPLETE_MARKER}`, { rm, ls, FsEntities, readTextFile, mkdir } = require("yafs"), gulp = requireModule("gulp"), log = requireModule("log"), path = require("path"), gulpDebug = require("gulp-debug"), debug = requireModule("debug")(__filename), filter = require("gulp-filter"), ansiColors = requireModule("ansi-colors"), promisifyStream = requireModule("promisify-stream"), nunitRunner = requireModule("gulp-nunit-runner"), testUtilFinder = requireModule("testutil-finder"), env = requireModule("env"), resolveTestMasks = requireModule("resolve-test-masks"), logConfig = requireModule("log-config"), gatherPaths = requireModule("gather-paths"), { test } = requireModule("dotnet-cli"), { resolveTestPrefixFor } = requireModule("test-utils"), buildReportFolder = path.dirname(env.resolve("BUILD_REPORT_XML")), Version = requireModule("version"), netFrameworkTestAssemblyFilter = requireModule("netfx-test-assembly-filter"), { baseName, chopExtension } = requireModule("path-utils");
+    const QUACKERS_LOG_PREFIX = "::", QUACKERS_SUMMARY_START_MARKER = `::SS::`, QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`, QUACKERS_FAILURE_START_MARKER = `::SF::`, QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::", QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::", QUACKERS_SLOW_SUMMARY_START_MARKER = "::SSS::", QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::SSC::", QUACKERS_VERBOSE_SUMMARY = "true", QUACKERS_OUTPUT_FAILURES_INLINE = "true", quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length, quackersFullSummaryStartMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_START_MARKER}`, quackersFullSummaryCompleteMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_COMPLETE_MARKER}`, { rm, ls, FsEntities, readTextFile, mkdir } = require("yafs"), gulp = requireModule("gulp"), log = requireModule("log"), path = require("path"), gulpDebug = require("gulp-debug"), debug = requireModule("debug")(__filename), filter = require("gulp-filter"), ansiColors = requireModule("ansi-colors"), promisifyStream = requireModule("promisify-stream"), nunitRunner = requireModule("gulp-nunit-runner"), testUtilFinder = requireModule("testutil-finder"), env = requireModule("env"), resolveTestMasks = requireModule("resolve-test-masks"), logConfig = requireModule("log-config"), gatherPaths = requireModule("gather-paths"), { test } = requireModule("dotnet-cli"), { resolveTestPrefixFor } = requireModule("test-utils"), buildReportFolder = path.dirname(env.resolve("BUILD_REPORT_XML")), Version = requireModule("version"), netFrameworkTestAssemblyFilter = requireModule("netfx-test-assembly-filter"), { baseName, chopExtension } = requireModule("path-utils");
     async function runTests() {
         await mkdir(buildReportFolder);
         const dotNetCore = env.resolveFlag("DOTNET_CORE");
@@ -394,7 +394,7 @@ Test Run Summary
         ::quackers log::::end summary::
              */
             const line = stripQuackersLogPrefix(s);
-            if (line.startsWith(QUACKERS_FAILURES_MARKER)) {
+            if (line.startsWith(QUACKERS_FAILURE_START_MARKER)) {
                 state.inFailureSummary = true;
                 return;
             }
@@ -404,11 +404,11 @@ Test Run Summary
                 state.inFailureSummary = false;
                 return;
             }
-            if (line.startsWith(QUACKERS_SLOW_SUMMARY_START)) {
+            if (line.startsWith(QUACKERS_SLOW_SUMMARY_START_MARKER)) {
                 state.inSlowSummary = true;
                 return;
             }
-            if (line.startsWith(QUACKERS_SLOW_SUMMARY_COMPLETE)) {
+            if (line.startsWith(QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER)) {
                 state.inSlowSummary = false;
                 return;
             }
@@ -480,22 +480,22 @@ Test Run Summary
         };
     }
     function generateQuackersEnvironmentVariables(prefix) {
-        const vars = {
+        const quackersVars = {
             QUACKERS_LOG_PREFIX,
-            QUACKERS_SUMMARY_START,
-            QUACKERS_SUMMARY_COMPLETE: QUACKERS_SUMMARY_COMPLETE_MARKER,
-            QUACKERS_FAILURES_MARKER,
-            QUACKERS_SLOW_SUMMARY_START,
-            QUACKERS_SLOW_SUMMARY_COMPLETE,
+            QUACKERS_SUMMARY_START_MARKER,
+            QUACKERS_SUMMARY_COMPLETE_MARKER,
+            QUACKERS_FAILURE_START_MARKER,
+            QUACKERS_SLOW_SUMMARY_START_MARKER,
+            QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER,
             QUACKERS_VERBOSE_SUMMARY,
             QUACKERS_OUTPUT_FAILURES_INLINE,
             QUACKERS_FAILURE_INDEX_PLACEHOLDER,
             QUACKERS_SLOW_INDEX_PLACEHOLDER
         };
         if (prefix) {
-            vars.QUACKERS_TEST_NAME_PREFIX = prefix;
+            quackersVars.QUACKERS_TEST_NAME_PREFIX = prefix;
         }
-        return vars;
+        return Object.assign(Object.assign({}, process.env), quackersVars);
     }
     function isDistinctFile(filePath, seenFiles) {
         const basename = path.basename(filePath), result = seenFiles.indexOf(basename) === -1;

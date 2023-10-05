@@ -288,7 +288,6 @@
 
         pushLoggers(args, opts.loggers);
         pushMsbuildProperties(args, opts);
-        pushEnvVars(args, opts.env);
         pushAdditionalArgs(args, opts);
 
         // there's a lot of stdio/stderr from tests, and it
@@ -982,18 +981,6 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
 
   function hasMsbuildProperties(opts: any): opts is DotNetBaseOptions {
     return opts !== undefined && opts.msbuildProperties !== undefined;
-  }
-
-  function pushEnvVars(args: string[], env?: Dictionary<string>) {
-    if (!env) {
-      return;
-    }
-    for (const key of Object.keys(env)) {
-      args.push("-e");
-      args.push(
-        `${ q(key) }=${ q(env[key]) }`
-      )
-    }
   }
 
   function pushLoggers(args: string[], loggers: Optional<DotNetTestLoggers>) {

@@ -551,19 +551,29 @@ describe("dotnet-cli", () => {
         });
         it(`should set env vars`, async () => {
             // Arrange
-            const target = faker_1.faker.word.sample();
+            const testEnv = {
+                foo: "bar",
+                moo: "cow beef",
+                "moo cow": "yum yum"
+            }, target = faker_1.faker.word.sample();
             // Act
             await test({
                 target,
-                env: {
-                    foo: "bar",
-                    moo: "cow beef",
-                    "moo cow": "yum yum"
-                }
+                env: testEnv
             });
             // Assert
             expect(system)
-                .toHaveBeenCalledWith("dotnet", ["test", target, "-e", "foo=bar", "-e", `moo="cow beef"`, "-e", `"moo cow"="yum yum"`], anything);
+                .toHaveBeenCalledWith("dotnet", ["test", target], anything);
+            const testCall = system.mock.calls.find(a => a[0] === "dotnet" && a[1][0] === "test");
+            expect(testCall)
+                .toExist();
+            const opts = testCall[2];
+            expect(opts.env)
+                .toExist();
+            for (const k of Object.keys(testEnv)) {
+                expect(opts.env[k])
+                    .toEqual(testEnv[k]);
+            }
         });
         it(`should pass through a provided filter`, async () => {
             // Arrange

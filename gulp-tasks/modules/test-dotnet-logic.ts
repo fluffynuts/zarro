@@ -4,17 +4,17 @@ import { StyleFunction } from "ansi-colors";
 (function () {
   const
     QUACKERS_LOG_PREFIX = "::",
-    QUACKERS_SUMMARY_START = `::SS::`,
+    QUACKERS_SUMMARY_START_MARKER = `::SS::`,
     QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`,
-    QUACKERS_FAILURES_MARKER = `::SF::`,
+    QUACKERS_FAILURE_START_MARKER = `::SF::`,
     QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::",
     QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::",
-    QUACKERS_SLOW_SUMMARY_START = "::SSS::",
-    QUACKERS_SLOW_SUMMARY_COMPLETE = "::SSC::",
+    QUACKERS_SLOW_SUMMARY_START_MARKER = "::SSS::",
+    QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::SSC::",
     QUACKERS_VERBOSE_SUMMARY = "true",
     QUACKERS_OUTPUT_FAILURES_INLINE = "true",
     quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length,
-    quackersFullSummaryStartMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_START }`,
+    quackersFullSummaryStartMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_START_MARKER }`,
     quackersFullSummaryCompleteMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_COMPLETE_MARKER }`,
     {
       rm,
@@ -561,7 +561,7 @@ Test Run Summary
   ::quackers log::::end summary::
        */
       const line = stripQuackersLogPrefix(s);
-      if (line.startsWith(QUACKERS_FAILURES_MARKER)) {
+      if (line.startsWith(QUACKERS_FAILURE_START_MARKER)) {
         state.inFailureSummary = true;
         return;
       }
@@ -571,11 +571,11 @@ Test Run Summary
         state.inFailureSummary = false;
         return;
       }
-      if (line.startsWith(QUACKERS_SLOW_SUMMARY_START)) {
+      if (line.startsWith(QUACKERS_SLOW_SUMMARY_START_MARKER)) {
         state.inSlowSummary = true;
         return;
       }
-      if (line.startsWith(QUACKERS_SLOW_SUMMARY_COMPLETE)) {
+      if (line.startsWith(QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER)) {
         state.inSlowSummary = false;
         return;
       }
@@ -665,23 +665,23 @@ Test Run Summary
 
   function generateQuackersEnvironmentVariables(
     prefix: string
-  ) {
-    const vars = {
+  ): Dictionary<string> {
+    const quackersVars = {
       QUACKERS_LOG_PREFIX,
-      QUACKERS_SUMMARY_START,
-      QUACKERS_SUMMARY_COMPLETE: QUACKERS_SUMMARY_COMPLETE_MARKER,
-      QUACKERS_FAILURES_MARKER,
-      QUACKERS_SLOW_SUMMARY_START,
-      QUACKERS_SLOW_SUMMARY_COMPLETE,
+      QUACKERS_SUMMARY_START_MARKER,
+      QUACKERS_SUMMARY_COMPLETE_MARKER,
+      QUACKERS_FAILURE_START_MARKER,
+      QUACKERS_SLOW_SUMMARY_START_MARKER,
+      QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER,
       QUACKERS_VERBOSE_SUMMARY,
       QUACKERS_OUTPUT_FAILURES_INLINE,
       QUACKERS_FAILURE_INDEX_PLACEHOLDER,
       QUACKERS_SLOW_INDEX_PLACEHOLDER
     } as Dictionary<string>;
     if (prefix) {
-      vars.QUACKERS_TEST_NAME_PREFIX = prefix;
+      quackersVars.QUACKERS_TEST_NAME_PREFIX = prefix;
     }
-    return vars;
+    return { ...process.env, ...quackersVars } as Dictionary<string>;
   }
 
   function isDistinctFile(
