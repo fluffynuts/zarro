@@ -433,7 +433,7 @@ Test Run Summary
     const
       useQuackers = await projectReferencesQuackers(target),
       stderr = useQuackers
-        ? console.error
+        ? quackersStdErrHandler
         : undefined,
       stdout = useQuackers
         ? quackersStdOutHandler.bind(null, quackersState)
@@ -493,13 +493,18 @@ Test Run Summary
     fullLog: string[];
   }
 
+  function quackersStdErrHandler(s: string) {
+    debug(`[test stderr]: ${s}`);
+    console.error(s);
+  }
+
   function quackersStdOutHandler(
     state: QuackersState,
     s: string
   ) {
     s = s || "";
     state.fullLog.push(s);
-    debug(`[test output] ${ s }`);
+    debug(`[test stdout] ${ s }`);
     if (s.startsWith(quackersFullSummaryStartMarker)) {
       debug("  summary starts");
       state.inSummary = true;
@@ -511,6 +516,13 @@ Test Run Summary
       return;
     }
     if (state.inSummary) {
+      const hasQuackersPrefix = s.startsWith(QUACKERS_LOG_PREFIX);
+      if (s.match(/overall/i)) {
+        console.log({
+          state,
+          isQuackersLog: hasQuackersPrefix
+        });
+      }
       /* actual summary log example
   ::quackers log::::start summary::
   ::quackers log::
@@ -535,20 +547,17 @@ Test Run Summary
        */
       const line = stripQuackersLogPrefix(s);
       if (line.startsWith(QUACKERS_FAILURE_START_MARKER)) {
+        debug("failure summary start");
         state.inFailureSummary = true;
         return;
       }
-      if (line.toLowerCase().indexOf("test results:") > -1) {
-        // this is the dotnet core test host printing results,
-        // but we're gonna do it better
-        state.inFailureSummary = false;
-        return;
-      }
       if (line.startsWith(QUACKERS_SLOW_SUMMARY_START_MARKER)) {
+        debug("slow summary start");
         state.inSlowSummary = true;
         return;
       }
       if (line.startsWith(QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER)) {
+        debug("slow summary complete");
         state.inSlowSummary = false;
         return;
       }
@@ -563,6 +572,12 @@ Test Run Summary
       return;
     }
     const isQuackersLog = s.startsWith(QUACKERS_LOG_PREFIX);
+    if (s.match(/overall/i)) {
+      console.log({
+        state,
+        isQuackersLog
+      });
+    }
     if (isQuackersLog) {
       state.haveSeenQuackersLog = true;
     }
