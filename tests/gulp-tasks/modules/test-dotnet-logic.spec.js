@@ -55,25 +55,27 @@ describe(`test-dotnet-logic`, () => {
             // Act
             const result = await testOneDotNetCoreProject(project, "Debug", "normal", testResults, true, true, true);
             // Assert
+            // tests below depend on output from
             if (result.exitCode !== 0) {
                 console.warn(result.stdout.join("\n"));
             }
             expect(result.exitCode)
                 .toEqual(0);
-            expect(result.stdout.find(line => line.match(/^total tests: \d+/i))).toExist();
-            expect(result.stdout.find(line => line.match(/^\s+passed: \d+/i))).toExist();
+            // assumes the standard zarro log prefix of ::
+            expect(result.stdout.find(line => line.match(/::total:\s+\d+/i))).toExist();
+            expect(result.stdout.find(line => line.match(/::passed:\s+\d+/i))).toExist();
             const args = fakeSystem.mock.calls[0];
-            let nextShouldBeNormal = false;
+            let nextIsVerbosity = false;
             for (const arg of args) {
                 if (arg === "--verbosity") {
-                    nextShouldBeNormal = true;
+                    nextIsVerbosity = true;
                     continue;
                 }
-                if (!nextShouldBeNormal) {
+                if (!nextIsVerbosity) {
                     continue;
                 }
                 expect(arg)
-                    .toEqual("normal");
+                    .toEqual("quiet");
                 break;
             }
         }, 30000);

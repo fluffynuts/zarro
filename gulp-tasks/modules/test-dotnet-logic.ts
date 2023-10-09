@@ -216,32 +216,6 @@ import { StyleFunction } from "ansi-colors";
     return testInParallel;
   }
 
-  const verbosityLookup = {
-    "q": 0,
-    "quiet": 0,
-    "m": 1,
-    "minimal": 1,
-    "n": 2,
-    "normal": 2,
-    "d": 3,
-    "detailed": 3,
-    "diag": 4,
-    "diagnostic": 5
-  } as Dictionary<number>;
-
-  function ensureAtLeastNormal(verbosity: string): string {
-    const level = verbosityLookup[`${ verbosity }`.toLowerCase()];
-    if (level === undefined) {
-      return "normal";
-    }
-    if (level < 2) {
-      return "normal";
-    }
-    // higher levels of verbosity seem to have similar-enough
-    // test output (build is just hella noisy)
-    return verbosity;
-  }
-
   async function testAsDotNetCore(
     configuration: string,
     testProjects: string[]
@@ -273,7 +247,6 @@ import { StyleFunction } from "ansi-colors";
       console.log(`  ${ projectPath }`);
     }
 
-    const dotnetCoreVerbosity = ensureAtLeastNormal(verbosity);
     const tasks = testProjectPaths.map(
       (path, idx) => {
         return async () => {
@@ -281,7 +254,7 @@ import { StyleFunction } from "ansi-colors";
           const result = await testOneDotNetCoreProject(
             path,
             configuration,
-            dotnetCoreVerbosity,
+            verbosity,
             testResults,
             true
           );
@@ -471,7 +444,7 @@ Test Run Summary
       prefix = resolveTestPrefixFor(target),
       testEnvironment = generateQuackersEnvironmentVariables(prefix),
       finalVerbosity = useQuackers
-        ? ensureAtLeastNormal(verbosity)
+        ? "minimal" // if quackers is providing details, quieten down the built-in console logger
         : verbosity;
     await mkdir(buildReportFolder);
     addTrxLoggerTo(loggers, target);
@@ -701,7 +674,6 @@ Test Run Summary
     testWithNunitCli,
     shouldTestInParallel,
     testOneDotNetCoreProject,
-    testAsDotNetCore,
-    ensureAtLeastNormal
+    testAsDotNetCore
   };
 })();

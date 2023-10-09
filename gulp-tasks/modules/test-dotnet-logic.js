@@ -150,30 +150,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
         logParallelState(testInParallel, parallelFlag);
         return testInParallel;
     }
-    const verbosityLookup = {
-        "q": 0,
-        "quiet": 0,
-        "m": 1,
-        "minimal": 1,
-        "n": 2,
-        "normal": 2,
-        "d": 3,
-        "detailed": 3,
-        "diag": 4,
-        "diagnostic": 5
-    };
-    function ensureAtLeastNormal(verbosity) {
-        const level = verbosityLookup[`${verbosity}`.toLowerCase()];
-        if (level === undefined) {
-            return "normal";
-        }
-        if (level < 2) {
-            return "normal";
-        }
-        // higher levels of verbosity seem to have similar-enough
-        // test output (build is just hella noisy)
-        return verbosity;
-    }
     async function testAsDotNetCore(configuration, testProjects) {
         const runInParallel = requireModule("run-in-parallel"), testResults = {
             quackersEnabled: false,
@@ -193,11 +169,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
         for (const projectPath of testProjectPaths) {
             console.log(`  ${projectPath}`);
         }
-        const dotnetCoreVerbosity = ensureAtLeastNormal(verbosity);
         const tasks = testProjectPaths.map((path, idx) => {
             return async () => {
                 debug(`${idx}  start test run ${path}`);
-                const result = await testOneDotNetCoreProject(path, configuration, dotnetCoreVerbosity, testResults, true);
+                const result = await testOneDotNetCoreProject(path, configuration, verbosity, testResults, true);
                 testProcessResults.push(result);
             };
         });
@@ -323,7 +298,7 @@ Test Run Summary
             : undefined, loggers = useQuackers
             ? { quackers: {} }
             : generateBuiltinConsoleLoggerConfig(), prefix = resolveTestPrefixFor(target), testEnvironment = generateQuackersEnvironmentVariables(prefix), finalVerbosity = useQuackers
-            ? ensureAtLeastNormal(verbosity)
+            ? "minimal" // if quackers is providing details, quieten down the built-in console logger
             : verbosity;
         await mkdir(buildReportFolder);
         addTrxLoggerTo(loggers, target);
@@ -509,7 +484,6 @@ Test Run Summary
         testWithNunitCli,
         shouldTestInParallel,
         testOneDotNetCoreProject,
-        testAsDotNetCore,
-        ensureAtLeastNormal
+        testAsDotNetCore
     };
 })();
