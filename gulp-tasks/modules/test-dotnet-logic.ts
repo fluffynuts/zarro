@@ -444,7 +444,7 @@ Test Run Summary
       prefix = resolveTestPrefixFor(target),
       testEnvironment = generateQuackersEnvironmentVariables(prefix),
       finalVerbosity = useQuackers
-        ? "minimal" // if quackers is providing details, quieten down the built-in console logger
+        ? "quiet" // if quackers is providing details, quieten down the built-in console logger
         : verbosity;
     await mkdir(buildReportFolder);
     addTrxLoggerTo(loggers, target);
