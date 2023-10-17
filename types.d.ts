@@ -1634,6 +1634,8 @@ declare global {
   type SpawnNuget = (args: string[], opts?: SystemOptions) => Promise<SystemResult>;
   type IsPromise = (obj: any) => obj is Promise<any>;
 
+  type GitTagAndPush = (tag?: string, dryRun?: boolean) => Promise<void>;
+
   // scraped from https://spdx.org/licenses/
   // with the following fragment from FF dev console
   // copy(Array.from(document.querySelector("table").querySelectorAll("tr")).map(tr => {

@@ -2,9 +2,7 @@
   const
     gulp = requireModule<Gulp>("gulp"),
     env = requireModule<Env>("env"),
-    gitTag = requireModule<GitTag>("git-tag"),
-    gitPushTags = requireModule<GitPushTags>("git-push-tags"),
-    gitPush = requireModule<GitPush>("git-push");
+    gitTagAndPush = requireModule<GitTagAndPush>("git-tag-and-push");
 
   env.associate([
     env.GIT_TAG,
@@ -15,12 +13,9 @@
   ]);
 
   gulp.task("git-tag-and-push", async () => {
-    const
-      tag = env.resolveRequired(env.GIT_TAG),
-      dryRun = env.resolveFlag(env.DRY_RUN);
-
-    await gitTag({ tag, dryRun });
-    await gitPush(dryRun);
-    await gitPushTags(dryRun);
+    await gitTagAndPush(
+      env.resolveRequired(env.GIT_TAG),
+      env.resolveFlag(env.DRY_RUN)
+    );
   });
 })();
