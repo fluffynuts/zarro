@@ -28,8 +28,8 @@
     const newVersion = incrementVersion(
       node[0],
       env.resolveFlag("BETA")
-        ? env.resolve("VERSION_INCREMENT_STRATEGY")
-        : "prerelease",
+        ? env.resolveWithFallback(env.VERSION_INCREMENT_STRATEGY, "prerelease")
+        : env.resolve(env.VERSION_INCREMENT_STRATEGY),
       env.resolveFlag("VERSION_INCREMENT_ZERO"),
       env.resolveNumber("PACK_INCREMENT_VERSION_BY")
     );
