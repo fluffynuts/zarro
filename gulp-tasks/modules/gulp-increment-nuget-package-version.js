@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const env = requireModule("env"), gutil = requireModule("gulp-util"), debug = requireModule("debug")(__filename), editXml = require("gulp-edit-xml"), incrementVersion = requireModule("./increment-version"), ZarroError = requireModule("zarro-error"), xmlOpts = {
+    const env = requireModule("env"), gutil = requireModule("gulp-util"), debug = requireModule("debug")(__filename), editXml = require("gulp-edit-xml"), incrementVersion = requireModule("increment-version"), ZarroError = requireModule("zarro-error"), xmlOpts = {
         builderOptions: {
             renderOpts: {
                 pretty: true
@@ -16,7 +16,9 @@
             return xml;
         }
         const node = packageVersionPropGroup.PackageVersion;
-        const newVersion = incrementVersion(node[0], env.resolve("VERSION_INCREMENT_STRATEGY"), env.resolveFlag("VERSION_INCREMENT_ZERO"), env.resolveNumber("PACK_INCREMENT_VERSION_BY"), env.resolveFlag("BETA"));
+        const newVersion = incrementVersion(node[0], env.resolveFlag("BETA")
+            ? env.resolve("VERSION_INCREMENT_STRATEGY")
+            : "prerelease", env.resolveFlag("VERSION_INCREMENT_ZERO"), env.resolveNumber("PACK_INCREMENT_VERSION_BY"));
         node[0] = newVersion;
         let packageIdPropGroup = xml.Project.PropertyGroup.filter((g) => !!g.PackageId)[0];
         let packageName = "(unknown)";
@@ -67,7 +69,7 @@
         const meta = xml.package.metadata[0], packageName = meta.id[0], node = meta.version, current = node[0];
         const newVersion = incrementVersion(current, env.resolveFlag("BETA")
             ? "prerelease"
-            : env.resolve("VERSION_INCREMENT_STRATEGY"));
+            : env.resolve("VERSION_INCREMENT_STRATEGY"), env.resolveFlag("VERSION_INCREMENT_ZERO"), env.resolveNumber("PACK_INCREMENT_VERSION_BY"));
         node[0] = newVersion;
         gutil.log(gutil.colors.yellow(`${packageName}: package version incremented to: ${newVersion}`));
         return xml;

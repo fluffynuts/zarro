@@ -290,7 +290,14 @@
             return;
         }
         if (fileExistsSync(name)) {
+            console.warn(`reading var value from file: '${name}'`);
             return (readTextFileSync(name) || "").trim();
+        }
+        else {
+            console.warn(`file not found: '${name}' (pwd: ${process.cwd()})`);
+            const { lsSync } = require("yafs");
+            const files = lsSync(process.cwd());
+            console.warn(`have these files:\n${files.join("\n")}`);
         }
     }
     function resolveInternal(name, ignoreDefault, overrideDefault) {

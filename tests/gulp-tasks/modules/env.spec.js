@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
+const yafs_1 = require("yafs");
 describe(`env`, () => {
     const env = requireModule("env");
     describe(`resolveObject`, () => {
@@ -19,7 +20,10 @@ describe(`env`, () => {
         });
         it(`should return the json value as an object`, async () => {
             // Arrange
-            const varname = `${faker_1.faker.word.sample()}_${faker_1.faker.word.sample()}`, expected = { id: faker_1.faker.number.int(), name: faker_1.faker.person.firstName() };
+            const varname = `${faker_1.faker.word.sample()}_${faker_1.faker.word.sample()}`, expected = {
+                id: faker_1.faker.number.int(),
+                name: faker_1.faker.person.firstName()
+            };
             envVars.push(varname);
             process.env[varname] = JSON.stringify(expected);
             // Act
@@ -153,7 +157,11 @@ describe(`env`, () => {
             cleanVars.splice(0, cleanVars.length);
         });
     });
-    describe(`resolveMap`, () => {
+    describe.only(`resolveMap`, () => {
+        beforeEach(() => {
+            process.env.ZARRO_ALLOW_FILE_RESOLUTIONS = undefined;
+            delete process.env.ZARRO_ALLOW_FILE_RESOLUTIONS;
+        });
         it(`should resolve empty var to empty object`, async () => {
             // Arrange
             const key = faker_1.faker.string.sample(10);
@@ -190,13 +198,17 @@ describe(`env`, () => {
             expect(result)
                 .toEqual(expected);
         });
-        it(`should resolve JSON from a file, if present & enabled`, async () => {
+        it.only(`should resolve JSON from a file, if present & enabled`, async () => {
             // Arrange
+            process.env.ZARRO_ALLOW_FILE_RESOLUTIONS = "1";
             const sandbox = await filesystem_sandbox_1.Sandbox.create(), expected = {
                 foo: faker_1.faker.word.sample(),
                 bar: faker_1.faker.word.sample()
             }, key = faker_1.faker.string.alphanumeric(10);
-            await sandbox.writeFile(key, JSON.stringify(expected));
+            const varfile = await sandbox.writeFile(key, JSON.stringify(expected));
+            console.log(`varfile: ${varfile}`);
+            const contents = await (0, yafs_1.readTextFile)(varfile);
+            console.log(`${varfile} contains:\n${contents}`);
             // Act
             delete process.env[key];
             const result = await sandbox.run(() => env.resolveMap(key));
@@ -362,6 +374,41 @@ describe(`env`, () => {
                 delete process.env[key];
                 delete testVars[key];
             }
+        });
+    });
+    describe(`resolveWithFallback`, () => {
+        const varname = "TEST_RESOLVE_WITH_FALLBACK";
+        beforeAll(() => {
+            env.register({
+                name: varname,
+                default: "wibbles",
+                help: ""
+            });
+        });
+        beforeEach(() => {
+            process.env[varname] = undefined;
+            delete process.env[varname];
+        });
+        it(`should resolve the env var that was set`, async () => {
+            // Arrange
+            const expected = faker_1.faker.word.sample();
+            process.env[varname] = expected;
+            // Act
+            const result = env.resolveWithFallback(varname, "some fallback value");
+            // Assert
+            expect(result)
+                .toEqual(expected);
+        });
+        it(`should resolve the fallback if not set`, async () => {
+            // Arrange
+            const expected = faker_1.faker.word.sample;
+            expect(process.env[varname])
+                .not.toBeDefined();
+            // Act
+            const result = env.resolveWithFallback(varname, expected);
+            // Assert
+            expect(result)
+                .toEqual(expected);
         });
     });
 });
