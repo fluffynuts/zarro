@@ -17,8 +17,8 @@
         }
         const node = packageVersionPropGroup.PackageVersion;
         const newVersion = incrementVersion(node[0], env.resolveFlag("BETA")
-            ? env.resolve("VERSION_INCREMENT_STRATEGY")
-            : "prerelease", env.resolveFlag("VERSION_INCREMENT_ZERO"), env.resolveNumber("PACK_INCREMENT_VERSION_BY"));
+            ? env.resolveWithFallback(env.VERSION_INCREMENT_STRATEGY, "prerelease")
+            : env.resolve(env.VERSION_INCREMENT_STRATEGY), env.resolveFlag("VERSION_INCREMENT_ZERO"), env.resolveNumber("PACK_INCREMENT_VERSION_BY"));
         node[0] = newVersion;
         let packageIdPropGroup = xml.Project.PropertyGroup.filter((g) => !!g.PackageId)[0];
         let packageName = "(unknown)";
