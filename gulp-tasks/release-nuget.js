@@ -22,11 +22,16 @@
                 version = matches === null || matches === void 0 ? void 0 : matches.groups["version"];
             }
             const source = env.resolve(env.NUGET_SOURCE);
-            await nugetPush({
-                source,
-                target: pkg,
-                apiKey: resolveNugetApiKey(source)
-            });
+            if (env.resolveFlag(env.DRY_RUN)) {
+                log.info(`DRY_RUN: would have pushed '${pkg}' to '${source}'`);
+            }
+            else {
+                await nugetPush({
+                    source,
+                    target: pkg,
+                    apiKey: resolveNugetApiKey(source)
+                });
+            }
         }
         if (!version) {
             log.warn(`Unable to determine version to tag at - set '${env.GIT_TAG}' to manually override.`);
