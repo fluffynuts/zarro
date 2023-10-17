@@ -257,10 +257,7 @@ describe(`env`, () => {
           bar: faker.word.sample()
         },
         key = faker.string.alphanumeric(10);
-      const varfile = await sandbox.writeFile(key, JSON.stringify(expected));
-      console.log(`varfile: ${varfile}`);
-      const contents = await readTextFile(varfile);
-      console.log(`${varfile} contains:\n${contents}`);
+      await sandbox.writeFile(key, JSON.stringify(expected));
       // Act
       delete process.env[key];
       const result = await sandbox.run(() => env.resolveMap(key as AnyEnvVar));

@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
-const yafs_1 = require("yafs");
 describe(`env`, () => {
     const env = requireModule("env");
     describe(`resolveObject`, () => {
@@ -205,10 +204,7 @@ describe(`env`, () => {
                 foo: faker_1.faker.word.sample(),
                 bar: faker_1.faker.word.sample()
             }, key = faker_1.faker.string.alphanumeric(10);
-            const varfile = await sandbox.writeFile(key, JSON.stringify(expected));
-            console.log(`varfile: ${varfile}`);
-            const contents = await (0, yafs_1.readTextFile)(varfile);
-            console.log(`${varfile} contains:\n${contents}`);
+            await sandbox.writeFile(key, JSON.stringify(expected));
             // Act
             delete process.env[key];
             const result = await sandbox.run(() => env.resolveMap(key));
