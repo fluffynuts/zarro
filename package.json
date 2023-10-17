@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.145.10",
+  "version": "1.145.12",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -86,7 +86,7 @@
     "vinyl": "^2.2.1",
     "which": "^2.0.2",
     "xml2js": "^0.6.2",
-    "yafs": "^1.34.0"
+    "yafs": "^1.35.0"
   },
   "files": [
     "gulp-tasks/**/*.js",

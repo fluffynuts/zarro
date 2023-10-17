@@ -24,7 +24,8 @@
           fullPaths: true,
           recurse: false,
           entities: FsEntities.files,
-          match: /\.nupkg$/
+          match: /\.nupkg$/,
+          exclude: /\.symbols\.nupkg$/
         });
 
       if (packageFiles.length === 0) {
