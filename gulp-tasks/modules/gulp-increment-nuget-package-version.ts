@@ -1,10 +1,10 @@
-(function() {
+(function () {
   const
     env = requireModule<Env>("env"),
     gutil = requireModule<GulpUtil>("gulp-util"),
     debug = requireModule<DebugFactory>("debug")(__filename),
     editXml = require("gulp-edit-xml"),
-    incrementVersion = requireModule<IncrementVersion>("./increment-version"),
+    incrementVersion = requireModule<IncrementVersion>("increment-version"),
     ZarroError = requireModule<ZarroError>("zarro-error"),
     xmlOpts = {
       builderOptions: {
@@ -27,10 +27,11 @@
     const node = packageVersionPropGroup.PackageVersion;
     const newVersion = incrementVersion(
       node[0],
-      env.resolve("VERSION_INCREMENT_STRATEGY"),
-      env.resolveFlag("VERSION_INCREMENT_ZERO"),
-      env.resolveNumber("PACK_INCREMENT_VERSION_BY"),
       env.resolveFlag("BETA")
+        ? env.resolve("VERSION_INCREMENT_STRATEGY")
+        : "prerelease",
+      env.resolveFlag("VERSION_INCREMENT_ZERO"),
+      env.resolveNumber("PACK_INCREMENT_VERSION_BY")
     );
     node[0] = newVersion;
 
@@ -96,10 +97,12 @@
       node = meta.version,
       current = node[0];
     const newVersion = incrementVersion(
-        current,
-        env.resolveFlag("BETA")
-          ? "prerelease"
-          : env.resolve("VERSION_INCREMENT_STRATEGY")
+      current,
+      env.resolveFlag("BETA")
+        ? "prerelease"
+        : env.resolve("VERSION_INCREMENT_STRATEGY"),
+      env.resolveFlag("VERSION_INCREMENT_ZERO"),
+      env.resolveNumber("PACK_INCREMENT_VERSION_BY")
     );
 
     node[0] = newVersion;

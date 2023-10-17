@@ -730,8 +730,7 @@ declare global {
     version: string,
     strategy: string,
     zeroLowerOrder?: boolean,
-    incrementBy?: number,
-    isBeta?: boolean
+    incrementBy?: number
   ) => string;
   type ReadPackageVersion = (packageJsonPath?: string) => Promise<string | undefined>;
   type ReadNuspecVersion = (pathToNuspec: string) => Promise<string | undefined>;
