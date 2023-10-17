@@ -97,7 +97,9 @@
       current = node[0];
     const newVersion = incrementVersion(
         current,
-        env.resolve("VERSION_INCREMENT_STRATEGY")
+        env.resolveFlag("BETA")
+          ? "prerelease"
+          : env.resolve("VERSION_INCREMENT_STRATEGY")
     );
 
     node[0] = newVersion;
