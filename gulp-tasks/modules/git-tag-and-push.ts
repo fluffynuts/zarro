@@ -18,6 +18,7 @@
       dryRun = env.resolveFlag(env.DRY_RUN);
     }
 
+
     await gitTag({
       tag,
       dryRun
