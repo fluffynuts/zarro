@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 (function () {
-    const QUACKERS_LOG_PREFIX = "::", QUACKERS_SUMMARY_START_MARKER = `::SS::`, QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`, QUACKERS_FAILURE_START_MARKER = `::SF::`, QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::", QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::", QUACKERS_SLOW_SUMMARY_START_MARKER = "::SSS::", QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::SSC::", QUACKERS_VERBOSE_SUMMARY = "true", QUACKERS_OUTPUT_FAILURES_INLINE = "true", quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length, quackersFullSummaryStartMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_START_MARKER}`, quackersFullSummaryCompleteMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_COMPLETE_MARKER}`, { rm, ls, FsEntities, readTextFile, mkdir } = require("yafs"), gulp = requireModule("gulp"), log = requireModule("log"), path = require("path"), gulpDebug = require("gulp-debug"), debug = requireModule("debug")(__filename), filter = require("gulp-filter"), ansiColors = requireModule("ansi-colors"), promisifyStream = requireModule("promisify-stream"), nunitRunner = requireModule("gulp-nunit-runner"), testUtilFinder = requireModule("testutil-finder"), env = requireModule("env"), resolveTestMasks = requireModule("resolve-test-masks"), logConfig = requireModule("log-config"), gatherPaths = requireModule("gather-paths"), { test } = requireModule("dotnet-cli"), { resolveTestPrefixFor } = requireModule("test-utils"), buildReportFolder = path.dirname(env.resolve("BUILD_REPORT_XML")), Version = requireModule("version"), netFrameworkTestAssemblyFilter = requireModule("netfx-test-assembly-filter"), { baseName, chopExtension } = requireModule("path-utils");
+    const QUACKERS_LOG_PREFIX = "::", QUACKERS_SUMMARY_START_MARKER = `::SS::`, QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`, QUACKERS_FAILURE_START_MARKER = `::SF::`, QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::", QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::", QUACKERS_SLOW_SUMMARY_START_MARKER = "::SSS::", QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::SSC::", QUACKERS_VERBOSE_SUMMARY = "true", QUACKERS_OUTPUT_FAILURES_INLINE = "true", quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length, quackersFullSummaryStartMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_START_MARKER}`, quackersFullSummaryCompleteMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_COMPLETE_MARKER}`, { rm, ls, FsEntities, readTextFile, mkdir } = require("yafs"), gulp = requireModule("gulp"), log = requireModule("log"), path = require("path"), gulpDebug = require("gulp-debug"), debug = requireModule("debug")(__filename), filter = require("gulp-filter"), ansiColors = requireModule("ansi-colors"), promisifyStream = requireModule("promisify-stream"), nunitRunner = requireModule("gulp-nunit-runner"), testUtilFinder = requireModule("testutil-finder"), env = requireModule("env"), resolveTestMasks = requireModule("resolve-test-masks"), logConfig = requireModule("log-config"), gatherPaths = requireModule("gather-paths"), { test } = requireModule("dotnet-cli"), { resolveTestPrefixFor } = requireModule("test-utils"), buildReportFolder = path.dirname(env.resolve("BUILD_REPORT_XML")), Version = requireModule("version"), quote = requireModule("quote-if-required"), netFrameworkTestAssemblyFilter = requireModule("netfx-test-assembly-filter"), { baseName, chopExtension } = requireModule("path-utils");
     async function runTests() {
         await mkdir(buildReportFolder);
         const dotNetCore = env.resolveFlag("DOTNET_CORE");
@@ -200,7 +200,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
                 const errors = (result.stderr || []);
                 if (errors.length === 0) {
                     if (!haveGenericWarning) {
-                        allErrors.push("One or more tests failed");
+                        allErrors.push(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}\nstdout: ${result.stdout.join("\n")}`);
                         haveGenericWarning = true;
                     }
                 }
@@ -212,6 +212,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
         if (allErrors.length) {
             throw new Error(`One or more test runs failed:\n\t${allErrors.join("\n\t")}`);
         }
+    }
+    function tryFindTestProjectFromTestCli(args) {
+        let seenTest = false;
+        for (const arg of args) {
+            if (seenTest) {
+                return arg;
+            }
+            if (arg === "test") {
+                seenTest = true;
+            }
+        }
+        return args.map(quote).join(" ");
     }
     function logOverallResults(testResults) {
         const total = testResults.passed + testResults.skipped + testResults.failed, now = Date.now(), runTimeMs = now - testResults.started, runTime = nunitLikeTime(runTimeMs), darkerThemeSelected = (process.env["QUACKERS_THEME"] || "").toLowerCase() === "darker", red = darkerThemeSelected
