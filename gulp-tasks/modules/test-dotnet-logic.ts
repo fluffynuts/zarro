@@ -41,6 +41,7 @@ import { StyleFunction } from "ansi-colors";
     { resolveTestPrefixFor } = requireModule<TestUtils>("test-utils"),
     buildReportFolder = path.dirname(env.resolve("BUILD_REPORT_XML")),
     Version = requireModule<Version>("version"),
+    quote = requireModule<QuoteIfRequired>("quote-if-required"),
     netFrameworkTestAssemblyFilter = requireModule<GulpNetFXTestAssemblyFilter>("netfx-test-assembly-filter"),
     {
       baseName,
@@ -290,7 +291,7 @@ import { StyleFunction } from "ansi-colors";
         const errors = (result.stderr || []);
         if (errors.length === 0) {
           if (!haveGenericWarning) {
-            allErrors.push("One or more tests failed");
+            allErrors.push(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}\nstdout: ${result.stdout.join("\n")}`);
             haveGenericWarning = true;
           }
         } else {
@@ -301,6 +302,19 @@ import { StyleFunction } from "ansi-colors";
     if (allErrors.length) {
       throw new Error(`One or more test runs failed:\n\t${ allErrors.join("\n\t") }`);
     }
+  }
+
+  function tryFindTestProjectFromTestCli(args: string[]): string {
+    let seenTest = false;
+    for (const arg of args) {
+      if (seenTest) {
+        return arg;
+      }
+      if (arg === "test") {
+        seenTest = true;
+      }
+    }
+    return args.map(quote).join(" ");
   }
 
   function logOverallResults(
