@@ -28,7 +28,6 @@ gulp.task("git-tag-and-push", async () => {
     const dryRun = env.resolveFlag("DRY_RUN");
     await tagRelease(dryRun);
 });
-
 async function tagRelease(dryRun) {
     const version = await readPackageVersion(), tag = `v${version}`;
     await commitAll(dryRun, ".", ":bookmark: bump package version");

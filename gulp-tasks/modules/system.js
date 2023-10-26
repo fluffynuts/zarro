@@ -143,11 +143,15 @@ ${tempFileContents}
                 ];
                 if (result.stderr && result.stderr.length) {
                     lines.push("stderr:");
-                    lines.push(...result.stderr.map(s => `  ${s}`));
+                    for (const line of result.stderr) {
+                        lines.push(`  ${line}`);
+                    }
                 }
                 if (result.stdout && result.stdout.length) {
                     lines.push("stdout:");
-                    lines.push(...result.stdout.map(s => `  ${s}`));
+                    for (const line of result.stdout) {
+                        lines.push(`  ${line}`);
+                    }
                 }
                 return lines.join("\n");
             }
