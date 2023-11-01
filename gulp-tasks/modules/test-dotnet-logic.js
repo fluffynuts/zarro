@@ -200,7 +200,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
                 const errors = (result.stderr || []);
                 if (errors.length === 0) {
                     if (!haveGenericWarning) {
-                        allErrors.push(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}\nstdout: ${result.stdout.join("\n")}`);
+                        debug(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}\nstdout: ${result.stdout.join("\n")}`);
+                        allErrors.push(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}`);
                         haveGenericWarning = true;
                     }
                 }
