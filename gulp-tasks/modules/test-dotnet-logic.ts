@@ -3,14 +3,14 @@ import { StyleFunction } from "ansi-colors";
 
 (function () {
   const
-    QUACKERS_LOG_PREFIX = "::",
-    QUACKERS_SUMMARY_START_MARKER = `::SS::`,
-    QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`,
-    QUACKERS_FAILURE_START_MARKER = `::SF::`,
+    QUACKERS_LOG_PREFIX = ":quackers_log:",
+    QUACKERS_SUMMARY_START_MARKER = `::start_summary::`,
+    QUACKERS_SUMMARY_COMPLETE_MARKER = `::summary_complete::`,
+    QUACKERS_FAILURE_START_MARKER = `::start_failures::`,
     QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::",
     QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::",
-    QUACKERS_SLOW_SUMMARY_START_MARKER = "::SSS::",
-    QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::SSC::",
+    QUACKERS_SLOW_SUMMARY_START_MARKER = "::slow_summary_start::",
+    QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::slow_summary_complete::",
     QUACKERS_VERBOSE_SUMMARY = "true",
     QUACKERS_OUTPUT_FAILURES_INLINE = "true",
     quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length,
@@ -291,8 +291,9 @@ import { StyleFunction } from "ansi-colors";
         const errors = (result.stderr || []);
         if (errors.length === 0) {
           if (!haveGenericWarning) {
-            debug(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}\nstdout: ${result.stdout.join("\n")}`);
-            allErrors.push(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}`);
+            debug(`Test run fails for: ${ tryFindTestProjectFromTestCli(result.args) }\nstdout: ${ result.stdout.join(
+              "\n") }`);
+            allErrors.push(`Test run fails for: ${ tryFindTestProjectFromTestCli(result.args) }`);
             haveGenericWarning = true;
           }
         } else {
@@ -509,7 +510,7 @@ Test Run Summary
   }
 
   function quackersStdErrHandler(s: string) {
-    debug(`[test stderr]: ${s}`);
+    debug(`[test stderr]: ${ s }`);
     console.error(s);
   }
 
@@ -518,6 +519,13 @@ Test Run Summary
     s: string
   ) {
     s = s || "";
+    if (s.includes("\n")) {
+      const lines = s.split("\n").map(s => s.trimEnd());
+      for (const line of lines) {
+        quackersStdOutHandler(state, line);
+      }
+      return;
+    }
     state.fullLog.push(s);
     debug(`[test stdout] ${ s }`);
     if (s.startsWith(quackersFullSummaryStartMarker)) {
@@ -538,27 +546,43 @@ Test Run Summary
           isQuackersLog: hasQuackersPrefix
         });
       }
-      /* actual summary log example
-  ::quackers log::::start summary::
-  ::quackers log::
-  ::quackers log::Test results:
-  ::quackers log::Passed:  8
-  ::quackers log::Failed:  2
-  ::quackers log::Skipped: 1
-  ::quackers log::Total:   11
+      /* actual summary log example, using settings
 
-  ::quackers log::Failures:
+    QUACKERS_LOG_PREFIX = "::",
+    QUACKERS_SUMMARY_START_MARKER = `::SS::`,
+    QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`,
+    QUACKERS_FAILURE_START_MARKER = `::SF::`,
+    QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::",
+    QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::",
+    QUACKERS_SLOW_SUMMARY_START_MARKER = "::SSS::",
+    QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::SSC::",
+    QUACKERS_VERBOSE_SUMMARY = "true",
+    QUACKERS_OUTPUT_FAILURES_INLINE = "true",
 
-  ::quackers log::[1] QuackersTestHost.SomeTests.ShouldBeLessThan50(75)
-  ::quackers log::  NExpect.Exceptions.UnmetExpectationException : Expected 75 to be less than 50
-  ::quackers log::     at QuackersTestHost.SomeTests.ShouldBeLessThan50(Int32 value) in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 66
-  ::quackers log::
+  ::::SS::
+  ::::SSS::
+  :: {some slow summary data}
+  ::::SSC::
+  ::
+  ::
+  ::Test results:
+  ::Passed:  8
+  ::Failed:  2
+  ::Skipped: 1
+  ::Total:   11
 
-  ::quackers log::[2] QuackersTestHost.SomeTests.ShouldFail
-  ::quackers log::  NExpect.Exceptions.UnmetExpectationException : Expected false but got true
-  ::quackers log::     at QuackersTestHost.SomeTests.ShouldFail() in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 28
-  ::quackers log::
-  ::quackers log::::end summary::
+  ::Failures:
+
+  ::[1] QuackersTestHost.SomeTests.ShouldBeLessThan50(75)
+  ::  NExpect.Exceptions.UnmetExpectationException : Expected 75 to be less than 50
+  ::     at QuackersTestHost.SomeTests.ShouldBeLessThan50(Int32 value) in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 66
+  ::
+
+  ::[2] QuackersTestHost.SomeTests.ShouldFail
+  ::  NExpect.Exceptions.UnmetExpectationException : Expected false but got true
+  ::     at QuackersTestHost.SomeTests.ShouldFail() in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 28
+  ::
+  ::::SC::
        */
       const line = stripQuackersLogPrefix(s);
       if (line.startsWith(QUACKERS_FAILURE_START_MARKER)) {

@@ -62,8 +62,8 @@ describe(`test-dotnet-logic`, () => {
             expect(result.exitCode)
                 .toEqual(0);
             // assumes the standard zarro log prefix of ::
-            expect(result.stdout.find(line => line.match(/::total:\s+\d+/i))).toExist();
-            expect(result.stdout.find(line => line.match(/::passed:\s+\d+/i))).toExist();
+            expect(result.stdout.find(line => line.match(/:quackers_log:total:\s+\d+/i))).toExist();
+            expect(result.stdout.find(line => line.match(/:quackers_log:passed:\s+\d+/i))).toExist();
             const args = fakeSystem.mock.calls[0];
             let nextIsVerbosity = false;
             for (const arg of args) {
