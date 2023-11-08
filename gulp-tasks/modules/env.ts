@@ -514,7 +514,9 @@
     debugger;
     const
       resolved = resolveInternal(name),
-      value = resolved === undefined ? undefined : resolved.toLowerCase();
+      value = resolved === undefined || resolved === ""
+        ? undefined
+        : resolved.toLowerCase();
     return resolveAsBoolean(name, value, fallback);
   }
 
