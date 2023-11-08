@@ -247,7 +247,8 @@ describe(`env`, () => {
       expect(result)
         .toEqual(expected);
     });
-    it.only(`should resolve JSON from a file, if present & enabled`, async () => {
+
+    it(`should resolve JSON from a file, if present & enabled`, async () => {
       // Arrange
       process.env.ZARRO_ALLOW_FILE_RESOLUTIONS = "1"
       const
@@ -320,6 +321,18 @@ describe(`env`, () => {
       // Assert
       expect(result)
         .toBeFalse();
+    });
+
+    it(`should use the fallback value when the flag is not set in the environment`, async () => {
+      // Arrange
+      // Act
+      const result1 = env.resolveFlag("FOO_BAR_QUUZ", false);
+      const result2 = env.resolveFlag("FOO_BAR_QUUZ", true);
+      // Assert
+      expect(result1)
+        .toBeFalse();
+      expect(result2)
+        .toBeTrue();
     });
 
     afterEach(async () => {
