@@ -34,6 +34,9 @@
       /**
        * @type DotNetPublishOptions
        */
+      const anyContainerOptionsSet = !!env.resolve(env.DOTNET_PUBLISH_CONTAINER_REGISTRY) ||
+                                     !!env.resolve(env.DOTNET_PUBLISH_CONTAINER_IMAGE_TAG) ||
+                                     !!env.resolve(env.DOTNET_PUBLISH_CONTAINER_IMAGE_NAME);
       const publishOpts = {
         configuration: env.resolve(env.DOTNET_PUBLISH_BUILD_CONFIGURATION, env.BUILD_CONFIGURATION),
         runtime: env.resolve(env.DOTNET_PUBLISH_RUNTIMES),
@@ -51,7 +54,7 @@
         target: "[ not set ]", // intentional: piping through gulp will set this, per project
         verbosity: env.resolve(env.DOTNET_PUBLISH_VERBOSITY) as DotNetVerbosity,
         msbuildProperties: env.resolveMap(env.MSBUILD_PROPERTIES),
-        publishContainer: env.resolveFlag(env.DOTNET_PUBLISH_CONTAINER),
+        publishContainer: env.resolveFlag(env.DOTNET_PUBLISH_CONTAINER, anyContainerOptionsSet),
         containerImageName: env.resolve(env.DOTNET_PUBLISH_CONTAINER_IMAGE_NAME),
         containerImageTag: env.resolve(env.DOTNET_PUBLISH_CONTAINER_IMAGE_TAG),
         containerRegistry: env.resolve(env.DOTNET_PUBLISH_CONTAINER_REGISTRY)

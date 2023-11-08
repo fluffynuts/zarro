@@ -547,7 +547,7 @@ declare global {
 
     resolveNumber(name: NumericEnvVar): number;
 
-    resolveFlag(name: FlagEnvVar): boolean;
+    resolveFlag(name: FlagEnvVar, fallback?: boolean): boolean;
 
     associate(varName: AnyEnvVar | AnyEnvVar[], tasks: string | string[]): void;
 
