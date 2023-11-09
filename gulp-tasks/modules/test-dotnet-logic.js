@@ -172,8 +172,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
         const tasks = testProjectPaths.map((path, idx) => {
             return async () => {
                 debug(`${idx}  start test run ${path}`);
-                const result = await testOneDotNetCoreProject(path, configuration, verbosity, testResults, true);
-                testProcessResults.push(result);
+                try {
+                    const result = await testOneDotNetCoreProject(path, configuration, verbosity, testResults, true);
+                    testProcessResults.push(result);
+                }
+                catch (e) {
+                    console.error(`unable to test dotnet core project '${path}':\n${e}`);
+                    process.exit(1);
+                }
             };
         });
         await runInParallel(concurrency, ...tasks);

@@ -386,7 +386,6 @@
     const positiveFlags = ["yes", "true", "1"];
     const negativeFlags = ["no", "false", "0"];
     function resolveFlag(name, fallback) {
-        debugger;
         const resolved = resolveInternal(name), value = resolved === undefined || resolved === ""
             ? undefined
             : resolved.toLowerCase();
