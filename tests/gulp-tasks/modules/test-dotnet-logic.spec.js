@@ -80,6 +80,85 @@ describe(`test-dotnet-logic`, () => {
             }
         }, 30000);
     });
+    describe(`testAsDotNetCore`, () => {
+        const { testAsDotNetCore } = requireModule("test-dotnet-logic");
+        beforeEach(() => {
+            fakeSystem.mockImplementation((exe, args, options) => realSystem(exe, args, options));
+            const hax = fakeSystem;
+            hax.isError = (arg) => arg instanceof SystemError;
+            hax.isSystemError = hax.isError;
+        });
+        it(`should report the correct totals`, async () => {
+            // Arrange
+            process.env.FORCE_TEST_FAILURE = "1";
+            process.env.DOTNET_TEST_REBUILD = "1";
+            const stdout = [];
+            const stderr = [];
+            const originalLog = console.log.bind(console);
+            const originalError = console.error.bind(console);
+            spyOn(console, "log").and.callFake((line) => stdout.push(...line.split("\n").map(l => l.replace(/\r$/, ""))));
+            spyOn(console, "error").and.callFake((line) => stderr.push(line));
+            const project1 = await findProject("Project1.Tests");
+            const project2 = await findProject("Project2.Tests");
+            const expected = {
+                total: 6,
+                passed: 3,
+                failed: 2,
+                skipped: 1
+            };
+            // Act
+            try {
+                await testAsDotNetCore("Debug", [project1, project2]);
+            }
+            catch (e) {
+                // suppress - test _should_ throw if there are failures
+            }
+            // Assert
+            let inSummary = false;
+            const results = {
+                total: -1,
+                passed: -1,
+                failed: -1,
+                skipped: -1
+            };
+            // originalLog("--- start full stdout dump ---");
+            // originalLog(stdout.join("\n"));
+            // originalLog("--- end full stdout dump ---");
+            for (const line of stdout) {
+                if (line.toLowerCase().includes("test results")) {
+                    inSummary = true;
+                    continue;
+                }
+                if (!inSummary) {
+                    continue;
+                }
+                if (tryParse(line, passedRe, (i) => results.passed = i)) {
+                    continue;
+                }
+                if (tryParse(line, totalRe, (i) => results.total = i)) {
+                    continue;
+                }
+                if (tryParse(line, skippedRe, (i) => results.skipped = i)) {
+                    continue;
+                }
+                tryParse(line, failedRe, (i) => results.failed = i);
+            }
+            expect(results)
+                .toEqual(expected);
+        }, 6000000);
+    });
+    const passedRe = /^\s*passed:\s*(?<value>\d+)\s*$/i;
+    const totalRe = /^\s*total:\s*(?<value>\d+)\s*$/i;
+    const failedRe = /^\s*failed:\s*(?<value>\d+)\s*$/i;
+    const skippedRe = /^\s*skipped:\s*(?<value>\d+)\s*$/i;
+    function tryParse(line, re, callback) {
+        const match = line.match(re);
+        if (!match || !match.groups) {
+            return false;
+        }
+        callback(parseInt(match.groups["value"]));
+        return true;
+    }
     async function findProject(name) {
         const basedir = path.dirname(path.dirname(path.dirname(__dirname)));
         const matches = await (0, yafs_1.ls)(basedir, {

@@ -159,7 +159,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
             failureSummary: [],
             slowSummary: [],
             started: Date.now(),
-            fullLog: []
+            fullLog: [],
         }, testProcessResults = [], testProjectPaths = await gatherPaths(testProjects, true), verbosity = env.resolve("BUILD_VERBOSITY");
         const testInParallel = await shouldTestInParallel(testProjectPaths);
         const concurrency = testInParallel
@@ -169,11 +169,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
         for (const projectPath of testProjectPaths) {
             console.log(`  ${projectPath}`);
         }
+        const rebuild = env.resolveFlag(env.DOTNET_TEST_REBUILD);
+        const runningInParallel = concurrency > 1;
         const tasks = testProjectPaths.map((path, idx) => {
             return async () => {
                 debug(`${idx}  start test run ${path}`);
                 try {
-                    const result = await testOneDotNetCoreProject(path, configuration, verbosity, testResults, true);
+                    const result = await testOneDotNetCoreProject(path, configuration, verbosity, testResults, runningInParallel, rebuild);
                     testProcessResults.push(result);
                 }
                 catch (e) {
@@ -320,7 +322,7 @@ Test Run Summary
             ? "quiet" // if quackers is providing details, quieten down the built-in console logger
             : verbosity;
         await mkdir(buildReportFolder);
-        addTrxLoggerTo(loggers, target);
+        // addTrxLoggerTo(loggers, target);
         testResults.quackersEnabled = testResults.quackersEnabled || useQuackers;
         try {
             const result = await test({
@@ -355,113 +357,108 @@ Test Run Summary
         console.error(s);
     }
     function quackersStdOutHandler(state, s) {
-        s = s || "";
-        if (s.includes("\n")) {
-            const lines = s.split("\n").map(s => s.trimEnd());
-            for (const line of lines) {
-                quackersStdOutHandler(state, line);
-            }
-            return;
-        }
-        state.fullLog.push(s);
-        debug(`[test stdout] ${s}`);
-        if (s.startsWith(quackersFullSummaryStartMarker)) {
-            debug("  summary starts");
-            state.inSummary = true;
-            return;
-        }
-        if (s.startsWith(quackersFullSummaryCompleteMarker)) {
-            debug("  summary ends");
-            state.inSummary = false;
-            return;
-        }
-        if (state.inSummary) {
-            const hasQuackersPrefix = s.startsWith(QUACKERS_LOG_PREFIX);
-            if (s.match(/overall/i)) {
-                console.log({
-                    state,
-                    isQuackersLog: hasQuackersPrefix
-                });
-            }
-            /* actual summary log example, using settings
-      
-          QUACKERS_LOG_PREFIX = "::",
-          QUACKERS_SUMMARY_START_MARKER = `::SS::`,
-          QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`,
-          QUACKERS_FAILURE_START_MARKER = `::SF::`,
-          QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::",
-          QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::",
-          QUACKERS_SLOW_SUMMARY_START_MARKER = "::SSS::",
-          QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::SSC::",
-          QUACKERS_VERBOSE_SUMMARY = "true",
-          QUACKERS_OUTPUT_FAILURES_INLINE = "true",
-      
-        ::::SS::
-        ::::SSS::
-        :: {some slow summary data}
-        ::::SSC::
-        ::
-        ::
-        ::Test results:
-        ::Passed:  8
-        ::Failed:  2
-        ::Skipped: 1
-        ::Total:   11
-      
-        ::Failures:
-      
-        ::[1] QuackersTestHost.SomeTests.ShouldBeLessThan50(75)
-        ::  NExpect.Exceptions.UnmetExpectationException : Expected 75 to be less than 50
-        ::     at QuackersTestHost.SomeTests.ShouldBeLessThan50(Int32 value) in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 66
-        ::
-      
-        ::[2] QuackersTestHost.SomeTests.ShouldFail
-        ::  NExpect.Exceptions.UnmetExpectationException : Expected false but got true
-        ::     at QuackersTestHost.SomeTests.ShouldFail() in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 28
-        ::
-        ::::SC::
-             */
-            const line = stripQuackersLogPrefix(s);
-            if (line.startsWith(QUACKERS_FAILURE_START_MARKER)) {
-                debug("failure summary start");
-                state.inFailureSummary = true;
+        try {
+            s = s || "";
+            if (s.includes("\n")) {
+                const lines = s.split("\n").map(s => s.trimEnd());
+                for (const line of lines) {
+                    quackersStdOutHandler(state, line);
+                }
                 return;
             }
-            if (line.startsWith(QUACKERS_SLOW_SUMMARY_START_MARKER)) {
-                debug("slow summary start");
-                state.inSlowSummary = true;
+            state.fullLog.push(s);
+            debug(`[test stdout] ${s}`);
+            if (s.startsWith(quackersFullSummaryStartMarker)) {
+                debug("  summary starts");
+                state.inSummary = true;
                 return;
             }
-            if (line.startsWith(QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER)) {
-                debug("slow summary complete");
-                state.inSlowSummary = false;
+            if (s.startsWith(quackersFullSummaryCompleteMarker)) {
+                debug("  summary ends");
+                state.inSummary = false;
                 return;
             }
-            if (state.inFailureSummary) {
-                state.testResults.failureSummary.push(line);
+            if (state.inSummary) {
+                /* actual summary log example, using settings
+          
+              QUACKERS_LOG_PREFIX = "::",
+              QUACKERS_SUMMARY_START_MARKER = `::SS::`,
+              QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`,
+              QUACKERS_FAILURE_START_MARKER = `::SF::`,
+              QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::",
+              QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::",
+              QUACKERS_SLOW_SUMMARY_START_MARKER = "::SSS::",
+              QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::SSC::",
+              QUACKERS_VERBOSE_SUMMARY = "true",
+              QUACKERS_OUTPUT_FAILURES_INLINE = "true",
+          
+            ::::SS::
+            ::::SSS::
+            :: {some slow summary data}
+            ::::SSC::
+            ::
+            ::
+            ::Test results:
+            ::Passed:  8
+            ::Failed:  2
+            ::Skipped: 1
+            ::Total:   11
+          
+            ::Failures:
+          
+            ::[1] QuackersTestHost.SomeTests.ShouldBeLessThan50(75)
+            ::  NExpect.Exceptions.UnmetExpectationException : Expected 75 to be less than 50
+            ::     at QuackersTestHost.SomeTests.ShouldBeLessThan50(Int32 value) in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 66
+            ::
+          
+            ::[2] QuackersTestHost.SomeTests.ShouldFail
+            ::  NExpect.Exceptions.UnmetExpectationException : Expected false but got true
+            ::     at QuackersTestHost.SomeTests.ShouldFail() in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 28
+            ::
+            ::::SC::
+                 */
+                const line = stripQuackersLogPrefix(s);
+                debugger;
+                if (line.startsWith(QUACKERS_FAILURE_START_MARKER)) {
+                    debug("failure summary start");
+                    state.inFailureSummary = true;
+                    return;
+                }
+                if (line.startsWith(QUACKERS_SLOW_SUMMARY_START_MARKER)) {
+                    debug("slow summary start");
+                    state.inSlowSummary = true;
+                    return;
+                }
+                if (line.startsWith(QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER)) {
+                    debug("slow summary complete");
+                    state.inSlowSummary = false;
+                    return;
+                }
+                if (state.inFailureSummary) {
+                    state.testResults.failureSummary.push(line);
+                    return;
+                }
+                if (state.inSlowSummary) {
+                    state.testResults.slowSummary.push(line);
+                    return;
+                }
+                incrementTestResultCount(state.testResults, line);
                 return;
             }
-            if (state.inSlowSummary) {
-                state.testResults.slowSummary.push(line);
+            const isQuackersLog = s.startsWith(QUACKERS_LOG_PREFIX);
+            if (isQuackersLog) {
+                state.haveSeenQuackersLog = true;
             }
-            incrementTestResultCount(state.testResults, line);
-            return;
+            if (!state.haveSeenQuackersLog || isQuackersLog) {
+                console.log(stripQuackersLogPrefix(s));
+            }
+            else {
+                debug(`discarding log: "${s}"`);
+            }
         }
-        const isQuackersLog = s.startsWith(QUACKERS_LOG_PREFIX);
-        if (s.match(/overall/i)) {
-            console.log({
-                state,
-                isQuackersLog
-            });
-        }
-        if (isQuackersLog) {
-            state.haveSeenQuackersLog = true;
-        }
-        if (!state.haveSeenQuackersLog || isQuackersLog) {
-            console.log(stripQuackersLogPrefix(s));
-        }
-        else {
-            debug(`discarding log: "${s}"`);
+        catch (e) {
+            const err = e;
+            const err2 = err;
         }
     }
     function incrementTestResultCount(testResults, line) {

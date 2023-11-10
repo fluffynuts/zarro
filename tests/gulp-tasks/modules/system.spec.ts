@@ -429,7 +429,6 @@ describe(`system`, () => {
     it(`should spawn the process and kill it after the timeout`, async () => {
       // Arrange
       // Act
-      const os = require("os");
       const before = Date.now();
       const result = await sut(
         `node -e "(async function() { await new Promise(resolve => setTimeout(resolve, 5000)); })()"`,
@@ -447,6 +446,33 @@ describe(`system`, () => {
         .toBeFalse();
       expect(sut.isResult(result))
         .toBeTrue();
+    });
+  });
+
+  describe(`discovery`, () => {
+    // just double-checking that the system command doesn't, somehow, drop io
+    it(`should record all output from the external process`, async () => {
+      // Arrange
+      // Act
+      const result = await sut(
+        "dotnet", [
+          "test",
+          "C:\\code\\opensource\\zarro\\tests\\resources\\dotnet-core-unit-tests\\src\\Project1.Tests\\Project1.Tests.csproj",
+          "--verbosity",
+          "quiet",
+          "--configuration",
+          "Debug",
+          "--logger",
+          "quackers"
+        ], {
+          suppressOutput: true,
+          suppressStdIoInErrors: true,
+          timeout: undefined,
+          stdout: (s: string) => console.log(`(live) ${s}`)
+        }
+      );
+      // Assert
+      console.log(result.stdout.join("\n"));
     });
   });
 

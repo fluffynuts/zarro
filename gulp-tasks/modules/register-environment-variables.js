@@ -49,6 +49,11 @@
             help: "run your dotnet core tests in parallel - will be automatically enabled if not set and the quackers logger is used"
         });
         env.register({
+            name: "DOTNET_TEST_REBUILD",
+            default: "false",
+            help: "force project rebuild before testing - useful if you don't have a full pipeline that includes an initial build (eg when using test-dotnet-logic manually"
+        });
+        env.register({
             name: "DOTNET_PARALLEL_STAGGER_MS",
             default: "1000",
             help: "The number of milliseconds to wait between parallel dotnet core test run spawns, ie to stagger them"

@@ -83,7 +83,6 @@ ${ tempFileContents }
     return exe;
   }
 
-
   async function system(
     program: string,
     args?: string[],

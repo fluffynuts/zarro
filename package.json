@@ -22,7 +22,7 @@
     "autotest-full-once": "run-s clear-console build test",
     "autotest-full": "nodemon -w gulp-tasks -w tests -w types.d.ts -x \"npm run autotest-full-once || cd .\" -e ts",
     "preautobuild": "run-s build-fetch-github-release",
-    "autobuild": "tsc --watch --incremental",
+    "autobuild": "nodemon -w gulp-tasks/**/*.ts -i gulp-tasks/modules/fetch-github-release -w tests/**/*.ts -w types.d.ts -x \"npm run build || cd .\" -e ts",
     "prestart": "run-s build",
     "start": "node index.js",
     "zarro": "node index.js",

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using NUnit.Framework;
 
 namespace Project1.Tests;
@@ -30,6 +31,26 @@ public class Tests
             Assert.Pass("Happy days");
         }
         // Assert
+    }
+
+    [Test]
+    public void ShouldBeSlow()
+    {
+        // Arrange
+        // Act
+        Thread.Sleep(2000);
+        // Assert
+        Assert.Pass("slow, but steady");
+    }
+
+    [Test]
+    [Ignore("skipped - always fails!")]
+    public void ShouldBeSkipped()
+    {
+        // Arrange
+        // Act
+        // Assert
+        Assert.That(1, Is.EqualTo(2));
     }
 
     private bool EnvironmentFlag(string name, bool fallback)

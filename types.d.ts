@@ -471,6 +471,7 @@ declare global {
     "BUILD_FAIL_ON_ERROR" |
     "BUILD_MSBUILD_NODE_REUSE" |
     "DOTNET_TEST_PARALLEL" |
+    "DOTNET_TEST_REBUILD" |
     "DOTNET_CORE" |
     "DRY_RUN" |
     "ENFORCE_VERIFICATION" |
@@ -644,6 +645,7 @@ declare global {
     BUILD_FAIL_ON_ERROR: FlagEnvVar;
     BUILD_MSBUILD_NODE_REUSE: FlagEnvVar;
     DOTNET_TEST_PARALLEL: FlagEnvVar;
+    DOTNET_TEST_REBUILD: FlagEnvVar;
     DOTNET_CORE: FlagEnvVar;
     DRY_RUN: FlagEnvVar;
     ENFORCE_VERIFICATION: FlagEnvVar;

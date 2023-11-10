@@ -231,7 +231,8 @@ import { StyleFunction } from "ansi-colors";
         failureSummary: [],
         slowSummary: [],
         started: Date.now(),
-        fullLog: []
+        fullLog: [],
+
       } satisfies TestResults,
       testProcessResults = [] as (SystemResult | SystemError)[],
       testProjectPaths = await gatherPaths(testProjects, true),
@@ -248,6 +249,8 @@ import { StyleFunction } from "ansi-colors";
       console.log(`  ${ projectPath }`);
     }
 
+    const rebuild = env.resolveFlag(env.DOTNET_TEST_REBUILD);
+    const runningInParallel = concurrency > 1;
     const tasks = testProjectPaths.map(
       (path, idx) => {
         return async () => {
@@ -258,7 +261,8 @@ import { StyleFunction } from "ansi-colors";
               configuration,
               verbosity,
               testResults,
-              true
+              runningInParallel,
+              rebuild
             );
             testProcessResults.push(result);
           } catch (e) {
@@ -468,7 +472,7 @@ Test Run Summary
         ? "quiet" // if quackers is providing details, quieten down the built-in console logger
         : verbosity;
     await mkdir(buildReportFolder);
-    addTrxLoggerTo(loggers, target);
+    // addTrxLoggerTo(loggers, target);
     testResults.quackersEnabled = testResults.quackersEnabled || useQuackers;
     try {
       const result = await test({
@@ -523,6 +527,7 @@ Test Run Summary
     state: QuackersState,
     s: string
   ) {
+    try {
     s = s || "";
     if (s.includes("\n")) {
       const lines = s.split("\n").map(s => s.trimEnd());
@@ -544,13 +549,6 @@ Test Run Summary
       return;
     }
     if (state.inSummary) {
-      const hasQuackersPrefix = s.startsWith(QUACKERS_LOG_PREFIX);
-      if (s.match(/overall/i)) {
-        console.log({
-          state,
-          isQuackersLog: hasQuackersPrefix
-        });
-      }
       /* actual summary log example, using settings
 
     QUACKERS_LOG_PREFIX = "::",
@@ -590,6 +588,7 @@ Test Run Summary
   ::::SC::
        */
       const line = stripQuackersLogPrefix(s);
+      debugger;
       if (line.startsWith(QUACKERS_FAILURE_START_MARKER)) {
         debug("failure summary start");
         state.inFailureSummary = true;
@@ -611,17 +610,12 @@ Test Run Summary
       }
       if (state.inSlowSummary) {
         state.testResults.slowSummary.push(line);
+        return;
       }
       incrementTestResultCount(state.testResults, line);
       return;
     }
     const isQuackersLog = s.startsWith(QUACKERS_LOG_PREFIX);
-    if (s.match(/overall/i)) {
-      console.log({
-        state,
-        isQuackersLog
-      });
-    }
     if (isQuackersLog) {
       state.haveSeenQuackersLog = true;
     }
@@ -629,6 +623,10 @@ Test Run Summary
       console.log(stripQuackersLogPrefix(s));
     } else {
       debug(`discarding log: "${ s }"`);
+    }
+    } catch (e) {
+      const err = e as Error;
+      const err2 = err;
     }
   }
 
