@@ -10,36 +10,39 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      - name: Setup .NET for integration testing
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: |
-            7.0.306
-      - uses: actions/setup-node@v2-beta
-        with:
-          # intentionally use 16 to ensure the fetch polyfill is being brought in
-          node-version: '16'
-      - name: Build & Test NExpect
-        run: |
-          git clone https://github.com/fluffynuts/NExpect
-          cd NExpect
-          npm i
-          npm run test-zarro
-          cd -
-      - name: Build & Test Quackers
-        run: |
-          git clone https://github.com/fluffynuts/quackers
-          cd quackers
-          npm i
-          npm run test-zarro
-          cd -
-      - name: Build PeanutButter
-        run: |
-          git clone https://github.com/fluffynuts/PeanutButter
-          cd PeanutButter
-          npm i
-          npm run test-zarro
-          cd -
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - name: Setup .NET for integration testing
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: |
+          7.0.306
+    - uses: actions/setup-node@v2-beta
+      with:
+        # intentionally use 16 to ensure the fetch polyfill is being brought in
+        node-version: '16'
+
+    - name: Build & Test NExpect
+      run: |
+        git clone https://github.com/fluffynuts/NExpect
+        cd NExpect
+        npm i
+        npm run test-zarro
+        cd -
+
+    - name: Build & Test Quackers
+      run: |
+        git clone https://github.com/fluffynuts/quackers
+        cd quackers
+        npm i
+        npm run test-zarro
+        cd -
+
+    - name: Build PeanutButter
+      run: |
+        git clone https://github.com/fluffynuts/PeanutButter
+        cd PeanutButter
+        npm i
+        npm run test-zarro
+        cd -

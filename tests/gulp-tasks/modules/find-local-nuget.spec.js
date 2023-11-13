@@ -27,6 +27,7 @@ require("expect-even-more-jest");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 const path = __importStar(require("path"));
 const yafs_1 = require("yafs");
+const run_locked_1 = require("../../test-helpers/run-locked");
 describe(`find-local-nuget`, () => {
     const findLocalNuget = requireModule("find-local-nuget");
     const { debuggerIsAttached } = require("debugger-is-attached"), os = require("os"), isWindows = os.platform() === "win32";
@@ -34,43 +35,47 @@ describe(`find-local-nuget`, () => {
         // process.env.SUPPRESS_DOWNLOAD_PROGRESS = "1";
     });
     it(`should download nuget.exe to the build tools folder`, async () => {
-        // Arrange
-        spyOn(console, "log");
-        spyOn(console, "error");
-        const sandbox = await filesystem_sandbox_1.Sandbox.create();
-        process.env.BUILD_TOOLS_FOLDER = sandbox.path;
-        // Act
-        const result = await findLocalNuget();
-        // Assert
-        const expectedExecutable = isWindows
-            ? "nuget.exe"
-            : "nuget";
-        expect(result.toLowerCase())
-            .toEqual(path.join(sandbox.path, expectedExecutable).toLowerCase());
-        const contents = await (0, yafs_1.ls)(sandbox.path, {
-            entities: yafs_1.FsEntities.files,
-            recurse: false,
-            fullPaths: false
+        await (0, run_locked_1.withLockedNuget)(async () => {
+            // Arrange
+            spyOn(console, "log");
+            spyOn(console, "error");
+            const sandbox = await filesystem_sandbox_1.Sandbox.create();
+            process.env.BUILD_TOOLS_FOLDER = sandbox.path;
+            // Act
+            const result = await findLocalNuget();
+            // Assert
+            const expectedExecutable = isWindows
+                ? "nuget.exe"
+                : "nuget";
+            expect(result.toLowerCase())
+                .toEqual(path.join(sandbox.path, expectedExecutable).toLowerCase());
+            const contents = await (0, yafs_1.ls)(sandbox.path, {
+                entities: yafs_1.FsEntities.files,
+                recurse: false,
+                fullPaths: false
+            });
+            expect(contents)
+                .toContain("nuget.exe");
         });
-        expect(contents)
-            .toContain("nuget.exe");
     });
     it(`should be able to install nuget package in dir via resolved nuget path`, async () => {
-        const system = requireModule("system");
-        // Arrange
-        spyOn(console, "log");
-        spyOn(console, "error");
-        const sandbox = await filesystem_sandbox_1.Sandbox.create(), toolsFolder = await sandbox.mkdir("build-tools");
-        process.env.BUILD_TOOLS_FOLDER = toolsFolder;
-        // Act
-        const nuget = await findLocalNuget();
-        await sandbox.run(async () => {
-            await system(nuget, ["install", "PeanutButter.TempDb.Runner"]);
+        await (0, run_locked_1.withLockedNuget)(async () => {
+            const system = requireModule("system");
+            // Arrange
+            spyOn(console, "log");
+            spyOn(console, "error");
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), toolsFolder = await sandbox.mkdir("build-tools");
+            process.env.BUILD_TOOLS_FOLDER = toolsFolder;
+            // Act
+            const nuget = await findLocalNuget();
+            await sandbox.run(async () => {
+                await system(nuget, ["install", "PeanutButter.TempDb.Runner"]);
+            });
+            // Assert
+            const dirs = await (0, yafs_1.ls)(sandbox.path, { entities: yafs_1.FsEntities.folders });
+            expect(dirs.find(o => o.indexOf("PeanutButter.TempDb.Runner") > -1))
+                .not.toBeUndefined();
         });
-        // Assert
-        const dirs = await (0, yafs_1.ls)(sandbox.path, { entities: yafs_1.FsEntities.folders });
-        expect(dirs.find(o => o.indexOf("PeanutButter.TempDb.Runner") > -1))
-            .not.toBeUndefined();
     });
     afterAll(async () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
