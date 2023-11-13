@@ -104,7 +104,8 @@ describe(`test-dotnet-logic`, () => {
                 total: 6,
                 passed: 3,
                 failed: 2,
-                skipped: 1
+                skipped: 1,
+                slow: 1
             };
             // Act
             try {
@@ -119,38 +120,49 @@ describe(`test-dotnet-logic`, () => {
                 total: -1,
                 passed: -1,
                 failed: -1,
-                skipped: -1
+                skipped: -1,
+                slow: -1
             };
             // originalLog("--- start full stdout dump ---");
             // originalLog(stdout.join("\n"));
             // originalLog("--- end full stdout dump ---");
+            let foundTotal = false;
+            let foundPassed = false;
+            let foundFailed = false;
+            let foundSkipped = false;
+            let foundSlow = false;
             for (const line of stdout) {
-                if (line.toLowerCase().includes("test results")) {
+                if (line.toLowerCase().includes("overall result:")) {
                     inSummary = true;
                     continue;
                 }
                 if (!inSummary) {
                     continue;
                 }
-                if (tryParse(line, passedRe, (i) => results.passed = i)) {
-                    continue;
+                foundTotal || (foundTotal = tryParse(line, totalRe, (i) => results.total = i));
+                foundPassed || (foundPassed = tryParse(line, passedRe, (i) => results.passed = i));
+                foundFailed || (foundFailed = tryParse(line, failedRe, (i) => results.failed = i));
+                foundSkipped || (foundSkipped = tryParse(line, skippedRe, (i) => results.skipped = i));
+                foundSlow || (foundSlow = tryParse(line, slowRe, (i) => results.slow = i));
+                const foundTotals = foundPassed &&
+                    foundTotal &&
+                    foundSkipped &&
+                    foundFailed &&
+                    foundSlow;
+                if (foundTotals) {
+                    inSummary = false;
+                    break;
                 }
-                if (tryParse(line, totalRe, (i) => results.total = i)) {
-                    continue;
-                }
-                if (tryParse(line, skippedRe, (i) => results.skipped = i)) {
-                    continue;
-                }
-                tryParse(line, failedRe, (i) => results.failed = i);
             }
             expect(results)
                 .toEqual(expected);
         }, 6000000);
     });
+    const totalRe = /^\s*test count:\s*(?<value>\d+)\s*$/i;
     const passedRe = /^\s*passed:\s*(?<value>\d+)\s*$/i;
-    const totalRe = /^\s*total:\s*(?<value>\d+)\s*$/i;
     const failedRe = /^\s*failed:\s*(?<value>\d+)\s*$/i;
     const skippedRe = /^\s*skipped:\s*(?<value>\d+)\s*$/i;
+    const slowRe = /^\s*slow:\s*(?<value>\d+)\s*$/i;
     function tryParse(line, re, callback) {
         const match = line.match(re);
         if (!match || !match.groups) {

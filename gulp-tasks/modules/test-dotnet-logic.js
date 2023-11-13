@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 (function () {
-    const QUACKERS_LOG_PREFIX = ":quackers_log:", QUACKERS_SUMMARY_START_MARKER = `::start_summary::`, QUACKERS_SUMMARY_COMPLETE_MARKER = `::summary_complete::`, QUACKERS_FAILURE_START_MARKER = `::start_failures::`, QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::", QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::", QUACKERS_SLOW_SUMMARY_START_MARKER = "::slow_summary_start::", QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::slow_summary_complete::", QUACKERS_VERBOSE_SUMMARY = "true", QUACKERS_OUTPUT_FAILURES_INLINE = "true", quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length, quackersFullSummaryStartMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_START_MARKER}`, quackersFullSummaryCompleteMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_COMPLETE_MARKER}`, { rm, ls, FsEntities, readTextFile, mkdir } = require("yafs"), gulp = requireModule("gulp"), log = requireModule("log"), path = require("path"), gulpDebug = require("gulp-debug"), debug = requireModule("debug")(__filename), filter = require("gulp-filter"), ansiColors = requireModule("ansi-colors"), promisifyStream = requireModule("promisify-stream"), nunitRunner = requireModule("gulp-nunit-runner"), testUtilFinder = requireModule("testutil-finder"), env = requireModule("env"), resolveTestMasks = requireModule("resolve-test-masks"), logConfig = requireModule("log-config"), gatherPaths = requireModule("gather-paths"), { test } = requireModule("dotnet-cli"), { resolveTestPrefixFor } = requireModule("test-utils"), buildReportFolder = path.dirname(env.resolve("BUILD_REPORT_XML")), Version = requireModule("version"), quote = requireModule("quote-if-required"), netFrameworkTestAssemblyFilter = requireModule("netfx-test-assembly-filter"), { baseName, chopExtension } = requireModule("path-utils");
+    const QUACKERS_LOG_PREFIX = ":quackers_log:", QUACKERS_SUMMARY_START_MARKER = `::start_summary::`, QUACKERS_SUMMARY_COMPLETE_MARKER = `::summary_complete::`, QUACKERS_FAILURE_START_MARKER = `::start_failures::`, QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::", QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::", QUACKERS_SLOW_SUMMARY_START_MARKER = "::slow_summary_start::", QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::slow_summary_complete::", QUACKERS_SHOW_SUMMARY = "true", QUACKERS_SUMMARY_TOTALS_START_MARKER = "::totals_summary_start::", QUACKERS_SUMMARY_TOTALS_COMPLETE_MARKER = "::totals_summary_complete::", QUACKERS_OUTPUT_FAILURES_INLINE = "true", quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length, quackersFullSummaryStartMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_START_MARKER}`, quackersFullSummaryCompleteMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_COMPLETE_MARKER}`, { rm, ls, FsEntities, readTextFile, mkdir } = require("yafs"), gulp = requireModule("gulp"), log = requireModule("log"), path = require("path"), gulpDebug = require("gulp-debug"), debug = requireModule("debug")(__filename), filter = require("gulp-filter"), ansiColors = requireModule("ansi-colors"), promisifyStream = requireModule("promisify-stream"), nunitRunner = requireModule("gulp-nunit-runner"), testUtilFinder = requireModule("testutil-finder"), env = requireModule("env"), resolveTestMasks = requireModule("resolve-test-masks"), logConfig = requireModule("log-config"), gatherPaths = requireModule("gather-paths"), { test } = requireModule("dotnet-cli"), { resolveTestPrefixFor } = requireModule("test-utils"), buildReportFolder = path.dirname(env.resolve("BUILD_REPORT_XML")), Version = requireModule("version"), quote = requireModule("quote-if-required"), netFrameworkTestAssemblyFilter = requireModule("netfx-test-assembly-filter"), { baseName, chopExtension } = requireModule("path-utils");
     async function runTests() {
         await mkdir(buildReportFolder);
         const dotNetCore = env.resolveFlag("DOTNET_CORE");
@@ -247,7 +247,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
         console.log(yellow(`
 Test Run Summary
   Overall result: ${overallResultFor(testResults)}
-  Test Count: ${total}, Passed: ${testResults.passed}, Failed: ${testResults.failed}, Skipped: ${testResults.skipped}, Slow: ${testResults.slowSummary.length}
+  Test Count: ${total}
+    Passed: ${testResults.passed} 
+    Failed: ${testResults.failed}
+    Skipped: ${testResults.skipped}
+    Slow: ${testResults.slowSummary.length}
   Start time: ${dateString(testResults.started)}
     End time: ${dateString(now)}
     Duration: ${runTime}
@@ -305,6 +309,7 @@ Test Run Summary
             inSummary: false,
             inFailureSummary: false,
             inSlowSummary: false,
+            inTotalsSummary: false,
             // there is some valid logging (eg build) before the first quackers log
             // -> suppress when running in parallel (and by default when sequential)
             haveSeenQuackersLog: runningInParallel || env.resolveFlag("DOTNET_TEST_QUIET_QUACKERS"),
@@ -322,6 +327,7 @@ Test Run Summary
             ? "quiet" // if quackers is providing details, quieten down the built-in console logger
             : verbosity;
         await mkdir(buildReportFolder);
+        // FIXME: re-enable once totals tests are passing
         // addTrxLoggerTo(loggers, target);
         testResults.quackersEnabled = testResults.quackersEnabled || useQuackers;
         try {
@@ -418,7 +424,6 @@ Test Run Summary
             ::::SC::
                  */
                 const line = stripQuackersLogPrefix(s);
-                debugger;
                 if (line.startsWith(QUACKERS_FAILURE_START_MARKER)) {
                     debug("failure summary start");
                     state.inFailureSummary = true;
@@ -434,6 +439,20 @@ Test Run Summary
                     state.inSlowSummary = false;
                     return;
                 }
+                if (line.startsWith(QUACKERS_SUMMARY_TOTALS_START_MARKER)) {
+                    debug("totals summary start");
+                    state.inTotalsSummary = true;
+                    return;
+                }
+                if (line.startsWith(QUACKERS_SUMMARY_TOTALS_COMPLETE_MARKER)) {
+                    debug("totals summary complete");
+                    state.inTotalsSummary = false;
+                    return;
+                }
+                if (state.inTotalsSummary) {
+                    incrementTestResultCount(state.testResults, line);
+                    return;
+                }
                 if (state.inFailureSummary) {
                     state.testResults.failureSummary.push(line);
                     return;
@@ -442,7 +461,6 @@ Test Run Summary
                     state.testResults.slowSummary.push(line);
                     return;
                 }
-                incrementTestResultCount(state.testResults, line);
                 return;
             }
             const isQuackersLog = s.startsWith(QUACKERS_LOG_PREFIX);
@@ -515,10 +533,12 @@ Test Run Summary
             QUACKERS_FAILURE_START_MARKER,
             QUACKERS_SLOW_SUMMARY_START_MARKER,
             QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER,
-            QUACKERS_VERBOSE_SUMMARY,
+            QUACKERS_VERBOSE_SUMMARY: QUACKERS_SHOW_SUMMARY,
             QUACKERS_OUTPUT_FAILURES_INLINE,
             QUACKERS_FAILURE_INDEX_PLACEHOLDER,
-            QUACKERS_SLOW_INDEX_PLACEHOLDER
+            QUACKERS_SLOW_INDEX_PLACEHOLDER,
+            QUACKERS_SUMMARY_TOTALS_START_MARKER,
+            QUACKERS_SUMMARY_TOTALS_COMPLETE_MARKER
         };
         if (prefix) {
             quackersVars.QUACKERS_TEST_NAME_PREFIX = prefix;

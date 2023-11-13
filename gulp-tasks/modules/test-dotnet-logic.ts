@@ -1,5 +1,6 @@
 import { BufferFile } from "vinyl";
 import { StyleFunction } from "ansi-colors";
+import { Test } from "@jest/test-result";
 
 (function () {
   const
@@ -11,7 +12,9 @@ import { StyleFunction } from "ansi-colors";
     QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::",
     QUACKERS_SLOW_SUMMARY_START_MARKER = "::slow_summary_start::",
     QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::slow_summary_complete::",
-    QUACKERS_VERBOSE_SUMMARY = "true",
+    QUACKERS_SHOW_SUMMARY = "true",
+    QUACKERS_SUMMARY_TOTALS_START_MARKER="::totals_summary_start::",
+    QUACKERS_SUMMARY_TOTALS_COMPLETE_MARKER="::totals_summary_complete::",
     QUACKERS_OUTPUT_FAILURES_INLINE = "true",
     quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length,
     quackersFullSummaryStartMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_START_MARKER }`,
@@ -351,7 +354,11 @@ import { StyleFunction } from "ansi-colors";
     console.log(yellow(`
 Test Run Summary
   Overall result: ${ overallResultFor(testResults) }
-  Test Count: ${ total }, Passed: ${ testResults.passed }, Failed: ${ testResults.failed }, Skipped: ${ testResults.skipped }, Slow: ${ testResults.slowSummary.length }
+  Test Count: ${ total }
+    Passed: ${ testResults.passed } 
+    Failed: ${ testResults.failed }
+    Skipped: ${ testResults.skipped }
+    Slow: ${ testResults.slowSummary.length }
   Start time: ${ dateString(testResults.started) }
     End time: ${ dateString(now) }
     Duration: ${ runTime }
@@ -434,6 +441,18 @@ Test Run Summary
     return `${ seconds }.${ ms } seconds`;
   }
 
+  interface QuackersState {
+    inSummary: boolean;
+    inSlowSummary: boolean;
+    inFailureSummary: boolean;
+    inTotalsSummary: boolean;
+    haveSeenQuackersLog: boolean;
+    testResults: TestResults;
+    target: string;
+    fullLog: string[];
+  }
+
+
   async function testOneDotNetCoreProject(
     target: string,
     configuration: string,
@@ -448,13 +467,14 @@ Test Run Summary
         inSummary: false, // gather summary info into test results
         inFailureSummary: false,
         inSlowSummary: false,
+        inTotalsSummary: false,
         // there is some valid logging (eg build) before the first quackers log
         // -> suppress when running in parallel (and by default when sequential)
         haveSeenQuackersLog: runningInParallel || env.resolveFlag("DOTNET_TEST_QUIET_QUACKERS"),
         testResults,
         target,
         fullLog: [] as string[]
-      };
+      } satisfies QuackersState;
     const
       useQuackers = await projectReferencesQuackers(target),
       stderr = useQuackers
@@ -472,6 +492,7 @@ Test Run Summary
         ? "quiet" // if quackers is providing details, quieten down the built-in console logger
         : verbosity;
     await mkdir(buildReportFolder);
+    // FIXME: re-enable once totals tests are passing
     // addTrxLoggerTo(loggers, target);
     testResults.quackersEnabled = testResults.quackersEnabled || useQuackers;
     try {
@@ -507,15 +528,6 @@ Test Run Summary
     loggers.trx = {
       logFileName
     };
-  }
-
-  interface QuackersState {
-    inSummary: boolean;
-    inSlowSummary: boolean;
-    inFailureSummary: boolean;
-    testResults: TestResults;
-    haveSeenQuackersLog: boolean;
-    fullLog: string[];
   }
 
   function quackersStdErrHandler(s: string) {
@@ -588,7 +600,6 @@ Test Run Summary
   ::::SC::
        */
       const line = stripQuackersLogPrefix(s);
-      debugger;
       if (line.startsWith(QUACKERS_FAILURE_START_MARKER)) {
         debug("failure summary start");
         state.inFailureSummary = true;
@@ -604,6 +615,20 @@ Test Run Summary
         state.inSlowSummary = false;
         return;
       }
+      if (line.startsWith(QUACKERS_SUMMARY_TOTALS_START_MARKER)) {
+        debug("totals summary start");
+        state.inTotalsSummary = true;
+        return;
+      }
+      if (line.startsWith(QUACKERS_SUMMARY_TOTALS_COMPLETE_MARKER)) {
+        debug("totals summary complete");
+        state.inTotalsSummary = false;
+        return;
+      }
+      if (state.inTotalsSummary) {
+        incrementTestResultCount(state.testResults, line);
+        return;
+      }
       if (state.inFailureSummary) {
         state.testResults.failureSummary.push(line);
         return;
@@ -612,7 +637,6 @@ Test Run Summary
         state.testResults.slowSummary.push(line);
         return;
       }
-      incrementTestResultCount(state.testResults, line);
       return;
     }
     const isQuackersLog = s.startsWith(QUACKERS_LOG_PREFIX);
@@ -703,10 +727,12 @@ Test Run Summary
       QUACKERS_FAILURE_START_MARKER,
       QUACKERS_SLOW_SUMMARY_START_MARKER,
       QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER,
-      QUACKERS_VERBOSE_SUMMARY,
+      QUACKERS_VERBOSE_SUMMARY: QUACKERS_SHOW_SUMMARY,
       QUACKERS_OUTPUT_FAILURES_INLINE,
       QUACKERS_FAILURE_INDEX_PLACEHOLDER,
-      QUACKERS_SLOW_INDEX_PLACEHOLDER
+      QUACKERS_SLOW_INDEX_PLACEHOLDER,
+      QUACKERS_SUMMARY_TOTALS_START_MARKER,
+      QUACKERS_SUMMARY_TOTALS_COMPLETE_MARKER
     } as Dictionary<string>;
     if (prefix) {
       quackersVars.QUACKERS_TEST_NAME_PREFIX = prefix;
