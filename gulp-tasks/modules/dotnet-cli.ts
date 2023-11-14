@@ -270,8 +270,11 @@
   async function test(
     opts: DotNetTestOptions
   ): Promise<SystemResult | SystemError> {
+    const labelText = !!opts.label
+      ? `${ label("Testing") }`
+      : `${ opts.label } ${ label("Testing") }`;
     return runOnAllConfigurations(
-      label("Testing"),
+      labelText,
       opts,
       configuration => {
         const args = [
@@ -302,6 +305,7 @@
   }
 
   let tempDbPortIncrements = 0;
+
   function incrementTempDbPortHintIfFound(env: Dictionary<string> | undefined): void {
     if (env === undefined) {
       return;
@@ -315,7 +319,7 @@
       return;
     }
     port += tempDbPortIncrements++;
-    env["TEMPDB_PORT_HINT"] = `${port}`;
+    env["TEMPDB_PORT_HINT"] = `${ port }`;
   }
 
   async function listNugetSources(): Promise<NugetSource[]> {

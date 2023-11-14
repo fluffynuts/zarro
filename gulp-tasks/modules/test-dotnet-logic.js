@@ -175,7 +175,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
             return async () => {
                 debug(`${idx}  start test run ${path}`);
                 try {
-                    const result = await testOneDotNetCoreProject(path, configuration, verbosity, testResults, runningInParallel, rebuild);
+                    const result = await testOneDotNetCoreProject(path, configuration, verbosity, testResults, runningInParallel, rebuild, false, `(${idx + 1} / ${testProjectPaths.length})`);
                     testProcessResults.push(result);
                 }
                 catch (e) {
@@ -304,7 +304,7 @@ Test Run Summary
         const ms = totalMs % 1000, seconds = Math.floor(totalMs / 1000);
         return `${seconds}.${ms} seconds`;
     }
-    async function testOneDotNetCoreProject(target, configuration, verbosity, testResults, runningInParallel, forceBuild, suppressOutput) {
+    async function testOneDotNetCoreProject(target, configuration, verbosity, testResults, runningInParallel, forceBuild, suppressOutput, label) {
         const quackersState = {
             inSummary: false,
             inFailureSummary: false,
@@ -342,7 +342,8 @@ Test Run Summary
                 stdout,
                 suppressOutput,
                 suppressErrors: true,
-                env: testEnvironment
+                env: testEnvironment,
+                label
             });
             return result;
         }

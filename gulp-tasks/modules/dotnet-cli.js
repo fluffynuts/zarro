@@ -182,7 +182,10 @@
             : str;
     }
     async function test(opts) {
-        return runOnAllConfigurations(label("Testing"), opts, configuration => {
+        const labelText = !!opts.label
+            ? `${label("Testing")}`
+            : `${opts.label} ${label("Testing")}`;
+        return runOnAllConfigurations(labelText, opts, configuration => {
             const args = [
                 "test",
                 q(opts.target)

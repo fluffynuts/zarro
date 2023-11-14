@@ -1508,6 +1508,7 @@ declare global {
     env?: Dictionary<string>;
     filter?: string;
     diagnostics?: string;
+    label?: string;
   }
 
   interface NugetSource {

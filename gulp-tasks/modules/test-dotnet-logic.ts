@@ -265,7 +265,9 @@ import { Test } from "@jest/test-result";
               verbosity,
               testResults,
               runningInParallel,
-              rebuild
+              rebuild,
+              false,
+              `(${idx + 1} / ${testProjectPaths.length})`
             );
             testProcessResults.push(result);
           } catch (e) {
@@ -459,7 +461,8 @@ Test Run Summary
     testResults: TestResults,
     runningInParallel: boolean,
     forceBuild?: boolean,
-    suppressOutput?: boolean
+    suppressOutput?: boolean,
+    label?: string
   ): Promise<SystemResult | SystemError> {
     const
       quackersState = {
@@ -506,7 +509,8 @@ Test Run Summary
         stdout,
         suppressOutput,
         suppressErrors: true, // we want to collect the errors later, not die when one happens
-        env: testEnvironment
+        env: testEnvironment,
+        label
       });
       return result;
     } catch (e) {
