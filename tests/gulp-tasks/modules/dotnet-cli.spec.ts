@@ -2737,6 +2737,31 @@ chucked:
     });
   });
 
+  describe(`specific integrations`, () => {
+    describe(`incrementTempDbPortHintIfFound`, () => {
+      const { incrementTempDbPortHintIfFound } = requireModule<DotNetCli>("dotnet-cli");
+      describe(`when found`, () => {
+        it(`should increment TEMPDB_PORT_HINT`, async () => {
+          // Arrange
+
+          const
+            start = faker.number.int({ min: 1024, max: 32768 }),
+            env = { TEMPDB_PORT_HINT: `${start}` };
+          // Act
+          incrementTempDbPortHintIfFound(env);
+          const first = env["TEMPDB_PORT_HINT"];
+          incrementTempDbPortHintIfFound(env);
+          const second = env["TEMPDB_PORT_HINT"];
+          // Assert
+          expect(parseInt(first))
+            .toEqual(start);
+          expect(parseInt(second))
+            .toEqual(start + 1);
+        });
+      });
+    });
+  });
+
   beforeEach(() => {
     allowLogs = false;
     const original = console.log;

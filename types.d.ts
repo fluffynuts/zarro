@@ -1569,6 +1569,7 @@ declare global {
     enableNugetSource: DotNetEnableNugetSourceFunction;
     disableNugetSource: DotNetDisableNugetSourceFunction;
     tryFindConfiguredNugetSource: DotNetTryMatchNugetSourceFunction;
+    incrementTempDbPortHintIfFound: (env: Dictionary<string>) => void;
   }
 
   type ReadCsProjNode = (csproj: string) => Promise<string>;

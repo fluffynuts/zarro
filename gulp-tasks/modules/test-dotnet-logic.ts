@@ -452,7 +452,6 @@ Test Run Summary
     fullLog: string[];
   }
 
-
   async function testOneDotNetCoreProject(
     target: string,
     configuration: string,

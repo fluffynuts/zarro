@@ -295,9 +295,27 @@
         // error dump is not only unnecessary, it confuses
         // the test handler wrt quackers output handling
         opts.suppressStdIoInErrors = true;
+        incrementTempDbPortHintIfFound(opts.env);
         return runDotNetWith(args, opts);
       }
     );
+  }
+
+  let tempDbPortIncrements = 0;
+  function incrementTempDbPortHintIfFound(env: Dictionary<string> | undefined): void {
+    if (env === undefined) {
+      return;
+    }
+    const current = env["TEMPDB_PORT_HINT"];
+    if (current === undefined) {
+      return;
+    }
+    let port = parseInt(current);
+    if (isNaN(port)) {
+      return;
+    }
+    port += tempDbPortIncrements++;
+    env["TEMPDB_PORT_HINT"] = `${port}`;
   }
 
   async function listNugetSources(): Promise<NugetSource[]> {
@@ -1096,6 +1114,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     removeNugetSource,
     disableNugetSource,
     enableNugetSource,
-    tryFindConfiguredNugetSource
+    tryFindConfiguredNugetSource,
+    incrementTempDbPortHintIfFound
   };
 })();
