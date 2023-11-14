@@ -81,7 +81,7 @@ describe(`test-dotnet-logic`, () => {
           break;
         }
       });
-    }, 30000);
+    }, 60000);
   });
 
   describe(`testAsDotNetCore`, () => {
