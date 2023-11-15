@@ -254,6 +254,7 @@ import { Test } from "@jest/test-result";
 
     const rebuild = env.resolveFlag(env.DOTNET_TEST_REBUILD);
     const runningInParallel = concurrency > 1;
+    const suppressOutput = true;
     const tasks = testProjectPaths.map(
       (path, idx) => {
         return async () => {
@@ -266,7 +267,7 @@ import { Test } from "@jest/test-result";
               testResults,
               runningInParallel,
               rebuild,
-              false,
+              suppressOutput,
               `(${idx + 1} / ${testProjectPaths.length})`
             );
             testProcessResults.push(result);
