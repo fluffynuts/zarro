@@ -171,11 +171,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
         }
         const rebuild = env.resolveFlag(env.DOTNET_TEST_REBUILD);
         const runningInParallel = concurrency > 1;
+        const suppressOutput = true;
         const tasks = testProjectPaths.map((path, idx) => {
             return async () => {
                 debug(`${idx}  start test run ${path}`);
                 try {
-                    const result = await testOneDotNetCoreProject(path, configuration, verbosity, testResults, runningInParallel, rebuild, false, `(${idx + 1} / ${testProjectPaths.length})`);
+                    const result = await testOneDotNetCoreProject(path, configuration, verbosity, testResults, runningInParallel, rebuild, suppressOutput, `(${idx + 1} / ${testProjectPaths.length})`);
                     testProcessResults.push(result);
                 }
                 catch (e) {
