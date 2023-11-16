@@ -1,6 +1,5 @@
 import { BufferFile } from "vinyl";
 import { StyleFunction } from "ansi-colors";
-import { Test } from "@jest/test-result";
 
 (function () {
   const
@@ -239,7 +238,7 @@ import { Test } from "@jest/test-result";
       } satisfies TestResults,
       testProcessResults = [] as (SystemResult | SystemError)[],
       testProjectPaths = await gatherPaths(testProjects, true),
-      verbosity = env.resolve("BUILD_VERBOSITY");
+      verbosity = env.resolve("TEST_VERBOSITY");
 
     const testInParallel = await shouldTestInParallel(testProjectPaths);
 
