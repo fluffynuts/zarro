@@ -174,7 +174,7 @@
         });
         env.register({
             name: "TEST_VERBOSITY",
-            help: `Verbosity of reporting for dotnet core testing: ${msbuildVerbosityOptions}`,
+            help: `Verbosity of reporting for dotnet core testing: ${msbuildVerbosityOptions} (if you're using Quackers, this will be dropped to minimal as Quackers provides plenty of logging)`,
             default: "normal"
         });
         env.register({

@@ -160,7 +160,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
             slowSummary: [],
             started: Date.now(),
             fullLog: [],
-        }, testProcessResults = [], testProjectPaths = await gatherPaths(testProjects, true), verbosity = env.resolve("BUILD_VERBOSITY");
+        }, testProcessResults = [], testProjectPaths = await gatherPaths(testProjects, true), verbosity = env.resolve("TEST_VERBOSITY");
         const testInParallel = await shouldTestInParallel(testProjectPaths);
         const concurrency = testInParallel
             ? env.resolveNumber("MAX_CONCURRENCY")
