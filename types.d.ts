@@ -509,6 +509,7 @@ declare global {
     "NPM_PUBLISH_SKIP_OTP" |
     "SKIP_NUGET_UPDATE" |
     "PACK_INCREMENT_MINOR_ON_FIRST_PRERELEASE" |
+    "BUILD_TOOLS_INSTALL_FORCE_NUGET_EXE" |
     string;
 
   type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
@@ -683,6 +684,7 @@ declare global {
     NPM_PUBLISH_SKIP_OTP: FlagEnvVar;
     SKIP_NUGET_UPDATE: FlagEnvVar;
     PACK_INCREMENT_MINOR_ON_FIRST_PRERELEASE: FlagEnvVar;
+    BUILD_TOOLS_INSTALL_FORCE_NUGET_EXE: FlagEnvVar;
 
     BUILD_MAX_CPU_COUNT: NumericEnvVar;
     MAX_NUNIT_AGENTS: NumericEnvVar;

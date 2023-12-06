@@ -20,6 +20,13 @@
     });
 
     env.register({
+      name: "BUILD_TOOLS_INSTALL_FORCE_NUGET_EXE",
+      help: `Flag: when set, revert to the original behavior for downloading tooling via nuget.exe 
+  (default is to use node-nuget-client since nuget.exe now refuses to download packages marked as tools)`,
+      default: "false"
+    });
+
+    env.register({
       name: "USE_SYSTEM_NUGET",
       default: "false",
       help: "Whether or not to use nuget.exe if found in the path"
