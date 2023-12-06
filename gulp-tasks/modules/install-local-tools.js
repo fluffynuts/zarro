@@ -92,6 +92,20 @@
         return inProgress[inProgressKey] = doInstall(toolsFolder, requiredTools);
     }
     async function doInstall(toolsFolder, requiredTools) {
+        return env.resolveFlag(env.BUILD_TOOLS_INSTALL_FORCE_NUGET_EXE)
+            ? doInstallViaNugetExe(toolsFolder, requiredTools)
+            : doInstallViaNodeNugetClient(toolsFolder, requiredTools);
+    }
+    async function doInstallViaNodeNugetClient(toolsFolder, requiredTools) {
+        const { NugetClient } = require("node-nuget-client"), client = new NugetClient();
+        for (const tool of requiredTools) {
+            await client.downloadPackage({
+                packageId: tool,
+                output: toolsFolder
+            });
+        }
+    }
+    async function doInstallViaNugetExe(toolsFolder, requiredTools) {
         const findLocalNuget = requireModule("find-local-nuget");
         await mkdir(toolsFolder);
         await cleanFoldersFrom(toolsFolder);
