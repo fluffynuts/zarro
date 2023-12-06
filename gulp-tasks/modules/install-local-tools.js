@@ -97,10 +97,13 @@
             : doInstallViaNodeNugetClient(toolsFolder, requiredTools);
     }
     async function doInstallViaNodeNugetClient(toolsFolder, requiredTools) {
-        const { NugetClient } = require("node-nuget-client"), client = new NugetClient();
+        const { NugetClient } = require("node-nuget-client");
         for (const tool of requiredTools) {
+            const spec = tool.includes("/")
+                ? tool
+                : `nuget.org/${tool}`, parts = spec.split("/"), [source, packageId] = parts, client = new NugetClient(source);
             await client.downloadPackage({
-                packageId: tool,
+                packageId,
                 output: toolsFolder
             });
         }
