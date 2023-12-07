@@ -98,14 +98,16 @@
         }
     }
     async function doInstallViaNodeNugetClient(toolsFolder, requiredTools) {
-        const { NugetClient } = require("node-nuget-client");
+        const { ExecStepContext } = require("exec-step"), ctx = new ExecStepContext(), { NugetClient } = require("node-nuget-client");
         for (const tool of requiredTools) {
-            const spec = tool.includes("/")
-                ? tool
-                : `nuget.org/${tool}`, parts = spec.split("/"), [source, packageId] = parts, client = new NugetClient(source);
-            await client.downloadPackage({
-                packageId,
-                output: toolsFolder
+            await ctx.exec(`Installing local tool: ${tool}`, async () => {
+                const spec = tool.includes("/")
+                    ? tool
+                    : `nuget.org/${tool}`, parts = spec.split("/"), [source, packageId] = parts, client = new NugetClient(source);
+                await client.downloadPackage({
+                    packageId,
+                    output: toolsFolder
+                });
             });
         }
     }

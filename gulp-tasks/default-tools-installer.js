@@ -3,7 +3,7 @@
     const debug = requireModule("debug")(__filename), gulp = requireModule("gulp"), env = requireModule("env"), nugetSourceName = process.env.NUGET_SOURCE || "nuget.org", installLocalTools = requireModule("install-local-tools"), isDotnetCore = env.resolveFlag("DOTNET_CORE"), tools = isDotnetCore
         ? [] // currently, only dotnet targets are used for dotnet test/build
         : [
-            `${nugetSourceName}/nunit.console`,
+            `${nugetSourceName}/nunit.consolerunner`,
             `${nugetSourceName}/opencover`,
             `${nugetSourceName}/Jetbrains.dotCover.CommandLineTools`,
             `${nugetSourceName}/reportgenerator`

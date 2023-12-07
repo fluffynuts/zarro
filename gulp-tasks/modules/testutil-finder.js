@@ -85,8 +85,7 @@
         return fs.existsSync(somePath) ? somePath : undefined;
     }
     function tryToFindNUnit(options) {
-        return initialToolSearch("nunit3-console.exe", "NUNIT") ||
-            searchForNunit(options);
+        return initialToolSearch("nunit3-console.exe", "NUNIT") || searchForSystemNUnit(options);
     }
     function latestNUnit(options) {
         const result = tryToFindNUnit(options);
@@ -99,7 +98,7 @@
         }
         return finder([programFilesFolder], undefined, "NUnit", searchBin, options);
     }
-    function searchForNunit(options) {
+    function searchForSystemNUnit(options) {
         options = options || {};
         const isX86 = (options.x86 || ((options.platform || options.architecture) === "x86"));
         const runner = isX86 ? "/bin/nunit-console-x86.exe" : "/bin/nunit-console.exe";
