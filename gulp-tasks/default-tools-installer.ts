@@ -9,20 +9,24 @@
     tools = isDotnetCore
       ? [] // currently, only dotnet targets are used for dotnet test/build
       : [
-        `${nugetSourceName}/nunit.consolerunner`,
-        `${nugetSourceName}/opencover`,
-        `${nugetSourceName}/Jetbrains.dotCover.CommandLineTools`,
-        `${nugetSourceName}/reportgenerator`
+        `${ nugetSourceName }/nunit.consolerunner`,
+        `${ nugetSourceName }/opencover`,
+        `${ nugetSourceName }/Jetbrains.dotCover.CommandLineTools`,
+        `${ nugetSourceName }/reportgenerator`
       ];
 
   env.associate("default-tools-installer", [ "BUILD_TOOLS_FOLDER", "DOTNET_CORE" ]);
 
   gulp.task(
     "default-tools-installer",
-    `Installs the default toolset: ${tools.join(", ")}`,
+    `Installs the default toolset: ${ tools.join(", ") }`,
     () => {
       if (env.resolveFlag("DOTNET_CORE")) {
-        debug("not invoked for dotnet core builds");
+        debug(`DOTNET_CORE builds currently have ${ tools.length } default tools to install`);
+      }
+      if (tools.length === 0) {
+        // don't waste time calling into the installer
+        // when there are no tools to install
         return Promise.resolve();
       }
       return installLocalTools.install(tools);
