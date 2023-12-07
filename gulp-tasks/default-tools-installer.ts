@@ -9,7 +9,7 @@
     tools = isDotnetCore
       ? [] // currently, only dotnet targets are used for dotnet test/build
       : [
-        `${nugetSourceName}/nunit.console`,
+        `${nugetSourceName}/nunit.consolerunner`,
         `${nugetSourceName}/opencover`,
         `${nugetSourceName}/Jetbrains.dotCover.CommandLineTools`,
         `${nugetSourceName}/reportgenerator`
