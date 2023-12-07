@@ -28,7 +28,7 @@
         // packagename (eg 'nunit')
         //  - retrieves the package according to the system config (original & default behavior)
         // source/packagename (eg 'proget.mycompany.moo/nunit')
-        //  - retrieves the package from the named source (same as nuget.exe install nunit -source proget.mycompany.moo}
+        //  - retrieves the package from the named source (same as nuget.exe install nunit -source proget.mycompany.moo)
         //  - allows consumer to be specific about where the package should come from
         //  - allows third-parties to be specific about their packages being from, eg, nuget.org
         const parts = toolSpec.split("/");
@@ -37,11 +37,6 @@
             "install", toolPackage[0], "-OutputDirectory", quoteIfRequired(outputDirectory)
         ].concat(generateNugetSourcesOptions(parts[0]));
     }
-    // gulp4 doesn't seem to protect against repeated dependencies, so this is a safeguard
-    //  here to prevent accidental parallel installation
-    //   let
-    //     installingPromise: Optional<Promise<void>>,
-    //     installingRequest: Optional<string[]>;
     const inProgress = {};
     const keyDelimiter = "||";
     function makeKey(parts) {
@@ -92,9 +87,15 @@
         return inProgress[inProgressKey] = doInstall(toolsFolder, requiredTools);
     }
     async function doInstall(toolsFolder, requiredTools) {
-        return env.resolveFlag(env.BUILD_TOOLS_INSTALL_FORCE_NUGET_EXE)
-            ? doInstallViaNugetExe(toolsFolder, requiredTools)
-            : doInstallViaNodeNugetClient(toolsFolder, requiredTools);
+        const forceNugetUsage = env.resolveFlag(env.BUILD_TOOLS_INSTALL_FORCE_NUGET_EXE);
+        if (forceNugetUsage) {
+            debug(`${env.BUILD_TOOLS_INSTALL_FORCE_NUGET_EXE} is set truthy - forcing usage of nuget.exe for tool installation`);
+            return doInstallViaNugetExe(toolsFolder, requiredTools);
+        }
+        else {
+            debug(`using node-nuget-client for tool installation`);
+            return doInstallViaNodeNugetClient(toolsFolder, requiredTools);
+        }
     }
     async function doInstallViaNodeNugetClient(toolsFolder, requiredTools) {
         const { NugetClient } = require("node-nuget-client");
