@@ -3,6 +3,7 @@
 
   gulp.task("generate-local-task", async () => {
     const
+      log = requireModule<Log>("log"),
       path = require("path"),
       { ask } = requireModule<Ask>("ask"),
       rawName = await ask("name of new task"), {
@@ -18,6 +19,7 @@
     }
 
     await writeTextFile(target, template.replace("%TASK_NAME%", taskName));
+    log.info(`generated new task file at: ${target}`);
   });
 
   const template = `
