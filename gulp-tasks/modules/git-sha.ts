@@ -9,7 +9,7 @@
         const git = new Git(forRepo);
         const log = await git.log({maxCount: 1});
         return !!short
-          ? currentGitSha.substring(0, 7)
+          ? log.latest.hash.substring(0, 7)
           : log.latest.hash;
     }
 
