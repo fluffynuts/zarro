@@ -53,7 +53,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
     }
     const prioritise = [
         "test-dotnet-logic",
-        "dotnet-cli",
+        "integrations",
         "find-local-nuget",
         "nuget-update-self"
     ];

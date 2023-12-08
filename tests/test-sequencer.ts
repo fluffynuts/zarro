@@ -68,7 +68,7 @@ import { Test } from "@jest/test-result";
 
   const prioritise = [
     "test-dotnet-logic",
-    "dotnet-cli",
+    "integrations",
     "find-local-nuget",
     "nuget-update-self"
   ];
