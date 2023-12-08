@@ -2,10 +2,15 @@
     const
         Git = require("simple-git");
 
-    async function fetchGitSha(forRepo?: string) {
+    async function fetchGitSha(
+      forRepo?: string,
+      short?: boolean
+    ) {
         const git = new Git(forRepo);
         const log = await git.log({maxCount: 1});
-        return log.latest.hash;
+        return !!short
+          ? currentGitSha.substring(0, 7)
+          : log.latest.hash;
     }
 
     // this is a bit of an hax: we're hoping that we get some

@@ -705,7 +705,10 @@ declare global {
   type StatFunction = (path: string) => Promise<fs.Stats | null>
 
   interface GitSha {
-    fetchGitSha(forRepo?: string): Promise<string>;
+    fetchGitSha(
+      forRepo?: string,
+      short?: boolean
+    ): Promise<string>;
 
     init(): Promise<void>;
 
