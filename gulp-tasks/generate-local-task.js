@@ -14,5 +14,5 @@ const
   gulp = requireModule<Gulp>("gulp");
 gulp.task(\`%TASK_NAME%\`, async () => {
 });  
-`;
+`.trim();
 })();

@@ -24,7 +24,9 @@
 /// <reference path="../node_modules/zarro/types.d.ts" />
 const
   gulp = requireModule<Gulp>("gulp");
+  
 gulp.task(\`%TASK_NAME%\`, async () => {
+  
 });  
-`;
+`.trim();
 })();
