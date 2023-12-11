@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const sut = require("../../../gulp-tasks/modules/increment-version");
 const { currentShortSHA, init } = require("../../../gulp-tasks/modules/git-sha");
 require("expect-even-more-jest");
 describe(`increment-version`, function () {
+    const sut = requireModule("increment-version");
     const env = requireModule("env");
     beforeAll(async () => {
         await init();
@@ -151,6 +151,17 @@ describe(`increment-version`, function () {
                 expect(result)
                     .toEqual(expected);
             });
+        });
+    });
+    describe(`tags`, () => {
+        it(`should be able to increment tag version`, async () => {
+            // Arrange
+            const input = "v0.1", expected = "v0.2";
+            // Act
+            const result = sut(input, "minor");
+            // Assert
+            expect(result)
+                .toEqual(expected);
         });
     });
 });

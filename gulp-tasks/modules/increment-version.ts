@@ -37,6 +37,7 @@
     const
       dashedParts = version.split("-"),
       currentVersionIsPreRelease = dashedParts.length > 1,
+      prefix = removePrefix(dashedParts),
       parts = dashedParts[0].split(".").map(i => parseInt(i));
     let toIncrement = incrementLookup[(strategy || "").toLowerCase()]
     if (toIncrement === undefined) {
@@ -63,9 +64,22 @@
     }
     const result = parts.join(".");
     if (strategy != "prerelease") {
-      return result;
+      return `${ prefix }${ result }`;
     }
-    return `${ result }-${ generateVersionSuffix() }`;
+    return `${ prefix }${ result }-${ generateVersionSuffix() }`;
+  }
+
+  function removePrefix(parts: string[]) {
+    const
+      match = parts[0].match(/^(?<prefix>[^.\d]+)?(?<version>[.\d]+)/),
+      prefix = match?.groups?.["prefix"] ?? "",
+      version = match?.groups?.["version"];
+
+    if (!version) {
+      throw new Error(`'${ parts[0] }' doesn't look like a version string?`)
+    }
+    parts[0] = version;
+    return prefix;
   }
 
 })()

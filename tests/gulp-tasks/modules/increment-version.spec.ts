@@ -1,4 +1,3 @@
-const sut = require("../../../gulp-tasks/modules/increment-version") as IncrementVersion;
 const {
   currentShortSHA,
   init
@@ -6,6 +5,7 @@ const {
 import "expect-even-more-jest";
 
 describe(`increment-version`, function () {
+  const sut = requireModule<IncrementVersion>("increment-version");
   const env = requireModule<Env>("env");
   beforeAll(async () => {
     await init();
@@ -213,6 +213,20 @@ describe(`increment-version`, function () {
         expect(result)
           .toEqual(expected);
       });
+    });
+  });
+
+  describe(`tags`, () => {
+    it(`should be able to increment tag version`, async () => {
+      // Arrange
+      const
+        input = "v0.1",
+        expected = "v0.2";
+      // Act
+      const result = sut(input, "minor");
+      // Assert
+      expect(result)
+        .toEqual(expected);
     });
   });
 });

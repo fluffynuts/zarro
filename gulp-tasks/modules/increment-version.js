@@ -19,7 +19,7 @@
         "patch": 2
     };
     module.exports = function incrementVersion(version, strategy, zeroLowerOrder = true, incrementBy = 1) {
-        const dashedParts = version.split("-"), currentVersionIsPreRelease = dashedParts.length > 1, parts = dashedParts[0].split(".").map(i => parseInt(i));
+        const dashedParts = version.split("-"), currentVersionIsPreRelease = dashedParts.length > 1, prefix = removePrefix(dashedParts), parts = dashedParts[0].split(".").map(i => parseInt(i));
         let toIncrement = incrementLookup[(strategy || "").toLowerCase()];
         if (toIncrement === undefined) {
             throw new ZarroError(`Unknown version increment strategy: ${strategy}\n try one of 'major', 'minor' or 'patch'`);
@@ -43,8 +43,17 @@
         }
         const result = parts.join(".");
         if (strategy != "prerelease") {
-            return result;
+            return `${prefix}${result}`;
         }
-        return `${result}-${generateVersionSuffix()}`;
+        return `${prefix}${result}-${generateVersionSuffix()}`;
     };
+    function removePrefix(parts) {
+        var _a, _b, _c;
+        const match = parts[0].match(/^(?<prefix>[^.\d]+)?(?<version>[.\d]+)/), prefix = (_b = (_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a["prefix"]) !== null && _b !== void 0 ? _b : "", version = (_c = match === null || match === void 0 ? void 0 : match.groups) === null || _c === void 0 ? void 0 : _c["version"];
+        if (!version) {
+            throw new Error(`'${parts[0]}' doesn't look like a version string?`);
+        }
+        parts[0] = version;
+        return prefix;
+    }
 })();
