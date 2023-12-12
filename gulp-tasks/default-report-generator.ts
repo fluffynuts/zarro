@@ -1,7 +1,7 @@
 (function() {
     const gulp = requireModule<Gulp>("gulp"),
         path = require("path"),
-        findTool = requireModule<TestUtilFinder>("testutil-finder").findTool,
+        findTool = requireModule<TestUtilFinder>("test-util-finder").findTool,
         system = requireModule<System>("system"),
         quoteIfRequired = requireModule<QuoteIfRequired>("quote-if-required"),
         { rm, mkdir, exists } = require("yafs"),

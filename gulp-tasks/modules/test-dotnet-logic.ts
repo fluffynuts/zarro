@@ -34,7 +34,7 @@ import { StyleFunction } from "ansi-colors";
     ansiColors = requireModule<AnsiColors>("ansi-colors"),
     promisifyStream = requireModule<PromisifyStream>("promisify-stream"),
     nunitRunner = requireModule<GulpNunitRunner>("gulp-nunit-runner"),
-    testUtilFinder = requireModule<TestUtilFinder>("testutil-finder"),
+    testUtilFinder = requireModule<TestUtilFinder>("test-util-finder"),
     env = requireModule<Env>("env"),
     resolveTestMasks = requireModule<ResolveTestMasks>("resolve-test-masks"),
     logConfig = requireModule<LogConfig>("log-config"),

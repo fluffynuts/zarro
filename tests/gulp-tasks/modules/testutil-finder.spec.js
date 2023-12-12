@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
-describe(`testutil-finder`, () => {
+describe(`test-util-finder`, () => {
     describe(`compareVersionArrays`, () => {
-        const { compareVersionArrays } = requireModule("testutil-finder");
+        const { compareVersionArrays } = requireModule("test-util-finder");
         it(`should return zero for two identical versions`, async () => {
             // Arrange
             const x = [1, 2, 3], y = [1, 2, 3];
@@ -51,7 +51,7 @@ describe(`testutil-finder`, () => {
         });
     });
     describe(`findTool`, () => {
-        const { findTool } = requireModule("testutil-finder");
+        const { findTool } = requireModule("test-util-finder");
         const which = requireModule("which");
         it(`should return undefined when not found at all`, async () => {
             // Arrange

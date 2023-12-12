@@ -7,7 +7,7 @@ import { BufferFile } from "vinyl";
         env = requireModule<Env>("env"),
         es = require("event-stream"),
         path = require("path"),
-        testUtilFinder = requireModule<TestUtilFinder>("testutil-finder"),
+        testUtilFinder = requireModule<TestUtilFinder>("test-util-finder"),
         getToolsFolder = requireModule<GetToolsFolder>("get-tools-folder"),
         system = requireModule<System>("system"),
         coverageTarget = process.env.COVERAGE_TARGET || "Debug",

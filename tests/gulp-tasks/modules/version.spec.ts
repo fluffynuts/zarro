@@ -3,7 +3,7 @@ import {major} from "semver";
 
 describe(`version`, () => {
   /**
-   * Largely tested indirectly via testutil-finder.spec.ts / compareVersionArrays,
+   * Largely tested indirectly via tes-tutil-finder.spec.ts / compareVersionArrays,
    * but there are some specifics here
    */
   const sut = requireModule<Version>("version");

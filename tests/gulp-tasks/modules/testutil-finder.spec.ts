@@ -1,10 +1,10 @@
 import "expect-even-more-jest";
 import { Sandbox } from "filesystem-sandbox";
 
-describe(`testutil-finder`, () => {
+describe(`test-util-finder`, () => {
     describe(`compareVersionArrays`, () => {
         const
-            { compareVersionArrays } = requireModule<TestUtilFinder>("testutil-finder");
+            { compareVersionArrays } = requireModule<TestUtilFinder>("test-util-finder");
         it(`should return zero for two identical versions`, async () => {
             // Arrange
             const
@@ -68,7 +68,7 @@ describe(`testutil-finder`, () => {
     });
 
     describe(`findTool`, () => {
-        const { findTool } = requireModule<TestUtilFinder>("testutil-finder");
+        const { findTool } = requireModule<TestUtilFinder>("test-util-finder");
         const which = requireModule<Which>("which");
         it(`should return undefined when not found at all`, async () => {
             // Arrange
