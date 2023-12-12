@@ -8,7 +8,7 @@
     // refuses to pack them, and I haven't figured out
     // why; so another process should create dist-copy
     // specifically for packing purposes
-    search = ["src", "dist", "dist-copy"];
+    search = ["dist-copy", "src"];
     for (const item of search) {
         const seek = path.join(__dirname, "fetch-github-release", item);
         if (folderExistsSync(seek)) {
