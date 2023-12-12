@@ -39,6 +39,9 @@
     "build-zarro": "tsc",
     "prebuild-fetch-github-release": "rimraf gulp-tasks/modules/fetch-github-release/dist",
     "build-fetch-github-release": "tsc -p gulp-tasks/modules/fetch-github-release/tsconfig.json",
+    "postbuild-fetch-github-release": "run-s delete-fetch-github-release-dist-shadow shadow-fetch-github-release-dist",
+    "delete-fetch-github-release-dist-shadow": "rimraf gulp-tasks/modules/fetch-github-release/dist-copy",
+    "shadow-fetch-github-release-dist": "cpy gulp-tasks/modules/fetch-github-release/dist/*.* gulp-tasks/modules/fetch-github-release/dist-copy/",
     "gulp": "gulp",
     "test-npm-gulp-task": "echo \"this is a test\"",
     "verify-up-to-date": "run-s \"zarro -- verify-up-to-date\"",
@@ -91,7 +94,8 @@
   },
   "files": [
     "gulp-tasks/**/*.js",
-    "gulp-tasks/modules/fetch-github-release/**/*.*",
+    "gulp-tasks/modules/fetch-github-release/moo/*.js",
+    "gulp-tasks/modules/fetch-github-release/moo/*.d.ts",
     "index-modules/**/*.js",
     "types.d.ts",
     "tsconfig.json"
@@ -118,6 +122,7 @@
     "@types/xml2js": "^0.4.8",
     "@types/yargs": "^15.0.13",
     "console-cls": "^1.2.2",
+    "cpy-cli": "^5.0.0",
     "debugger-is-attached": "^1.2.0",
     "expect-even-more-jest": "^1.15.0",
     "filesystem-sandbox": "^1.20.0",
