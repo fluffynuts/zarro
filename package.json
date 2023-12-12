@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.165.4",
+  "version": "1.165.6",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "./index.js"
@@ -94,8 +94,10 @@
   },
   "files": [
     "gulp-tasks/**/*.js",
-    "gulp-tasks/modules/fetch-github-release/moo/*.js",
-    "gulp-tasks/modules/fetch-github-release/moo/*.d.ts",
+    "gulp-tasks/modules/fetch-github-release/dist-copy/*.js",
+    "gulp-tasks/modules/fetch-github-release/dist-copy/*.d.ts",
+    "gulp-tasks/modules/fetch-github-release/src/*.ts",
+    "gulp-tasks/modules/fetch-github-release/src/*.js",
     "index-modules/**/*.js",
     "types.d.ts",
     "tsconfig.json"
