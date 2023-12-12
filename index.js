@@ -21,6 +21,8 @@ const
   ZarroError = require("./gulp-tasks/modules/zarro-error"),
   { skip } = require("./gulp-tasks/modules/linq"),
   gatherArgs = require("./index-modules/gather-args");
+const { ExecStepContext } = require("exec-step");
+const { transpileModule, ModuleKind } = require("typescript");
 
 function requireHandler(name) {
   const result = require(`./index-modules/handlers/${ name }`);
@@ -86,18 +88,18 @@ async function loadDefaults() {
     }
     const
       parts = code.trim().split("="),
-      name = parts[ 0 ],
+      name = parts[0],
       value = Array.from(skip(parts, 1)).join("="),
-      forced = name[ 0 ] === '!',
-      notYetSet = process.env[ name ] === undefined;
+      forced = name[0] === '!',
+      notYetSet = process.env[name] === undefined;
     if (notYetSet || forced) {
       const key = name.replace(/^!/, "");
       if (value) {
         debug(`setting env var ${ key } to '${ value }'`);
-        process.env[ key ] = value;
+        process.env[key] = value;
       } else {
         debug(`deleting env var ${ key }`);
-        delete process.env[ key ];
+        delete process.env[key];
       }
     } else {
       debug(`env var ${ name } is already set, force it by setting !${ name }=${ value } in ${ defaultsFile }`)
@@ -124,6 +126,25 @@ function splitComment(line) {
   return [ line.substring(0, idx), line.substring(idx + 1) ];
 }
 
+async function transpileLocalTaskModules() {
+  await Promise.all([
+    transpileModulesUnder("local-tasks"),
+    transpileModulesUnder("override-tasks")
+  ]);
+
+  const externalTaskFolders = await ls(
+      "external-tasks", {
+        entities: FsEntities.folders,
+        recurse: false,
+        fullPaths: true
+      }
+    ),
+    promises = externalTaskFolders.map(
+      f => transpileModulesUnder(f)
+    );
+  await Promise.all(promises);
+}
+
 async function transpileLocalTasks() {
   await Promise.all([
     transpileTasksUnder("local-tasks"),
@@ -142,7 +163,101 @@ async function transpileLocalTasks() {
   await Promise.all(promises);
 }
 
+async function transpileModulesUnder(folder) {
+  await transpileTypeScriptFiles(
+    path.join(folder, "modules"),
+    true,
+    s => s.replace(/\.ts$/, ".js")
+  );
+}
+
+async function transpileTypeScriptFiles(
+  inFolder,
+  transpileAnyTypeScript,
+  outputNameGenerator
+) {
+  const toTranspile = [];
+  const fullPath = path.isAbsolute(inFolder)
+    ? inFolder
+    : path.join(process.cwd(), inFolder);
+  const contents = await ls(fullPath, {
+    recurse: false,
+    entities: FsEntities.files,
+    match: /\.ts$/,
+    fullPaths: true
+  });
+  for (const item of contents) {
+    toTranspile.push(item);
+  }
+
+  if (toTranspile.length === 0) {
+    debug(`no typescript modules found; skipping transpile phase.`);
+    return;
+  }
+
+  try {
+    require("typescript");
+  } catch (e) {
+    throw new Error(`TypeScript not installed, unable to transpile local tasks: \n- ${ toTranspile.join("\n -") }`);
+  }
+
+  try {
+    const
+      { ExecStepContext } = require("exec-step"),
+      ctx = new ExecStepContext(),
+      { transpileModule, ModuleKind } = require("typescript");
+    for (const src of toTranspile) {
+      if (!transpileAnyTypeScript) {
+        const test = src.replace(/\.ts$/, ".js");
+        if (await fileExists(test)) {
+          // assume this is a compilation handled elsewhere
+          continue;
+        }
+      }
+      const output = outputNameGenerator(src);
+      if (await fileExists(output)) {
+        const srcStat = await stat(src);
+        const outStat = await stat(output);
+
+        const srcLastModified = srcStat.mtime.getTime();
+        const outLastModified = outStat.mtime.getTime();
+
+
+        if (srcLastModified <= outLastModified) {
+          debug(`${ output } modified after ${ src }; skipping transpile`);
+          continue;
+        }
+        debug(`will transpile: ${ src }`);
+      }
+      await ctx.exec(
+        `transpiling ${ src }`,
+        async () => {
+          const contents = await readTextFile(src);
+          const transpiled = transpileModule(contents, {
+            compilerOptions: {
+              esModuleInterop: true,
+              module: ModuleKind.CommonJS,
+              target: "es2017"
+            }
+          }).outputText;
+          await writeTextFile(output, transpiled);
+        }
+      );
+    }
+  } catch (e) {
+    log.error(`one or more typescript modules could not be transpiled:\n${ e }`);
+  }
+}
+
 async function transpileTasksUnder(folder) {
+  await transpileTypeScriptFiles(
+    folder,
+    false,
+    s => s.replace(/\.ts$/, ".generated.js")
+  );
+}
+
+async function transpileTasksUnder_(folder) {
   const toTranspile = [];
   const fullPath = path.isAbsolute(folder)
     ? folder
@@ -236,7 +351,10 @@ async function transpileTasksUnder(folder) {
       loadDefaults(),
       init()
     ]);
-    await transpileLocalTasks();
+    await Promise.all([
+      transpileLocalTaskModules(),
+      transpileLocalTasks()
+    ]);
     const handler = await findHandlerFor(args);
     if (!handler) {
       throw new ZarroError("no handler for current args");
