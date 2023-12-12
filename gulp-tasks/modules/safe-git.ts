@@ -14,7 +14,7 @@
       const
         e = ex as Error,
         message = e.message || e.toString();
-      if (message.match(/not a git repository/i)) {
+      if (message.match(/not a git repository/i) || message.match(/does not exist/)) {
         return defaultValue;
       }
       throw e;
