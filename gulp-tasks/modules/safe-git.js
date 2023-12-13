@@ -11,7 +11,7 @@
         }
         catch (ex) {
             const e = ex, message = e.message || e.toString();
-            if (message.match(/not a git repository/i)) {
+            if (message.match(/not a git repository/i) || message.match(/does not exist/)) {
                 return defaultValue;
             }
             throw e;
