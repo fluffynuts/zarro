@@ -11,7 +11,6 @@ const
     ls,
     readTextFile,
     fileExists,
-    folderExists,
     readTextFileLines,
     writeTextFile
   } = require("yafs"),
@@ -21,8 +20,6 @@ const
   ZarroError = require("./gulp-tasks/modules/zarro-error"),
   { skip } = require("./gulp-tasks/modules/linq"),
   gatherArgs = require("./index-modules/gather-args");
-const { ExecStepContext } = require("exec-step");
-const { transpileModule, ModuleKind } = require("typescript");
 
 function requireHandler(name) {
   const result = require(`./index-modules/handlers/${ name }`);
