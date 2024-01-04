@@ -192,11 +192,7 @@ async function transpileTypeScriptFiles(
     return;
   }
 
-  try {
-    require("typescript");
-  } catch (e) {
-    throw new ZarroError(`TypeScript not installed, unable to transpile local tasks: \n- ${ toTranspile.join("\n -") }`);
-  }
+  importTypeScript();
 
   try {
     const
@@ -254,6 +250,17 @@ async function transpileTasksUnder(folder) {
   );
 }
 
+function importTypeScript() {
+  try {
+    require("typescript");
+  } catch (e) {
+    const message = `TypeScript not installed, unable to transpile local tasks: \n- ${ toTranspile.join("\n -") }`;
+    console.error(message);
+    process.exit(2);
+  }
+}
+
+
 async function transpileTasksUnder_(folder) {
   const toTranspile = [];
   const fullPath = path.isAbsolute(folder)
@@ -274,11 +281,7 @@ async function transpileTasksUnder_(folder) {
     return;
   }
 
-  try {
-    require("typescript");
-  } catch (e) {
-    throw new ZarroError(`TypeScript not installed, unable to transpile local tasks: \n- ${ toTranspile.join("\n -") }`);
-  }
+  importTypeScript();
 
   try {
     const
