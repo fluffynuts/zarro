@@ -40,5 +40,6 @@ jobs:
         TEST_TIMEOUT: 60000
         MAX_WORKERS: 1
       run: |
-        npm ci
+        npm i
+        npm run build
         npm test
