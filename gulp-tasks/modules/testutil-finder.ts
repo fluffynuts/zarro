@@ -1,4 +1,4 @@
 (function() {
-  console.warn("testutil-finder has been renamed to test-util-finder");
-  return require("./test-util-finder");
+  console.error("testutil-finder has been renamed to test-util-finder and will be removed in a future release");
+  module.exports = require("./test-util-finder");
 })();
