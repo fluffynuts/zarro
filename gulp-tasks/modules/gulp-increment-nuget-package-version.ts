@@ -21,8 +21,12 @@
       (g: any) => !!g.PackageVersion
     )[0];
     if (!packageVersionPropGroup) {
-      debug("No PropertyGroup found with PackageVersion node");
-      return xml;
+      // if we got in here, then something wants to increment
+      // the package version, but we can't unless the correct
+      // structure is found in the project
+      throw new ZarroError(
+        `Unable to increment package version in '${ file.path }': no PropertyGroup containing a PackageVersion node was found.`
+      );
     }
     const node = packageVersionPropGroup.PackageVersion;
     const newVersion = incrementVersion(
