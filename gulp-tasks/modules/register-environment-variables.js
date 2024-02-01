@@ -721,6 +721,11 @@
             default: env.resolve("NUGET_SOURCE")
         });
         env.register({
+            name: "NUGET_PUSH_PACKAGES",
+            help: "comma-delimited list of packages to push, either relative to the PACK_TARGET_FOLDER, or relative to the project root. If left empty, assume all packages under PACK_TARGET_FOLDER.",
+            default: ""
+        });
+        env.register({
             name: "NUGET_PUSH_SOURCE",
             help: "Specifically: nuget source to push to. Will fall back on NUGET_SOURCE or first of NUGET_SOURCES.",
             default: env.resolve("NUGET_SOURCE")

@@ -866,10 +866,17 @@
       help: "single nuget source to use for package restore and publication",
       default: "nuget.org"
     });
+
     env.register({
       name: "NUGET_SOURCES",
       help: "comma-delimited list of nuget sources if you don't want to use the defaults",
       default: env.resolve("NUGET_SOURCE")
+    });
+
+    env.register({
+      name: "NUGET_PUSH_PACKAGES",
+      help: "comma-delimited list of packages to push, either relative to the PACK_TARGET_FOLDER, or relative to the project root. If left empty, assume all packages under PACK_TARGET_FOLDER.",
+      default: ""
     });
 
     env.register({

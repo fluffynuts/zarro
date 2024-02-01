@@ -355,6 +355,10 @@ declare global {
     license: LicenseIdentifier
   }
 
+  interface ResolveNugetPushPackageFiles {
+    resolveNugetPushPackageFiles: () => Promise<string[]>;
+  }
+
   type ResolveMasks = (
     includeVar: StringEnvVar | StringEnvVar[],
     excludeVar: StringEnvVar | StringEnvVar[],
@@ -405,6 +409,7 @@ declare global {
     "NUGET_PUSH_SOURCE" |
     "NUGET_SOURCE" |
     "NUGET_SOURCES" |
+    "NUGET_PUSH_PACKAGES" |
     "DOTNET_PUBLISH_RUNTIMES" |
     "DOTNET_PUBLISH_BUILD_CONFIGURATION" |
     "DOTNET_PUBLISH_OS" |
@@ -599,6 +604,7 @@ declare global {
     NUGET_PUSH_SOURCE: StringEnvVar;
     NUGET_SOURCES: StringEnvVar;
     NUGET_SOURCE: StringEnvVar;
+    NUGET_PUSH_PACKAGES: StringEnvVar;
     DOTNET_PUBLISH_RUNTIMES: StringEnvVar;
     DOTNET_PUBLISH_BUILD_CONFIGURATION: StringEnvVar;
     DOTNET_PUBLISH_OS: StringEnvVar;
