@@ -215,6 +215,9 @@ describe(`resolve-nuget-pus-package-files`, () => {
         // force an ambiguity
         notAPackage = "foo.bar.md";
 
+      expect(otherFolder)
+        .not.toEqual(packFolder);
+
       const toCreate = [
         `${ otherFolder }/${ package1 }`,
         `${ otherFolder }/${ package1Symbols }`,

@@ -149,6 +149,8 @@ describe(`resolve-nuget-pus-package-files`, () => {
             const sandbox = await filesystem_sandbox_1.Sandbox.create(), packFolder = env.resolve(env.PACK_TARGET_FOLDER), otherFolder = faker_1.faker.string.alpha(16), package1 = "foo.bar.nupkg", package1Symbols = "foo.bar.symbols.nupkg", package2 = "quux.cow.nupkg", 
             // force an ambiguity
             notAPackage = "foo.bar.md";
+            expect(otherFolder)
+                .not.toEqual(packFolder);
             const toCreate = [
                 `${otherFolder}/${package1}`,
                 `${otherFolder}/${package1Symbols}`,
