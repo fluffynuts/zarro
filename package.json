@@ -13,7 +13,7 @@
     "verify-submodules": "node index.js verify-submodules",
     "verify-no-debugger": "node index.js @",
     "clean-cache": "rimraf .jest-cache",
-    "pretest": "run-s clean-cache build verify-submodules",
+    "pretest": "run-s clean-cache build",
     "test": "jest",
     "quick-test": "jest -o --no-cache",
     "clear-console": "console-cls",

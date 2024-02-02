@@ -7,7 +7,6 @@
             return await enumeratePackagesIn(packRoot);
         }
         const collected = [];
-        debugger;
         for (const mask of pushMask) {
             const maskFiles = await findFilesFor(mask);
             collected.push(...maskFiles);
