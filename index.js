@@ -84,7 +84,7 @@ async function loadDefaults() {
       // comment-only line or empty line
       continue;
     }
-    const sectionMatch = code.match(/\s*\[(?<section>[a-zA-Z0-9\s-_.]+)]\s*/);
+    const sectionMatch = code.match(/^\s*\[(?<section>[a-zA-Z0-9\s-_.]+)]\s*$/);
     if (sectionMatch) {
       currentSection = `${sectionMatch.groups.section}`.toLowerCase();
       continue;
