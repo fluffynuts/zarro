@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const filesystem_sandbox_1 = require("filesystem-sandbox");
+const faker_1 = require("@faker-js/faker");
 describe(`resolve-nuget-pus-package-files`, () => {
     const env = requireModule("env"), { resolveNugetPushPackageFiles } = requireModule("resolve-nuget-push-package-files"), sut = resolveNugetPushPackageFiles;
     describe(`default behavior`, () => {
@@ -80,7 +81,10 @@ describe(`resolve-nuget-pus-package-files`, () => {
                 `${packFolder}/${notAPackage}`
             ];
             process.env[env.NUGET_PUSH_PACKAGES] = "foo.bar";
-            const expected = [sandbox.fullPathFor(`${packFolder}/${package1}`)];
+            const expected = [
+                sandbox.fullPathFor(`${packFolder}/${package1}`),
+                sandbox.fullPathFor(`${packFolder}/${package1Symbols}`),
+            ];
             for (const file of toCreate) {
                 await sandbox.writeFile(file, "test");
             }
@@ -103,8 +107,7 @@ describe(`resolve-nuget-pus-package-files`, () => {
             ];
             process.env[env.NUGET_PUSH_PACKAGES] = "foo.bar.nupkg";
             const expected = [
-                sandbox.fullPathFor(`${packFolder}/${package1}`),
-                sandbox.fullPathFor(`${packFolder}/${package1Symbols}`)
+                sandbox.fullPathFor(`${packFolder}/${package1}`)
             ];
             for (const file of toCreate) {
                 await sandbox.writeFile(file, "test");
@@ -129,7 +132,32 @@ describe(`resolve-nuget-pus-package-files`, () => {
             process.env[env.NUGET_PUSH_PACKAGES] = "foo.bar,quux.cow";
             const expected = [
                 sandbox.fullPathFor(`${packFolder}/${package1}`),
+                sandbox.fullPathFor(`${packFolder}/${package1Symbols}`),
                 sandbox.fullPathFor(`${packFolder}/${package2}`),
+            ];
+            for (const file of toCreate) {
+                await sandbox.writeFile(file, "test");
+            }
+            // Act
+            const result = await sandbox.run(async () => await sut());
+            // Assert
+            expect(result)
+                .toEqual(expected);
+        });
+        it(`should return named relative package under some other folder`, async () => {
+            // Arrange
+            const sandbox = await filesystem_sandbox_1.Sandbox.create(), packFolder = env.resolve(env.PACK_TARGET_FOLDER), otherFolder = faker_1.faker.string.alpha(16), package1 = "foo.bar.nupkg", package1Symbols = "foo.bar.symbols.nupkg", package2 = "quux.cow.nupkg", 
+            // force an ambiguity
+            notAPackage = "foo.bar.md";
+            const toCreate = [
+                `${otherFolder}/${package1}`,
+                `${otherFolder}/${package1Symbols}`,
+                `${otherFolder}/${package2}`,
+                `${otherFolder}/${notAPackage}`
+            ];
+            process.env[env.NUGET_PUSH_PACKAGES] = `${otherFolder}/foo.bar.nupkg`;
+            const expected = [
+                sandbox.fullPathFor(`${otherFolder}/${package1}`)
             ];
             for (const file of toCreate) {
                 await sandbox.writeFile(file, "test");

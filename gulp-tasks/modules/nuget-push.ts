@@ -31,7 +31,7 @@
         const nugetPushSource = sourceName ||
             env.resolve(env.NUGET_PUSH_SOURCE, env.NUGET_SOURCE) ||
             "nuget.org";
-        const apiKey = resolveNugetApiKey(nugetPushSource);
+        const apiKey = options?.apiKey ?? resolveNugetApiKey(nugetPushSource);
         options = options || {};
         options.skipDuplicates = options.skipDuplicates === undefined
             ? env.resolveFlag("NUGET_IGNORE_DUPLICATE_PACKAGES")

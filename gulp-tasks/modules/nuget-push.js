@@ -10,10 +10,11 @@
         await dotnetCli.nugetPush(opts);
     }
     async function nugetPush(packageFile, sourceName, options) {
+        var _a;
         const nugetPushSource = sourceName ||
             env.resolve(env.NUGET_PUSH_SOURCE, env.NUGET_SOURCE) ||
             "nuget.org";
-        const apiKey = resolveNugetApiKey(nugetPushSource);
+        const apiKey = (_a = options === null || options === void 0 ? void 0 : options.apiKey) !== null && _a !== void 0 ? _a : resolveNugetApiKey(nugetPushSource);
         options = options || {};
         options.skipDuplicates = options.skipDuplicates === undefined
             ? env.resolveFlag("NUGET_IGNORE_DUPLICATE_PACKAGES")

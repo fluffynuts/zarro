@@ -845,6 +845,7 @@ declare global {
 
   export interface NugetPushOpts {
     skipDuplicates?: boolean;
+    apiKey?: string
   }
 
   type IsWindows = () => boolean;

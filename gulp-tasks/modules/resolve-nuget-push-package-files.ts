@@ -20,7 +20,6 @@
     const
       collected = [] as string[];
 
-    debugger;
     for (const mask of pushMask) {
       const maskFiles = await findFilesFor(mask);
       collected.push(...maskFiles);
@@ -43,14 +42,20 @@
         : [ maskContainer, `${ env.resolve(env.PACK_TARGET_FOLDER) }/${ maskContainer }` ],
       files = await lsAll(searchContainers);
     const
+      maskHasFolders = mask.includes("/") || mask.includes("\\"),
       leaf = path.basename(mask),
-      start = leaf.startsWith("*") ? "" : "^",
-      end = leaf.endsWith("*") ? "" : "*",
-      regexed = mask.replace(/\*/g, ".*"),
+      start = leaf.startsWith("*") ? ".*" : "^",
+      end = leaf.endsWith("*") ? ".*" : "",
+      regexed = mask.replace(/\*/g, ".*").replace(/\\/g, "\\/"),
       nupkgRe = /\.nupkg$/i,
       maskRe = new RegExp(`${ start }${ regexed }${ end }`);
     return files.filter(
-      (f: string) => nupkgRe.test(f) && maskRe.test(f)
+      (f: string) => {
+        const toTest = maskHasFolders
+          ? f
+          : path.basename(f);
+        return nupkgRe.test(toTest) && maskRe.test(toTest)
+      }
     );
   }
 

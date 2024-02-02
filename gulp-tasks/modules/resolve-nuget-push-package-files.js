@@ -21,8 +21,13 @@
         const env = requireModule("env"), maskContainer = path.dirname(mask), searchContainers = path.isAbsolute(mask)
             ? [maskContainer]
             : [maskContainer, `${env.resolve(env.PACK_TARGET_FOLDER)}/${maskContainer}`], files = await lsAll(searchContainers);
-        const leaf = path.basename(mask), start = leaf.startsWith("*") ? "" : "^", end = leaf.endsWith("*") ? "" : "*", regexed = mask.replace(/\*/g, ".*"), nupkgRe = /\.nupkg$/i, maskRe = new RegExp(`${start}${regexed}${end}`);
-        return files.filter((f) => nupkgRe.test(f) && maskRe.test(f));
+        const maskHasFolders = mask.includes("/") || mask.includes("\\"), leaf = path.basename(mask), start = leaf.startsWith("*") ? ".*" : "^", end = leaf.endsWith("*") ? ".*" : "", regexed = mask.replace(/\*/g, ".*").replace(/\\/g, "\\/"), nupkgRe = /\.nupkg$/i, maskRe = new RegExp(`${start}${regexed}${end}`);
+        return files.filter((f) => {
+            const toTest = maskHasFolders
+                ? f
+                : path.basename(f);
+            return nupkgRe.test(toTest) && maskRe.test(toTest);
+        });
     }
     async function lsAll(dirs) {
         const result = [];

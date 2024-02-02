@@ -6,17 +6,14 @@
       runInParallel = requireModule<RunInParallel>("run-in-parallel"),
       nugetPush = requireModule<NugetPush>("nuget-push"),
       { resolveNugetPushPackageFiles } = requireModule<ResolveNugetPushPackageFiles>("resolve-nuget-push-package-files"),
-      resolveNugetApiKey = requireModule<ResolveNugetApiKey>("resolve-nuget-api-key");
+      packageFiles = await resolveNugetPushPackageFiles(),
+      nugetSrc = env.resolve("NUGET_PUSH_SOURCE");
 
-    const
-      packageFiles = await resolveNugetPushPackageFiles();
+    const actions = packageFiles.map(file => {
+      return async() => await nugetPush(file, nugetSrc);
+    });
 
-    const
-      nugetSrc = env.resolve("NUGET_PUSH_SOURCE"),
-      apiKey = resolveNugetApiKey();
-
-    for (const pkg of packageFiles) {
-    }
+    await runInParallel(2, ...actions);
   });
 
 })();
