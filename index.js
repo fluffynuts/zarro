@@ -70,8 +70,13 @@ async function loadDefaults() {
     await createZarroDefaultsEmpty();
     return;
   }
+  let currentSection = "defaults"; // unnamed section is defaults section
   const
-    lines = await readTextFileLines(defaultsFile);
+    lines = await readTextFileLines(defaultsFile),
+    taskName = `${ process.env.npm_lifecycle_event }`.toLowerCase(),
+    shouldSkip = () => {
+      return currentSection !== "defaults" && currentSection !== taskName;
+    };
   for (const line of lines) {
     const
       [ code, _ ] = splitComment(line);
@@ -79,6 +84,16 @@ async function loadDefaults() {
       // comment-only line or empty line
       continue;
     }
+    const sectionMatch = code.match(/\s*\[(?<section>[a-zA-Z0-9\s-_.]+)]\s*/);
+    if (sectionMatch) {
+      currentSection = `${sectionMatch.groups.section}`.toLowerCase();
+      continue;
+    }
+
+    if (shouldSkip()) {
+      continue;
+    }
+
     if (looksInvalid(code)) {
       log.warn(`invalid config line in ${ defaultsFile }:\n${ line }`);
       continue;
@@ -88,18 +103,21 @@ async function loadDefaults() {
       name = parts[0],
       value = Array.from(skip(parts, 1)).join("="),
       forced = name[0] === '!',
+      forwarded = value[0] === '$',
       notYetSet = process.env[name] === undefined;
     if (notYetSet || forced) {
-      const key = name.replace(/^!/, "");
-      if (value) {
-        debug(`setting env var ${ key } to '${ value }'`);
-        process.env[key] = value;
+      const
+        key = name.replace(/^!/, ""),
+        finalValue = forwarded ? process.env[value.substring(1)] : value;
+      if (finalValue) {
+        debug(`setting env var ${ key } to '${ finalValue }'`);
+        process.env[key] = finalValue;
       } else {
         debug(`deleting env var ${ key }`);
         delete process.env[key];
       }
     } else {
-      debug(`env var ${ name } is already set, force it by setting !${ name }=${ value } in ${ defaultsFile }`)
+      debug(`env var ${ name } is already set, force it by setting !${ name }=${ value } in ${ defaultsFile }`);
     }
   }
 }
