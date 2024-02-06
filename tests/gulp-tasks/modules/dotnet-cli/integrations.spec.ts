@@ -12,6 +12,7 @@ const {
   mockUpdatePackageNuspec,
   runWithRealSystem
 } = require("./common");
+import { v4 } from "uuid";
 
 describe("dotnet-cli", () => {
   const sut = requireModule<DotNetCli>("dotnet-cli");
@@ -562,13 +563,9 @@ chucked:
   });
   const usedSourceNames = new Set<string>();
 
+  let idx = 1;
   function randomSourceName() {
-    let result: string;
-    do {
-      result = `${ faker.word.sample() }-${ faker.word.sample() }`;
-    } while (usedSourceNames.has(result));
-    usedSourceNames.add(result);
-    return result;
+    return `test-source-${idx++}-${v4()}`;
   }
 
   const knownSources = [] as NugetSource[];

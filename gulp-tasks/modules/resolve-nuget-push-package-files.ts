@@ -48,13 +48,16 @@
       end = leaf.endsWith("*") ? ".*" : "",
       regexed = mask.replace(/\*/g, ".*").replace(/\\/g, "\\/"),
       nupkgRe = /\.nupkg$/i,
+      symbolsRe = /\.symbols\.nupkg$/i,
       maskRe = new RegExp(`${ start }${ regexed }${ end }`);
     return files.filter(
       (f: string) => {
         const toTest = maskHasFolders
           ? f
           : path.basename(f);
-        return nupkgRe.test(toTest) && maskRe.test(toTest)
+        return !symbolsRe.test(toTest) &&
+               nupkgRe.test(toTest) &&
+               maskRe.test(toTest)
       }
     );
   }
@@ -81,7 +84,8 @@
   ): Promise<string[]> {
     return await ls(packRoot, {
       entities: FsEntities.files,
-      match: /\.nupkg$/,
+      match: /\.nupkg$/i,
+      exclude: [ /\.symbols\.nupkg$/i, /\.snupkg$/i ],
       recurse: false,
       fullPaths: true
     });

@@ -17,16 +17,19 @@ describe(`resolve-git-branch`, () => {
         // Arrange
         const sandbox = await filesystem_sandbox_1.Sandbox.create();
         await sandbox.run(async () => {
-            await system("git init");
+            await sys("git init");
             await (0, yafs_1.writeTextFile)("foo", "bar");
-            await system("git add -A :/");
-            await system("git commit -m \"test\"");
+            await sys("git add -A :/");
+            await sys("git commit -m \"test\"");
         });
         // Act
         const zarroBranch = await sandbox.run(() => resolveGitBranch());
         // Assert
         expect(zarroBranch)
             .toEqual("master");
+        async function sys(cmd) {
+            await system(cmd, [], { suppressOutput: true });
+        }
     });
     it(`should return undefined when there is no git repo`, async () => {
         // Arrange

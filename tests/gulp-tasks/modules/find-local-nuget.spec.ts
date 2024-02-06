@@ -8,12 +8,11 @@ describe(`find-local-nuget`, () => {
   const findLocalNuget = requireModule<FindLocalNuget>("find-local-nuget");
 
   const
-    { debuggerIsAttached } = require("debugger-is-attached"),
     os = require("os"),
     isWindows = os.platform() === "win32";
 
   beforeAll(() => {
-    // process.env.SUPPRESS_DOWNLOAD_PROGRESS = "1";
+    process.env.SUPPRESS_DOWNLOAD_PROGRESS = "1";
   });
 
   it(`should download nuget.exe to the build tools folder`, async () => {
@@ -56,11 +55,11 @@ describe(`find-local-nuget`, () => {
       // Act
       const nuget = await findLocalNuget();
       await sandbox.run(async () => {
-        await system(nuget, [ "install", "PeanutButter.TempDb.Runner" ])
+        await system(nuget, [ "install", "NExpect", "-source", "nuget.org" ])
       });
       // Assert
       const dirs = await ls(sandbox.path, { entities: FsEntities.folders });
-      expect(dirs.find(o => o.indexOf("PeanutButter.TempDb.Runner") > -1))
+      expect(dirs.find(o => o.indexOf("NExpect") > -1))
         .not.toBeUndefined();
     });
   });

@@ -6,6 +6,7 @@ const faker_1 = require("@faker-js/faker");
 const run_locked_1 = require("../../../test-helpers/run-locked");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 const { anything, mockSystem, system, enableSystemCallThrough, disableSystemCallThrough, mockUpdatePackageNuspec, runWithRealSystem } = require("./common");
+const uuid_1 = require("uuid");
 describe("dotnet-cli", () => {
     const sut = requireModule("dotnet-cli");
     let allowLogs = false;
@@ -486,13 +487,9 @@ chucked:
         await restoreAllKnownNugetSources();
     });
     const usedSourceNames = new Set();
+    let idx = 1;
     function randomSourceName() {
-        let result;
-        do {
-            result = `${faker_1.faker.word.sample()}-${faker_1.faker.word.sample()}`;
-        } while (usedSourceNames.has(result));
-        usedSourceNames.add(result);
-        return result;
+        return `test-source-${idx++}-${(0, uuid_1.v4)()}`;
     }
     const knownSources = [];
     const { listNugetSources } = sut;

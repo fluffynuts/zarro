@@ -20,12 +20,14 @@
         const env = requireModule("env"), maskContainer = path.dirname(mask), searchContainers = path.isAbsolute(mask)
             ? [maskContainer]
             : [maskContainer, `${env.resolve(env.PACK_TARGET_FOLDER)}/${maskContainer}`], files = await lsAll(searchContainers);
-        const maskHasFolders = mask.includes("/") || mask.includes("\\"), leaf = path.basename(mask), start = leaf.startsWith("*") ? ".*" : "^", end = leaf.endsWith("*") ? ".*" : "", regexed = mask.replace(/\*/g, ".*").replace(/\\/g, "\\/"), nupkgRe = /\.nupkg$/i, maskRe = new RegExp(`${start}${regexed}${end}`);
+        const maskHasFolders = mask.includes("/") || mask.includes("\\"), leaf = path.basename(mask), start = leaf.startsWith("*") ? ".*" : "^", end = leaf.endsWith("*") ? ".*" : "", regexed = mask.replace(/\*/g, ".*").replace(/\\/g, "\\/"), nupkgRe = /\.nupkg$/i, symbolsRe = /\.symbols\.nupkg$/i, maskRe = new RegExp(`${start}${regexed}${end}`);
         return files.filter((f) => {
             const toTest = maskHasFolders
                 ? f
                 : path.basename(f);
-            return nupkgRe.test(toTest) && maskRe.test(toTest);
+            return !symbolsRe.test(toTest) &&
+                nupkgRe.test(toTest) &&
+                maskRe.test(toTest);
         });
     }
     async function lsAll(dirs) {
@@ -43,7 +45,8 @@
     async function enumeratePackagesIn(packRoot) {
         return await ls(packRoot, {
             entities: FsEntities.files,
-            match: /\.nupkg$/,
+            match: /\.nupkg$/i,
+            exclude: [/\.symbols\.nupkg$/i, /\.snupkg$/i],
             recurse: false,
             fullPaths: true
         });

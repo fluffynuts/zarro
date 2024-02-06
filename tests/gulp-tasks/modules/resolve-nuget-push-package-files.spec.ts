@@ -1,7 +1,7 @@
 import { Sandbox } from "filesystem-sandbox";
 import { faker } from "@faker-js/faker";
 
-describe(`resolve-nuget-pus-package-files`, () => {
+describe(`resolve-nuget-push-package-files`, () => {
   const
     env = requireModule<Env>("env"),
     { resolveNugetPushPackageFiles } = requireModule<ResolveNugetPushPackageFiles>("resolve-nuget-push-package-files"),
@@ -44,6 +44,7 @@ describe(`resolve-nuget-pus-package-files`, () => {
       ];
       const expected = toCreate
         .filter(s => !s.includes(notAPackage))
+        .filter(s => !s.includes("symbols"))
         .map(
           rel => sandbox.fullPathFor(rel)
         );
@@ -66,7 +67,7 @@ describe(`resolve-nuget-pus-package-files`, () => {
         sandbox = await Sandbox.create(),
         packFolder = env.resolve(env.PACK_TARGET_FOLDER),
         package1 = "foo.bar.nupkg",
-        package1Symbols = "foo.bar.symbols.nupkg",
+        package1snupkg = "foo.bar.snupkg",
         package2 = "quux.cow.nupkg",
         notAPackage = "README.md";
 
@@ -75,12 +76,13 @@ describe(`resolve-nuget-pus-package-files`, () => {
 
       const toCreate = [
         `${ packFolder }/${ package1 }`,
-        `${ packFolder }/${ package1Symbols }`,
+        `${ packFolder }/${ package1snupkg }`,
         `${ packFolder }/${ package2 }`,
         `${ packFolder }/${ notAPackage }`
       ];
       const expected = toCreate
         .filter(s => !s.includes(notAPackage))
+        .filter(s => !s.includes("snupkg"))
         .map(
           rel => sandbox.fullPathFor(rel)
         );
@@ -118,8 +120,7 @@ describe(`resolve-nuget-pus-package-files`, () => {
 
       process.env[env.NUGET_PUSH_PACKAGES] = "foo.bar";
       const expected = [
-        sandbox.fullPathFor(`${ packFolder }/${ package1 }`),
-        sandbox.fullPathFor(`${ packFolder }/${ package1Symbols }`),
+        sandbox.fullPathFor(`${ packFolder }/${ package1 }`)
       ];
 
       for (const file of toCreate) {
@@ -188,7 +189,6 @@ describe(`resolve-nuget-pus-package-files`, () => {
       process.env[env.NUGET_PUSH_PACKAGES] = "foo.bar,quux.cow";
       const expected = [
         sandbox.fullPathFor(`${ packFolder }/${ package1 }`),
-        sandbox.fullPathFor(`${ packFolder }/${ package1Symbols }`),
         sandbox.fullPathFor(`${ packFolder }/${ package2 }`),
       ];
 
@@ -220,12 +220,11 @@ describe(`resolve-nuget-pus-package-files`, () => {
 
       const toCreate = [
         `${ otherFolder }/${ package1 }`,
-        `${ otherFolder }/${ package1Symbols }`,
         `${ otherFolder }/${ package2 }`,
         `${ otherFolder }/${ notAPackage }`
       ];
 
-      process.env[env.NUGET_PUSH_PACKAGES] = `${otherFolder}/foo.bar.nupkg`;
+      process.env[env.NUGET_PUSH_PACKAGES] = `${ otherFolder }/foo.bar.nupkg`;
       const expected = [
         sandbox.fullPathFor(`${ otherFolder }/${ package1 }`)
       ];
