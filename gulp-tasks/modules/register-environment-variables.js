@@ -503,6 +503,11 @@
             default: "true"
         });
         env.register({
+            name: "PACK_SYNC_PROJECT_VERSION",
+            help: "Flag: should the project version be synchronised with the package version when packing?",
+            default: "false"
+        });
+        env.register({
             name: "PACK_INCREMENT_VERSION_BY",
             help: "Number (default 1): increment the selected version number by this value",
             default: "1"

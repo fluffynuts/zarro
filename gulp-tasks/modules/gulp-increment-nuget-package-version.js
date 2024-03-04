@@ -20,8 +20,16 @@
         const node = packageVersionPropGroup.PackageVersion;
         const newVersion = incrementVersion(node[0], env.resolveFlag("BETA")
             ? env.resolveWithFallback(env.VERSION_INCREMENT_STRATEGY, "prerelease")
-            : env.resolve(env.VERSION_INCREMENT_STRATEGY), env.resolveFlag("VERSION_INCREMENT_ZERO"), env.resolveNumber("PACK_INCREMENT_VERSION_BY"));
+            : env.resolve(env.VERSION_INCREMENT_STRATEGY), env.resolveFlag(env.VERSION_INCREMENT_ZERO), env.resolveNumber(env.PACK_INCREMENT_VERSION_BY));
         node[0] = newVersion;
+        const incrementProjectVersion = env.resolveFlag(env.PACK_SYNC_PROJECT_VERSION);
+        if (incrementProjectVersion) {
+            const projectVersionPropGroup = xml.Project.PropertyGroup.filter((g) => !!g.Version);
+            if (!projectVersionPropGroup) {
+                throw new ZarroError(`${env.PACK_SYNC_PROJECT_VERSION} was set, but no PropertyGroup with a Version child was found.`);
+            }
+            projectVersionPropGroup.Version[0] = newVersion;
+        }
         let packageIdPropGroup = xml.Project.PropertyGroup.filter((g) => !!g.PackageId)[0];
         let packageName = "(unknown)";
         if (!packageIdPropGroup) {
