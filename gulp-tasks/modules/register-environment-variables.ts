@@ -615,8 +615,8 @@
     });
 
     env.register({
-      name: "PACK_INCREMENT_PROJECT_VERSION",
-      help: "Flag: should the project version be incremented along with the package version when packing?",
+      name: "PACK_SYNC_PROJECT_VERSION",
+      help: "Flag: should the project version be synchronised with the package version when packing?",
       default: "false"
     });
 

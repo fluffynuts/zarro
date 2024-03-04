@@ -39,13 +39,13 @@
     );
     node[0] = newVersion;
 
-    const incrementProjectVersion = env.resolveFlag(env.PACK_INCREMENT_PROJECT_VERSION);
+    const incrementProjectVersion = env.resolveFlag(env.PACK_SYNC_PROJECT_VERSION);
     if (incrementProjectVersion) {
       const projectVersionPropGroup = xml.Project.PropertyGroup.filter(
         (g: any) => !!g.Version
       );
       if (!projectVersionPropGroup) {
-        throw new ZarroError(`${env.PACK_INCREMENT_PROJECT_VERSION} was set, but no PropertyGroup with a Version child was found.`)
+        throw new ZarroError(`${env.PACK_SYNC_PROJECT_VERSION} was set, but no PropertyGroup with a Version child was found.`)
       }
       projectVersionPropGroup.Version[0] = newVersion;
     }
