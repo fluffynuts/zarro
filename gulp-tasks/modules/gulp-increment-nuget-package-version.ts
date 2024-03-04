@@ -47,7 +47,7 @@
       if (!projectVersionPropGroup) {
         throw new ZarroError(`${env.PACK_SYNC_PROJECT_VERSION} was set, but no PropertyGroup with a Version child was found.`)
       }
-      projectVersionPropGroup.Version[0] = newVersion;
+      projectVersionPropGroup[0].Version = [ newVersion ];
     }
 
     let packageIdPropGroup = xml.Project.PropertyGroup.filter(
