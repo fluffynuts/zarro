@@ -481,6 +481,7 @@ declare global {
     "NO_COLOR" |
     "NUGET_IGNORE_DUPLICATE_PACKAGES" |
     "PACK_INCREMENT_VERSION" |
+    "PACK_INCREMENT_PROJECT_VERSION" |
     "PACK_INCLUDE_EMPTY_DIRECTORIES" |
     "PACK_INCLUDE_SYMBOLS" |
     "PACK_INCLUDE_SOURCE" |
@@ -656,6 +657,7 @@ declare global {
     NO_COLOR: FlagEnvVar;
     NUGET_IGNORE_DUPLICATE_PACKAGES: FlagEnvVar;
     PACK_INCREMENT_VERSION: FlagEnvVar;
+    PACK_INCREMENT_PROJECT_VERSION: FlagEnvVar;
     PACK_INCLUDE_EMPTY_DIRECTORIES: FlagEnvVar;
     PACK_INCLUDE_SYMBOLS: FlagEnvVar;
     PACK_INCLUDE_SOURCE: FlagEnvVar;
@@ -742,7 +744,7 @@ declare global {
   type ReadPackageVersion = (packageJsonPath?: string) => Promise<string | undefined>;
   type ReadNuspecVersion = (pathToNuspec: string) => Promise<string | undefined>;
   // FIXME: is this used anywhere? should be supplanted by csproj-utils
-  type ReadCsProjVersion = (pathToCsProj: string) => string | undefined;
+  type ReadCsProjVersion = (pathToCsProj: string) => Promise<string | undefined>;
   type ReadCsProjPackageVersion = (pathToCsProj: string) => string | undefined;
   type GatherPaths = (pathSpecs: string | string[], throwForNoMatches?: boolean) => Promise<string[]>;
   type PromisifyStream = (stream: Stream) => Promise<void>;
