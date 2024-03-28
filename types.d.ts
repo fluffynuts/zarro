@@ -531,7 +531,7 @@ declare global {
     open(url: string): Promise<void>;
   }
 
-  type ResolveNugetApiKey = (forSource?: string) => Optional<string>;
+  type ResolveNugetApiKey = (forSource?: string) => Promise<Optional<string>>;
 
   interface Env
     extends Dictionary<any> {
