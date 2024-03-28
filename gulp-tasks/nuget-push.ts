@@ -13,7 +13,7 @@
         } = require("yafs"),
         env = requireModule<Env>("env"),
         folder = env.resolve(env.PACK_TARGET_FOLDER),
-        versionRe = /^(?<id>[A-Za-z\.]+)\.(?<version>\d\.\d\.\d)(-(?<tag>.*))?.nupkg$/,
+        versionRe = /^(?<id>[A-Za-z\.]+)\.(?<version>\d\.\d\.\d)(-(?<tag>.*))?\.nupkg$/,
         packages = await ls(folder, {
           recurse: false,
           entities: FsEntities.files,
