@@ -21,6 +21,10 @@
         }),
         sorted = packages.sort().reverse(),
         seen = new Set<string>();
+      if (sorted.length === 0) {
+        throw new Error(`No .nupkg files found in ${path.resolve(folder)}`);
+      }
+      const toPush = [] as string[];
       for (const file of sorted) {
         const
           match = file.match(versionRe),
@@ -30,7 +34,20 @@
           continue;
         }
         seen.add(id);
+        toPush.push(file);
 
+      }
+
+      if (env.resolveFlag(env.DRY_RUN)) {
+        const log = requireModule<Log>("log");
+        log.info("DRY_RUN set, would have pushed packages:");
+        for (const item of toPush) {
+          log.info(`  ${item}`);
+        }
+        return;
+      }
+
+      for (const file of toPush) {
         await nugetPush(
           path.join(folder, file)
         );
