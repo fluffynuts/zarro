@@ -56,12 +56,13 @@
 
   function findValue(
     data: Optional<Dictionary<string>>,
-    ...seekKeys: string[]
+    ...seekKeys: Optional<string>[]
   ): Optional<string> {
     if (!data || !seekKeys) {
       return undefined;
     }
-    const uniqueKeys = new Set<string>(seekKeys);
+    const setValues = seekKeys.filter(s => !!s) as string[];
+    const uniqueKeys = new Set<string>(setValues);
     for (let seek of uniqueKeys) {
       const exactMatch = data[seek];
       if (exactMatch) {
@@ -93,7 +94,7 @@
 
   async function resolveSourceName(
     sourceToResolve: string
-  ): Promise<string> {
+  ): Promise<Optional<string>> {
     const
       sources = await listNugetSources();
 
@@ -106,14 +107,21 @@
       }
     }
 
-    log.warn(`Unable to match provides nuget push source '${ sourceToResolve }' to the url or name of any registered source on this machine`);
+    if (!!process.env[env.NUGET_API_KEY] && looksLikeUrl(sourceToResolve)) {
+      return undefined;
+    }
+
+    log.warn(`Unable to match provided nuget push source '${ sourceToResolve }' to the url or name of any registered source on this machine`);
     log.warn(`  known sources are:`)
     for (const source of sources) {
       log.warn(`    ${ source.name }: ${ source.url } (${ source.enabled ? "enabled" : "disabled" })`);
     }
 
-    throw new Error(`Unable to determine the nuget source to push to`);
+    return undefined;
+  }
 
+  function looksLikeUrl(str: string): boolean {
+    return !!str && str.includes("://");
   }
 
   function resolveSource(source?: string): string {

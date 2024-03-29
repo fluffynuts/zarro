@@ -36,7 +36,8 @@
         if (!data || !seekKeys) {
             return undefined;
         }
-        const uniqueKeys = new Set(seekKeys);
+        const setValues = seekKeys.filter(s => !!s);
+        const uniqueKeys = new Set(setValues);
         for (let seek of uniqueKeys) {
             const exactMatch = data[seek];
             if (exactMatch) {
@@ -68,12 +69,18 @@
                 return source.name;
             }
         }
-        log.warn(`Unable to match provides nuget push source '${sourceToResolve}' to the url or name of any registered source on this machine`);
+        if (!!process.env[env.NUGET_API_KEY] && looksLikeUrl(sourceToResolve)) {
+            return undefined;
+        }
+        log.warn(`Unable to match provided nuget push source '${sourceToResolve}' to the url or name of any registered source on this machine`);
         log.warn(`  known sources are:`);
         for (const source of sources) {
             log.warn(`    ${source.name}: ${source.url} (${source.enabled ? "enabled" : "disabled"})`);
         }
-        throw new Error(`Unable to determine the nuget source to push to`);
+        return undefined;
+    }
+    function looksLikeUrl(str) {
+        return !!str && str.includes("://");
     }
     function resolveSource(source) {
         if (source) {
