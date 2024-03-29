@@ -30,7 +30,7 @@
                 await nugetPush({
                     source,
                     target: pkg,
-                    apiKey: resolveNugetApiKey(source)
+                    apiKey: await resolveNugetApiKey(source)
                 });
             }
         }

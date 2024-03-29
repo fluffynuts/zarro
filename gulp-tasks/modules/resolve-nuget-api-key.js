@@ -1,12 +1,12 @@
 "use strict";
 (function () {
-    const env = requireModule("env");
-    function resolveNugetApiKey(source) {
+    const env = requireModule("env"), log = requireModule("log"), { listNugetSources } = requireModule("dotnet-cli");
+    async function resolveNugetApiKey(source) {
         const allKeys = resolveSourceToKeyLookup(), requestedSource = resolveSource(source);
         if (!requestedSource) {
             return findValue(allKeys, "nuget.org") || findValue(allKeys, "*");
         }
-        const perSource = findValue(allKeys, requestedSource), multiKeyFallback = findValue(allKeys, "*"), nugetOrgFallback = findValue(allKeys, "nuget.org"), ultimateFallback = env.resolve(env.NUGET_API_KEY);
+        const perSource = findValue(allKeys, requestedSource, await resolveSourceName(requestedSource)), multiKeyFallback = findValue(allKeys, "*"), nugetOrgFallback = findValue(allKeys, "nuget.org"), ultimateFallback = env.resolve(env.NUGET_API_KEY);
         return perSource || multiKeyFallback || nugetOrgFallback || ultimateFallback || undefined;
     }
     function resolveSourceToKeyLookup() {
@@ -32,15 +32,22 @@
             ["*"]: k
         };
     }
-    function findValue(keys, seek) {
-        if (!keys || !seek) {
+    function findValue(data, ...seekKeys) {
+        if (!data || !seekKeys) {
             return undefined;
         }
-        const exactMatch = keys[seek];
-        if (exactMatch) {
-            return exactMatch;
+        const uniqueKeys = new Set(seekKeys);
+        for (let seek of uniqueKeys) {
+            const exactMatch = data[seek];
+            if (exactMatch) {
+                return exactMatch;
+            }
+            const thisPass = fuzzyFindValue(data, seek);
+            if (thisPass) {
+                return thisPass;
+            }
         }
-        return fuzzyFindValue(keys, seek);
+        return undefined;
     }
     function fuzzyFindValue(keys, seek) {
         const keyLookup = Object.keys(keys)
@@ -50,6 +57,23 @@
         }, {});
         const key = keyLookup[seek.toLowerCase()];
         return keys[key];
+    }
+    async function resolveSourceName(sourceToResolve) {
+        const sources = await listNugetSources();
+        for (const source of sources) {
+            if (source.name.toLowerCase() === sourceToResolve.toLowerCase()) {
+                return source.name;
+            }
+            if (source.url.toLowerCase() === sourceToResolve.toLowerCase()) {
+                return source.name;
+            }
+        }
+        log.warn(`Unable to match provides nuget push source '${sourceToResolve}' to the url or name of any registered source on this machine`);
+        log.warn(`  known sources are:`);
+        for (const source of sources) {
+            log.warn(`    ${source.name}: ${source.url} (${source.enabled ? "enabled" : "disabled"})`);
+        }
+        throw new Error(`Unable to determine the nuget source to push to`);
     }
     function resolveSource(source) {
         if (source) {

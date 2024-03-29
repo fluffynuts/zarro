@@ -3,8 +3,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
 describe(`resolve-nuget-api-key`, () => {
-    const resolveNugetApiKey = requireModule("resolve-nuget-api-key");
-    const env = requireModule("env");
+    const resolveNugetApiKey = requireModule("resolve-nuget-api-key"), dotnetCli = requireModule("dotnet-cli"), which = requireModule("which"), env = requireModule("env");
+    async function findRandomKnownNugetSource() {
+        const all = await dotnetCli.listNugetSources();
+        return faker_1.faker.helpers.arrayElement(all);
+    }
+    beforeAll(() => {
+        // zarro's `which` facade caches, and somewhere
+        // later in this test, the PATH variable gets smashed ):
+        // so if we just ask where dotnet is right now, we can
+        // easily see that this is not the problem you're looking
+        // for *waves hand like a jedi*
+        const dotnet = which("dotnet");
+        expect(dotnet)
+            .toBeDefined();
+    });
     describe(`when NUGET_API_KEY not set and NUGET_API_KEYS not set`, () => {
         it(`should return undefined`, async () => {
             // Arrange
@@ -12,7 +25,7 @@ describe(`resolve-nuget-api-key`, () => {
             expect(env.resolveObject(env.NUGET_API_KEYS))
                 .toBeUndefined();
             // Act
-            const result = resolveNugetApiKey();
+            const result = await resolveNugetApiKey();
             // Assert
             expect(result)
                 .not.toBeDefined();
@@ -25,7 +38,7 @@ describe(`resolve-nuget-api-key`, () => {
             const expected = faker_1.faker.string.alphanumeric(32);
             process.env.NUGET_API_KEY = expected;
             // Act
-            const result = resolveNugetApiKey();
+            const result = await resolveNugetApiKey();
             // Assert
             expect(result)
                 .toEqual(expected);
@@ -33,10 +46,10 @@ describe(`resolve-nuget-api-key`, () => {
         it(`should return that for a named source`, async () => {
             // Arrange
             blockEnvVars(env.NUGET_API_KEYS);
-            const source = faker_1.faker.internet.domainName(), expected = faker_1.faker.string.alphanumeric(32);
+            const nugetSource = await findRandomKnownNugetSource(), source = nugetSource.url, expected = faker_1.faker.string.alphanumeric(32);
             process.env.NUGET_API_KEY = expected;
             // Act
-            const result = resolveNugetApiKey(source);
+            const result = await resolveNugetApiKey(source);
             // Assert
             expect(result)
                 .toEqual(expected);
@@ -49,7 +62,7 @@ describe(`resolve-nuget-api-key`, () => {
                 process.env.NUGET_API_KEY = expected;
                 process.env[varname] = source;
                 // Act
-                const result = resolveNugetApiKey();
+                const result = await resolveNugetApiKey();
                 // Assert
                 expect(result)
                     .toEqual(expected);
@@ -61,10 +74,10 @@ describe(`resolve-nuget-api-key`, () => {
             it(`should return that value`, async () => {
                 // Arrange
                 delete process.env.NUGET_API_KEY;
-                const expected = faker_1.faker.string.alphanumeric(32);
+                const source = await findRandomKnownNugetSource(), expected = faker_1.faker.string.alphanumeric(32);
                 process.env.NUGET_API_KEYS = expected;
                 // Act
-                const result = resolveNugetApiKey(faker_1.faker.internet.domainName());
+                const result = await resolveNugetApiKey(source.url);
                 // Assert
                 expect(result)
                     .toEqual(expected);
@@ -80,10 +93,42 @@ describe(`resolve-nuget-api-key`, () => {
                 };
                 process.env.NUGET_API_KEYS = JSON.stringify(apiKeys);
                 // Act
-                const result = resolveNugetApiKey();
+                const result = await resolveNugetApiKey();
                 // Assert
                 expect(result)
                     .toBeUndefined();
+            });
+            it(`should resolve source urls to source names`, async () => {
+                // Arrange
+                blockEnvVars(env.NUGET_API_KEY, env.NUGET_SOURCE, env.NUGET_PUSH_SOURCE, env.NUGET_SOURCES);
+                const knownSources = await dotnetCli.listNugetSources(), selectedSource = faker_1.faker.helpers.arrayElement(knownSources), expected = faker_1.faker.string.alphanumeric(32);
+                const apiKeys = {
+                    ["some-private-repository"]: faker_1.faker.string.alphanumeric(32),
+                    [selectedSource.name]: expected
+                };
+                process.env.NUGET_API_KEYS = JSON.stringify(apiKeys);
+                process.env.NUGET_PUSH_SOURCE = selectedSource.url;
+                // Act
+                const result = await resolveNugetApiKey();
+                // Assert
+                expect(result)
+                    .toEqual(expected);
+            });
+            it(`should handle NUGET_PUSH_SOURCE being an url`, async () => {
+                // Arrange
+                blockEnvVars(env.NUGET_API_KEY, env.NUGET_SOURCE, env.NUGET_PUSH_SOURCE, env.NUGET_SOURCES);
+                const dotnetCli = requireModule("dotnet-cli"), knownSources = await dotnetCli.listNugetSources(), selectedSource = faker_1.faker.helpers.arrayElement(knownSources), expected = faker_1.faker.string.alphanumeric(32);
+                const apiKeys = {
+                    ["https://some-private-repository"]: faker_1.faker.string.alphanumeric(32),
+                    [selectedSource.url]: expected
+                };
+                process.env.NUGET_API_KEYS = JSON.stringify(apiKeys);
+                process.env.NUGET_PUSH_SOURCE = selectedSource.url;
+                // Act
+                const result = await resolveNugetApiKey();
+                // Assert
+                expect(result)
+                    .toEqual(expected);
             });
             it(`should return the nuget.org key if defined`, async () => {
                 // Arrange
@@ -95,7 +140,7 @@ describe(`resolve-nuget-api-key`, () => {
                 };
                 process.env.NUGET_API_KEYS = JSON.stringify(apiKeys);
                 // Act
-                const result = resolveNugetApiKey();
+                const result = await resolveNugetApiKey();
                 // Assert
                 expect(result)
                     .toEqual(expected);
@@ -103,14 +148,14 @@ describe(`resolve-nuget-api-key`, () => {
             it(`should return the key for the named source`, async () => {
                 // Arrange
                 blockEnvVars(env.NUGET_API_KEY, env.NUGET_SOURCE, env.NUGET_PUSH_SOURCE, env.NUGET_SOURCES);
-                const source = domainName(), expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
+                const nugetSource = await findRandomKnownNugetSource(), source = nugetSource.name, expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
                     [domainName()]: faker_1.faker.string.alphanumeric(32),
                     [domainName()]: faker_1.faker.string.alphanumeric(32),
                     [source]: expected
                 };
                 process.env.NUGET_API_KEYS = JSON.stringify(apiKeys);
                 // Act
-                const result = resolveNugetApiKey(source);
+                const result = await resolveNugetApiKey(source);
                 // Assert
                 expect(result)
                     .toEqual(expected);
@@ -118,7 +163,7 @@ describe(`resolve-nuget-api-key`, () => {
             it(`should return the key for NUGET_PUSH_SOURCE > NUGET_SOURCE > NUGET_SOURCES[0]`, async () => {
                 // Arrange
                 blockEnvVars(env.NUGET_API_KEY, env.NUGET_SOURCE, env.NUGET_PUSH_SOURCE, env.NUGET_SOURCES);
-                const source = domainName(), expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
+                const nugetSource = await findRandomKnownNugetSource(), source = nugetSource.url, expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
                     [domainName()]: faker_1.faker.string.alphanumeric(32),
                     [domainName()]: faker_1.faker.string.alphanumeric(32),
                     [source]: expected
@@ -128,7 +173,7 @@ describe(`resolve-nuget-api-key`, () => {
                 process.env.NUGET_SOURCE = domainName();
                 process.env.NUGET_SOURCES = domainName();
                 // Act
-                const result = resolveNugetApiKey();
+                const result = await resolveNugetApiKey();
                 // Assert
                 expect(result)
                     .toEqual(expected);
@@ -136,7 +181,7 @@ describe(`resolve-nuget-api-key`, () => {
             it(`should return the key for NUGET_SOURCE > NUGET_SOURCES[0]`, async () => {
                 // Arrange
                 blockEnvVars(env.NUGET_API_KEY, env.NUGET_SOURCE, env.NUGET_PUSH_SOURCE, env.NUGET_SOURCES);
-                const source = domainName(), expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
+                const nugetSource = await findRandomKnownNugetSource(), source = nugetSource.url, expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
                     [domainName()]: faker_1.faker.string.alphanumeric(32),
                     [domainName()]: faker_1.faker.string.alphanumeric(32),
                     [source]: expected
@@ -145,7 +190,7 @@ describe(`resolve-nuget-api-key`, () => {
                 process.env.NUGET_SOURCE = source;
                 process.env.NUGET_SOURCES = domainName();
                 // Act
-                const result = resolveNugetApiKey();
+                const result = await resolveNugetApiKey();
                 // Assert
                 expect(result)
                     .toEqual(expected);
@@ -153,7 +198,7 @@ describe(`resolve-nuget-api-key`, () => {
             it(`should return the key for NUGET_SOURCES[0]`, async () => {
                 // Arrange
                 blockEnvVars(env.NUGET_API_KEY, env.NUGET_SOURCE, env.NUGET_PUSH_SOURCE, env.NUGET_SOURCES);
-                const source = domainName(), expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
+                const nugetSource = await findRandomKnownNugetSource(), source = nugetSource.url, expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
                     [domainName()]: faker_1.faker.string.alphanumeric(32),
                     [domainName()]: faker_1.faker.string.alphanumeric(32),
                     [source]: expected
@@ -161,7 +206,7 @@ describe(`resolve-nuget-api-key`, () => {
                 process.env.NUGET_API_KEYS = JSON.stringify(apiKeys);
                 process.env.NUGET_SOURCES = source;
                 // Act
-                const result = resolveNugetApiKey();
+                const result = await resolveNugetApiKey();
                 // Assert
                 expect(result)
                     .toEqual(expected);
@@ -173,7 +218,7 @@ describe(`resolve-nuget-api-key`, () => {
             it(`should return NUGET_API_KEY`, async () => {
                 // Arrange
                 blockEnvVars(env.NUGET_API_KEY, env.NUGET_SOURCE, env.NUGET_PUSH_SOURCE, env.NUGET_SOURCES);
-                const source = domainName(), expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
+                const nugetSource = await findRandomKnownNugetSource(), source = nugetSource.url, expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
                     [domainName()]: faker_1.faker.string.alphanumeric(32),
                     [domainName()]: faker_1.faker.string.alphanumeric(32)
                 };
@@ -181,7 +226,7 @@ describe(`resolve-nuget-api-key`, () => {
                 process.env.NUGET_API_KEY = expected;
                 process.env.NUGET_SOURCES = source;
                 // Act
-                const result = resolveNugetApiKey(source);
+                const result = await resolveNugetApiKey(source);
                 // Assert
                 expect(result)
                     .toEqual(expected);
@@ -191,7 +236,7 @@ describe(`resolve-nuget-api-key`, () => {
             it(`should prefer that value`, async () => {
                 // Arrange
                 blockEnvVars(env.NUGET_API_KEY, env.NUGET_SOURCE, env.NUGET_PUSH_SOURCE, env.NUGET_SOURCES);
-                const source = domainName(), expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
+                const nugetSource = await findRandomKnownNugetSource(), source = nugetSource.url, expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
                     [domainName()]: faker_1.faker.string.alphanumeric(32),
                     [domainName()]: faker_1.faker.string.alphanumeric(32),
                     [source]: expected
@@ -199,7 +244,7 @@ describe(`resolve-nuget-api-key`, () => {
                 process.env.NUGET_API_KEYS = JSON.stringify(apiKeys);
                 process.env.NUGET_API_KEY = faker_1.faker.string.alphanumeric(32);
                 // Act
-                const result = resolveNugetApiKey(source);
+                const result = await resolveNugetApiKey(source);
                 // Assert
                 expect(result)
                     .toEqual(expected);
@@ -210,7 +255,7 @@ describe(`resolve-nuget-api-key`, () => {
                 it(`should prefer that value (${varname})`, async () => {
                     // Arrange
                     blockEnvVars(env.NUGET_API_KEY, env.NUGET_SOURCE, env.NUGET_PUSH_SOURCE, env.NUGET_SOURCES);
-                    const source = domainName(), expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
+                    const nugetSource = await findRandomKnownNugetSource(), source = nugetSource.url, expected = faker_1.faker.string.alphanumeric(32), apiKeys = {
                         [domainName()]: faker_1.faker.string.alphanumeric(32),
                         [domainName()]: faker_1.faker.string.alphanumeric(32),
                         [source]: expected
@@ -219,7 +264,7 @@ describe(`resolve-nuget-api-key`, () => {
                     process.env.NUGET_API_KEY = faker_1.faker.string.alphanumeric(32);
                     process.env[varname] = source;
                     // Act
-                    const result = resolveNugetApiKey();
+                    const result = await resolveNugetApiKey();
                     // Assert
                     expect(result)
                         .toEqual(expected);

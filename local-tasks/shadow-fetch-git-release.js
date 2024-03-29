@@ -5,7 +5,6 @@ gulp.task("shadow-fetch-github-release-dist", async () => {
         entities: FsEntities.files,
         fullPaths: true
     });
-    console.log(`contents of '${distDir}'`, sourceFiles);
     await mkdir(target);
     for (const f of sourceFiles) {
         const parts = splitPath(f);

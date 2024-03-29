@@ -2,8 +2,28 @@ import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
 
 describe(`resolve-nuget-api-key`, () => {
-  const resolveNugetApiKey = requireModule<ResolveNugetApiKey>("resolve-nuget-api-key");
-  const env = requireModule<Env>("env");
+  const
+    resolveNugetApiKey = requireModule<ResolveNugetApiKey>("resolve-nuget-api-key"),
+    dotnetCli = requireModule<DotNetCli>("dotnet-cli"),
+    which = requireModule<Which>("which"),
+    env = requireModule<Env>("env");
+
+  async function findRandomKnownNugetSource(): Promise<NugetSource> {
+    const all = await dotnetCli.listNugetSources();
+    return faker.helpers.arrayElement(all);
+  }
+
+  beforeAll(() => {
+    // zarro's `which` facade caches, and somewhere
+    // later in this test, the PATH variable gets smashed ):
+    // so if we just ask where dotnet is right now, we can
+    // easily see that this is not the problem you're looking
+    // for *waves hand like a jedi*
+    const dotnet = which("dotnet");
+    expect(dotnet)
+      .toBeDefined();
+  });
+
   describe(`when NUGET_API_KEY not set and NUGET_API_KEYS not set`, () => {
     it(`should return undefined`, async () => {
       // Arrange
@@ -20,7 +40,6 @@ describe(`resolve-nuget-api-key`, () => {
         .not.toBeDefined();
     });
   });
-
 
   describe(`when only NUGET_API_KEY set`, () => {
     it(`should return that for unnamed source`, async () => {
@@ -45,7 +64,8 @@ describe(`resolve-nuget-api-key`, () => {
       // Arrange
       blockEnvVars(env.NUGET_API_KEYS);
       const
-        source = faker.internet.domainName(),
+        nugetSource = await findRandomKnownNugetSource(),
+        source = nugetSource.url,
         expected = faker.string.alphanumeric(32);
       process.env.NUGET_API_KEY = expected;
       // Act
@@ -54,6 +74,7 @@ describe(`resolve-nuget-api-key`, () => {
       expect(result)
         .toEqual(expected);
     });
+
     [ "NUGET_SOURCE", "NUGET_SOURCES", "NUGET_PUSH_SOURCE" ].forEach(
       varname => {
         xit(`should return that for an environmentally-named source in ${ varname }`, async () => {
@@ -80,17 +101,18 @@ describe(`resolve-nuget-api-key`, () => {
         // Arrange
         delete process.env.NUGET_API_KEY;
         const
+          source = await findRandomKnownNugetSource(),
           expected = faker.string.alphanumeric(32);
         process.env.NUGET_API_KEYS = expected;
         // Act
-        const result = await resolveNugetApiKey(faker.internet.domainName());
+        const result = await resolveNugetApiKey(source.url);
         // Assert
         expect(result)
           .toEqual(expected);
       });
     });
     describe(`and is json`, () => {
-      it(`should return undefined when the source is unknown and no nuget.org apikey defined`, async () => {
+     it(`should return undefined when the source is unknown and no nuget.org apikey defined`, async () => {
         // Arrange
         blockEnvVars(
           env.NUGET_API_KEY,
@@ -120,7 +142,6 @@ describe(`resolve-nuget-api-key`, () => {
           env.NUGET_SOURCES
         );
         const
-          dotnetCli = requireModule<DotNetCli>("dotnet-cli"),
           knownSources = await dotnetCli.listNugetSources(),
           selectedSource = faker.helpers.arrayElement(knownSources),
           expected = faker.string.alphanumeric(32);
@@ -128,6 +149,33 @@ describe(`resolve-nuget-api-key`, () => {
         const apiKeys = {
           ["some-private-repository"]: faker.string.alphanumeric(32),
           [selectedSource.name]: expected
+        }
+        process.env.NUGET_API_KEYS = JSON.stringify(apiKeys);
+        process.env.NUGET_PUSH_SOURCE = selectedSource.url;
+        // Act
+        const result = await resolveNugetApiKey();
+        // Assert
+        expect(result)
+          .toEqual(expected);
+      });
+
+      it(`should handle NUGET_PUSH_SOURCE being an url`, async () => {
+        // Arrange
+        blockEnvVars(
+          env.NUGET_API_KEY,
+          env.NUGET_SOURCE,
+          env.NUGET_PUSH_SOURCE,
+          env.NUGET_SOURCES
+        );
+        const
+          dotnetCli = requireModule<DotNetCli>("dotnet-cli"),
+          knownSources = await dotnetCli.listNugetSources(),
+          selectedSource = faker.helpers.arrayElement(knownSources),
+          expected = faker.string.alphanumeric(32);
+
+        const apiKeys = {
+          ["https://some-private-repository"]: faker.string.alphanumeric(32),
+          [selectedSource.url]: expected
         }
         process.env.NUGET_API_KEYS = JSON.stringify(apiKeys);
         process.env.NUGET_PUSH_SOURCE = selectedSource.url;
@@ -170,7 +218,8 @@ describe(`resolve-nuget-api-key`, () => {
           env.NUGET_SOURCES
         );
         const
-          source = domainName(),
+          nugetSource = await findRandomKnownNugetSource(),
+          source = nugetSource.name,
           expected = faker.string.alphanumeric(32),
           apiKeys = {
             [domainName()]: faker.string.alphanumeric(32),
@@ -193,7 +242,8 @@ describe(`resolve-nuget-api-key`, () => {
           env.NUGET_SOURCES
         );
         const
-          source = domainName(),
+          nugetSource = await findRandomKnownNugetSource(),
+          source = nugetSource.url,
           expected = faker.string.alphanumeric(32),
           apiKeys = {
             [domainName()]: faker.string.alphanumeric(32),
@@ -220,7 +270,8 @@ describe(`resolve-nuget-api-key`, () => {
           env.NUGET_SOURCES
         );
         const
-          source = domainName(),
+          nugetSource = await findRandomKnownNugetSource(),
+          source = nugetSource.url,
           expected = faker.string.alphanumeric(32),
           apiKeys = {
             [domainName()]: faker.string.alphanumeric(32),
@@ -245,7 +296,8 @@ describe(`resolve-nuget-api-key`, () => {
           env.NUGET_SOURCES
         );
         const
-          source = domainName(),
+          nugetSource = await findRandomKnownNugetSource(),
+          source = nugetSource.url,
           expected = faker.string.alphanumeric(32),
           apiKeys = {
             [domainName()]: faker.string.alphanumeric(32),
@@ -274,7 +326,8 @@ describe(`resolve-nuget-api-key`, () => {
           env.NUGET_SOURCES
         );
         const
-          source = domainName(),
+          nugetSource = await findRandomKnownNugetSource(),
+          source = nugetSource.url,
           expected = faker.string.alphanumeric(32),
           apiKeys = {
             [domainName()]: faker.string.alphanumeric(32),
@@ -300,7 +353,8 @@ describe(`resolve-nuget-api-key`, () => {
           env.NUGET_SOURCES
         );
         const
-          source = domainName(),
+          nugetSource = await findRandomKnownNugetSource(),
+          source = nugetSource.url,
           expected = faker.string.alphanumeric(32),
           apiKeys = {
             [domainName()]: faker.string.alphanumeric(32),
@@ -328,7 +382,8 @@ describe(`resolve-nuget-api-key`, () => {
               env.NUGET_SOURCES
             );
             const
-              source = domainName(),
+              nugetSource = await findRandomKnownNugetSource(),
+              source = nugetSource.url,
               expected = faker.string.alphanumeric(32),
               apiKeys = {
                 [domainName()]: faker.string.alphanumeric(32),

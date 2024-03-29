@@ -9,12 +9,12 @@
   ): Promise<Optional<string>> {
     const
       allKeys = resolveSourceToKeyLookup(),
-      requestedSource = await resolveSourceName(resolveSource(source));
+      requestedSource = resolveSource(source);
     if (!requestedSource) {
       return findValue(allKeys, "nuget.org") || findValue(allKeys, "*");
     }
     const
-      perSource = findValue(allKeys, requestedSource),
+      perSource = findValue(allKeys, requestedSource, await resolveSourceName(requestedSource)),
       multiKeyFallback = findValue(allKeys, "*"),
       nugetOrgFallback = findValue(allKeys, "nuget.org"),
       ultimateFallback = env.resolve(env.NUGET_API_KEY);
@@ -55,18 +55,25 @@
   }
 
   function findValue(
-    keys: Optional<Dictionary<string>>,
-    seek: string
+    data: Optional<Dictionary<string>>,
+    ...seekKeys: string[]
   ): Optional<string> {
-    if (!keys || !seek) {
+    if (!data || !seekKeys) {
       return undefined;
     }
-    const exactMatch = keys[seek];
-    if (exactMatch) {
-      return exactMatch;
-    }
+    const uniqueKeys = new Set<string>(seekKeys);
+    for (let seek of uniqueKeys) {
+      const exactMatch = data[seek];
+      if (exactMatch) {
+        return exactMatch;
+      }
 
-    return fuzzyFindValue(keys, seek);
+      const thisPass = fuzzyFindValue(data, seek);
+      if (thisPass) {
+        return thisPass
+      }
+    }
+    return undefined;
   }
 
   function fuzzyFindValue(

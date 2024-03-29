@@ -22,7 +22,6 @@ gulp.task("shadow-fetch-github-release-dist", async () => {
       fullPaths: true
     });
 
-  console.log(`contents of '${ distDir }'`, sourceFiles);
   await mkdir(target);
 
   for (const f of sourceFiles) {
