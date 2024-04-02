@@ -5,10 +5,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
     const PluginError = require("plugin-error");
     const { SpawnError } = requireModule("spawn");
     function streamify(fn, optionsFactory, pluginName, operation) {
+        debugger;
         return through.obj(async function (file, enc, cb) {
+            debugger;
             try {
                 const options = await optionsFactory(file);
                 await fn(options);
+                debugger;
                 cb(null, file);
             }
             catch (e) {
