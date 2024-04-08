@@ -23,12 +23,19 @@
 
   let shouldBypassSystemMock = false;
 
+  const history = [] as SystemResult[];
+
+  function fetchHistory() {
+    return history.splice(0);
+  }
+
   function mockSystem() {
     try {
       throw new Error('');
     } catch (e) {
       const err = e as Error;
     }
+    history.splice(0);
     system.mockImplementation((exe, args, opts) => {
       systemPre(exe, args, opts);
       if (shouldBypassSystemMock) {
@@ -52,18 +59,21 @@
         } as SystemResult;
         return result;
       }
-      return Promise.resolve({
+      const result = {
         exe: exe,
         args,
         exitCode: 0,
         __is_mocked__: true
-      } as unknown as SystemResult);
+      } as unknown as SystemResult;
+      history.push(result);
+      return Promise.resolve(result);
     });
   }
 
   function enableSystemCallThrough() {
     shouldBypassSystemMock = true;
   }
+
   function disableSystemCallThrough() {
     shouldBypassSystemMock = false;
   }
@@ -157,6 +167,7 @@
     system,
     updateNuspecVersion,
     updateNuspecVersionPre,
-    runWithRealSystem
+    runWithRealSystem,
+    fetchHistory
   };
 })();

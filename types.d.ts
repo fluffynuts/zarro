@@ -1512,6 +1512,17 @@ declare global {
     configFile?: string;
   }
 
+  interface DotNetInstallNugetPackageOption extends DotNetBaseOptions {
+    id: string;
+    projectFile: string;
+    version?: string;
+    framework?: string;
+    noRestore?: boolean;
+    source?: string;
+    packageDirectory?: string;
+    preRelease?: boolean;
+  }
+
   interface IoConsumers {
     stdout?: IoConsumer;
     stderr?: IoConsumer;
@@ -1573,6 +1584,7 @@ declare global {
   type DotNetDisableNugetSourceFunction = (source: string | NugetSource) => Promise<void>;
   type DotNetTryMatchNugetSourceFunction = (nameOrUrlOrHostOrSpec: string | Partial<NugetSource> | RegExp) => Promise<Optional<NugetSource>>;
   type DotNetSearchNugetPackagesFunction = (opts: DotNetSearchPackagesOptions | string) => Promise<PackageInfo[]>;
+  type DotNetInstallNugetPackageFunction = (opts: DotNetInstallNugetPackageOption | string) => Promise<void>;
 
   interface DotNetCli {
     clean: DotNetCleanFunction;
@@ -1591,6 +1603,7 @@ declare global {
     tryFindConfiguredNugetSource: DotNetTryMatchNugetSourceFunction;
     incrementTempDbPortHintIfFound: (env: Dictionary<string>) => void;
     searchPackages: DotNetSearchNugetPackagesFunction;
+    installPackage: DotNetInstallNugetPackageFunction;
   }
 
   type ReadCsProjNode = (csproj: string) => Promise<string>;

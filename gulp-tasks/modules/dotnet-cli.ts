@@ -1139,7 +1139,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     pushFlag(args, opts.exactMatch, "--exact-match");
     pushFlag(args, opts.preRelease, "--prerelease");
     pushIfSet(args, opts.configFile, "--configfile");
-    
+
     args.push("--format", "json");
     if (opts.search) {
       args.push(opts.search);
@@ -1189,6 +1189,28 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     return finalResult;
   }
 
+  async function installPackage(
+    opts: DotNetInstallNugetPackageOption
+  ): Promise<void> {
+    if (!opts) {
+      throw new Error(`no options passed to 'installPackage' - target project and package name not specified`);
+    }
+    if (!`${opts.projectFile}`.trim()) {
+      throw new Error(`projectFile not specified`);
+    }
+    if (!`${opts.id}`.trim()) {
+      throw new Error(`package id not specified`);
+    }
+    const args = [ "add", "package", opts.projectFile, opts.id ];
+    pushIfSet(args, opts.version, "--version");
+    pushIfSet(args, opts.framework, "--framework");
+    pushFlag(args, opts.noRestore, "--no-restore");
+    pushIfSet(args, opts.source, "--source");
+    pushIfSet(args, opts.packageDirectory, "--package-directory");
+    pushFlag(args, opts.preRelease, "--prerelease");
+    await runDotNetWith(args, opts);
+  }
+
   module.exports = {
     test,
     build,
@@ -1205,6 +1227,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     enableNugetSource,
     tryFindConfiguredNugetSource,
     incrementTempDbPortHintIfFound,
-    searchPackages
+    searchPackages,
+    installPackage
   };
 })();

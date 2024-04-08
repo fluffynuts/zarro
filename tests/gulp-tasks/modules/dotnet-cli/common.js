@@ -18,6 +18,10 @@
     system.isResult = (o) => o && o.exitCode === 0;
     mockModule("system", system);
     let shouldBypassSystemMock = false;
+    const history = [];
+    function fetchHistory() {
+        return history.splice(0);
+    }
     function mockSystem() {
         try {
             throw new Error('');
@@ -25,6 +29,7 @@
         catch (e) {
             const err = e;
         }
+        history.splice(0);
         system.mockImplementation((exe, args, opts) => {
             systemPre(exe, args, opts);
             if (shouldBypassSystemMock) {
@@ -48,12 +53,14 @@
                 };
                 return result;
             }
-            return Promise.resolve({
+            const result = {
                 exe: exe,
                 args,
                 exitCode: 0,
                 __is_mocked__: true
-            });
+            };
+            history.push(result);
+            return Promise.resolve(result);
         });
     }
     function enableSystemCallThrough() {
@@ -146,6 +153,7 @@
         system,
         updateNuspecVersion,
         updateNuspecVersionPre,
-        runWithRealSystem
+        runWithRealSystem,
+        fetchHistory
     };
 })();
