@@ -12,8 +12,8 @@ import { StyleFunction } from "ansi-colors";
     QUACKERS_SLOW_SUMMARY_START_MARKER = "::slow_summary_start::",
     QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::slow_summary_complete::",
     QUACKERS_SHOW_SUMMARY = "true",
-    QUACKERS_SUMMARY_TOTALS_START_MARKER="::totals_summary_start::",
-    QUACKERS_SUMMARY_TOTALS_COMPLETE_MARKER="::totals_summary_complete::",
+    QUACKERS_SUMMARY_TOTALS_START_MARKER = "::totals_summary_start::",
+    QUACKERS_SUMMARY_TOTALS_COMPLETE_MARKER = "::totals_summary_complete::",
     QUACKERS_OUTPUT_FAILURES_INLINE = "true",
     quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length,
     quackersFullSummaryStartMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_START_MARKER }`,
@@ -209,9 +209,6 @@ import { StyleFunction } from "ansi-colors";
     if (process.env[parallelVar] === undefined) {
       // automatically test in parallel if possible
       testInParallel = allProjectsReferenceQuackers;
-      if (testInParallel) {
-      } else {
-      }
     } else if (parallelFlag && !allProjectsReferenceQuackers) {
       testInParallel = false;
     }
@@ -267,11 +264,11 @@ import { StyleFunction } from "ansi-colors";
               runningInParallel,
               rebuild,
               suppressOutput,
-              `(${idx + 1} / ${testProjectPaths.length})`
+              `(${ idx + 1 } / ${ testProjectPaths.length })`
             );
             testProcessResults.push(result);
           } catch (e) {
-            console.error(`unable to test dotnet core project '${path}':\n${e}`);
+            console.error(`unable to test dotnet core project '${ path }':\n${ e }`);
             process.exit(1);
           }
         };
@@ -543,117 +540,116 @@ Test Run Summary
     s: string
   ) {
     try {
-    s = s || "";
-    if (s.includes("\n")) {
-      const lines = s.split("\n").map(s => s.trimEnd());
-      for (const line of lines) {
-        quackersStdOutHandler(state, line);
+      s = s || "";
+      if (s.includes("\n")) {
+        const lines = s.split("\n").map(s => s.trimEnd());
+        for (const line of lines) {
+          quackersStdOutHandler(state, line);
+        }
+        return;
       }
-      return;
-    }
-    state.fullLog.push(s);
-    debug(`[test stdout] ${ s }`);
-    if (s.startsWith(quackersFullSummaryStartMarker)) {
-      debug("  summary starts");
-      state.inSummary = true;
-      return;
-    }
-    if (s.startsWith(quackersFullSummaryCompleteMarker)) {
-      debug("  summary ends");
-      state.inSummary = false;
-      return;
-    }
-    if (state.inSummary) {
-      /* actual summary log example, using settings
+      state.fullLog.push(s);
+      debug(`[test stdout] ${ s }`);
+      if (s.startsWith(quackersFullSummaryStartMarker)) {
+        debug("  summary starts");
+        state.inSummary = true;
+        return;
+      }
+      if (s.startsWith(quackersFullSummaryCompleteMarker)) {
+        debug("  summary ends");
+        state.inSummary = false;
+        return;
+      }
+      if (state.inSummary) {
+        /* actual summary log example, using settings
 
-    QUACKERS_LOG_PREFIX = "::",
-    QUACKERS_SUMMARY_START_MARKER = `::SS::`,
-    QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`,
-    QUACKERS_FAILURE_START_MARKER = `::SF::`,
-    QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::",
-    QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::",
-    QUACKERS_SLOW_SUMMARY_START_MARKER = "::SSS::",
-    QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::SSC::",
-    QUACKERS_VERBOSE_SUMMARY = "true",
-    QUACKERS_OUTPUT_FAILURES_INLINE = "true",
+      QUACKERS_LOG_PREFIX = "::",
+      QUACKERS_SUMMARY_START_MARKER = `::SS::`,
+      QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`,
+      QUACKERS_FAILURE_START_MARKER = `::SF::`,
+      QUACKERS_FAILURE_INDEX_PLACEHOLDER = "::[#]::",
+      QUACKERS_SLOW_INDEX_PLACEHOLDER = "::[-]::",
+      QUACKERS_SLOW_SUMMARY_START_MARKER = "::SSS::",
+      QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::SSC::",
+      QUACKERS_VERBOSE_SUMMARY = "true",
+      QUACKERS_OUTPUT_FAILURES_INLINE = "true",
 
-  ::::SS::
-  ::::SSS::
-  :: {some slow summary data}
-  ::::SSC::
-  ::
-  ::
-  ::Test results:
-  ::Passed:  8
-  ::Failed:  2
-  ::Skipped: 1
-  ::Total:   11
+    ::::SS::
+    ::::SSS::
+    :: {some slow summary data}
+    ::::SSC::
+    ::
+    ::
+    ::Test results:
+    ::Passed:  8
+    ::Failed:  2
+    ::Skipped: 1
+    ::Total:   11
 
-  ::Failures:
+    ::Failures:
 
-  ::[1] QuackersTestHost.SomeTests.ShouldBeLessThan50(75)
-  ::  NExpect.Exceptions.UnmetExpectationException : Expected 75 to be less than 50
-  ::     at QuackersTestHost.SomeTests.ShouldBeLessThan50(Int32 value) in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 66
-  ::
+    ::[1] QuackersTestHost.SomeTests.ShouldBeLessThan50(75)
+    ::  NExpect.Exceptions.UnmetExpectationException : Expected 75 to be less than 50
+    ::     at QuackersTestHost.SomeTests.ShouldBeLessThan50(Int32 value) in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 66
+    ::
 
-  ::[2] QuackersTestHost.SomeTests.ShouldFail
-  ::  NExpect.Exceptions.UnmetExpectationException : Expected false but got true
-  ::     at QuackersTestHost.SomeTests.ShouldFail() in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 28
-  ::
-  ::::SC::
-       */
-      const line = stripQuackersLogPrefix(s);
-      if (line.startsWith(QUACKERS_FAILURE_START_MARKER)) {
-        debug("failure summary start");
-        state.inFailureSummary = true;
+    ::[2] QuackersTestHost.SomeTests.ShouldFail
+    ::  NExpect.Exceptions.UnmetExpectationException : Expected false but got true
+    ::     at QuackersTestHost.SomeTests.ShouldFail() in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 28
+    ::
+    ::::SC::
+         */
+        const line = stripQuackersLogPrefix(s);
+        if (line.startsWith(QUACKERS_FAILURE_START_MARKER)) {
+          debug("failure summary start");
+          state.inFailureSummary = true;
+          return;
+        }
+        if (line.startsWith(QUACKERS_SLOW_SUMMARY_START_MARKER)) {
+          debug("slow summary start");
+          state.inSlowSummary = true;
+          return;
+        }
+        if (line.startsWith(QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER)) {
+          debug("slow summary complete");
+          state.inSlowSummary = false;
+          return;
+        }
+        if (line.startsWith(QUACKERS_SUMMARY_TOTALS_START_MARKER)) {
+          debug("totals summary start");
+          state.inTotalsSummary = true;
+          return;
+        }
+        if (line.startsWith(QUACKERS_SUMMARY_TOTALS_COMPLETE_MARKER)) {
+          debug("totals summary complete");
+          state.inTotalsSummary = false;
+          return;
+        }
+        if (state.inTotalsSummary) {
+          incrementTestResultCount(state.testResults, line);
+          return;
+        }
+        if (state.inFailureSummary) {
+          state.testResults.failureSummary.push(line);
+          return;
+        }
+        if (state.inSlowSummary) {
+          state.testResults.slowSummary.push(line);
+          return;
+        }
         return;
       }
-      if (line.startsWith(QUACKERS_SLOW_SUMMARY_START_MARKER)) {
-        debug("slow summary start");
-        state.inSlowSummary = true;
-        return;
+      const isQuackersLog = s.startsWith(QUACKERS_LOG_PREFIX);
+      if (isQuackersLog) {
+        state.haveSeenQuackersLog = true;
       }
-      if (line.startsWith(QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER)) {
-        debug("slow summary complete");
-        state.inSlowSummary = false;
-        return;
+      if (!state.haveSeenQuackersLog || isQuackersLog) {
+        console.log(stripQuackersLogPrefix(s));
+      } else {
+        debug(`discarding log: "${ s }"`);
       }
-      if (line.startsWith(QUACKERS_SUMMARY_TOTALS_START_MARKER)) {
-        debug("totals summary start");
-        state.inTotalsSummary = true;
-        return;
-      }
-      if (line.startsWith(QUACKERS_SUMMARY_TOTALS_COMPLETE_MARKER)) {
-        debug("totals summary complete");
-        state.inTotalsSummary = false;
-        return;
-      }
-      if (state.inTotalsSummary) {
-        incrementTestResultCount(state.testResults, line);
-        return;
-      }
-      if (state.inFailureSummary) {
-        state.testResults.failureSummary.push(line);
-        return;
-      }
-      if (state.inSlowSummary) {
-        state.testResults.slowSummary.push(line);
-        return;
-      }
-      return;
-    }
-    const isQuackersLog = s.startsWith(QUACKERS_LOG_PREFIX);
-    if (isQuackersLog) {
-      state.haveSeenQuackersLog = true;
-    }
-    if (!state.haveSeenQuackersLog || isQuackersLog) {
-      console.log(stripQuackersLogPrefix(s));
-    } else {
-      debug(`discarding log: "${ s }"`);
-    }
     } catch (e) {
-      const err = e as Error;
-      const err2 = err;
+      debug(`quackersStdOutHandler errors:\n${e}`);
     }
   }
 
@@ -679,7 +675,10 @@ Test Run Summary
   }
 
   function stripQuackersLogPrefix(line: string) {
-    return line.substring(quackersLogPrefixLength);
+    while (line.startsWith(QUACKERS_LOG_PREFIX)) {
+      line = line.substring(QUACKERS_LOG_PREFIX.length);
+    }
+    return line;
   }
 
   const quackersRefCache = {} as Dictionary<boolean>;
