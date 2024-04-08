@@ -16,6 +16,7 @@
     const readNuspecVersion = requireModule("read-nuspec-version");
     const log = requireModule("log");
     const env = requireModule("env");
+    const Version = requireModule("version");
     const emojiLabels = {
         testing: `🧪 Testing`,
         packing: `📦 Packing`,
@@ -669,14 +670,13 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     }
     async function runDotNetWith(args, opts) {
         try {
-            const result = await system("dotnet", args, {
+            return await system("dotnet", args, {
                 stdout: opts.stdout,
                 stderr: opts.stderr,
                 suppressOutput: opts.suppressOutput,
                 suppressStdIoInErrors: opts.suppressStdIoInErrors,
                 env: opts.env
             });
-            return result;
         }
         catch (e) {
             if (opts.suppressErrors) {
@@ -754,6 +754,57 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             usingFallback
         });
     }
+    async function searchPackages(options) {
+        if (!options) {
+            throw new Error(`No options or search string provided`);
+        }
+        const opts = typeof options === "string"
+            ? { search: options }
+            : options;
+        const args = ["package", "search"];
+        pushIfSet(args, opts.source, "--source");
+        pushFlag(args, opts.exactMatch, "--exact-match");
+        pushFlag(args, opts.preRelease, "--prerelease");
+        pushIfSet(args, opts.configFile, "--configfile");
+        args.push("--format", "json");
+        if (opts.search) {
+            args.push(opts.search);
+        }
+        const stdout = [];
+        opts.stdout = (s) => stdout.push(s);
+        opts.suppressOutput = true;
+        const rawResult = await runDotNetWith(args, opts);
+        if (system.isError(rawResult)) {
+            throw rawResult;
+        }
+        const allText = stdout.join(" "), parsed = JSON.parse(allText);
+        const finalResult = [];
+        const limit = opts.take || Number.MAX_VALUE;
+        for (const sourceResult of parsed.searchResult) {
+            for (const pkg of sourceResult.packages) {
+                finalResult.push({
+                    id: pkg.id,
+                    version: new Version(pkg.latestVersion),
+                    source: sourceResult.sourceName
+                });
+            }
+        }
+        // dotnet package search takes in skip and take parameters,
+        // but there are some potential issues:
+        // 1. when searching for an exact match, it dotnet doesn't apply skip/take
+        //    - so we'd have to do it ourselves anyway
+        // 2. dotnet returns results in ascending version order
+        //    - where the most useful, especially for paging, is reverse-ordered
+        finalResult.sort((a, b) => a.version.compareWith(b.version)).reverse();
+        const skip = opts.skip || 0;
+        if (skip > 0) {
+            finalResult.splice(0, skip);
+        }
+        if (finalResult.length > limit) {
+            finalResult.splice(limit);
+        }
+        return finalResult;
+    }
     module.exports = {
         test,
         build,
@@ -769,6 +820,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         disableNugetSource,
         enableNugetSource,
         tryFindConfiguredNugetSource,
-        incrementTempDbPortHintIfFound
+        incrementTempDbPortHintIfFound,
+        searchPackages
     };
 })();

@@ -1,4 +1,4 @@
-// noinspection JSUnusedGlobalSymbols
+// noinspection JSUnusedGlobalSymbols,JSUnusedLocalSymbols
 
 import * as fs from "fs";
 import { StatsBase } from "fs";
@@ -802,6 +802,7 @@ declare global {
   interface PackageInfo {
     id: string;
     version: Version;
+    source?: string;
   }
 
   interface PathUtils {
@@ -827,16 +828,16 @@ declare global {
   // @ts-ignore
   export interface ExecOpts
     extends ExecFileOptionsWithBufferEncoding {
-    // force usage of execfile
+    // force usage of execFile
     _useExecFile?: boolean;
     // exec normally mirrors output (and returns it)
     // -> set this to true to only return the output
-    suppressOutput?: boolean;
+    encoding?: string | null;
 
     // merge stdout & stderr into one output
     mergeIo?: boolean;
 
-    encoding?: string | null;
+    suppressOutput?: boolean;
   }
 
   export interface NugetPushOpts {
@@ -1063,7 +1064,7 @@ declare global {
 
     /**
      * when set true, output will not be echoed back on the
-     * console but you will be able to get it from a custom
+     * console, but you will be able to get it from a custom
      * io writer or the result from after spawn completes
      */
     suppressOutput?: boolean;
@@ -1095,7 +1096,7 @@ declare global {
 
     /**
      * when set true, output will not be echoed back on the
-     * console but you will be able to get it from a custom
+     * console, but you will be able to get it from a custom
      * io writer or the result from after spawn completes
      */
     suppressOutput?: boolean;
@@ -1501,6 +1502,16 @@ declare global {
     timeout?: number;
   }
 
+  interface DotNetSearchPackagesOptions extends DotNetBaseOptions {
+    source?: string;
+    search?: string;
+    take?: number;
+    skip?: number;
+    exactMatch?: boolean;
+    preRelease?: boolean;
+    configFile?: string;
+  }
+
   interface IoConsumers {
     stdout?: IoConsumer;
     stderr?: IoConsumer;
@@ -1561,6 +1572,7 @@ declare global {
   type DotNetEnableNugetSourceFunction = (source: string | NugetSource) => Promise<void>;
   type DotNetDisableNugetSourceFunction = (source: string | NugetSource) => Promise<void>;
   type DotNetTryMatchNugetSourceFunction = (nameOrUrlOrHostOrSpec: string | Partial<NugetSource> | RegExp) => Promise<Optional<NugetSource>>;
+  type DotNetSearchNugetPackagesFunction = (opts: DotNetSearchPackagesOptions | string) => Promise<PackageInfo[]>;
 
   interface DotNetCli {
     clean: DotNetCleanFunction;
@@ -1578,6 +1590,7 @@ declare global {
     disableNugetSource: DotNetDisableNugetSourceFunction;
     tryFindConfiguredNugetSource: DotNetTryMatchNugetSourceFunction;
     incrementTempDbPortHintIfFound: (env: Dictionary<string>) => void;
+    searchPackages: DotNetSearchNugetPackagesFunction;
   }
 
   type ReadCsProjNode = (csproj: string) => Promise<string>;
@@ -1715,7 +1728,7 @@ declare global {
     "bzip2-1.0.5" |
     "bzip2-1.0.6" |
     "Caldera" |
-    "CATOSL-1.1" |
+    "CATO-1.1" |
     "CC-BY-1.0" |
     "CC-BY-2.0" |
     "CC-BY-2.5" |
