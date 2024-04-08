@@ -139,10 +139,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
         if (process.env[parallelVar] === undefined) {
             // automatically test in parallel if possible
             testInParallel = allProjectsReferenceQuackers;
-            if (testInParallel) {
-            }
-            else {
-            }
         }
         else if (parallelFlag && !allProjectsReferenceQuackers) {
             testInParallel = false;
@@ -388,7 +384,7 @@ Test Run Summary
             }
             if (state.inSummary) {
                 /* actual summary log example, using settings
-          
+        
               QUACKERS_LOG_PREFIX = "::",
               QUACKERS_SUMMARY_START_MARKER = `::SS::`,
               QUACKERS_SUMMARY_COMPLETE_MARKER = `::SC::`,
@@ -399,7 +395,7 @@ Test Run Summary
               QUACKERS_SLOW_SUMMARY_COMPLETE_MARKER = "::SSC::",
               QUACKERS_VERBOSE_SUMMARY = "true",
               QUACKERS_OUTPUT_FAILURES_INLINE = "true",
-          
+        
             ::::SS::
             ::::SSS::
             :: {some slow summary data}
@@ -411,14 +407,14 @@ Test Run Summary
             ::Failed:  2
             ::Skipped: 1
             ::Total:   11
-          
+        
             ::Failures:
-          
+        
             ::[1] QuackersTestHost.SomeTests.ShouldBeLessThan50(75)
             ::  NExpect.Exceptions.UnmetExpectationException : Expected 75 to be less than 50
             ::     at QuackersTestHost.SomeTests.ShouldBeLessThan50(Int32 value) in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 66
             ::
-          
+        
             ::[2] QuackersTestHost.SomeTests.ShouldFail
             ::  NExpect.Exceptions.UnmetExpectationException : Expected false but got true
             ::     at QuackersTestHost.SomeTests.ShouldFail() in C:\code\opensource\quackers\src\Demo\SomeTests.cs:line 28
@@ -477,8 +473,7 @@ Test Run Summary
             }
         }
         catch (e) {
-            const err = e;
-            const err2 = err;
+            debug(`quackersStdOutHandler errors:\n${e}`);
         }
     }
     function incrementTestResultCount(testResults, line) {
@@ -496,7 +491,10 @@ Test Run Summary
         }
     }
     function stripQuackersLogPrefix(line) {
-        return line.substring(quackersLogPrefixLength);
+        while (line.startsWith(QUACKERS_LOG_PREFIX)) {
+            line = line.substring(QUACKERS_LOG_PREFIX.length);
+        }
+        return line;
     }
     const quackersRefCache = {};
     async function projectReferencesQuackers(csproj) {
