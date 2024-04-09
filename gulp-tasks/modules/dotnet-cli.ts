@@ -1208,6 +1208,9 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     pushIfSet(args, opts.source, "--source");
     pushIfSet(args, opts.packageDirectory, "--package-directory");
     pushFlag(args, opts.preRelease, "--prerelease");
+    if (opts.suppressOutput === undefined) {
+      opts.suppressOutput = true;
+    }
     await runDotNetWith(args, opts);
   }
 
