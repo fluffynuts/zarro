@@ -1,3 +1,5 @@
+// noinspection ES6ConvertRequireIntoImport
+
 import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
 
@@ -33,7 +35,7 @@ describe(`installPackage`, () => {
     expect(calls[0].exe)
       .toEqual("dotnet");
     expect(calls[0].args)
-      .toEqual([ "add", "package", csproj, "NExpect" ]);
+      .toEqual([ "add", csproj, "package", "NExpect" ]);
   });
 
   it(`should specify version when set`, async () => {
@@ -52,8 +54,7 @@ describe(`installPackage`, () => {
     const calls = fetchHistory();
     expect(calls[0].args)
       .toEqual([
-        "add", "package",
-        projectFile,
+        "add", projectFile, "package",
         id,
         "--version",
         version
@@ -76,8 +77,7 @@ describe(`installPackage`, () => {
     const calls = fetchHistory();
     expect(calls[0].args)
       .toEqual([
-        "add", "package",
-        projectFile,
+        "add", projectFile, "package",
         id,
         "--framework",
         framework
@@ -99,8 +99,7 @@ describe(`installPackage`, () => {
     const calls = fetchHistory();
     expect(calls[0].args)
       .toEqual([
-        "add", "package",
-        projectFile,
+        "add", projectFile, "package",
         id,
         "--no-restore"
       ]);
@@ -122,8 +121,7 @@ describe(`installPackage`, () => {
     const calls = fetchHistory();
     expect(calls[0].args)
       .toEqual([
-        "add", "package",
-        projectFile,
+        "add", projectFile, "package",
         id,
         "--source",
         source
@@ -146,8 +144,7 @@ describe(`installPackage`, () => {
     const calls = fetchHistory();
     expect(calls[0].args)
       .toEqual([
-        "add", "package",
-        projectFile,
+        "add", projectFile, "package",
         id,
         "--package-directory",
         packageDirectory
@@ -169,8 +166,7 @@ describe(`installPackage`, () => {
     const calls = fetchHistory();
     expect(calls[0].args)
       .toEqual([
-        "add", "package",
-        projectFile,
+        "add", projectFile, "package",
         id,
         "--prerelease"
       ]);

@@ -1201,7 +1201,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     if (!`${opts.id}`.trim()) {
       throw new Error(`package id not specified`);
     }
-    const args = [ "add", "package", opts.projectFile, opts.id ];
+    const args = [ "add", opts.projectFile, "package", opts.id ];
     pushIfSet(args, opts.version, "--version");
     pushIfSet(args, opts.framework, "--framework");
     pushFlag(args, opts.noRestore, "--no-restore");
