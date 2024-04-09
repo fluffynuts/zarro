@@ -67,7 +67,7 @@
             const ver = other instanceof Version
                 ? other
                 : new Version(other);
-            return compareVersionArrays(this.version, ver.version);
+            return compareVersions(this.version, this.tag, ver.version, ver.tag);
         }
         toString() {
             const ver = this.version.join(".");
@@ -76,7 +76,7 @@
                 : ver;
         }
     }
-    function compareVersionArrays(x, y) {
+    function compareVersions(x, xTag, y, yTag) {
         const shortest = Math.min(x.length, y.length), compare = [];
         for (let i = 0; i < shortest; i++) {
             if (x[i] > y[i]) {
@@ -90,11 +90,11 @@
             }
         }
         if (compare.length === 0) {
-            return 0;
+            return compareTags(xTag, yTag);
         }
         const allZero = compare.reduce((acc, cur) => acc && (cur === "0"), true);
         if (allZero) {
-            return 0;
+            return compareTags(xTag, yTag);
         }
         for (const s of compare) {
             if (s === ">") {
@@ -104,7 +104,29 @@
                 return -1;
             }
         }
+        return compareTags(xTag, yTag);
+    }
+    function compareTags(xTag, yTag) {
+        if (xTag && yTag) {
+            return compareStrings(xTag, yTag);
+        }
+        if (xTag) {
+            // assume x is the beta for y
+            return -1;
+        }
+        if (yTag) {
+            // assume y is the beta for x
+            return 1;
+        }
         return 0;
+    }
+    function compareStrings(s1, s2) {
+        if (s1 === s2) {
+            return 0;
+        }
+        return s1 < s2
+            ? -1
+            : 1;
     }
     module.exports = Version;
 })();

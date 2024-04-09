@@ -43,7 +43,6 @@ describe(`searchPackages`, () => {
             take: 1
         });
         // Assert
-        console.log(result.map(o => `${o.id}: ${o.version}`));
         expect(result.length)
             .toEqual(1);
     });

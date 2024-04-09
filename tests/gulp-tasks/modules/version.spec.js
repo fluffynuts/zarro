@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
+const faker_1 = require("@faker-js/faker");
 describe(`version`, () => {
     /**
      * Largely tested indirectly via tes-tutil-finder.spec.ts / compareVersionArrays,
@@ -68,6 +69,47 @@ describe(`version`, () => {
             // Assert
             expect(sut.toString())
                 .toEqual("1.2.3-beta4");
+        });
+    });
+    describe(`equals`, () => {
+        describe(`when have same non-prerelease version`, () => {
+            it(`should return true`, async () => {
+                // Arrange
+                const version = faker_1.faker.system.semver(), left = create(version), right = create(version);
+                // Act
+                const result1 = left.equals(right), result2 = right.equals(left);
+                // Assert
+                expect(result1)
+                    .toBeTrue();
+                expect(result2)
+                    .toBeTrue();
+            });
+        });
+        describe(`when have the same pre-release version`, () => {
+            it(`should return true`, async () => {
+                // Arrange
+                const version = `${faker_1.faker.system.semver()}-r1`, left = create(version), right = create(version);
+                // Act
+                const result1 = left.equals(right), result2 = right.equals(left);
+                // Assert
+                expect(result1)
+                    .toBeTrue();
+                expect(result2)
+                    .toBeTrue();
+            });
+        });
+        describe(`when have the same version, but different pre-release tag`, () => {
+            it(`should return false`, async () => {
+                // Arrange
+                const version = faker_1.faker.system.semver(), left = create(`${version}-r1`), right = create(`${version}-r2`);
+                // Act
+                const result1 = left.equals(right), result2 = right.equals(left);
+                // Assert
+                expect(result1)
+                    .toBeFalse();
+                expect(result2)
+                    .toBeFalse();
+            });
         });
     });
     describe(`isLessThan`, () => {
@@ -157,6 +199,14 @@ describe(`version`, () => {
             {
                 left: create("1.2.3"),
                 right: create([2, 0, 0])
+            },
+            {
+                left: create("1.1.1-r1"),
+                right: create("1.1.1-r2")
+            },
+            {
+                left: create("1.1.1-r1"),
+                right: create("1.1.1")
             }
         ].forEach(tc => {
             const { left, right } = tc;
@@ -205,6 +255,14 @@ describe(`version`, () => {
             {
                 left: create("2.2.3"),
                 right: create([1, 8, 0])
+            },
+            {
+                left: create("1.1.1-r2"),
+                right: create("1.1.1-r1")
+            },
+            {
+                left: create("1.1.1"),
+                right: create("1.1.1-r1")
             }
         ].forEach(tc => {
             const { left, right } = tc;

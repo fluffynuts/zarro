@@ -1,7 +1,7 @@
 (function () {
   class Version {
     public get version(): number[] {
-      return [...this._version];
+      return [ ...this._version ];
     }
 
     public get major(): number {
@@ -34,7 +34,7 @@
       tag?: string
     ) {
       if (Array.isArray(verOrMajor)) {
-        this._version = [...verOrMajor];
+        this._version = [ ...verOrMajor ];
         this._tag = "";
       } else if (typeof verOrMajor === "object") {
         this._version = [
@@ -51,7 +51,7 @@
         this._tag = parts[1] || "";
         return;
       } else {
-        this._version = [verOrMajor, minor ?? 0, patch ?? 0];
+        this._version = [ verOrMajor, minor ?? 0, patch ?? 0 ];
         this._tag = tag ?? "";
       }
       this.ensureVersionIsThreeNumbers();
@@ -83,23 +83,27 @@
       const ver = other instanceof Version
         ? other
         : new Version(other);
-      return compareVersionArrays(
+      return compareVersions(
         this.version,
-        ver.version
+        this.tag,
+        ver.version,
+        ver.tag
       );
     }
 
     public toString() {
       const ver = this.version.join(".");
       return !!this._tag
-        ? `${ver}-${this._tag}`
+        ? `${ ver }-${ this._tag }`
         : ver;
     }
   }
 
-  function compareVersionArrays(
+  function compareVersions(
     x: number[],
-    y: number[]
+    xTag: string,
+    y: number[],
+    yTag: string
   ): number {
     const
       shortest = Math.min(x.length, y.length),
@@ -114,13 +118,13 @@
       }
     }
     if (compare.length === 0) {
-      return 0;
+      return compareTags(xTag, yTag);
     }
     const allZero = compare.reduce(
       (acc: boolean, cur: string) => acc && (cur === "0"), true
     );
     if (allZero) {
-      return 0;
+      return compareTags(xTag, yTag);
     }
     for (const s of compare) {
       if (s === ">") {
@@ -129,7 +133,34 @@
         return -1;
       }
     }
+    return compareTags(xTag, yTag);
+  }
+
+  function compareTags(
+    xTag?: string,
+    yTag?: string
+  ): number {
+    if (xTag && yTag) {
+      return compareStrings(xTag, yTag);
+    }
+    if (xTag) {
+      // assume x is the beta for y
+      return -1;
+    }
+    if (yTag) {
+      // assume y is the beta for x
+      return 1;
+    }
     return 0;
+  }
+
+  function compareStrings(s1: string, s2: string): number {
+    if (s1 === s2) {
+      return 0;
+    }
+    return s1 < s2
+      ? -1
+      : 1;
   }
 
   module.exports = Version;

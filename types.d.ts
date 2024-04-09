@@ -1510,6 +1510,7 @@ declare global {
     exactMatch?: boolean;
     preRelease?: boolean;
     configFile?: string;
+    latestOnly?: boolean;
   }
 
   interface DotNetInstallNugetPackageOption extends DotNetBaseOptions {

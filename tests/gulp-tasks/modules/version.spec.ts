@@ -1,5 +1,5 @@
 import "expect-even-more-jest";
-import {major} from "semver";
+import { faker } from "@faker-js/faker";
 
 describe(`version`, () => {
   /**
@@ -15,7 +15,7 @@ describe(`version`, () => {
       const sut = create("1.2.3-beta1");
       // Assert
       expect(sut.version)
-        .toEqual([1, 2, 3]);
+        .toEqual([ 1, 2, 3 ]);
       expect(sut.tag)
         .toEqual("beta1");
       expect(sut.isPreRelease)
@@ -24,10 +24,10 @@ describe(`version`, () => {
     it(`should construct from an array of numbers`, async () => {
       // Arrange
       // Act
-      const sut = create([3, 4, 5]);
+      const sut = create([ 3, 4, 5 ]);
       // Assert
       expect(sut.version)
-        .toEqual([3, 4, 5]);
+        .toEqual([ 3, 4, 5 ]);
       expect(sut.tag)
         .toEqual("");
       expect(sut.isPreRelease)
@@ -39,7 +39,7 @@ describe(`version`, () => {
       const sut = create(1, 2, 3, "beta1");
       // Assert
       expect(sut.version)
-        .toEqual([1, 2, 3]);
+        .toEqual([ 1, 2, 3 ]);
       expect(sut.major)
         .toEqual(1);
       expect(sut.minor)
@@ -55,7 +55,7 @@ describe(`version`, () => {
       const sut = create(3);
       // Assert
       expect(sut.version)
-        .toEqual([3, 0, 0]);
+        .toEqual([ 3, 0, 0 ]);
     });
 
     it(`should construct from VersionInfo`, async () => {
@@ -73,6 +73,65 @@ describe(`version`, () => {
     });
   });
 
+  describe(`equals`, () => {
+    describe(`when have same non-prerelease version`, () => {
+      it(`should return true`, async () => {
+        // Arrange
+        const
+          version = faker.system.semver(),
+          left = create(version),
+          right = create(version);
+        // Act
+        const
+          result1 = left.equals(right),
+          result2 = right.equals(left);
+        // Assert
+        expect(result1)
+          .toBeTrue();
+        expect(result2)
+          .toBeTrue();
+      });
+    });
+
+    describe(`when have the same pre-release version`, () => {
+      it(`should return true`, async () => {
+        // Arrange
+        const
+          version = `${faker.system.semver()}-r1`,
+          left = create(version),
+          right = create(version);
+        // Act
+        const
+          result1 = left.equals(right),
+          result2 = right.equals(left);
+        // Assert
+        expect(result1)
+          .toBeTrue();
+        expect(result2)
+          .toBeTrue();
+      });
+    });
+
+    describe(`when have the same version, but different pre-release tag`, () => {
+      it(`should return false`, async () => {
+        // Arrange
+        const
+          version = faker.system.semver(),
+          left = create(`${version}-r1`),
+          right = create(`${version}-r2`);
+        // Act
+        const
+          result1 = left.equals(right),
+          result2 = right.equals(left);
+        // Assert
+        expect(result1)
+          .toBeFalse();
+        expect(result2)
+          .toBeFalse();
+      });
+    });
+  });
+
   describe(`isLessThan`, () => {
     [
       {
@@ -85,14 +144,14 @@ describe(`version`, () => {
       },
       {
         left: create("1.2.3"),
-        right: create([2, 0, 0])
+        right: create([ 2, 0, 0 ])
       }
     ].forEach(tc => {
       const {
         left,
         right
       } = tc;
-      it(`should return true when ${left} is less than ${right}`, async () => {
+      it(`should return true when ${ left } is less than ${ right }`, async () => {
         // Arrange
         // Act
         const result = left.isLessThan(right);
@@ -112,7 +171,7 @@ describe(`version`, () => {
       },
       {
         left: create("1.2.3"),
-        right: create([1, 2, 3])
+        right: create([ 1, 2, 3 ])
       }
     ].forEach(tc => {
       const {
@@ -140,7 +199,7 @@ describe(`version`, () => {
       },
       {
         left: create("2.2.3"),
-        right: create([1, 8, 0])
+        right: create([ 1, 8, 0 ])
       }
     ].forEach(tc => {
       const {
@@ -170,14 +229,22 @@ describe(`version`, () => {
       },
       {
         left: create("1.2.3"),
-        right: create([2, 0, 0])
+        right: create([ 2, 0, 0 ])
+      },
+      {
+        left: create("1.1.1-r1"),
+        right: create("1.1.1-r2")
+      },
+      {
+        left: create("1.1.1-r1"),
+        right: create("1.1.1")
       }
     ].forEach(tc => {
       const {
         left,
         right
       } = tc;
-      it(`should return false when ${left} is less than ${right}`, async () => {
+      it(`should return false when ${ left } is less than ${ right }`, async () => {
         // Arrange
         // Act
         const result = left.isGreaterThan(right);
@@ -197,7 +264,7 @@ describe(`version`, () => {
       },
       {
         left: create("1.2.3"),
-        right: create([1, 2, 3])
+        right: create([ 1, 2, 3 ])
       }
     ].forEach(tc => {
       const {
@@ -225,7 +292,15 @@ describe(`version`, () => {
       },
       {
         left: create("2.2.3"),
-        right: create([1, 8, 0])
+        right: create([ 1, 8, 0 ])
+      },
+      {
+        left: create("1.1.1-r2"),
+        right: create("1.1.1-r1")
+      },
+      {
+        left: create("1.1.1"),
+        right: create("1.1.1-r1")
       }
     ].forEach(tc => {
       const {
