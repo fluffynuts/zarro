@@ -766,6 +766,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         pushFlag(args, opts.exactMatch, "--exact-match");
         pushFlag(args, opts.preRelease, "--prerelease");
         pushIfSet(args, opts.configFile, "--configfile");
+        const skip = opts.skip === undefined ? 0 : opts.skip;
+        const take = opts.take === undefined ? 1024 : opts.take;
+        args.push("--skip", `${skip}`);
+        args.push("--take", `${take}`);
         args.push("--format", "json");
         if (opts.search) {
             args.push(opts.search);
@@ -779,7 +783,6 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         }
         const allText = stdout.join(" "), parsed = JSON.parse(allText);
         const finalResult = [];
-        const limit = opts.take || Number.MAX_VALUE;
         for (const sourceResult of parsed.searchResult) {
             for (const pkg of sourceResult.packages) {
                 finalResult.push({
@@ -796,12 +799,12 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         // 2. dotnet returns results in ascending version order
         //    - where the most useful, especially for paging, is reverse-ordered
         finalResult.sort((a, b) => a.version.compareWith(b.version)).reverse();
-        const skip = opts.skip || 0;
+        // some registries don't honor paging (looking at you, GitHub)
         if (skip > 0) {
             finalResult.splice(0, skip);
         }
-        if (finalResult.length > limit) {
-            finalResult.splice(limit);
+        if (finalResult.length > take) {
+            finalResult.splice(take);
         }
         return finalResult;
     }

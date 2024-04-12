@@ -1140,6 +1140,11 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     pushFlag(args, opts.preRelease, "--prerelease");
     pushIfSet(args, opts.configFile, "--configfile");
 
+    const skip = opts.skip === undefined ? 0 : opts.skip;
+    const take = opts.take === undefined ? 1024 : opts.take;
+    args.push("--skip", `${skip}`);
+    args.push("--take", `${take}`);
+
     args.push("--format", "json");
     if (opts.search) {
       args.push(opts.search);
@@ -1159,7 +1164,6 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       parsed = JSON.parse(allText) as PackageSearchResult;
 
     const finalResult = [] as PackageInfo[];
-    const limit = opts.take || Number.MAX_VALUE;
     for (const sourceResult of parsed.searchResult) {
       for (const pkg of sourceResult.packages) {
         finalResult.push({
@@ -1179,12 +1183,12 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     finalResult.sort(
       (a, b) => a.version.compareWith(b.version)
     ).reverse();
-    const skip = opts.skip || 0;
+    // some registries don't honor paging (looking at you, GitHub)
     if (skip > 0) {
       finalResult.splice(0, skip);
     }
-    if (finalResult.length > limit) {
-      finalResult.splice(limit);
+    if (finalResult.length > take) {
+      finalResult.splice(take);
     }
     return finalResult;
   }
@@ -1195,10 +1199,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     if (!opts) {
       throw new Error(`no options passed to 'installPackage' - target project and package name not specified`);
     }
-    if (!`${opts.projectFile}`.trim()) {
+    if (!`${ opts.projectFile }`.trim()) {
       throw new Error(`projectFile not specified`);
     }
-    if (!`${opts.id}`.trim()) {
+    if (!`${ opts.id }`.trim()) {
       throw new Error(`package id not specified`);
     }
     const args = [ "add", opts.projectFile, "package", opts.id ];

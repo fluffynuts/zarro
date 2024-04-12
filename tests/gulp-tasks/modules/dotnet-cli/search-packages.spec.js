@@ -71,6 +71,21 @@ describe(`searchPackages`, () => {
         expect(firstPreRelease)
             .toExist();
     });
+    describe(`finding a well-known package when search results exceed the default limit of 20`, () => {
+        const pkg = "PeanutButter.TestUtils.AspNetCore";
+        it(`should find the package '${pkg}'`, async () => {
+            // Arrange
+            // Act
+            const result = await searchPackages({
+                search: "PeanutButter",
+                exactMatch: false,
+                take: 100
+            });
+            // Assert
+            expect(result.find(o => o.id === pkg))
+                .toExist();
+        });
+    });
     describe(`paging`, () => {
         it(`should page on request`, async () => {
             // Arrange
