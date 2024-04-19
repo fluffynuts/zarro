@@ -446,6 +446,7 @@ declare global {
     "TAG" |
     "GIT_TAG" |
     "GIT_VERSION_INCREMENT_MESSAGE" |
+    "PACKAGE_REGISTRY" |
     string; // allow client-side extension, encourage usage of env.associate & env.register
 
   type NumericEnvVar =
@@ -641,6 +642,7 @@ declare global {
     TAG: StringEnvVar;
     GIT_TAG: StringEnvVar;
     GIT_VERSION_INCREMENT_MESSAGE: StringEnvVar;
+    PACKAGE_REGISTRY: StringEnvVar;
 
     ENABLE_NUGET_PARALLEL_PROCESSING: FlagEnvVar;
     BUILD_SHOW_INFO: FlagEnvVar;
