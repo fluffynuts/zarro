@@ -48,6 +48,11 @@
                     args.push("--otp");
                     args.push(otp);
                 }
+                const registry = env.resolve(env.PACKAGE_REGISTRY);
+                if (!!registry) {
+                    args.push("--registry");
+                    args.push(registry);
+                }
                 await spawn("npm", args, {
                     interactive: true
                 });
