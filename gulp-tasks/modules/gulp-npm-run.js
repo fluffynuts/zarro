@@ -29,6 +29,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
                         console.log(chalk.yellow(d));
                     }
                 });
+                clearRunningScript();
             });
         });
     }
@@ -37,6 +38,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
         return (process.env[scriptMarkerVar] || "")
             .split(",")
             .includes(k);
+    }
+    function clearRunningScript() {
+        process.env[scriptMarkerVar] = "";
     }
     function storeRunningScript(k) {
         const existing = (process.env[scriptMarkerVar] || ""), update = !!existing
