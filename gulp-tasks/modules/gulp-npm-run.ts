@@ -40,6 +40,7 @@ import { fi } from "@faker-js/faker";
             console.log(chalk.yellow(d))
           }
         });
+        clearRunningScript();
       });
     });
   }
@@ -52,6 +53,9 @@ import { fi } from "@faker-js/faker";
       .includes(k);
   }
 
+  function clearRunningScript() {
+    process.env[scriptMarkerVar] = "";
+  }
   function storeRunningScript(k: string): void {
     const
       existing = (process.env[scriptMarkerVar] || ""),
