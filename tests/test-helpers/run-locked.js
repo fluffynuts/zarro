@@ -13,7 +13,7 @@ async function runLocked(lockName, options, toRun) {
         if (toRun === undefined) {
             toRun = options;
             options = {
-                maxLockDuration: 60000
+                maxLockDuration: 90000
             };
         }
         const opts = options;
@@ -35,7 +35,7 @@ async function runLocked(lockName, options, toRun) {
 exports.runLocked = runLocked;
 async function withLockedNuget(toRun) {
     await runLocked("nuget", {
-        maxLockDuration: 60000
+        maxLockDuration: 90000
     }, toRun);
 }
 exports.withLockedNuget = withLockedNuget;

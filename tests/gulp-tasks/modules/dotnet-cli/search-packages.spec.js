@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
+const filesystem_sandbox_1 = require("filesystem-sandbox");
 describe(`searchPackages`, () => {
     const { searchPackages, listNugetSources } = requireModule("dotnet-cli");
     it(`should be a function`, async () => {
@@ -35,13 +36,23 @@ describe(`searchPackages`, () => {
             return;
         }
         // Act
-        const result = await searchPackages({
-            source: "github-codeo",
-            search: "Codeo.Core",
-            preRelease: true,
-            exactMatch: true,
-            take: 1
-        });
+        let result = [];
+        try {
+            result = await searchPackages({
+                source: "github-codeo",
+                search: "Codeo.Core",
+                preRelease: true,
+                exactMatch: true,
+                take: 1
+            });
+        }
+        catch (e) {
+            const err = e;
+            if (err.message.includes("401 (Unauthorized)")) {
+                console.warn("Skipping this test - local nuget config does not allow access to private package repo");
+                return;
+            }
+        }
         // Assert
         expect(result.length)
             .toEqual(1);
@@ -103,5 +114,69 @@ describe(`searchPackages`, () => {
             expect(result2[0])
                 .toEqual(allResults[1]);
         });
+    });
+    describe(`working around dotnet cli issues`, () => {
+        describe(`when failing to auth to read the package index`, () => {
+            describe(`exact search`, () => {
+                it(`should throw good error`, async () => {
+                    // Arrange
+                    const sandbox = await filesystem_sandbox_1.Sandbox.create(), privateSource = "https://nuget.pkg.github.com/codeo-za/index.json", configFile = await sandbox.writeFile("NuGet.config", `
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+    <add key="github" value="${privateSource}" />
+  </packageSources>
+  <packageSourceCredentials>
+    <github>
+      <add key="Username" value="invalid-name" />
+      <add key="ClearTextPassword" value="invalid-token" />
+    </github>
+  </packageSourceCredentials>
+</configuration>
+`);
+                    // Act
+                    await expect(searchPackages({
+                        source: "github",
+                        configFile,
+                        exactMatch: true,
+                        search: "Codeo.Core"
+                    })).rejects.toThrow(/unhandled exception/i);
+                    // Assert
+                });
+            });
+            describe(`inexact search`, () => {
+                // behaves differently from exact search, of course :|
+                it(`should throw good error`, async () => {
+                    // Arrange
+                    const sandbox = await filesystem_sandbox_1.Sandbox.create(), privateSource = "https://nuget.pkg.github.com/codeo-za/index.json", configFile = await sandbox.writeFile("NuGet.config", `
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+    <add key="github" value="${privateSource}" />
+  </packageSources>
+  <packageSourceCredentials>
+    <github>
+      <add key="Username" value="invalid-name" />
+      <add key="ClearTextPassword" value="invalid-token" />
+    </github>
+  </packageSourceCredentials>
+</configuration>
+`);
+                    // Act
+                    await expect(searchPackages({
+                        source: "github",
+                        configFile,
+                        exactMatch: true,
+                        search: "Codeo.Core"
+                    })).rejects.toThrow(/unable to perform package search.*check your access token/i);
+                    // Assert
+                });
+            });
+        });
+    });
+    afterAll(async () => {
+        await filesystem_sandbox_1.Sandbox.destroyAll();
     });
 });

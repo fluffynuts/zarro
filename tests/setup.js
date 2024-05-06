@@ -1,4 +1,7 @@
-global["require" + "Module"] = require("../gulp-tasks/modules/require-module");
+global.requireModule = require("../gulp-tasks/modules/require-module");
+const log = requireModule("log");
+log.disableOutput();
+process.env.RUNNING_IN_TEST = "TRUE";
 // jest spies broke at some point after v26
 // -> call through to the underlying implementation (wtf)
 // -> @types/jest doesn't align with what's actually available
@@ -22,7 +25,8 @@ global.spyOn = function (obj, member) {
       original.apply(obj, Array.from(arguments));
     },
     stub() {
-      result.mockImplementation(() => {});
+      result.mockImplementation(() => {
+      });
     }
   };
   Object.defineProperty(result, "and", {

@@ -114,6 +114,10 @@ declare global {
 
     threshold: LogThreshold;
 
+    outputDisabled: boolean;
+    enableOutput(): void;
+    disableOutput(): void;
+
   }
 
 

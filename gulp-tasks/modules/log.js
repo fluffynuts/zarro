@@ -33,8 +33,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
             this._logLevels = new LogLevels();
             this._threshold = INFO;
             this._timestamp = true;
+            this._outputDisabled = false;
             const logLevel = (process.env.LOG_LEVEL || "").toUpperCase();
             this.setThreshold(levels[logLevel] || INFO);
+        }
+        get outputDisabled() {
+            return this._outputDisabled;
+        }
+        disableOutput() {
+            this._outputDisabled = true;
+        }
+        enableOutput() {
+            this._outputDisabled = false;
         }
         get threshold() {
             return this._threshold;
@@ -94,6 +104,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
             this._timestamp = true;
         }
         _print(args, ...styles) {
+            if (this.outputDisabled) {
+                return;
+            }
             let message;
             if (typeof args[0] === "string") {
                 message = args[0];

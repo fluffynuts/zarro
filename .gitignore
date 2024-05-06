@@ -89,6 +89,7 @@ typings/
 __build__
 __sandboxes__
 gulp-tasks/modules/fetch-github-release/src/**/*.js
+gulp-tasks/modules/fetch-github-release/dist-copy/**/*.*
 build-tools
 tests/gulp-tasks/modules/csproj/bin
 tests/gulp-tasks/modules/csproj/obj

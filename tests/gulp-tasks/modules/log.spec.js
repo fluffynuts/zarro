@@ -4,6 +4,9 @@ require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
 describe(`log`, () => {
     const log = requireModule("log");
+    beforeAll(() => {
+        log.enableOutput();
+    });
     describe(`when threshold at or lower than log level`, () => {
         beforeEach(() => {
             log.setThreshold(log.LogLevels.Info);

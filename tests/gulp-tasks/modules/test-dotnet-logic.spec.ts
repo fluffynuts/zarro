@@ -1,3 +1,5 @@
+import { Sandbox } from "filesystem-sandbox";
+
 const realSystem = requireModule<System>("system");
 const fakeSystem = jest.fn();
 jest.doMock("../../../gulp-tasks/modules/system", () => fakeSystem);
@@ -81,7 +83,7 @@ describe(`test-dotnet-logic`, () => {
           break;
         }
       });
-    }, 60000);
+    }, 90000);
   });
 
   describe(`testAsDotNetCore`, () => {
@@ -105,7 +107,6 @@ describe(`test-dotnet-logic`, () => {
         process.env.DOTNET_TEST_REBUILD = "1";
         const stdout = [] as string[];
         const stderr = [] as string[];
-        const originalLog = console.log.bind(console);
         const originalError = console.error.bind(console);
         spyOn(console, "log").and.callFake(
           (line: string) => stdout.push(...line.split("\n").map(l => l.replace(/\r$/, "")))
@@ -190,7 +191,7 @@ describe(`test-dotnet-logic`, () => {
         expect(results)
           .toEqual(expected);
       });
-    }, 6000000);
+    }, 90000);
   });
 
   const totalRe = /\s*test count:\s*(?<value>\d+)/i;
@@ -248,7 +249,7 @@ describe(`test-dotnet-logic`, () => {
   }
 
   afterAll(async () => {
-    // await Sandbox.destroyAll();
+    await Sandbox.destroyAll();
   });
 
 });

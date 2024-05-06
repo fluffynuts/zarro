@@ -17,6 +17,7 @@
     const log = requireModule("log");
     const env = requireModule("env");
     const Version = requireModule("version");
+    const SystemError = requireModule("system-error");
     const emojiLabels = {
         testing: `🧪 Testing`,
         packing: `📦 Packing`,
@@ -669,8 +670,9 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         }
     }
     async function runDotNetWith(args, opts) {
+        let result;
         try {
-            return await system("dotnet", args, {
+            result = await system("dotnet", args, {
                 stdout: opts.stdout,
                 stderr: opts.stderr,
                 suppressOutput: opts.suppressOutput,
@@ -684,6 +686,11 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             }
             throw e;
         }
+        const errors = result.stderr || [], hasDiedFromException = !!errors.find(s => s.toLowerCase().includes("unhandled exception"));
+        if (!hasDiedFromException) {
+            return result;
+        }
+        throw new SystemError(`dotnet exit code is zero, but stdout contains logging about an unhandled exception:\n${errors.join("\n")}`, result.exe, result.args, result.exitCode || Number.MIN_VALUE, result.stdout, result.stderr);
     }
     function pushMsbuildProperties(args, opts) {
         if (!opts.msbuildProperties) {
@@ -777,9 +784,19 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         const stdout = [];
         opts.stdout = (s) => stdout.push(s);
         opts.suppressOutput = true;
-        const rawResult = await runDotNetWith(args, opts);
+        let rawResult;
+        try {
+            rawResult = await runDotNetWith(args, opts);
+        }
+        catch (e) {
+            if (SystemError.isError(e)) {
+                throw wrapSearchError(e);
+            }
+            throw e;
+        }
         if (system.isError(rawResult)) {
-            throw rawResult;
+            const systemError = rawResult;
+            throw wrapSearchError(systemError);
         }
         const allText = stdout.join(" "), parsed = JSON.parse(allText);
         const finalResult = [];
@@ -807,6 +824,23 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             finalResult.splice(take);
         }
         return finalResult;
+    }
+    function wrapSearchError(e) {
+        return new Error(`Unable to perform package search (check your access token if necessary): ${e}`);
+    }
+    function parsePackageSearchResult(stdout) {
+        const allText = stdout.join(" ");
+        let parsed;
+        try {
+            parsed = JSON.parse(allText);
+        }
+        catch (e) {
+            throw new Error(`Unable to parse json from:\n${allText}`);
+        }
+        if (parsed.problems && parsed.problems.length) {
+            throw new Error(`unable to perform package search (check your access token):\n${parsed.problems.join("\n")}`);
+        }
+        return parsed;
     }
     async function installPackage(opts) {
         if (!opts) {

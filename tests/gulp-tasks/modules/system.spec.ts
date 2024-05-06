@@ -475,5 +475,4 @@ describe(`system`, () => {
       console.log(result.stdout.join("\n"));
     });
   });
-
 });

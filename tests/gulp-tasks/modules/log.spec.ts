@@ -3,6 +3,9 @@ import { faker } from "@faker-js/faker";
 
 describe(`log`, () => {
   const log = requireModule<Log>("log");
+  beforeAll(() => {
+    log.enableOutput();
+  });
   describe(`when threshold at or lower than log level`, () => {
     beforeEach(() => {
       log.setThreshold(log.LogLevels.Info);
