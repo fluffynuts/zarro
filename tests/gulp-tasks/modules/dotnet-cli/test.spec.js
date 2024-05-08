@@ -4,7 +4,7 @@ require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 const { anything, system, disableSystemCallThrough, mockSystem, mockUpdatePackageNuspec, } = require("./common");
-describe(`test`, () => {
+describe(`dotnet-cli:test`, () => {
     beforeEach(() => {
         mockSystem();
         mockUpdatePackageNuspec();

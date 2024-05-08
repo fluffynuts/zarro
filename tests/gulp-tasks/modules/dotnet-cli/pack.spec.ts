@@ -15,7 +15,7 @@ const {
 } = require("./common");
 const log = requireModule<Log>("log");
 
-describe(`pack`, () => {
+describe(`dotnet-cli:pack`, () => {
   const sut = requireModule<DotNetCli>("dotnet-cli");
   const { pack } = sut;
 

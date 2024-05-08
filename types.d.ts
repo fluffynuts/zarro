@@ -22,6 +22,7 @@ interface RequireModule<T>
 }
 
 declare global {
+
   function requireModule<T>(module: string): T;
 
 // copied out of @types/fancy-log because imports are being stupid
@@ -115,7 +116,9 @@ declare global {
     threshold: LogThreshold;
 
     outputDisabled: boolean;
+
     enableOutput(): void;
+
     disableOutput(): void;
 
   }
@@ -1202,15 +1205,21 @@ declare global {
     stdout: string[];
 
     isResult(): this is SystemResult;
+
     isError(): this is SystemError;
   }
 
   interface SystemResultBuilder {
     withExe(exe: string): SystemResultBuilder;
+
     withArgs(args: string[]): SystemResultBuilder;
+
     withExitCode(code: number): SystemResultBuilder;
+
     withStdErr(lines: string[] | string): SystemResultBuilder;
+
     withStdOut(lines: string[] | string): SystemResultBuilder;
+
     build(): SystemResult;
   }
 
@@ -1244,11 +1253,13 @@ declare global {
   interface System
     extends SystemFunction {
     isError(o: any): o is SystemError;
+
     isResult(o: any): o is SystemResult;
   }
 
   interface TempFile {
     path: string;
+
     destroy(): void;
   }
 
@@ -1262,11 +1273,13 @@ declare global {
   }
 
   type ZarroTestPackage = "local" | "beta" | "latest" | string;
+
   interface TestZarroOptions {
     packageVersion: ZarroTestPackage;
     tasks: string | string[];
     rollback?: boolean;
   }
+
   type TestZarro = (opts: TestZarroOptions) => Promise<void>;
 
   type GulpNugetRestore = (opts: NugetRestoreOptions) => Stream;
@@ -1288,11 +1301,12 @@ declare global {
     gulpNpmRun: (gulp: Gulp) => void;
     isNpmScript: (name: string) => boolean;
   }
+
   type Nuget = (args: string[], opts?: SystemOptions) => Promise<void>;
 
   interface CliSupport {
-    pushIfSet: (args: string[], value: Optional<string | number>, cliSwitch: string) => void;
-    pushFlag: (args: string[], value: Optional<boolean>, cliSwitch: string) => void;
+    pushIfSet: (args: string[], value: Nullable<Optional<string | number>>, cliSwitch: string) => void;
+    pushFlag: (args: string[], value: Nullable<Optional<boolean>>, cliSwitch: string) => void;
   }
 
   interface NugetInstallOptions {
@@ -1324,11 +1338,17 @@ declare global {
 
   interface NugetCli {
     install: (opts: NugetInstallOptions) => Promise<void>;
+
     clearAllCache(): Promise<void>;
+
     clearHttpCache(): Promise<void>;
+
     listSources(): Promise<NugetSource[]>;
+
     addSource(src: NugetAddSourceOptions): Promise<void>;
+
     enableSource(name: string): Promise<void>;
+
     disableSource(name: string): Promise<void>;
   }
 
@@ -1349,6 +1369,7 @@ declare global {
     outputStream?: NodeJS.WriteStream,
     validator?: (s: string) => boolean;
   }
+
   type AskFunction = (message: string, options?: AskOptions) => Promise<string>;
   type Ask = {
     ask: AskFunction
@@ -1373,13 +1394,17 @@ declare global {
 
   interface DotNetBaseOptions
     extends IoConsumers {
-    msbuildProperties?: Dictionary<string>;
-    additionalArguments?: string[];
     verbosity?: DotNetVerbosity | string;
     // when set, errors are returned instead of thrown
     suppressErrors?: boolean;
     suppressStdIoInErrors?: boolean;
     suppressOutput?: boolean;
+  }
+
+  interface DotNetMsBuildOptions
+    extends DotNetBaseOptions {
+    msbuildProperties?: Dictionary<string>;
+    additionalArguments?: string[];
 
     env?: Dictionary<string>;
   }
@@ -1426,7 +1451,7 @@ declare global {
   type GulpDotNetCover = (opts?: GulpDotNetCoverOptions) => Transform;
 
   interface DotNetCommonBuildOptions
-    extends DotNetBaseOptions {
+    extends DotNetMsBuildOptions {
     target: string;
     configuration?: string | string[];
     framework?: string;
@@ -1456,7 +1481,7 @@ declare global {
   }
 
   interface DotNetPackOptions
-    extends DotNetBaseOptions {
+    extends DotNetMsBuildOptions {
     target: string;
     output?: string;
     configuration?: string | string[];
@@ -1485,7 +1510,7 @@ declare global {
   }
 
   interface DotNetCleanOptions
-    extends DotNetBaseOptions {
+    extends DotNetMsBuildOptions {
     target: string;
     framework?: string;
     runtime?: string;
@@ -1494,7 +1519,7 @@ declare global {
   }
 
   interface DotNetNugetPushOptions
-    extends DotNetBaseOptions {
+    extends DotNetMsBuildOptions {
     target: string;
     apiKey?: string;
     symbolApiKey?: string;
@@ -1508,8 +1533,9 @@ declare global {
     timeout?: number;
   }
 
-  interface DotNetSearchPackagesOptions extends DotNetBaseOptions {
-    source?: string;
+  interface DotNetSearchPackagesOptions
+    extends DotNetMsBuildOptions {
+    source?: string | null | undefined;
     search?: string;
     take?: number;
     skip?: number;
@@ -1519,7 +1545,8 @@ declare global {
     latestOnly?: boolean;
   }
 
-  interface DotNetInstallNugetPackageOption extends DotNetBaseOptions {
+  interface DotNetInstallNugetPackageOption
+    extends DotNetMsBuildOptions {
     id: string;
     projectFile: string;
     version?: string;
@@ -1533,6 +1560,8 @@ declare global {
   interface IoConsumers {
     stdout?: IoConsumer;
     stderr?: IoConsumer;
+    cwd?: string;
+    env?: NodeJS.ProcessEnv
   }
 
   interface DotNetTestOptions
@@ -1576,6 +1605,38 @@ declare global {
     usingFallback: boolean;
   }
 
+  interface DotNetCreateBaseOptions
+    extends DotNetBaseOptions {
+    output?: string;
+    name: string;
+    dryRun?: boolean;
+    force?: boolean;
+    skipTemplateUpdateCheck?: boolean;
+    enableDiagnostics?: boolean;
+  }
+
+  interface DotNetCreateOptions
+    extends DotNetCreateBaseOptions {
+    template: string;
+    projectFile?: string;
+  }
+
+  interface DotNetAddProjectToSolutionOptions
+    extends DotNetBaseOptions {
+    solutionFile: string;
+    projectFile: string;
+  }
+
+  type StringOrRegex = string | RegExp;
+
+  interface DotNetUpgradePackagesOptions {
+    pathToProjectOrSolution: string;
+    packages: StringOrRegex[],
+    preRelease?: boolean;
+    noRestore?: boolean;
+    source?: string;
+  }
+
   type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<SystemResult | SystemError>;
   type DotNetBuildFunction = (opts: DotNetBuildOptions) => Promise<SystemResult | SystemError>;
   type DotNetPackFunction = (opts: DotNetPackOptions) => Promise<SystemResult | SystemError>;
@@ -1592,6 +1653,10 @@ declare global {
   type DotNetTryMatchNugetSourceFunction = (nameOrUrlOrHostOrSpec: string | Partial<NugetSource> | RegExp) => Promise<Optional<NugetSource>>;
   type DotNetSearchNugetPackagesFunction = (opts: DotNetSearchPackagesOptions | string) => Promise<PackageInfo[]>;
   type DotNetInstallNugetPackageFunction = (opts: DotNetInstallNugetPackageOption | string) => Promise<void>;
+  type DotNetUpgradePackagesFunction = (opts: DotNetUpgradePackagesOptions) => Promise<void>;
+  type DotNetCreateFunction = (opts: DotNetCreateOptions) => Promise<string>;
+  type DotNetListProjectsFunction = (solutionFile: string) => Promise<string[]>;
+  type DotNetAddProjectToSolutionFunction = (opts: DotNetAddProjectToSolutionOptions) => Promise<void>;
 
   interface DotNetCli {
     clean: DotNetCleanFunction;
@@ -1611,6 +1676,10 @@ declare global {
     incrementTempDbPortHintIfFound: (env: Dictionary<string>) => void;
     searchPackages: DotNetSearchNugetPackagesFunction;
     installPackage: DotNetInstallNugetPackageFunction;
+    upgradePackages: DotNetUpgradePackagesFunction;
+    create: DotNetCreateFunction;
+    listProjects: DotNetListProjectsFunction;
+    addProjectToSolution: DotNetAddProjectToSolutionFunction;
   }
 
   type ReadCsProjNode = (csproj: string) => Promise<string>;

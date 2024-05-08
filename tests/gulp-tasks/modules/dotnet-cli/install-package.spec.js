@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
 const { mockSystem, fetchHistory } = require("./common");
-describe(`installPackage`, () => {
+describe(`dotnet-cli:installPackage`, () => {
     const { installPackage } = requireModule("dotnet-cli");
     beforeEach(() => {
         mockSystem();

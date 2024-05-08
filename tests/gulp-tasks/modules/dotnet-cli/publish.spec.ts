@@ -11,7 +11,7 @@ const {
   mockUpdatePackageNuspec,
 } = require("./common");
 
-describe(`publish`, () => {
+describe(`dotnet-cli:publish`, () => {
   let allowLogs = false;
   beforeEach(() => {
     allowLogs = false;

@@ -11,7 +11,7 @@ const {
   mockUpdatePackageNuspec,
 } = require("./common");
 
-describe(`resolveContainerOptions`, () => {
+describe(`dotnet-cli:resolveContainerOptions`, () => {
   let allowLogs = false;
   beforeEach(() => {
     allowLogs = false;

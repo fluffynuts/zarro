@@ -10,7 +10,7 @@ const {
   mockUpdatePackageNuspec,
 } = require("./common");
 
-describe(`nugetPush`, () => {
+describe(`dotnet-cli:nugetPush`, () => {
   beforeEach(() => {
     mockSystem();
     mockUpdatePackageNuspec();

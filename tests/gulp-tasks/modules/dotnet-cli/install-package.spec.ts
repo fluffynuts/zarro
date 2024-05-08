@@ -8,7 +8,7 @@ const {
   fetchHistory
 } = require("./common");
 
-describe(`installPackage`, () => {
+describe(`dotnet-cli:installPackage`, () => {
   const { installPackage } = requireModule<DotNetCli>("dotnet-cli");
   beforeEach(() => {
     mockSystem();

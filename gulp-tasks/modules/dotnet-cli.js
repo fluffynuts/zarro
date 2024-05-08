@@ -5,7 +5,7 @@
     const { isRegExp } = types;
     const ZarroError = requireModule("zarro-error");
     const path = require("path");
-    const { fileExists, readTextFile } = require("yafs");
+    const { fileExists, readTextFile, ls, FsEntities } = require("yafs");
     const { yellow } = requireModule("ansi-colors");
     const q = requireModule("quote-if-required");
     const { pushIfSet, pushFlag } = requireModule("cli-support");
@@ -264,7 +264,7 @@
     async function enableNugetSource(source) {
         const toEnable = await tryFindConfiguredNugetSource(source);
         if (!toEnable) {
-            throw new Error(`unable to find source matching: ${JSON.stringify(source)}`);
+            throw new ZarroError(`unable to find source matching: ${JSON.stringify(source)}`);
         }
         await runDotNetWith(["dotnet", "nuget", "enable", "source", toEnable.name], {
             suppressOutput: true
@@ -273,7 +273,7 @@
     async function disableNugetSource(source) {
         const toDisable = await tryFindConfiguredNugetSource(source);
         if (!toDisable) {
-            throw new Error(`unable to find source matching: ${JSON.stringify(source)}`);
+            throw new ZarroError(`unable to find source matching: ${JSON.stringify(source)}`);
         }
         await runDotNetWith(["dotnet", "nuget", "disable", "source", toDisable.name], {
             suppressOutput: true
@@ -334,7 +334,7 @@
         }
         function single(results) {
             if (results.length > 1) {
-                throw new Error(`multiple matches for nuget source by name / url / host: ${JSON.stringify(find)}\nfound:\n${JSON.stringify(allSources, null, 2)}`);
+                throw new ZarroError(`multiple matches for nuget source by name / url / host: ${JSON.stringify(find)}\nfound:\n${JSON.stringify(allSources, null, 2)}`);
             }
             return results[0];
         }
@@ -356,7 +356,7 @@
     async function removeNugetSourceByName(find) {
         const source = await tryFindConfiguredNugetSource(find);
         if (!source) {
-            throw new Error(`Can't find source with '${find}'`);
+            throw new ZarroError(`Can't find source with '${find}'`);
         }
         const result = await runDotNetWith(["nuget", "remove", "source", source.name], { suppressOutput: true });
         if (system.isError(result)) {
@@ -469,7 +469,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             if (await fileExists(test)) {
                 return test;
             }
-            throw new Error(`Unable to resolve '${resolvedPath}' relative to '${containerDir}'`);
+            throw new ZarroError(`Unable to resolve '${resolvedPath}' relative to '${containerDir}'`);
         }
     }
     async function shouldIncludeNuspec(opts) {
@@ -495,7 +495,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     async function nugetPush(opts) {
         validateCommonBuildOptions(opts);
         if (!opts.apiKey) {
-            throw new Error("apiKey was not specified");
+            throw new ZarroError("apiKey was not specified");
         }
         const args = [
             "nuget",
@@ -554,7 +554,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         // for simplicity: return the last system result (at least for now, until there's a reason to get clever)
         if (lastResult === undefined) {
             // this is really here for TS
-            throw new Error(`No build configurations could be determined, which is odd, because there's even a fallback.`);
+            throw new ZarroError(`No build configurations could be determined, which is odd, because there's even a fallback.`);
         }
         return lastResult;
     }
@@ -601,7 +601,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         });
         const result = enabledSources[0];
         if (!result) {
-            throw new Error(`Unable to determine default nuget source. Please specify 'source' on your options.`);
+            throw new ZarroError(`Unable to determine default nuget source. Please specify 'source' on your options.`);
         }
         return result;
     }
@@ -670,6 +670,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         }
     }
     async function runDotNetWith(args, opts) {
+        opts = opts || {};
+        if (opts.suppressOutput === undefined) {
+            opts.suppressOutput = true;
+        }
         let result;
         try {
             result = await system("dotnet", args, {
@@ -677,7 +681,8 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
                 stderr: opts.stderr,
                 suppressOutput: opts.suppressOutput,
                 suppressStdIoInErrors: opts.suppressStdIoInErrors,
-                env: opts.env
+                env: opts.env,
+                cwd: opts.cwd
             });
         }
         catch (e) {
@@ -761,9 +766,23 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             usingFallback
         });
     }
+    function parsePackageSearchResult(stdout) {
+        const allText = stdout.join(" ");
+        let parsed;
+        try {
+            parsed = JSON.parse(allText);
+        }
+        catch (e) {
+            throw new ZarroError(`Unable to parse json from:\n${allText}`);
+        }
+        if (parsed.problems && parsed.problems.length) {
+            throw new ZarroError(`unable to perform package search (check your access token):\n${parsed.problems.join("\n")}`);
+        }
+        return parsed;
+    }
     async function searchPackages(options) {
         if (!options) {
-            throw new Error(`No options or search string provided`);
+            throw new ZarroError(`No options or search string provided`);
         }
         const opts = typeof options === "string"
             ? { search: options }
@@ -798,7 +817,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             const systemError = rawResult;
             throw wrapSearchError(systemError);
         }
-        const allText = stdout.join(" "), parsed = JSON.parse(allText);
+        const parsed = parsePackageSearchResult(stdout);
         const finalResult = [];
         for (const sourceResult of parsed.searchResult) {
             for (const pkg of sourceResult.packages) {
@@ -828,41 +847,186 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     function wrapSearchError(e) {
         return new Error(`Unable to perform package search (check your access token if necessary): ${e}`);
     }
-    function parsePackageSearchResult(stdout) {
-        const allText = stdout.join(" ");
-        let parsed;
-        try {
-            parsed = JSON.parse(allText);
-        }
-        catch (e) {
-            throw new Error(`Unable to parse json from:\n${allText}`);
-        }
-        if (parsed.problems && parsed.problems.length) {
-            throw new Error(`unable to perform package search (check your access token):\n${parsed.problems.join("\n")}`);
-        }
-        return parsed;
-    }
     async function installPackage(opts) {
         if (!opts) {
-            throw new Error(`no options passed to 'installPackage' - target project and package name not specified`);
+            throw new ZarroError(`no options passed to 'installPackage' - target project and package name not specified`);
         }
         if (!`${opts.projectFile}`.trim()) {
-            throw new Error(`projectFile not specified`);
+            throw new ZarroError(`projectFile not specified`);
         }
         if (!`${opts.id}`.trim()) {
-            throw new Error(`package id not specified`);
+            throw new ZarroError(`package id not specified`);
         }
         const args = ["add", opts.projectFile, "package", opts.id];
         pushIfSet(args, opts.version, "--version");
         pushIfSet(args, opts.framework, "--framework");
         pushFlag(args, opts.noRestore, "--no-restore");
-        pushIfSet(args, opts.source, "--source");
+        pushIfSet(args, await resolveSourceUrlFor(opts.source), "--source");
         pushIfSet(args, opts.packageDirectory, "--package-directory");
         pushFlag(args, opts.preRelease, "--prerelease");
         if (opts.suppressOutput === undefined) {
             opts.suppressOutput = true;
         }
         await runDotNetWith(args, opts);
+    }
+    const defaultCreateOptions = {
+        skipTemplateUpdateCheck: true
+    };
+    const solutionRegex = /.*\.sln$/i;
+    function isSolution(filePath) {
+        return solutionRegex.test(filePath);
+    }
+    const projectRegex = /.*\.csproj$/i;
+    function isProject(filePath) {
+        return projectRegex.test(filePath);
+    }
+    async function create(opts) {
+        verifyExists(opts, `no options passed to create`);
+        opts = Object.assign(Object.assign({}, defaultCreateOptions), opts);
+        verifyNonEmptyString(opts.template, `template was not specified and is required`);
+        const args = ["new", opts.template];
+        pushIfSet(args, opts.output, "--output");
+        pushIfSet(args, opts.name, "--name");
+        pushFlag(args, opts.skipTemplateUpdateCheck, "--no-update-check");
+        pushIfSet(args, opts.projectFile, "--project");
+        pushIfSet(args, opts.verbosity, "--verbosity");
+        pushFlag(args, opts.enableDiagnostics, "--diagnostics");
+        if (opts.suppressOutput === undefined) {
+            opts.suppressOutput = true;
+        }
+        const newFiles = await runAndReportNewFiles(opts.cwd, () => runDotNetWith(args, opts));
+        return newFiles.find(isSolution)
+            || newFiles.find(isProject)
+            || newFiles[0];
+    }
+    async function runAndReportNewFiles(where, toRun) {
+        const before = new Set(await listDotNetFilesUnder(where));
+        await toRun();
+        const after = await listDotNetFilesUnder(where);
+        const added = [];
+        for (const item of after) {
+            if (!before.has(item)) {
+                added.push(item);
+            }
+        }
+        return added;
+    }
+    async function listDotNetFilesUnder(folder) {
+        return await ls(folder || ".", {
+            entities: FsEntities.files,
+            fullPaths: true,
+            recurse: true,
+            doNotTraverse: [
+                /node_modules/,
+                /[\\/]obj[\\/]/,
+                /[\\/]bin[\\/]/
+            ]
+        });
+    }
+    async function addProjectToSolution(opts) {
+        verifyExists(opts, "no options were passed to 'addProjectToSolution'");
+        verifyNonEmptyString(opts.projectFile, "path to project file is required");
+        verifyNonEmptyString(opts.solutionFile, "path to solution file is required");
+        if (!await fileExists(opts.solutionFile)) {
+            throw new ZarroError(`file not found: ${opts.solutionFile}`);
+        }
+        if (!await fileExists(opts.projectFile)) {
+            throw new ZarroError(`file not found: ${opts.projectFile}`);
+        }
+        const args = ["sln", opts.solutionFile, "add", opts.projectFile];
+        await runDotNetWith(args, opts);
+    }
+    async function listProjects(solutionFile) {
+        const args = ["sln", solutionFile, "list"], basePath = path.dirname(solutionFile), rawResult = await runDotNetWith(args), result = [];
+        for (const line of rawResult.stdout) {
+            const trimmed = line.trim(), test = path.join(basePath, trimmed);
+            if (await fileExists(test)) {
+                result.push(test);
+            }
+        }
+        return result;
+    }
+    async function resolveSourceUrlFor(source) {
+        if (!source) {
+            return undefined;
+        }
+        const lowered = source.toLowerCase();
+        const sources = await listNugetSources();
+        for (const source of sources) {
+            if (source.name.toLowerCase() == lowered) {
+                return source.url;
+            }
+        }
+        // hopefully this is a valid source that dotnet understands
+        // - in my testing, dotnet doesn't understand source names,
+        //   unlike nuget.exe
+        return source;
+    }
+    async function upgradePackages(opts) {
+        var _a;
+        verifyExists(opts, "no options provided to upgradePackages");
+        verifyNonEmptyString(opts.pathToProjectOrSolution, "no path to a project or solution was supplied");
+        if (!opts.packages || opts.packages.length === 0) {
+            throw new ZarroError(`no packages were specified`);
+        }
+        const projects = isProject(opts.pathToProjectOrSolution)
+            ? [opts.pathToProjectOrSolution]
+            : await listProjects(opts.pathToProjectOrSolution);
+        for (const project of projects) {
+            const projectPackages = await listPackages(project);
+            const toUpgrade = [];
+            for (const pkg of opts.packages) {
+                const test = isRegex(pkg)
+                    ? (s) => pkg.test(s)
+                    : (s) => projectPackages.find(pp => pp.id.toLowerCase() === s.toLowerCase());
+                for (const projectPackage of projectPackages) {
+                    if (test(projectPackage.id)) {
+                        toUpgrade.push(projectPackage.id);
+                    }
+                }
+            }
+            const upstream = await searchForMultiplePackages(toUpgrade, opts.source, (_a = opts.preRelease) !== null && _a !== void 0 ? _a : false);
+            for (const pkg of upstream) {
+                await installPackage({
+                    projectFile: project,
+                    id: pkg.id,
+                    version: pkg.version.toString(),
+                    source: opts.source,
+                    noRestore: opts.noRestore,
+                    preRelease: opts.preRelease
+                });
+            }
+        }
+    }
+    async function searchForMultiplePackages(packageIds, source, preRelease) {
+        // TODO: optimise
+        const promises = packageIds.map(id => searchPackages({
+            search: id,
+            exactMatch: true,
+            preRelease,
+            source,
+            take: 1
+        }));
+        const allResults = await Promise.all(promises), finalResult = [];
+        for (const resultArray of allResults) {
+            for (const result of resultArray) {
+                finalResult.push(result);
+            }
+        }
+        return finalResult;
+    }
+    function isRegex(value) {
+        return value instanceof RegExp;
+    }
+    function verifyExists(value, failMessage) {
+        if (value === undefined || value === null) {
+            throw new ZarroError(failMessage);
+        }
+    }
+    function verifyNonEmptyString(value, failMessage) {
+        if (!`${value}`.trim()) {
+            throw new ZarroError(failMessage);
+        }
     }
     module.exports = {
         test,
@@ -881,6 +1045,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         tryFindConfiguredNugetSource,
         incrementTempDbPortHintIfFound,
         searchPackages,
-        installPackage
+        installPackage,
+        upgradePackages,
+        create,
+        listProjects,
+        addProjectToSolution
     };
 })();
