@@ -1454,7 +1454,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       for (const pkg of opts.packages) {
         const test = isRegex(pkg)
           ? (s: string) => pkg.test(s)
-          : (s: string) => projectPackages.find(pp => pp.id.toLowerCase() === s.toLowerCase());
+          : (s: string) => s.toLowerCase() == pkg.toLowerCase()
 
         for (const projectPackage of projectPackages) {
           if (test(projectPackage.id)) {
@@ -1463,7 +1463,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         }
       }
       if (toUpgrade.length === 0) {
-
+        if (opts.showProgress) {
+          console.log(`  -> no matching packages to upgrade in '${project}'`);
+        }
+        continue;
       }
 
       const message = `searching for ${ toUpgrade.length } packages to upgrade in ${ project }`;

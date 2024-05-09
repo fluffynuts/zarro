@@ -105,4 +105,88 @@ describe(`dotnet-cli:upgradePackages`, () => {
         expect(version2.isGreaterThan("2.0.1"))
             .toBeTrue();
     });
+    it(`should only upgrade the matching package(s) [1: package specified as regex]`, async () => {
+        // Arrange
+        const sandbox = await filesystem_sandbox_1.Sandbox.create(), pbVersion = "3.0.100", nexpectVersion = "2.0.69", projectName = faker_1.faker.string.alphanumeric();
+        const projectPath = await create({
+            template: "classlib",
+            name: projectName,
+            cwd: sandbox.path
+        });
+        await installPackage({
+            cwd: sandbox.path,
+            projectFile: projectPath,
+            id: "PeanutButter.Utils",
+            version: pbVersion
+        });
+        await installPackage({
+            cwd: sandbox.path,
+            projectFile: projectPath,
+            id: "NExpect",
+            version: nexpectVersion
+        });
+        // Act
+        await upgradePackages({
+            showProgress: false,
+            packages: [/nexpect/i],
+            preRelease: false,
+            pathToProjectOrSolution: projectPath
+        });
+        // Assert
+        const result = await listPackages(projectPath);
+        for (const pkg of result) {
+            if (pkg.id.toLowerCase() === "nexpect") {
+                const ver = new Version(pkg.version);
+                expect(ver.isGreaterThan(nexpectVersion))
+                    .toBeTrue();
+                continue;
+            }
+            if (pkg.id.toLowerCase() === "peanutbutter.utils") {
+                expect(pkg.version)
+                    .toEqual(pbVersion);
+            }
+        }
+    });
+    it(`should only upgrade the matching package(s) [2: package specified exactly]`, async () => {
+        // Arrange
+        const sandbox = await filesystem_sandbox_1.Sandbox.create(), pbVersion = "3.0.100", nexpectVersion = "2.0.69", projectName = faker_1.faker.string.alphanumeric();
+        const projectPath = await create({
+            template: "classlib",
+            name: projectName,
+            cwd: sandbox.path
+        });
+        await installPackage({
+            cwd: sandbox.path,
+            projectFile: projectPath,
+            id: "PeanutButter.Utils",
+            version: pbVersion
+        });
+        await installPackage({
+            cwd: sandbox.path,
+            projectFile: projectPath,
+            id: "NExpect",
+            version: nexpectVersion
+        });
+        // Act
+        await upgradePackages({
+            showProgress: false,
+            packages: ["nexpect"],
+            preRelease: false,
+            pathToProjectOrSolution: projectPath
+        });
+        // Assert
+        const result = await listPackages(projectPath);
+        for (const pkg of result) {
+            if (pkg.id.toLowerCase() === "nexpect") {
+                const ver = new Version(pkg.version);
+                expect(ver.isGreaterThan(nexpectVersion))
+                    .toBeTrue();
+                continue;
+            }
+            if (pkg.id.toLowerCase() === "peanutbutter.utils") {
+                expect(pkg.version)
+                    .toEqual(pbVersion);
+            }
+        }
+    });
 });
