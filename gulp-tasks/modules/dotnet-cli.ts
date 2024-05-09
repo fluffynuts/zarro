@@ -1450,7 +1450,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
 
     for (const project of projects) {
       const projectPackages = await listPackages(project);
-      const toUpgrade = [] as string[];
+      const toUpgrade = [] as DotNetPackageReference[];
       for (const pkg of opts.packages) {
         const test = isRegex(pkg)
           ? (s: string) => pkg.test(s)
@@ -1458,7 +1458,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
 
         for (const projectPackage of projectPackages) {
           if (test(projectPackage.id)) {
-            toUpgrade.push(projectPackage.id);
+            toUpgrade.push(projectPackage);
           }
         }
       }
@@ -1475,12 +1475,22 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       const upstream = await ctx.exec(
         message,
         async () => await searchForMultiplePackages(
-          toUpgrade,
+          toUpgrade.map(o => o.id),
           opts.source,
           opts.preRelease ?? false
         )
-      );
+      ) as PackageInfo[];
       for (const pkg of upstream) {
+        const projectMatch = toUpgrade.find(o => o.id.toLowerCase() === pkg.id.toLowerCase());
+        if (!projectMatch) {
+          throw new Error(`no matching package reference for '${pkg.id}' in '${project}' (HOW?)`);
+        }
+        if (pkg.version.equals(projectMatch.version)) {
+          if (opts.showProgress) {
+            console.log(`  ${pkg.id} already at latest version '${pkg.version}' in '${project}'`);
+          }
+          continue;
+        }
         ctx.indent += 2;
         await ctx.exec(
           `installing '${pkg.id}' at version '${pkg.version}' into '${project}'`,

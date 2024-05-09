@@ -242,4 +242,49 @@ describe(`dotnet-cli:upgradePackages`, () => {
       }
     }
   });
+
+  it(`should not upgrade a package already at the latest version`, async () => {
+    // Arrange
+    const
+      sandbox = await Sandbox.create(),
+      projectName = faker.string.alphanumeric();
+    const projectFile = await create({
+      template: "classlib",
+      name: projectName,
+      cwd: sandbox.path
+    });
+    await installPackage({
+      id: "NExpect",
+      projectFile: projectName,
+      cwd: sandbox.path
+    });
+    const
+      allInstalled = await listPackages(projectFile),
+      nexpectVersion = allInstalled.find(o => o.id.toLowerCase() === "nexpect")?.version;
+
+    expect(nexpectVersion)
+      .toExist();
+
+    const capturedOutput = [] as string[];
+    spyOn(process.stdout, "write").and.callFake((...args: any[]) => {
+      capturedOutput.push(args[0] as string);
+    });
+    spyOn(console, "log").and.callFake((...args: any[]) => {
+      capturedOutput.push(args[0] as string);
+    });
+
+    // Act
+    await upgradePackages({
+      pathToProjectOrSolution: projectFile,
+      packages: [ "nexpect" ],
+      showProgress: true // we're going to spy on outputs to verify
+    });
+    // Assert
+    const installLine = capturedOutput.find(s => s.includes("install"));
+    expect(installLine)
+      .not.toExist();
+    const skipLine = capturedOutput.find(s => s.includes("already at latest"));
+    expect(skipLine)
+      .toExist();
+  });
 });
