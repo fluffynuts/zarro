@@ -1487,8 +1487,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
               id: pkg.id,
               version: pkg.version.toString(),
               source: opts.source,
-              noRestore: opts.noRestore,
-              preRelease: opts.preRelease
+              noRestore: opts.noRestore
             })
         );
       }
