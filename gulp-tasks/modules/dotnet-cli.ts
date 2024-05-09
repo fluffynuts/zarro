@@ -1469,7 +1469,9 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         continue;
       }
 
-      const message = `searching for ${ toUpgrade.length } packages to upgrade in ${ project }`;
+      const
+        s = toUpgrade.length === 1 ? "" : "s",
+        message = `searching for ${ toUpgrade.length } package${s} to upgrade in ${ project }`;
       const upstream = await ctx.exec(
         message,
         async () => await searchForMultiplePackages(
@@ -1479,6 +1481,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         )
       );
       for (const pkg of upstream) {
+        ctx.indent += 2;
         await ctx.exec(
           `installing '${pkg.id}' at version '${pkg.version}' into '${project}'`,
           async () =>
@@ -1490,6 +1493,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
               noRestore: opts.noRestore
             })
         );
+        ctx.indent -= 2;
       }
     }
   }
