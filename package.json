@@ -3,7 +3,7 @@
   "version": "1.173.10",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
-    "zarro": "./index.js"
+    "zarro": "index.js"
   },
   "homepage": "https://github.com/fluffynuts/zarro",
   "main": "index.js",
