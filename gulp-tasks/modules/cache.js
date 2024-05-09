@@ -75,7 +75,6 @@
             return result;
         }
         _findCacheItem(key) {
-            debugger;
             const result = this._store[key];
             if (result === undefined) {
                 return undefined;

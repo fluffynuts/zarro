@@ -1468,7 +1468,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
 
       const message = `searching for ${ toUpgrade.length } packages to upgrade in ${ project }`;
       const upstream = await ctx.exec(
-        ``,
+        message,
         async () => await searchForMultiplePackages(
           toUpgrade,
           opts.source,
@@ -1477,7 +1477,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       );
       for (const pkg of upstream) {
         await ctx.exec(
-          ``,
+          `installing '${pkg.id}' at version '${pkg.version}' into '${project}'`,
           async () =>
             await installPackage({
               projectFile: project,

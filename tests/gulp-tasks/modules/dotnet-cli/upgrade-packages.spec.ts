@@ -43,7 +43,7 @@ describe(`dotnet-cli:upgradePackages`, () => {
     await upgradePackages({
       pathToProjectOrSolution: projectFile,
       packages: [ "NExpect" ],
-      showProgress: true
+      showProgress: false
     });
     // Assert
     const
@@ -55,8 +55,7 @@ describe(`dotnet-cli:upgradePackages`, () => {
     const version = new Version(`${ nexpect?.version }`);
     expect(version.isGreaterThan("2.0.1"))
       .toBeTrue();
-  })
-  ;
+  });
 
   it(`should upgrade the single named package in the solution`, async () => {
     // Arrange
@@ -124,7 +123,8 @@ describe(`dotnet-cli:upgradePackages`, () => {
     // Act
     await upgradePackages({
       pathToProjectOrSolution: solutionFile,
-      packages: [ "NExpect" ]
+      packages: [ "NExpect" ],
+      showProgress: false
     });
     // Assert
     const

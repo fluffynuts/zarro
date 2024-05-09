@@ -1003,12 +1003,12 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             if (toUpgrade.length === 0) {
             }
             const message = `searching for ${toUpgrade.length} packages to upgrade in ${project}`;
-            const upstream = await ctx.exec(``, async () => {
+            const upstream = await ctx.exec(message, async () => {
                 var _a;
                 return await searchForMultiplePackages(toUpgrade, opts.source, (_a = opts.preRelease) !== null && _a !== void 0 ? _a : false);
             });
             for (const pkg of upstream) {
-                await ctx.exec(``, async () => await installPackage({
+                await ctx.exec(`installing '${pkg.id}' at version '${pkg.version}' into '${project}'`, async () => await installPackage({
                     projectFile: project,
                     id: pkg.id,
                     version: pkg.version.toString(),

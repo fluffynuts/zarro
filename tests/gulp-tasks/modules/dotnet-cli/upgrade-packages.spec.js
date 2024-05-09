@@ -29,7 +29,7 @@ describe(`dotnet-cli:upgradePackages`, () => {
         await upgradePackages({
             pathToProjectOrSolution: projectFile,
             packages: ["NExpect"],
-            showProgress: true
+            showProgress: false
         });
         // Assert
         const currentlyInstalled = await listPackages(projectFile), nexpect = currentlyInstalled.find(o => o.id.toLowerCase() === "nexpect");
@@ -89,7 +89,8 @@ describe(`dotnet-cli:upgradePackages`, () => {
         // Act
         await upgradePackages({
             pathToProjectOrSolution: solutionFile,
-            packages: ["NExpect"]
+            packages: ["NExpect"],
+            showProgress: false
         });
         // Assert
         const currentlyInstalled1 = await listPackages(project1File), nexpect1 = currentlyInstalled1.find(o => o.id.toLowerCase() === "nexpect"), currentlyInstalled2 = await listPackages(project1File), nexpect2 = currentlyInstalled2.find(o => o.id.toLowerCase() === "nexpect");
