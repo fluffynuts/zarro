@@ -83,7 +83,7 @@ declare global {
   }
 
   interface Log {
-    setThreshold(level: number): void;
+    setThreshold(level: number | string): void;
 
     debug(...args: any[]): void;
 
@@ -1635,6 +1635,10 @@ declare global {
     preRelease?: boolean;
     noRestore?: boolean;
     source?: string;
+    /**
+     * defaults to true
+     */
+    showProgress?: boolean;
   }
 
   type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<SystemResult | SystemError>;
@@ -2135,5 +2139,23 @@ declare global {
     "ZPL-1.1" |
     "ZPL-2.0" |
     "ZPL-2.1"
+
+  interface Cache {
+    read<T>(key: string, fallback?: T): Optional<T>;
+    write<T>(key: string, value: T, ttlSeconds: number): void;
+    through<T>(
+      key: string,
+      generator: Func<Promise<T>>,
+      ttlSeconds: number
+    ): Promise<T>;
+    throughSync<T>(
+      key: string,
+      generator: Func<T>,
+      ttlSeconds: number
+    ): T;
+    create(): Cache;
+    trim(): void;
+    forget(key: string): void;
+  }
 }
 

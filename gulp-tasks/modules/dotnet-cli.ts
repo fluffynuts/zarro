@@ -31,6 +31,7 @@
   const env = requireModule<Env>("env");
   const Version = requireModule<Version>("version");
   const SystemError = requireModule<SystemError>("system-error");
+  const cache = requireModule<Cache>("cache");
 
   const emojiLabels = {
     testing: `🧪 Testing`,
@@ -1175,6 +1176,17 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       ? { search: options } as DotNetSearchPackagesOptions
       : options;
 
+    return await cache.through(
+      JSON.stringify(opts),
+      async () => await searchPackagesUncached(opts),
+      60 // cache for a minute
+    );
+  }
+
+  async function searchPackagesUncached(
+    opts: DotNetSearchPackagesOptions
+  ): Promise<PackageInfo[]> {
+
     const args = [ "package", "search" ] as string[];
     pushIfSet(args, opts.source, "--source");
     pushFlag(args, opts.exactMatch, "--exact-match");
@@ -1404,6 +1416,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     return source;
   }
 
+
   async function upgradePackages(
     opts: DotNetUpgradePackagesOptions
   ): Promise<void> {
@@ -1412,6 +1425,20 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     if (!opts.packages || opts.packages.length === 0) {
       throw new ZarroError(`no packages were specified`);
     }
+    if (opts.showProgress === undefined) {
+      opts.showProgress = true;
+    }
+
+    const
+      {
+        ExecStepContext,
+        Labelers
+      } = require("exec-step"),
+      ctx = new ExecStepContext({
+        labeler: opts.showProgress
+          ? Labelers.interactive
+          : Labelers.none
+      });
 
     const projects = isProject(opts.pathToProjectOrSolution)
       ? [ opts.pathToProjectOrSolution ]
@@ -1431,21 +1458,32 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
           }
         }
       }
+      if (toUpgrade.length === 0) {
 
-      const upstream = await searchForMultiplePackages(
-        toUpgrade,
-        opts.source,
-        opts.preRelease ?? false
+      }
+
+      const message = `searching for ${ toUpgrade.length } packages to upgrade in ${ project }`;
+      const upstream = await ctx.exec(
+        ``,
+        async () => await searchForMultiplePackages(
+          toUpgrade,
+          opts.source,
+          opts.preRelease ?? false
+        )
       );
       for (const pkg of upstream) {
-        await installPackage({
-          projectFile: project,
-          id: pkg.id,
-          version: pkg.version.toString(),
-          source: opts.source,
-          noRestore: opts.noRestore,
-          preRelease: opts.preRelease
-        })
+        await ctx.exec(
+          ``,
+          async () =>
+            await installPackage({
+              projectFile: project,
+              id: pkg.id,
+              version: pkg.version.toString(),
+              source: opts.source,
+              noRestore: opts.noRestore,
+              preRelease: opts.preRelease
+            })
+        );
       }
     }
   }
