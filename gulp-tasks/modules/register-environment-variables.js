@@ -732,8 +732,7 @@
         });
         env.register({
             name: "PACKAGE_REGISTRY",
-            help: "Specify npm source to push to. Will default to npmjs.com",
-            default: "nuget.org"
+            help: "Specify npm source to push to. When unspecified, behavior is left up to npm"
         });
         debug("-- env registration complete --");
     };
