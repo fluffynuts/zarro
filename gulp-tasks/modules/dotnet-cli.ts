@@ -1176,6 +1176,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       ? { search: options } as DotNetSearchPackagesOptions
       : options;
 
+    if (opts.skipCache) {
+      return await searchPackages(opts);
+    }
+
     return await cache.through(
       JSON.stringify(opts),
       async () => await searchPackagesUncached(opts),

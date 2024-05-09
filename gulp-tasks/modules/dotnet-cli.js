@@ -788,6 +788,9 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         const opts = typeof options === "string"
             ? { search: options }
             : options;
+        if (opts.skipCache) {
+            return await searchPackages(opts);
+        }
         return await cache.through(JSON.stringify(opts), async () => await searchPackagesUncached(opts), 60 // cache for a minute
         );
     }

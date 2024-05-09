@@ -1543,6 +1543,12 @@ declare global {
     preRelease?: boolean;
     configFile?: string;
     latestOnly?: boolean;
+    /**
+     * search results are typically cached in memory
+     * for 1 minute. If you absolutely _must_ have
+     * fresh data, set this to false
+     */
+    skipCache?: boolean;
   }
 
   interface DotNetInstallNugetPackageOption
@@ -2156,6 +2162,7 @@ declare global {
     create(): Cache;
     trim(): void;
     forget(key: string): void;
+    clear(): void;
   }
 }
 

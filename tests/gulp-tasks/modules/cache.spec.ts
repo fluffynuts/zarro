@@ -19,6 +19,10 @@ describe(`cache`, () => {
       .toBeFunction();
     expect(cache.create)
       .toBeFunction();
+    expect(cache.clear)
+      .toBeFunction();
+    expect(cache.forget)
+      .toBeFunction();
     // Assert
   });
 
@@ -67,6 +71,22 @@ describe(`cache`, () => {
       // Assert
       expect(result)
         .toEqual(fallbackValue);
+    });
+  });
+
+  describe(`clear`, () => {
+    it(`should clear caching`, async () => {
+      // Arrange
+      const
+        key = faker.string.alphanumeric(),
+        value = faker.word.sample(),
+        sut = cache.create();
+      // Act
+      sut.write(key, value, 120);
+      expect(sut.read(key))
+        .toEqual(value);
+      sut.clear();
+      // Assert
     });
   });
 
