@@ -13,7 +13,8 @@ import { StyleFunction } from "ansi-colors";
       INFO,
       NOTICE,
       WARNING
-    } as Dictionary<number>;
+    } as Dictionary<number>,
+    ZarroError = requireModule<ZarroError>("zarro-error");
 
   class LogLevels {
     get Debug(): number {
@@ -69,13 +70,20 @@ import { StyleFunction } from "ansi-colors";
     }
 
     setThreshold(value: string | number) {
+      const originalValue = value;
+      let translated = false;
       if (levels[value] !== undefined) {
+        translated = true;
         value = levels[value];
       }
       const intValue = parseInt(`${ value }`);
       if (isNaN(intValue) || intValue < 1 || intValue > 5) {
-        throw value +
-              " is not a valid integer value. Try use one of (logger).LogLevels.{Debug|Info|Notice|Warning|Error}";
+        const pre = translated
+        ? `'${originalValue}' is not a known log level`
+          : `${originalValue} is not a value integer value`;
+        throw new ZarroError(
+          `${ pre }. Try use one of (logger).LogLevels.{Debug|Info|Notice|Warning|Error}`
+        );
       }
       this._threshold = intValue;
     }

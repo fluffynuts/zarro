@@ -628,7 +628,6 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       return opts.nuspec;
     }
     const {
-      isOptional,
       resolvedPath
     } = parseNuspecPath(opts.nuspec);
     if (path.isAbsolute(resolvedPath) && await fileExists(resolvedPath)) {
@@ -652,8 +651,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     opts: DotNetPackOptions
   ): Promise<string> {
     const {
-      resolvedPath,
-      isOptional
+      resolvedPath
     } = parseNuspecPath(opts.nuspec);
     if (!resolvedPath) {
       throw new ZarroError(`unable to resolve path to nuspec: no nuspec provided`);
@@ -961,6 +959,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     args: string[],
     opts?: DotNetBaseOptions
   ): Promise<SystemResult | SystemError> {
+    debugger;
     opts = opts || {};
     if (opts.suppressOutput === undefined) {
       opts.suppressOutput = true;
@@ -981,6 +980,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       }
       throw e;
     }
+    debugger;
 
     const
       errors = result.stderr || [],
@@ -1557,6 +1557,25 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     }
   }
 
+  enum DotNetCache {
+    all = "all",
+    httpCache = "http-cache",
+    globalPackages = "global-packages",
+    temp = "temp"
+  }
+
+  async function clearCaches(
+    cacheType: DotNetCache | string
+  ): Promise<void> {
+    const args = [ "nuget", "locals", `${cacheType}`, "--clear" ];
+    await runDotNetWith(args);
+  }
+
+  clearCaches.all = DotNetCache.all;
+  clearCaches.httpCache = DotNetCache.httpCache;
+  clearCaches.globalPackages = DotNetCache.globalPackages;
+  clearCaches.temp = DotNetCache.temp;
+
   module.exports = {
     test,
     build,
@@ -1577,6 +1596,8 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     searchPackages,
     installPackage,
     upgradePackages,
+    clearCaches,
+    DotNetCache,
 
     create,
     listProjects,

@@ -1647,6 +1647,13 @@ declare global {
     showProgress?: boolean;
   }
 
+  enum DotNetCache {
+    all = "all",
+    httpCache = "http-cache",
+    globalPackages = "global-packages",
+    temp = "temp"
+  }
+
   type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<SystemResult | SystemError>;
   type DotNetBuildFunction = (opts: DotNetBuildOptions) => Promise<SystemResult | SystemError>;
   type DotNetPackFunction = (opts: DotNetPackOptions) => Promise<SystemResult | SystemError>;
@@ -1667,6 +1674,13 @@ declare global {
   type DotNetCreateFunction = (opts: DotNetCreateOptions) => Promise<string>;
   type DotNetListProjectsFunction = (solutionFile: string) => Promise<string[]>;
   type DotNetAddProjectToSolutionFunction = (opts: DotNetAddProjectToSolutionOptions) => Promise<void>;
+  type DotNetClearCachesFunction = (opts: DotNetCache | string) => Promise<void>;
+  type DotNetClearCachesFunctionWithEnumValues = DotNetClearCachesFunction & {
+    all: DotNetCache;
+    httpCache: DotNetCache;
+    globalPackages: DotNetCache;
+    temp: DotNetCache;
+  }
 
   interface DotNetCli {
     clean: DotNetCleanFunction;
@@ -1690,6 +1704,7 @@ declare global {
     create: DotNetCreateFunction;
     listProjects: DotNetListProjectsFunction;
     addProjectToSolution: DotNetAddProjectToSolutionFunction;
+    clearCaches: DotNetClearCachesFunctionWithEnumValues;
   }
 
   type ReadCsProjNode = (csproj: string) => Promise<string>;

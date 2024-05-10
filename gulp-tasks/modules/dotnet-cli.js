@@ -442,7 +442,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         if (!opts.nuspec) {
             return opts.nuspec;
         }
-        const { isOptional, resolvedPath } = parseNuspecPath(opts.nuspec);
+        const { resolvedPath } = parseNuspecPath(opts.nuspec);
         if (path.isAbsolute(resolvedPath) && await fileExists(resolvedPath)) {
             return opts.nuspec;
         }
@@ -457,7 +457,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         return opts.nuspec;
     }
     async function resolveAbsoluteNuspecPath(opts) {
-        const { resolvedPath, isOptional } = parseNuspecPath(opts.nuspec);
+        const { resolvedPath } = parseNuspecPath(opts.nuspec);
         if (!resolvedPath) {
             throw new ZarroError(`unable to resolve path to nuspec: no nuspec provided`);
         }
@@ -671,6 +671,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         }
     }
     async function runDotNetWith(args, opts) {
+        debugger;
         opts = opts || {};
         if (opts.suppressOutput === undefined) {
             opts.suppressOutput = true;
@@ -692,6 +693,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             }
             throw e;
         }
+        debugger;
         const errors = result.stderr || [], hasDiedFromException = !!errors.find(s => s.toLowerCase().includes("unhandled exception"));
         if (!hasDiedFromException) {
             return result;
@@ -1064,6 +1066,21 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             throw new ZarroError(failMessage);
         }
     }
+    let DotNetCache;
+    (function (DotNetCache) {
+        DotNetCache["all"] = "all";
+        DotNetCache["httpCache"] = "http-cache";
+        DotNetCache["globalPackages"] = "global-packages";
+        DotNetCache["temp"] = "temp";
+    })(DotNetCache || (DotNetCache = {}));
+    async function clearCaches(cacheType) {
+        const args = ["nuget", "locals", `${cacheType}`, "--clear"];
+        await runDotNetWith(args);
+    }
+    clearCaches.all = DotNetCache.all;
+    clearCaches.httpCache = DotNetCache.httpCache;
+    clearCaches.globalPackages = DotNetCache.globalPackages;
+    clearCaches.temp = DotNetCache.temp;
     module.exports = {
         test,
         build,
@@ -1083,6 +1100,8 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         searchPackages,
         installPackage,
         upgradePackages,
+        clearCaches,
+        DotNetCache,
         create,
         listProjects,
         addProjectToSolution
