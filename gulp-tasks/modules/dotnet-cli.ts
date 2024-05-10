@@ -959,7 +959,6 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     args: string[],
     opts?: DotNetBaseOptions
   ): Promise<SystemResult | SystemError> {
-    debugger;
     opts = opts || {};
     if (opts.suppressOutput === undefined) {
       opts.suppressOutput = true;
@@ -980,7 +979,6 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       }
       throw e;
     }
-    debugger;
 
     const
       errors = result.stderr || [],

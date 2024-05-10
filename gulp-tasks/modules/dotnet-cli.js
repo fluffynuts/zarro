@@ -671,7 +671,6 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         }
     }
     async function runDotNetWith(args, opts) {
-        debugger;
         opts = opts || {};
         if (opts.suppressOutput === undefined) {
             opts.suppressOutput = true;
@@ -693,7 +692,6 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             }
             throw e;
         }
-        debugger;
         const errors = result.stderr || [], hasDiedFromException = !!errors.find(s => s.toLowerCase().includes("unhandled exception"));
         if (!hasDiedFromException) {
             return result;
