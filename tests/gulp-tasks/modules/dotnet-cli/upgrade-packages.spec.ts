@@ -43,6 +43,7 @@ describe(`dotnet-cli:upgradePackages`, () => {
     await upgradePackages({
       pathToProjectOrSolution: projectFile,
       packages: [ "NExpect" ],
+      source: "nuget.org",
       showProgress: false
     });
     // Assert
@@ -124,6 +125,7 @@ describe(`dotnet-cli:upgradePackages`, () => {
     await upgradePackages({
       pathToProjectOrSolution: solutionFile,
       packages: [ "NExpect" ],
+      source: "nuget.org",
       showProgress: false
     });
     // Assert
@@ -175,6 +177,7 @@ describe(`dotnet-cli:upgradePackages`, () => {
     await upgradePackages({
       showProgress: false,
       packages: [ /nexpect/i ],
+      source: "nuget.org",
       preRelease: false,
       pathToProjectOrSolution: projectPath
     });
@@ -224,6 +227,7 @@ describe(`dotnet-cli:upgradePackages`, () => {
     await upgradePackages({
       showProgress: false,
       packages: [ "nexpect" ],
+      source: "nuget.org",
       preRelease: false,
       pathToProjectOrSolution: projectPath
     });
@@ -277,6 +281,7 @@ describe(`dotnet-cli:upgradePackages`, () => {
     await upgradePackages({
       pathToProjectOrSolution: projectFile,
       packages: [ "nexpect" ],
+      source: "nuget.org",
       showProgress: true // we're going to spy on outputs to verify
     });
     // Assert
