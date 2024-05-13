@@ -6,7 +6,7 @@
         env.NUGET_SOURCE
     ], taskName);
     gulp.task(taskName, ["clear-packages-folder", "pack"], async () => {
-        const log = requireModule("log"), ZarroError = requireModule("zarro-error"), resolveNugetApiKey = requireModule("resolve-nuget-api-key"), { FsEntities, ls } = require("yafs"), { nugetPush } = requireModule("dotnet-cli"), packageDir = env.resolve(env.PACK_TARGET_FOLDER), packageFiles = await ls(packageDir, {
+        const log = requireModule("log"), Git = require("simple-git"), git = new Git("."), ZarroError = requireModule("zarro-error"), resolveNugetApiKey = requireModule("resolve-nuget-api-key"), { FsEntities, ls } = require("yafs"), { nugetPush } = requireModule("dotnet-cli"), packageDir = env.resolve(env.PACK_TARGET_FOLDER), packageFiles = await ls(packageDir, {
             fullPaths: true,
             recurse: false,
             entities: FsEntities.files,
@@ -38,6 +38,8 @@
             log.warn(`Unable to determine version to tag at - set '${env.GIT_TAG}' to manually override.`);
             return;
         }
+        await git.add(":/");
+        await git.commit(`:bookmark: bump package version to ${version}`);
         const gitTagAndPush = requireModule("git-tag-and-push");
         await gitTagAndPush(version);
     });
