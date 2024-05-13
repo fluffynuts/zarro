@@ -12,6 +12,8 @@
   gulp.task(taskName, [ "clear-packages-folder", "pack" ], async () => {
       const
         log = requireModule<Log>("log"),
+        Git = require("simple-git"),
+        git = new Git("."),
         ZarroError = requireModule<ZarroError>("zarro-error"),
         resolveNugetApiKey = requireModule<ResolveNugetApiKey>("resolve-nuget-api-key"),
         {
@@ -40,7 +42,7 @@
         }
         const source = env.resolve(env.NUGET_SOURCE);
         if (env.resolveFlag(env.DRY_RUN)) {
-          log.info(`DRY_RUN: would have pushed '${pkg}' to '${source}'`);
+          log.info(`DRY_RUN: would have pushed '${ pkg }' to '${ source }'`);
         } else {
           await nugetPush({
             source,
@@ -55,9 +57,10 @@
         return;
       }
 
+      await git.add(":/");
+      await git.commit(`:bookmark: bump package version to ${ version }`);
       const gitTagAndPush = requireModule<GitTagAndPush>("git-tag-and-push");
       await gitTagAndPush(version);
-
     }
   );
 })();
