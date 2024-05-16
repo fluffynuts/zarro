@@ -591,7 +591,7 @@
     env.register({
       name: "UPGRADE_PACKAGES_NO_RESTORE",
       help: "Flag: when set truthy (default), don't actively restore packages (next build will do so) - makes the process faster",
-      default: "false"
+      default: "true"
     });
 
     env.register({
