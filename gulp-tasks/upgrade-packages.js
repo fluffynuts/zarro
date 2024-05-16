@@ -68,7 +68,7 @@
         if (!hasEnoughParts) {
             return new RegExp(s, "i");
         }
-        const startsWithSlash = parts[0] === "", endsWithSlash = parts[parts.length - 1] === "", finalSlashIsEscaped = hasEnoughParts && !parts[parts.length - 2].endsWith("\\"), isEz = startsWithSlash && endsWithSlash && !finalSlashIsEscaped;
+        const startsWithSlash = parts[0] === "", endsWithSlash = parts[parts.length - 1] === "", finalSlashIsEscaped = hasEnoughParts && parts[parts.length - 2].endsWith("\\"), isEz = startsWithSlash && endsWithSlash && !finalSlashIsEscaped;
         if (isEz) {
             let re = s;
             if (startsWithSlash) {
