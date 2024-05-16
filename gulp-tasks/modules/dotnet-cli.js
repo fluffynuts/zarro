@@ -77,6 +77,9 @@
     function findPackageReferencesOn(xml) {
         const itemGroups = getByPath(xml, "Project.ItemGroup");
         const result = [];
+        if (!itemGroups) {
+            return result;
+        }
         for (const dict of itemGroups) {
             const packageReferences = getByPath(dict, "PackageReference");
             if (packageReferences) {
