@@ -260,7 +260,9 @@ describe(`dotnet-cli:upgradePackages`, () => {
     await installPackage({
       id: "NExpect",
       projectFile: projectName,
-      cwd: sandbox.path
+      cwd: sandbox.path,
+      // avoid issues with possible test nuget sources by being explicit
+      source: "nuget.org"
     });
     const
       allInstalled = await listPackages(projectFile),

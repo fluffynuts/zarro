@@ -205,7 +205,9 @@ describe(`dotnet-cli:upgradePackages`, () => {
         await installPackage({
             id: "NExpect",
             projectFile: projectName,
-            cwd: sandbox.path
+            cwd: sandbox.path,
+            // avoid issues with possible test nuget sources by being explicit
+            source: "nuget.org"
         });
         const allInstalled = await listPackages(projectFile), nexpectVersion = (_a = allInstalled.find(o => o.id.toLowerCase() === "nexpect")) === null || _a === void 0 ? void 0 : _a.version;
         expect(nexpectVersion)

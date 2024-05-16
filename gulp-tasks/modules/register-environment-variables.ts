@@ -567,6 +567,34 @@
     });
 
     env.register({
+      name: "UPGRADE_PACKAGES",
+      help: "A list of packages/regular expressions for packages to guid the upgrade-packages task"
+    });
+
+    env.register({
+      name: "UPGRADE_PACKAGES_TARGET",
+      help: "The solution(s) or project(s) to upgrade. If not specified, all found _solutions_ are upgraded"
+    });
+
+    env.register({
+      name: "UPGRADE_PACKAGES_PROGRESS",
+      help: "Flag: when set falsey, show no progress",
+      default: "true"
+    });
+
+    env.register({
+      name: "UPGRADE_PACKAGES_PRERELEASE",
+      help: "Flag: when set truthy, include pre-release packages in the upgrade process",
+      default: "false"
+    });
+
+    env.register({
+      name: "UPGRADE_PACKAGES_NO_RESTORE",
+      help: "Flag: when set truthy (default), don't actively restore packages (next build will do so) - makes the process faster",
+      default: "false"
+    });
+
+    env.register({
       name: "PACK_INCLUDE_CSPROJ",
       help: "Mask to apply for inclusions to 'dotnet pack'",
       default: ""

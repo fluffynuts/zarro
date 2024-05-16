@@ -454,6 +454,8 @@ declare global {
     "GIT_TAG" |
     "GIT_VERSION_INCREMENT_MESSAGE" |
     "PACKAGE_REGISTRY" |
+    "UPGRADE_PACKAGES" |
+    "UPGRADE_PACKAGES_TARGET" |
     string; // allow client-side extension, encourage usage of env.associate & env.register
 
   type NumericEnvVar =
@@ -519,6 +521,8 @@ declare global {
     "SKIP_NUGET_UPDATE" |
     "PACK_INCREMENT_MINOR_ON_FIRST_PRERELEASE" |
     "BUILD_TOOLS_INSTALL_FORCE_NUGET_EXE" |
+    "UPGRADE_PACKAGES_PROGRESS" |
+    "UPGRADE_PACKAGES_PRERELEASE" |
     string;
 
   type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
@@ -650,6 +654,8 @@ declare global {
     GIT_TAG: StringEnvVar;
     GIT_VERSION_INCREMENT_MESSAGE: StringEnvVar;
     PACKAGE_REGISTRY: StringEnvVar;
+    UPGRADE_PACKAGES: StringEnvVar;
+    UPGRADE_PACKAGES_TARGET: StringEnvVar;
 
     ENABLE_NUGET_PARALLEL_PROCESSING: FlagEnvVar;
     BUILD_SHOW_INFO: FlagEnvVar;
@@ -696,6 +702,8 @@ declare global {
     SKIP_NUGET_UPDATE: FlagEnvVar;
     PACK_INCREMENT_MINOR_ON_FIRST_PRERELEASE: FlagEnvVar;
     BUILD_TOOLS_INSTALL_FORCE_NUGET_EXE: FlagEnvVar;
+    UPGRADE_PACKAGES_PROGRESS: FlagEnvVar;
+    UPGRADE_PACKAGES_PRERELEASE: FlagEnvVar;
 
     BUILD_MAX_CPU_COUNT: NumericEnvVar;
     MAX_NUNIT_AGENTS: NumericEnvVar;
