@@ -2,7 +2,8 @@
   const
     {
       ls,
-      FsEntities
+      FsEntities,
+      fileExistsSync
     } = require("yafs"),
     gulp = requireModule<Gulp>("gulp");
 
@@ -40,19 +41,31 @@
     if (!rawTargets || rawTargets.length === 0) {
       return await findSolutions();
     }
-    const regexTargets = parseMasks(rawTargets, false);
+    const exactMatches = rawTargets.filter(t => {
+      return fileExistsSync(t);
+    });
+    const inexactMatches = rawTargets.filter(
+      s => exactMatches.indexOf(s) === -1
+    );
+    const regexTargets = parseMasks(inexactMatches, false);
+    if (regexTargets.length === 0) {
+      return exactMatches;
+    }
     const interestingFiles = await findFiles([
       solutionRe,
       projectRe
     ]);
-    return interestingFiles.filter(filepath => {
-      for (const re of regexTargets) {
-        if (re.test(filepath)) {
-          return true;
+    return [
+      ...exactMatches,
+      ...interestingFiles.filter(filepath => {
+        for (const re of regexTargets) {
+          if (re.test(filepath)) {
+            return true;
+          }
         }
-      }
-      return false;
-    });
+        return false;
+      })
+    ];
   }
 
   async function findSolutions(): Promise<string[]> {
@@ -75,11 +88,40 @@
   ): RegExp[] {
     // package masks can be raw strings or strings representing regular expressions
     return masks.map(s => looksLikeRegex(s)
-      ? new RegExp(s)
+      ? makeCaseInsensitiveRegex(s)
       : looksLikeAGlob(s)
         ? createRegExpFromGlob(s)
         : makeRegex(s, strict)
     );
+  }
+
+  function makeCaseInsensitiveRegex(s: string): RegExp {
+    const
+      parts = s.split("/"),
+      hasEnoughParts = parts.length >= 3;
+    if (!hasEnoughParts) {
+      return new RegExp(s, "i");
+    }
+    const
+      startsWithSlash = parts[0] === "",
+      endsWithSlash = parts[parts.length - 1] === "",
+      finalSlashIsEscaped = hasEnoughParts && !parts[parts.length - 2].endsWith("\\"),
+      isEz = startsWithSlash && endsWithSlash && !finalSlashIsEscaped;
+    if (isEz) {
+      let re = s;
+      if (startsWithSlash) {
+        re = re.substring(1);
+      }
+      if (endsWithSlash) {
+        re = re.substring(0, re.length - 1);
+      }
+      return new RegExp(re, "i");
+    }
+
+    const
+      bitsInTheMiddle = parts.slice(1, parts.length - 2),
+      rejoined = bitsInTheMiddle.join("/");
+    return new RegExp(rejoined, "i");
   }
 
   function makeRegex(s: string, strict: boolean): RegExp {

@@ -97,6 +97,9 @@
   function findPackageReferencesOn(xml: XmlNode): XmlNode[] {
     const itemGroups = getByPath(xml, "Project.ItemGroup") as Dictionary<XmlNode[]>[];
     const result = [] as XmlNode[];
+    if (!itemGroups) {
+      return result;
+    }
     for (const dict of itemGroups) {
       const packageReferences = getByPath(dict, "PackageReference") as XmlNode[];
       if (packageReferences) {
