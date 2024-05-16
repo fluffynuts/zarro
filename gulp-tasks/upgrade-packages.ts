@@ -127,8 +127,8 @@
   function makeRegex(s: string, strict: boolean): RegExp {
     const escaped = s.replace(".", "\\.");
     return strict
-      ? new RegExp(`/^${escaped}$/i`)
-      : new RegExp(`/${escaped}/i`);
+      ? new RegExp(`^${escaped}$`, `i`)
+      : new RegExp(`${escaped}`, `i`);
   }
 
   function createRegExpFrom(s: string): RegExp {

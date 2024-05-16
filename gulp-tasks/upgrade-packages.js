@@ -85,8 +85,8 @@
     function makeRegex(s, strict) {
         const escaped = s.replace(".", "\\.");
         return strict
-            ? new RegExp(`/^${escaped}$/i`)
-            : new RegExp(`/${escaped}/i`);
+            ? new RegExp(`^${escaped}$`, `i`)
+            : new RegExp(`${escaped}`, `i`);
     }
     function createRegExpFrom(s) {
         if (s.endsWith('/')) {
