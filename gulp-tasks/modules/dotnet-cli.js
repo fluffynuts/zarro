@@ -1009,11 +1009,14 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
                 }
                 continue;
             }
-            const s = toUpgrade.length === 1 ? "" : "s", message = `searching for ${toUpgrade.length} package${s} to upgrade in ${project}`;
+            const s = toUpgrade.length === 1 ? "" : "s", message = `searching for ${toUpgrade.length} package${s} to upgrade in ${project}`, upgradeIds = toUpgrade.map(o => o.id);
             const upstream = await ctx.exec(message, async () => {
                 var _a;
-                return await searchForMultiplePackages(toUpgrade.map(o => o.id), opts.source, (_a = opts.preRelease) !== null && _a !== void 0 ? _a : false);
+                return await searchForMultiplePackages(upgradeIds, opts.source, (_a = opts.preRelease) !== null && _a !== void 0 ? _a : false);
             });
+            if (upstream.length === 0) {
+                log.warn(`No results found for packages at ${opts.source} (preRelease: ${!!opts.preRelease})\n- ${upgradeIds.join("\n- ")}`);
+            }
             for (const pkg of upstream) {
                 const projectMatch = toUpgrade.find(o => o.id.toLowerCase() === pkg.id.toLowerCase());
                 if (!projectMatch) {
