@@ -4,6 +4,7 @@
     "Pushes the latest versions of packages in the package build dir",
     async () => {
       const
+        { ctx } = require("exec-step"),
         debug = requireModule<DebugFactory>("debug")(__filename),
         path = require("path"),
         nugetPush = requireModule<NugetPush>("nuget-push"),
@@ -22,7 +23,7 @@
         sorted = packages.sort().reverse(),
         seen = new Set<string>();
       if (sorted.length === 0) {
-        throw new Error(`No .nupkg files found in ${path.resolve(folder)}`);
+        throw new Error(`No .nupkg files found in ${ path.resolve(folder) }`);
       }
       const toPush = [] as string[];
       for (const file of sorted) {
@@ -42,14 +43,18 @@
         const log = requireModule<Log>("log");
         log.info("DRY_RUN set, would have pushed packages:");
         for (const item of toPush) {
-          log.info(`  ${item}`);
+          log.info(`  ${ item }`);
         }
         return;
       }
 
       for (const file of toPush) {
-        await nugetPush(
-          path.join(folder, file)
+        await ctx.exec(
+          `⬆️ pushing ${ file }`,
+          async () =>
+            await nugetPush(
+              path.join(folder, file)
+            )
         );
       }
     }
