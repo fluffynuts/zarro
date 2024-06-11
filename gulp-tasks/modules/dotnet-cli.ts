@@ -1479,7 +1479,8 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         async () => await searchForMultiplePackages(
           upgradeIds,
           opts.source,
-          opts.preRelease ?? false
+          opts.preRelease ?? false,
+          opts.clearNugetHttpCache ?? false
         )
       ) as PackageInfo[];
       if (upstream.length === 0) {
@@ -1516,8 +1517,12 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
   async function searchForMultiplePackages(
     packageIds: string[],
     source: string | undefined | null,
-    preRelease: boolean
+    preRelease: boolean,
+    clearNugetHttpCache: boolean
   ): Promise<PackageInfo[]> {
+    if (clearNugetHttpCache) {
+      await clearCaches(DotNetCache.httpCache);
+    }
     // TODO: optimise
     const promises = packageIds.map(
       id => searchPackages({

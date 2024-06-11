@@ -523,6 +523,7 @@ declare global {
     "BUILD_TOOLS_INSTALL_FORCE_NUGET_EXE" |
     "UPGRADE_PACKAGES_PROGRESS" |
     "UPGRADE_PACKAGES_PRERELEASE" |
+    "UPGRADE_PACKAGES_BYPASS_CACHE" |
     string;
 
   type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
@@ -704,6 +705,7 @@ declare global {
     BUILD_TOOLS_INSTALL_FORCE_NUGET_EXE: FlagEnvVar;
     UPGRADE_PACKAGES_PROGRESS: FlagEnvVar;
     UPGRADE_PACKAGES_PRERELEASE: FlagEnvVar;
+    UPGRADE_PACKAGES_BYPASS_CACHE: FlagEnvVar;
 
     BUILD_MAX_CPU_COUNT: NumericEnvVar;
     MAX_NUNIT_AGENTS: NumericEnvVar;
@@ -1653,6 +1655,7 @@ declare global {
      * defaults to true
      */
     showProgress?: boolean;
+    clearNugetHttpCache?: boolean;
   }
 
   enum DotNetCache {

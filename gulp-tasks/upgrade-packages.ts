@@ -18,6 +18,7 @@
       showProgress = env.resolveFlag(env.UPGRADE_PACKAGES_PROGRESS),
       preRelease = env.resolveFlag(env.UPGRADE_PACKAGES_PRERELEASE),
       noRestore = env.resolveFlag(env.UPGRADE_PACKAGES_NO_RESTORE),
+      clearNugetHttpCache = env.resolveFlag(env.UPGRADE_PACKAGES_BYPASS_CACHE),
       targets = await resolveTargets(rawTargetMask);
 
     for (const target of targets) {
@@ -27,7 +28,8 @@
         packages: packageMask,
         pathToProjectOrSolution: target,
         preRelease: preRelease,
-        noRestore: noRestore
+        noRestore: noRestore,
+        clearNugetHttpCache: clearNugetHttpCache
       });
     }
 
