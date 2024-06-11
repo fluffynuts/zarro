@@ -2,7 +2,7 @@
 (function () {
     const { ls, FsEntities, fileExistsSync } = require("yafs"), gulp = requireModule("gulp");
     gulp.task("upgrade-packages", async () => {
-        const env = requireModule("env"), { upgradePackages } = requireModule("dotnet-cli"), rawPackageMask = env.resolveArray(env.UPGRADE_PACKAGES), packageMask = parseMasks(rawPackageMask, true), rawTargetMask = env.resolveArray(env.UPGRADE_PACKAGES_TARGET), nugetSource = env.resolve(env.NUGET_SOURCE), showProgress = env.resolveFlag(env.UPGRADE_PACKAGES_PROGRESS), preRelease = env.resolveFlag(env.UPGRADE_PACKAGES_PRERELEASE), noRestore = env.resolveFlag(env.UPGRADE_PACKAGES_NO_RESTORE), targets = await resolveTargets(rawTargetMask);
+        const env = requireModule("env"), { upgradePackages } = requireModule("dotnet-cli"), rawPackageMask = env.resolveArray(env.UPGRADE_PACKAGES), packageMask = parseMasks(rawPackageMask, true), rawTargetMask = env.resolveArray(env.UPGRADE_PACKAGES_TARGET), nugetSource = env.resolve(env.NUGET_SOURCE), showProgress = env.resolveFlag(env.UPGRADE_PACKAGES_PROGRESS), preRelease = env.resolveFlag(env.UPGRADE_PACKAGES_PRERELEASE), noRestore = env.resolveFlag(env.UPGRADE_PACKAGES_NO_RESTORE), clearNugetHttpCache = env.resolveFlag(env.UPGRADE_PACKAGES_BYPASS_CACHE), targets = await resolveTargets(rawTargetMask);
         for (const target of targets) {
             await upgradePackages({
                 source: nugetSource,
@@ -10,7 +10,8 @@
                 packages: packageMask,
                 pathToProjectOrSolution: target,
                 preRelease: preRelease,
-                noRestore: noRestore
+                noRestore: noRestore,
+                clearNugetHttpCache: clearNugetHttpCache
             });
         }
     });

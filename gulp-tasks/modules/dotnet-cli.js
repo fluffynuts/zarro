@@ -1011,8 +1011,8 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             }
             const s = toUpgrade.length === 1 ? "" : "s", message = `searching for ${toUpgrade.length} package${s} to upgrade in ${project}`, upgradeIds = toUpgrade.map(o => o.id);
             const upstream = await ctx.exec(message, async () => {
-                var _a;
-                return await searchForMultiplePackages(upgradeIds, opts.source, (_a = opts.preRelease) !== null && _a !== void 0 ? _a : false);
+                var _a, _b;
+                return await searchForMultiplePackages(upgradeIds, opts.source, (_a = opts.preRelease) !== null && _a !== void 0 ? _a : false, (_b = opts.clearNugetHttpCache) !== null && _b !== void 0 ? _b : false);
             });
             if (upstream.length === 0) {
                 log.warn(`No results found for packages at ${opts.source} (preRelease: ${!!opts.preRelease})\n- ${upgradeIds.join("\n- ")}`);
@@ -1040,7 +1040,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             }
         }
     }
-    async function searchForMultiplePackages(packageIds, source, preRelease) {
+    async function searchForMultiplePackages(packageIds, source, preRelease, clearNugetHttpCache) {
+        if (clearNugetHttpCache) {
+            await clearCaches(DotNetCache.httpCache);
+        }
         // TODO: optimise
         const promises = packageIds.map(id => searchPackages({
             search: id,

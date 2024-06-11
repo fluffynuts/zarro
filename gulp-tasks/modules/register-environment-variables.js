@@ -486,6 +486,11 @@
             default: "true"
         });
         env.register({
+            name: "UPGRADE_PACKAGES_BYPASS_CACHE",
+            help: "Flag: when set truthy, first clear the nuget http cache before searching for upgrades",
+            default: "false"
+        });
+        env.register({
             name: "PACK_INCLUDE_CSPROJ",
             help: "Mask to apply for inclusions to 'dotnet pack'",
             default: ""
