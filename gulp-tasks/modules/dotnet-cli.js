@@ -4,6 +4,7 @@
     const { types } = require("util");
     const { isRegExp } = types;
     const ZarroError = requireModule("zarro-error");
+    const sleep = requireModule("sleep");
     const path = require("path");
     const { fileExists, readTextFile, ls, FsEntities } = require("yafs");
     const { yellow } = requireModule("ansi-colors");
@@ -1082,7 +1083,22 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     })(DotNetCache || (DotNetCache = {}));
     async function clearCaches(cacheType) {
         const args = ["nuget", "locals", `${cacheType}`, "--clear"];
-        await runDotNetWith(args);
+        let lastError = null;
+        for (let i = 0; i < 10; i++) {
+            try {
+                await runDotNetWith(args);
+                return;
+            }
+            catch (e) {
+                lastError = e;
+                const allLogs = (lastError.stdout || []).concat(lastError.stderr || []);
+                const lockError = !!allLogs.find(s => s.includes("another process"));
+                if (lockError) {
+                    await sleep(500);
+                }
+            }
+        }
+        console.warn(`unable to clear caches:\n${lastError}`);
     }
     clearCaches.all = DotNetCache.all;
     clearCaches.httpCache = DotNetCache.httpCache;

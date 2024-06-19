@@ -5,6 +5,7 @@
   const { types } = require("util");
   const { isRegExp } = types;
   const ZarroError = requireModule<ZarroError>("zarro-error");
+  const sleep = requireModule<Sleep>("sleep");
   const path = require("path");
   const {
     fileExists,
@@ -1465,14 +1466,14 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       }
       if (toUpgrade.length === 0) {
         if (opts.showProgress) {
-          console.log(`  -> no matching packages to upgrade in '${project}'`);
+          console.log(`  -> no matching packages to upgrade in '${ project }'`);
         }
         continue;
       }
 
       const
         s = toUpgrade.length === 1 ? "" : "s",
-        message = `searching for ${ toUpgrade.length } package${s} to upgrade in ${ project }`,
+        message = `searching for ${ toUpgrade.length } package${ s } to upgrade in ${ project }`,
         upgradeIds = toUpgrade.map(o => o.id);
       const upstream = await ctx.exec(
         message,
@@ -1484,22 +1485,23 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         )
       ) as PackageInfo[];
       if (upstream.length === 0) {
-        log.warn(`No results found for packages at ${opts.source} (preRelease: ${!!opts.preRelease})\n- ${upgradeIds.join("\n- ")}`);
+        log.warn(`No results found for packages at ${ opts.source } (preRelease: ${ !!opts.preRelease })\n- ${ upgradeIds.join(
+          "\n- ") }`);
       }
       for (const pkg of upstream) {
         const projectMatch = toUpgrade.find(o => o.id.toLowerCase() === pkg.id.toLowerCase());
         if (!projectMatch) {
-          throw new Error(`no matching package reference for '${pkg.id}' in '${project}' (HOW?)`);
+          throw new Error(`no matching package reference for '${ pkg.id }' in '${ project }' (HOW?)`);
         }
         if (pkg.version.equals(projectMatch.version)) {
           if (opts.showProgress) {
-            console.log(`  ${pkg.id} already at latest version '${pkg.version}' in '${project}'`);
+            console.log(`  ${ pkg.id } already at latest version '${ pkg.version }' in '${ project }'`);
           }
           continue;
         }
         ctx.indent += 2;
         await ctx.exec(
-          `installing '${pkg.id}' at version '${pkg.version}' into '${project}'`,
+          `installing '${ pkg.id }' at version '${ pkg.version }' into '${ project }'`,
           async () =>
             await installPackage({
               projectFile: project,
@@ -1577,8 +1579,22 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
   async function clearCaches(
     cacheType: DotNetCache | string
   ): Promise<void> {
-    const args = [ "nuget", "locals", `${cacheType}`, "--clear" ];
-    await runDotNetWith(args);
+    const args = [ "nuget", "locals", `${ cacheType }`, "--clear" ];
+    let lastError = null;
+    for (let i = 0; i < 10; i++) {
+      try {
+        await runDotNetWith(args);
+        return;
+      } catch (e) {
+        lastError = e as SystemError;
+        const allLogs = (lastError.stdout || []).concat(lastError.stderr || []);
+        const lockError = !!allLogs.find(s => s.includes("another process"));
+        if (lockError) {
+          await sleep(500);
+        }
+      }
+    }
+    console.warn(`unable to clear caches:\n${lastError}`);
   }
 
   clearCaches.all = DotNetCache.all;

@@ -125,7 +125,7 @@
     "console-cls": "^1.2.2",
     "debug": "^4.3.4",
     "debugger-is-attached": "^1.2.0",
-    "expect-even-more-jest": "^1.15.0",
+    "expect-even-more-jest": "^1.19.0",
     "filesystem-sandbox": "^1.20.0",
     "ioredis": "^5.3.2",
     "jest": "^29.6.2",
