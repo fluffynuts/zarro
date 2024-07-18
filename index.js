@@ -329,7 +329,72 @@ async function transpileTasksUnder_(folder) {
   }
 }
 
+const timestampMatcher = /\[\d\d:\d\d:\d\d]/;
+
+function patchConsoleOutputToSuppressIntermediateTasks() {
+  patchConsoleFunction("log");
+  patchConsoleFunction("error");
+  // don't need to patch console.warn right now...
+  // patchConsoleFunction("warn");
+
+  const original = process.stdout.write.bind(process.stdout);
+  let last = "";
+  process.stdout.write = (...args) => {
+    const main = plainText(`${ args[0] }`);
+    if (main.match(timestampMatcher) && last.match(timestampMatcher)) {
+      // suppress duplicated timestamps
+      last = main;
+      return;
+    }
+    last = main;
+    original.apply(process.stdout, args);
+  };
+}
+
+// https://stackoverflow.com/a/29497680/1697008
+function plainText(str) {
+  return str.replace(
+    /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, ''
+  );
+}
+
+let eatNewLines = {};
+
+function patchConsoleFunction(fn) {
+  const original = console[fn].bind(console);
+  console[fn] = (...args) => {
+    const main = `${ args[0] }`;
+    if (shouldSuppressLog(main)) {
+      eatNewLines[fn] = true;
+      return;
+    }
+    if (!main.trim() && eatNewLines[fn]) {
+      return;
+    }
+    eatNewLines[fn] = false;
+    original.apply(console, args);
+  };
+}
+
+function shouldSuppressLog(str) {
+  return str.includes("::: [suppress] :::") ||
+    looksLikeAnonymousTaskMessage(str);
+}
+
+function looksLikeAnonymousTaskMessage(str) {
+  if (!str) {
+    return false;
+  }
+  const firstQuotePos = str.indexOf("'");
+  if (firstQuotePos === -1) {
+    return false;
+  }
+  const anonymousPos = str.indexOf("<anonymous>", firstQuotePos);
+  return anonymousPos > -1;
+}
+
 (async function () {
+  patchConsoleOutputToSuppressIntermediateTasks();
   try {
     const rawArgs = await gatherArgs([ path.join(path.dirname(__dirname), ".bin", "zarro"), __filename ]);
     const args = [];

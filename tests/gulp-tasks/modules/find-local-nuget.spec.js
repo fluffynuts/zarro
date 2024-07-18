@@ -30,9 +30,9 @@ const yafs_1 = require("yafs");
 const run_locked_1 = require("../../test-helpers/run-locked");
 describe(`find-local-nuget`, () => {
     const findLocalNuget = requireModule("find-local-nuget");
-    const { debuggerIsAttached } = require("debugger-is-attached"), os = require("os"), isWindows = os.platform() === "win32";
+    const os = require("os"), isWindows = os.platform() === "win32";
     beforeAll(() => {
-        // process.env.SUPPRESS_DOWNLOAD_PROGRESS = "1";
+        process.env.SUPPRESS_DOWNLOAD_PROGRESS = "1";
     });
     it(`should download nuget.exe to the build tools folder`, async () => {
         await (0, run_locked_1.withLockedNuget)(async () => {
@@ -78,6 +78,11 @@ describe(`find-local-nuget`, () => {
         });
     });
     afterAll(async () => {
-        await filesystem_sandbox_1.Sandbox.destroyAll();
+        try {
+            await filesystem_sandbox_1.Sandbox.destroyAll();
+        }
+        catch (e) {
+            // suppress
+        }
     });
 });

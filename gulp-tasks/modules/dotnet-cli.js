@@ -1,5 +1,6 @@
 "use strict";
 (function () {
+    const debug = requireModule("debug")(__filename);
     const system = requireModule("system");
     const { types } = require("util");
     const { isRegExp } = types;
@@ -793,7 +794,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             ? { search: options }
             : options;
         if (opts.skipCache) {
-            return await searchPackages(opts);
+            return await searchPackagesUncached(opts);
         }
         return await cache.through(JSON.stringify(opts), async () => await searchPackagesUncached(opts), 60 // cache for a minute
         );
@@ -830,6 +831,11 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             throw wrapSearchError(systemError);
         }
         const parsed = parsePackageSearchResult(stdout);
+        debug({
+            label: "searchPackagesUncached: response from package repository",
+            rawResult,
+            parsed
+        });
         const finalResult = [];
         for (const sourceResult of parsed.searchResult) {
             for (const pkg of sourceResult.packages) {

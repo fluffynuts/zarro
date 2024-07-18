@@ -39,7 +39,8 @@
       resolveFlag,
       resolveWithFallback,
       resolveMap,
-      resolveRequired
+      resolveRequired,
+      toBool
     } as Dictionary<any>;
 
   const positives = new Set([ "1", "yes", "true" ]);
@@ -374,7 +375,7 @@
     const
       key = "ZARRO_ALLOW_FILE_RESOLUTIONS",
       raw = process.env[key],
-      fileResolutionsAreEnabled = resolveAsBoolean(name, raw, true);
+      fileResolutionsAreEnabled = toBool(name, raw, true);
     if (!fileResolutionsAreEnabled) {
       return;
     }
@@ -516,10 +517,10 @@
       value = resolved === undefined || resolved === ""
         ? undefined
         : resolved.toLowerCase();
-    return resolveAsBoolean(name, value, fallback);
+    return toBool(name, value, fallback);
   }
 
-  function resolveAsBoolean(
+  function toBool(
     name: string,
     value?: string,
     fallback?: boolean
