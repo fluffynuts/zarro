@@ -1,6 +1,7 @@
 (function () {
   // TODO: perhaps one day, this should become an npm module of its own
   type PerConfigurationFunction = (configuration: string) => Promise<SystemResult | SystemError>;
+  const debug = requireModule<DebugFactory>("debug")(__filename);
   const system = requireModule<System>("system");
   const { types } = require("util");
   const { isRegExp } = types;
@@ -1179,7 +1180,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       : options;
 
     if (opts.skipCache) {
-      return await searchPackages(opts);
+      return await searchPackagesUncached(opts);
     }
 
     return await cache.through(
@@ -1229,6 +1230,13 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
 
     const
       parsed = parsePackageSearchResult(stdout);
+
+    debug({
+      label: "searchPackagesUncached: response from package repository",
+      rawResult,
+      parsed
+    });
+
 
     const finalResult = [] as PackageInfo[];
     for (const sourceResult of parsed.searchResult) {
