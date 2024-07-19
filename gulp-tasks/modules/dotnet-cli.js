@@ -252,10 +252,14 @@
         pushIfSet(args, opts.configFile, "--configfile");
         args.push(opts.url);
         const systemArgs = ["nuget", "add", "source"].concat(args);
-        await runDotNetWith(systemArgs, { suppressOutput: true });
-        if (opts.enabled === false) {
-            await disableNugetSource(opts.name);
+        let result = await runDotNetWith(systemArgs, { suppressOutput: true });
+        if (SystemError.isError(result)) {
+            return result;
         }
+        if (opts.enabled === false) {
+            result = await disableNugetSource(opts.name);
+        }
+        return result;
     }
     async function removeNugetSource(source) {
         if (!source) {
@@ -272,7 +276,7 @@
         if (!toEnable) {
             throw new ZarroError(`unable to find source matching: ${JSON.stringify(source)}`);
         }
-        await runDotNetWith(["dotnet", "nuget", "enable", "source", toEnable.name], {
+        return await runDotNetWith(["dotnet", "nuget", "enable", "source", toEnable.name], {
             suppressOutput: true
         });
     }
@@ -281,7 +285,7 @@
         if (!toDisable) {
             throw new ZarroError(`unable to find source matching: ${JSON.stringify(source)}`);
         }
-        await runDotNetWith(["dotnet", "nuget", "disable", "source", toDisable.name], {
+        return runDotNetWith(["dotnet", "nuget", "disable", "source", toDisable.name], {
             suppressOutput: true
         });
     }
@@ -418,7 +422,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
                 }
                 pushMsbuildProperties(args, copy);
                 pushAdditionalArgs(args, copy);
-                return await runDotNetWith(args, copy);
+                return runDotNetWith(args, copy);
             }
             catch (e) {
                 throw e;
@@ -885,7 +889,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         if (opts.suppressOutput === undefined) {
             opts.suppressOutput = true;
         }
-        await runDotNetWith(args, opts);
+        return await runDotNetWith(args, opts);
     }
     const defaultCreateOptions = {
         skipTemplateUpdateCheck: true
