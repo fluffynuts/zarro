@@ -28,7 +28,8 @@
         resolveFlag,
         resolveWithFallback,
         resolveMap,
-        resolveRequired
+        resolveRequired,
+        toBool
     };
     const positives = new Set(["1", "yes", "true"]);
     if (process.env.POSITIVE_FLAG) {
@@ -285,7 +286,7 @@
             // a file name or a path to something
             return undefined;
         }
-        const key = "ZARRO_ALLOW_FILE_RESOLUTIONS", raw = process.env[key], fileResolutionsAreEnabled = resolveAsBoolean(name, raw, true);
+        const key = "ZARRO_ALLOW_FILE_RESOLUTIONS", raw = process.env[key], fileResolutionsAreEnabled = toBool(name, raw, true);
         if (!fileResolutionsAreEnabled) {
             return;
         }
@@ -389,9 +390,9 @@
         const resolved = resolveInternal(name), value = resolved === undefined || resolved === ""
             ? undefined
             : resolved.toLowerCase();
-        return resolveAsBoolean(name, value, fallback);
+        return toBool(name, value, fallback);
     }
-    function resolveAsBoolean(name, value, fallback) {
+    function toBool(name, value, fallback) {
         if (value === undefined && fallback !== undefined) {
             return fallback;
         }

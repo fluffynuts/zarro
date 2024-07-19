@@ -28,61 +28,74 @@ const filesystem_sandbox_1 = require("filesystem-sandbox");
 const path = __importStar(require("path"));
 const yafs_1 = require("yafs");
 const run_locked_1 = require("../../test-helpers/run-locked");
-describe(`find-local-nuget`, () => {
-    const findLocalNuget = requireModule("find-local-nuget");
-    const os = require("os"), isWindows = os.platform() === "win32";
-    beforeAll(() => {
-        process.env.SUPPRESS_DOWNLOAD_PROGRESS = "1";
-    });
-    it(`should download nuget.exe to the build tools folder`, async () => {
-        await (0, run_locked_1.withLockedNuget)(async () => {
+const should_skip_slow_network_tests_1 = require("../../test-helpers/should-skip-slow-network-tests");
+if ((0, should_skip_slow_network_tests_1.shouldSkipSlowNetworkTests)()) {
+    describe(`find-local-nuget`, () => {
+        it(`skipping tests`, async () => {
             // Arrange
-            spyOn(console, "log");
-            spyOn(console, "error");
-            const sandbox = await filesystem_sandbox_1.Sandbox.create();
-            process.env.BUILD_TOOLS_FOLDER = sandbox.path;
             // Act
-            const result = await findLocalNuget();
+            expect(true).toBeTrue();
             // Assert
-            const expectedExecutable = isWindows
-                ? "nuget.exe"
-                : "nuget";
-            expect(result.toLowerCase())
-                .toEqual(path.join(sandbox.path, expectedExecutable).toLowerCase());
-            const contents = await (0, yafs_1.ls)(sandbox.path, {
-                entities: yafs_1.FsEntities.files,
-                recurse: false,
-                fullPaths: false
-            });
-            expect(contents)
-                .toContain("nuget.exe");
         });
     });
-    it(`should be able to install nuget package in dir via resolved nuget path`, async () => {
-        await (0, run_locked_1.withLockedNuget)(async () => {
-            const system = requireModule("system");
-            // Arrange
-            spyOn(console, "log");
-            spyOn(console, "error");
-            const sandbox = await filesystem_sandbox_1.Sandbox.create(), toolsFolder = await sandbox.mkdir("build-tools");
-            process.env.BUILD_TOOLS_FOLDER = toolsFolder;
-            // Act
-            const nuget = await findLocalNuget();
-            await sandbox.run(async () => {
-                await system(nuget, ["install", "PeanutButter.TempDb.Runner"]);
+}
+else {
+    describe(`find-local-nuget`, () => {
+        const findLocalNuget = requireModule("find-local-nuget");
+        const os = require("os"), isWindows = os.platform() === "win32";
+        beforeAll(() => {
+            process.env.SUPPRESS_DOWNLOAD_PROGRESS = "1";
+        });
+        it(`should download nuget.exe to the build tools folder`, async () => {
+            await (0, run_locked_1.withLockedNuget)(async () => {
+                // Arrange
+                spyOn(console, "log");
+                spyOn(console, "error");
+                const sandbox = await filesystem_sandbox_1.Sandbox.create();
+                process.env.BUILD_TOOLS_FOLDER = sandbox.path;
+                // Act
+                const result = await findLocalNuget();
+                // Assert
+                const expectedExecutable = isWindows
+                    ? "nuget.exe"
+                    : "nuget";
+                expect(result.toLowerCase())
+                    .toEqual(path.join(sandbox.path, expectedExecutable).toLowerCase());
+                const contents = await (0, yafs_1.ls)(sandbox.path, {
+                    entities: yafs_1.FsEntities.files,
+                    recurse: false,
+                    fullPaths: false
+                });
+                expect(contents)
+                    .toContain("nuget.exe");
             });
-            // Assert
-            const dirs = await (0, yafs_1.ls)(sandbox.path, { entities: yafs_1.FsEntities.folders });
-            expect(dirs.find(o => o.indexOf("PeanutButter.TempDb.Runner") > -1))
-                .not.toBeUndefined();
+        });
+        it(`should be able to install nuget package in dir via resolved nuget path`, async () => {
+            await (0, run_locked_1.withLockedNuget)(async () => {
+                const system = requireModule("system");
+                // Arrange
+                spyOn(console, "log");
+                spyOn(console, "error");
+                const sandbox = await filesystem_sandbox_1.Sandbox.create(), toolsFolder = await sandbox.mkdir("build-tools");
+                process.env.BUILD_TOOLS_FOLDER = toolsFolder;
+                // Act
+                const nuget = await findLocalNuget();
+                await sandbox.run(async () => {
+                    await system(nuget, ["install", "PeanutButter.TempDb.Runner"]);
+                });
+                // Assert
+                const dirs = await (0, yafs_1.ls)(sandbox.path, { entities: yafs_1.FsEntities.folders });
+                expect(dirs.find(o => o.indexOf("PeanutButter.TempDb.Runner") > -1))
+                    .not.toBeUndefined();
+            });
+        });
+        afterAll(async () => {
+            try {
+                await filesystem_sandbox_1.Sandbox.destroyAll();
+            }
+            catch (e) {
+                // suppress
+            }
         });
     });
-    afterAll(async () => {
-        try {
-            await filesystem_sandbox_1.Sandbox.destroyAll();
-        }
-        catch (e) {
-            // suppress
-        }
-    });
-});
+}

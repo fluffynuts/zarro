@@ -11,7 +11,16 @@ import { shouldSkipSlowNetworkTests } from "../../test-helpers/should-skip-slow-
 
 const SystemError = requireModule<SystemError>("system-error");
 
-if (!shouldSkipSlowNetworkTests()) {
+if (shouldSkipSlowNetworkTests()) {
+  describe(`test-dotnet-logic`, () => {
+    it(`skipping tests`, async () => {
+      // Arrange
+      // Act
+      expect(true).toBeTrue();
+      // Assert
+    });
+  });
+} else {
   describe(`test-dotnet-logic`, () => {
     describe(`testOneDotNetCoreProject`, () => {
       beforeEach(() => {

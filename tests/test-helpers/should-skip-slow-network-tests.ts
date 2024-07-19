@@ -1,7 +1,12 @@
 const { toBool} = require("../../gulp-tasks/modules/env");
 
 export function shouldSkipSlowNetworkTests() {
+  if (!process.env.SKIP_SLOW_NETWORK_TESTS) {
+    return false;
+  }
   return toBool(
-    process.env.SKIP_SLOW_NETWORK_TESTS || ""
+    "SKIP_SLOW_NETWORK_TESTS",
+    process.env.SKIP_SLOW_NETWORK_TESTS,
+    "0"
   );
 }

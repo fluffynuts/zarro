@@ -15,7 +15,16 @@ const {
   runWithRealSystem
 } = require("./common");
 
-if (!shouldSkipSlowNetworkTests()) {
+if (shouldSkipSlowNetworkTests()) {
+  describe(`dotnet-cli`, () => {
+    it(`skipping tests`, async () => {
+      // Arrange
+      // Act
+      expect(true).toBeTrue();
+      // Assert
+    });
+  });
+} else {
   describe("dotnet-cli", () => {
     const sut = requireModule<DotNetCli>("dotnet-cli");
     let allowLogs = false;

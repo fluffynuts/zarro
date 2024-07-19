@@ -5,7 +5,16 @@ import { FsEntities, ls } from "yafs";
 import { withLockedNuget } from "../../test-helpers/run-locked";
 import { shouldSkipSlowNetworkTests } from "../../test-helpers/should-skip-slow-network-tests";
 
-if (!shouldSkipSlowNetworkTests()) {
+if (shouldSkipSlowNetworkTests()) {
+  describe(`find-local-nuget`, () => {
+    it(`skipping tests`, async () => {
+      // Arrange
+      // Act
+      expect(true).toBeTrue();
+      // Assert
+    });
+  });
+} else {
   describe(`find-local-nuget`, () => {
     const findLocalNuget = requireModule<FindLocalNuget>("find-local-nuget");
 
