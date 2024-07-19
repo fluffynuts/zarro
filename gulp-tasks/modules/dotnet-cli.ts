@@ -345,7 +345,7 @@
 
   async function addNugetSource(
     opts: NugetAddSourceOptions
-  ): Promise<void> {
+  ): Promise<SystemResult | SystemError> {
     validateConfig(
       opts,
       o => !!o ? undefined : "no options provided",
@@ -361,13 +361,17 @@
     pushIfSet(args, opts.configFile, "--configfile");
     args.push(opts.url);
     const systemArgs = [ "nuget", "add", "source" ].concat(args);
-    await runDotNetWith(
+    let result = await runDotNetWith(
       systemArgs,
       { suppressOutput: true }
     );
-    if (opts.enabled === false) {
-      await disableNugetSource(opts.name);
+    if (SystemError.isError(result)) {
+      return result;
     }
+    if (opts.enabled === false) {
+      result = await disableNugetSource(opts.name);
+    }
+    return result;
   }
 
   async function removeNugetSource(
@@ -385,12 +389,12 @@
 
   async function enableNugetSource(
     source: string | NugetSource
-  ): Promise<void> {
+  ): Promise<SystemResult | SystemError> {
     const toEnable = await tryFindConfiguredNugetSource(source);
     if (!toEnable) {
       throw new ZarroError(`unable to find source matching: ${ JSON.stringify(source) }`);
     }
-    await runDotNetWith(
+    return await runDotNetWith(
       [ "dotnet", "nuget", "enable", "source", toEnable.name ], {
         suppressOutput: true
       }
@@ -399,12 +403,12 @@
 
   async function disableNugetSource(
     source: string | NugetSource
-  ): Promise<void> {
+  ): Promise<SystemResult | SystemError> {
     const toDisable = await tryFindConfiguredNugetSource(source);
     if (!toDisable) {
       throw new ZarroError(`unable to find source matching: ${ JSON.stringify(source) }`);
     }
-    await runDotNetWith(
+    return runDotNetWith(
       [ "dotnet", "nuget", "disable", "source", toDisable.name ], {
         suppressOutput: true
       }
@@ -596,7 +600,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
           }
           pushMsbuildProperties(args, copy)
           pushAdditionalArgs(args, copy);
-          return await runDotNetWith(args, copy);
+          return runDotNetWith(args, copy);
         } catch (e) {
           throw e;
         } finally {
@@ -1274,7 +1278,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
 
   async function installPackage(
     opts: DotNetInstallNugetPackageOption
-  ): Promise<void> {
+  ): Promise<SystemResult | SystemError> {
     if (!opts) {
       throw new ZarroError(`no options passed to 'installPackage' - target project and package name not specified`);
     }
@@ -1294,7 +1298,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     if (opts.suppressOutput === undefined) {
       opts.suppressOutput = true;
     }
-    await runDotNetWith(args, opts);
+    return await runDotNetWith(args, opts);
   }
 
   const defaultCreateOptions = {
