@@ -40,7 +40,7 @@
           const matches = pkg.match(/(?<version>\d+\.\d+\.\d+(?<tag>[a-zA-Z0-9-]+)?)/)
           version = matches?.groups["version"];
         }
-        const source = env.resolve(env.NUGET_SOURCE);
+        const source = env.resolve(env.NUGET_PUSH_SOURCE, env.NUGET_SOURCE) || "nuget.org";
         if (env.resolveFlag(env.DRY_RUN)) {
           log.info(`DRY_RUN: would have pushed '${ pkg }' to '${ source }'`);
         } else {
