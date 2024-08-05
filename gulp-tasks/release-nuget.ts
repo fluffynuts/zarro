@@ -11,6 +11,7 @@
 
   gulp.task(taskName, [ "clear-packages-folder", "pack" ], async () => {
       const
+        { ctx } = require("exec-step"),
         log = requireModule<Log>("log"),
         Git = require("simple-git"),
         git = new Git("."),
@@ -44,11 +45,15 @@
         if (env.resolveFlag(env.DRY_RUN)) {
           log.info(`DRY_RUN: would have pushed '${ pkg }' to '${ source }'`);
         } else {
-          await nugetPush({
-            source,
-            target: pkg,
-            apiKey: await resolveNugetApiKey(source)
-          });
+          await ctx.exec(
+            `Pushing ${ pkg } to ${ source }`,
+            async () =>
+              await nugetPush({
+                source,
+                target: pkg,
+                apiKey: await resolveNugetApiKey(source)
+              })
+          );
         }
       }
 
