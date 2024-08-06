@@ -546,6 +546,11 @@
             default: "1"
         });
         env.register({
+            name: "RELEASE_TAG_AND_PUSH",
+            help: "Flag: commit, tag and push after a release",
+            default: "true"
+        });
+        env.register({
             name: "PACK_BASE_PATH",
             help: "Base path to pack nuget packages from"
         });

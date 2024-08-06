@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const gitFactory = require("simple-git"), spawn = requireModule("spawn"), gulp = requireModule("gulp"), gutil = requireModule("gulp-util"), ZarroError = requireModule("zarro-error"), { ask } = requireModule("ask"), readGitInfo = requireModule("read-git-info"), env = requireModule("env"), readPackageVersion = requireModule("read-package-version"), { runTask } = requireModule("run-task"), { withEnvironment } = requireModule("temporary-environment"), alterPackageJsonVersion = requireModule("alter-package-json-version");
+    const gitFactory = require("simple-git"), spawn = requireModule("spawn"), gulp = requireModule("gulp"), gutil = requireModule("gulp-util"), log = requireModule("log"), ZarroError = requireModule("zarro-error"), { ask } = requireModule("ask"), readGitInfo = requireModule("read-git-info"), env = requireModule("env"), readPackageVersion = requireModule("read-package-version"), { runTask } = requireModule("run-task"), { withEnvironment } = requireModule("temporary-environment"), alterPackageJsonVersion = requireModule("alter-package-json-version");
     async function rollBackPackageJson() {
         await alterPackageJsonVersion({ loadUnsetFromEnvironment: true, incrementBy: -1 });
     }
@@ -61,6 +61,9 @@
         catch (e) {
             await rollBackPackageJson();
             throw e;
+        }
+        if (!env.resolveFlag(env.RELEASE_TAG_AND_PUSH)) {
+            log.info(`Skipping commit/tag/push: version increment will not be retained in version control`);
         }
         if (dryRun) {
             gutil.log(gutil.colors.yellow(`would commit all updated files`));

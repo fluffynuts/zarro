@@ -34,6 +34,9 @@
                 }));
             }
         }
+        if (!env.resolveFlag(env.RELEASE_TAG_AND_PUSH)) {
+            log.info(`Skipping commit/tag/push: version increment will not be retained in version control`);
+        }
         if (!version) {
             log.warn(`Unable to determine version to tag at - set '${env.GIT_TAG}' to manually override.`);
             return;
