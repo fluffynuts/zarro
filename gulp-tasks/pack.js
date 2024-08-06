@@ -19,7 +19,9 @@
         "PACK_VERSION"
     ], ["pack"]);
     gulp.task("pack", "Creates nupkgs from all nuspec files in this repo", ["prepack"], () => {
-        const target = env.resolve("PACK_TARGET_FOLDER"), isDotnetCore = env.resolveFlag("DOTNET_CORE"), incrementVersion = env.resolveFlag("PACK_INCREMENT_VERSION"), packerFn = isDotnetCore ? packWithDotnetCore : packWithNuget;
+        const target = env.resolve("PACK_TARGET_FOLDER"), isDotnetCore = env.resolveFlag("DOTNET_CORE"), isBeta = env.resolveFlag("BETA"), incrementVersion = isBeta
+            ? env.resolveFlag(env.PACK_INCREMENT_BETA_VERSION)
+            : env.resolveFlag(env.PACK_INCREMENT_VERSION), packerFn = isDotnetCore ? packWithDotnetCore : packWithNuget;
         debug({
             isDotnetCore,
             incrementVersion
