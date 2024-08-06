@@ -4,6 +4,7 @@
     spawn = requireModule<Spawn>("spawn"),
     gulp = requireModule<GulpWithHelp>("gulp"),
     gutil = requireModule<GulpUtil>("gulp-util"),
+    log = requireModule<Log>("log"),
     ZarroError = requireModule<ZarroError>("zarro-error"),
     { ask } = requireModule<Ask>("ask"),
     readGitInfo = requireModule<ReadGitInfo>("read-git-info"),
@@ -85,6 +86,10 @@
     } catch (e) {
       await rollBackPackageJson();
       throw e;
+    }
+
+    if (!env.resolveFlag(env.RELEASE_TAG_AND_PUSH)) {
+      log.info(`Skipping commit/tag/push: version increment will not be retained in version control`);
     }
 
     if (dryRun) {
