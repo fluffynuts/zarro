@@ -649,6 +649,12 @@
     });
 
     env.register({
+      name: "PACK_INCREMENT_BETA_VERSION",
+      help: "Flag: should the package version be incremented for a BETA package before packing?",
+      default: "true"
+    });
+
+    env.register({
       name: "PACK_SYNC_PROJECT_VERSION",
       help: "Flag: should the project version be synchronised with the package version when packing?",
       default: "false"
