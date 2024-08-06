@@ -59,6 +59,7 @@
 
       if (!env.resolveFlag(env.RELEASE_TAG_AND_PUSH)) {
         log.info(`Skipping commit/tag/push: version increment will not be retained in version control`);
+        return;
       }
 
       if (!version) {
