@@ -28,7 +28,7 @@
     quiet = !!quiet;
     const
       git = gitFactory(where),
-      more = where ? ` (${ where })` : "";
+      more = (where && where !== ".") ? ` (${ where })` : "";
     if (dryRun) {
       gutil.log(gutil.colors.green(`dry run: whould push local commits now${ more }...`));
       return Promise.resolve();
