@@ -1152,7 +1152,8 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     "total downloads": number;
     owner: string;
     id: string;
-    latestVersion: string;
+    latestVersion?: Version;
+    version?: Version;
   }
 
   function parsePackageSearchResult(
@@ -1168,6 +1169,16 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     }
     if (parsed.problems && parsed.problems.length) {
       throw new ZarroError(`unable to perform package search (check your access token):\n${ parsed.problems.join("\n") }`);
+    }
+    for (const result of parsed.searchResult || []) {
+      for (const pkg of result.packages || []) {
+        if (typeof pkg.version as any === "string") {
+          pkg.version = new Version(pkg.version as unknown as string);
+        }
+        if (typeof pkg.latestVersion as any === "string") {
+          pkg.latestVersion = new Version(pkg.latestVersion as unknown as string)
+        }
+      }
     }
     return parsed;
   }
@@ -1245,9 +1256,13 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     const finalResult = [] as PackageInfo[];
     for (const sourceResult of parsed.searchResult) {
       for (const pkg of sourceResult.packages) {
+        const version = pkg.latestVersion ?? pkg.version;
+        if (!version) {
+          continue;
+        }
         finalResult.push({
           id: pkg.id,
-          version: new Version(pkg.latestVersion),
+          version: version,
           source: sourceResult.sourceName
         });
       }

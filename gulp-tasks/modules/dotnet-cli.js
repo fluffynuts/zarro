@@ -788,6 +788,16 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         if (parsed.problems && parsed.problems.length) {
             throw new ZarroError(`unable to perform package search (check your access token):\n${parsed.problems.join("\n")}`);
         }
+        for (const result of parsed.searchResult || []) {
+            for (const pkg of result.packages || []) {
+                if (typeof pkg.version === "string") {
+                    pkg.version = new Version(pkg.version);
+                }
+                if (typeof pkg.latestVersion === "string") {
+                    pkg.latestVersion = new Version(pkg.latestVersion);
+                }
+            }
+        }
         return parsed;
     }
     async function searchPackages(options) {
@@ -804,6 +814,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         );
     }
     async function searchPackagesUncached(opts) {
+        var _a;
         const args = ["package", "search"];
         pushIfSet(args, opts.source, "--source");
         pushFlag(args, opts.exactMatch, "--exact-match");
@@ -843,9 +854,13 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         const finalResult = [];
         for (const sourceResult of parsed.searchResult) {
             for (const pkg of sourceResult.packages) {
+                const version = (_a = pkg.latestVersion) !== null && _a !== void 0 ? _a : pkg.version;
+                if (!version) {
+                    continue;
+                }
                 finalResult.push({
                     id: pkg.id,
-                    version: new Version(pkg.latestVersion),
+                    version: version,
                     source: sourceResult.sourceName
                 });
             }
