@@ -1539,7 +1539,7 @@ declare global {
     symbolApiKey?: string;
     disableBuffering?: boolean;
     noSymbols?: boolean;
-    skipDuplicate?: boolean;
+    skipDuplicates?: boolean;
     noServiceEndpoint?: boolean;
     forceEnglishOutput?: boolean;
     source?: string;
