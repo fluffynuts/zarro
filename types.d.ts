@@ -546,6 +546,10 @@ declare global {
     open(url: string): Promise<void>;
   }
 
+  interface ParseFlag {
+    parseFlag: (value: string, fallback?: boolean) => boolean;
+  }
+
   type ResolveNugetApiKey = (forSource?: string) => Promise<Optional<string>>;
 
   interface Env
