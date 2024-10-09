@@ -19,15 +19,15 @@
 
     async function pushWithDotnet(
         opts: DotNetNugetPushOptions
-    ) {
-        await dotnetCli.nugetPush(opts);
+    ): Promise<SystemResult | SystemError> {
+        return await dotnetCli.nugetPush(opts);
     }
 
     async function nugetPush(
         packageFile: string,
         sourceName?: string,
         options?: NugetPushOpts
-    ): Promise<void> {
+    ): Promise<SystemResult | SystemError | undefined> {
         const nugetPushSource = sourceName ||
             env.resolve(env.NUGET_PUSH_SOURCE, env.NUGET_SOURCE) ||
             "nuget.org";

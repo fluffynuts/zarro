@@ -987,7 +987,7 @@ declare global {
 
   type GitTagFromCsProj = (options?: GitTagOptions) => Stream;
   type GitFetch = (all: boolean) => Promise<void>;
-  type NugetPush = (packageFile: string, sourceName?: string, options?: NugetPushOpts) => Promise<void>;
+  type NugetPush = (packageFile: string, sourceName?: string, options?: NugetPushOpts) => Promise<SystemError | SystemResult | undefined>;
 
   interface ParseNugetVersion {
     parseNugetVersion(versionStringOrFileName: string): Version;

@@ -7,7 +7,7 @@
         return !!executable.match(/^dotnet(:?\.exe)?$/i);
     }
     async function pushWithDotnet(opts) {
-        await dotnetCli.nugetPush(opts);
+        return await dotnetCli.nugetPush(opts);
     }
     async function nugetPush(packageFile, sourceName, options) {
         const nugetPushSource = sourceName ||

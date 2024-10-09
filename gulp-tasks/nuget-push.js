@@ -1,7 +1,9 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const exec_step_1 = require("exec-step");
 (function () {
     gulp.task("nuget-push", "Pushes the latest versions of packages in the package build dir", async () => {
-        const { ctx } = require("exec-step"), debug = requireModule("debug")(__filename), path = require("path"), nugetPush = requireModule("nuget-push"), { ls, FsEntities } = require("yafs"), env = requireModule("env"), folder = env.resolve(env.PACK_TARGET_FOLDER), versionRe = /^(?<id>[A-Za-z\.]+)\.(?<version>\d\.\d\.\d)(-(?<tag>.*))?\.nupkg$/, packages = await ls(folder, {
+        const SystemError = requireModule("system-error"), { ctx } = require("exec-step"), debug = requireModule("debug")(__filename), path = require("path"), nugetPush = requireModule("nuget-push"), { ls, FsEntities } = require("yafs"), env = requireModule("env"), folder = env.resolve(env.PACK_TARGET_FOLDER), versionRe = /^(?<id>[A-Za-z\.]+)\.(?<version>\d\.\d\.\d)(-(?<tag>.*))?\.nupkg$/, packages = await ls(folder, {
             recurse: false,
             entities: FsEntities.files,
             match: versionRe
@@ -28,7 +30,20 @@
             return;
         }
         for (const file of toPush) {
-            await ctx.exec(`⬆️ pushing ${file}`, async () => await nugetPush(path.join(folder, file)));
+            await ctx.exec(`⬆️ pushing ${file}`, async () => {
+                const result = await nugetPush(path.join(folder, file));
+                if (SystemError.isError(result)) {
+                    throw result;
+                }
+                if (SystemError.isResult(result)) {
+                    const res = result;
+                    const io = res.stderr.concat(res.stdout);
+                    const isConflict = io.find(s => s.includes("409"));
+                    if (isConflict) {
+                        throw new exec_step_1.ExecStepOverrideMessage(`${path.basename(file)} NOT pushed: this version already exists at the registry.`, new Error('dummy'), false);
+                    }
+                }
+            });
         }
     });
 })();
