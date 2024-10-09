@@ -10,15 +10,14 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Setup .NET for integration testing
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: |
-          7.0.306
-    - uses: actions/setup-node@v2-beta
+        dotnet-version: 8.x
+    - uses: actions/setup-node@v4
       with:
         # intentionally use 16 to ensure the fetch polyfill is being brought in
         node-version: '16'
