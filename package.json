@@ -1,6 +1,6 @@
 {
   "name": "zarro",
-  "version": "1.183.6",
+  "version": "1.183.7",
   "description": "Some glue to make gulp easier, perhaps even zero- or close-to-zero-conf",
   "bin": {
     "zarro": "index.js"
@@ -61,7 +61,7 @@
     "decompress": "^4.2.1",
     "del": "^5.1.0",
     "event-stream": "^4.0.1",
-    "exec-step": "^0.16.0",
+    "exec-step": "^0.17.0",
     "fancy-log": "^1.3.3",
     "gulp": "^5.0.0",
     "gulp-debug": "^4.0.0",
