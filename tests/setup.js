@@ -1,4 +1,5 @@
 global.requireModule = require("../gulp-tasks/modules/require-module");
+jest.retryTimes(3, { logErrorsBeforeRetry: true });
 const log = requireModule("log");
 log.disableOutput();
 process.env.RUNNING_IN_TEST = "TRUE";
