@@ -67,7 +67,7 @@
             return acc || cur;
         }, null);
         if (resolved) {
-            log.info(`using restore tool: ${resolved}`);
+            debug(`using restore tool: ${resolved}`);
             return (lastResolution = quoteIfRequired(shimNuget(resolved)));
         }
         if (!errorOnMissing) {
