@@ -37,13 +37,28 @@ const exec_step_1 = require("exec-step");
                 }
                 if (system.isResult(result)) {
                     const res = result;
-                    const io = res.stderr.concat(res.stdout);
-                    const isConflict = io.find(s => s.includes("409"));
-                    if (isConflict) {
+                    if (looksLikeNugetConflict(res)) {
                         throw new exec_step_1.ExecStepOverrideMessage(`${path.basename(file)} NOT pushed: this version already exists at the registry.`, new Error('dummy'), false);
                     }
                 }
             });
         }
     });
+    const conflictMarkers = [
+        "409",
+        "already been pushed",
+        "conflict http"
+    ];
+    function looksLikeNugetConflict(result) {
+        const io = result.stderr
+            .concat(result.stdout)
+            .map(line => line.toLowerCase());
+        for (const line of io) {
+            const current = conflictMarkers.reduce((acc, cur) => acc || line.includes(cur), false);
+            if (current) {
+                return true;
+            }
+        }
+        return false;
+    }
 })();

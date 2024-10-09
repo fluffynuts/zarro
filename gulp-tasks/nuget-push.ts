@@ -1,6 +1,6 @@
 import { ExecStepOverrideMessage } from "exec-step";
 
-(function () {
+(function() {
   gulp.task(
     "nuget-push",
     "Pushes the latest versions of packages in the package build dir",
@@ -63,11 +63,9 @@ import { ExecStepOverrideMessage } from "exec-step";
             }
             if (system.isResult(result)) {
               const res = result as SystemResult;
-              const io = res.stderr.concat(res.stdout);
-              const isConflict = io.find(s => s.includes("409"));
-              if (isConflict) {
+              if (looksLikeNugetConflict(res)) {
                 throw new ExecStepOverrideMessage(
-                  `${path.basename(file)} NOT pushed: this version already exists at the registry.`,
+                  `${ path.basename(file) } NOT pushed: this version already exists at the registry.`,
                   new Error('dummy'),
                   false
                 );
@@ -78,4 +76,26 @@ import { ExecStepOverrideMessage } from "exec-step";
       }
     }
   );
+
+  const conflictMarkers = [
+    "409",
+    "already been pushed",
+    "conflict http"
+  ];
+
+  function looksLikeNugetConflict(result: SystemResult): boolean {
+    const io = result.stderr
+      .concat(result.stdout)
+      .map(line => line.toLowerCase());
+    for (const line of io) {
+      const current = conflictMarkers.reduce(
+        (acc: boolean, cur: string) => acc || line.includes(cur),
+        false
+      );
+      if (current) {
+        return true;
+      }
+    }
+    return false;
+  }
 })();
