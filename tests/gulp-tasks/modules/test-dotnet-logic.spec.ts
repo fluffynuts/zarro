@@ -31,7 +31,6 @@ if (shouldSkipSlowNetworkTests()) {
         ) => realSystem(exe, args, options));
         const hax = fakeSystem as any;
         hax.isError = (arg: any) => arg instanceof SystemError;
-        hax.isSystemError = hax.isError;
       });
       const { testOneDotNetCoreProject } = requireModule<TestDotNetLogic>("test-dotnet-logic");
 
@@ -107,8 +106,6 @@ if (shouldSkipSlowNetworkTests()) {
         ) => realSystem(exe, args, options));
         const hax = fakeSystem as any;
         hax.isError = (arg: any) => arg instanceof SystemError;
-        hax.isSystemError = hax.isError;
-
       });
 
       it(`should report the correct totals`, async () => {

@@ -365,7 +365,7 @@
       systemArgs,
       { suppressOutput: true }
     );
-    if (SystemError.isError(result)) {
+    if (system.isError(result)) {
       return result;
     }
     if (opts.enabled === false) {
@@ -1242,7 +1242,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     try {
       rawResult = await runDotNetWith(args, opts);
     } catch (e: any) {
-      if (SystemError.isError(e)) {
+      if (system.isError(e)) {
         throw wrapSearchError(e as SystemError);
       }
       throw e;

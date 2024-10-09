@@ -253,7 +253,7 @@
         args.push(opts.url);
         const systemArgs = ["nuget", "add", "source"].concat(args);
         let result = await runDotNetWith(systemArgs, { suppressOutput: true });
-        if (SystemError.isError(result)) {
+        if (system.isError(result)) {
             return result;
         }
         if (opts.enabled === false) {
@@ -845,7 +845,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
             rawResult = await runDotNetWith(args, opts);
         }
         catch (e) {
-            if (SystemError.isError(e)) {
+            if (system.isError(e)) {
                 throw wrapSearchError(e);
             }
             throw e;

@@ -60,12 +60,6 @@
         isError() {
             return true;
         }
-        static isSystemError(o) {
-            return o instanceof SystemError;
-        }
-        static isError(o) {
-            return o instanceof SystemError;
-        }
     }
     module.exports = SystemError;
 })();

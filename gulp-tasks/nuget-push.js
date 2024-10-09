@@ -32,10 +32,10 @@ const exec_step_1 = require("exec-step");
         for (const file of toPush) {
             await ctx.exec(`⬆️ pushing ${file}`, async () => {
                 const result = await nugetPush(path.join(folder, file));
-                if (SystemError.isError(result)) {
+                if (system.isError(result)) {
                     throw result;
                 }
-                if (SystemError.isResult(result)) {
+                if (system.isResult(result)) {
                     const res = result;
                     const io = res.stderr.concat(res.stdout);
                     const isConflict = io.find(s => s.includes("409"));

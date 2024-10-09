@@ -159,7 +159,7 @@ ${tempFileContents}
                 return [info.exe, (info.args || []).map(q).join(" ")].join(" ");
             }
             function generateError(message, exitCode) {
-                if (SystemError.isError(result)) {
+                if (system.isError(result)) {
                     const errorDetails = gatherErrorDetails(result);
                     if (errorDetails) {
                         message = `${message}\n${errorDetails}`;
@@ -226,7 +226,7 @@ ${tempFileContents}
             }
         }
     }
-    system.isError = SystemError.isError;
-    system.isResult = SystemResult.isResult;
+    system.isError = (o) => o instanceof SystemError;
+    system.isResult = (o) => o instanceof SystemResult;
     module.exports = system;
 })();

@@ -1217,10 +1217,6 @@ declare global {
     exitCode?: number;
     stderr: string[];
     stdout: string[];
-
-    isResult(): this is SystemResult;
-
-    isError(): this is SystemError;
   }
 
   interface SystemResultBuilder {
@@ -1255,10 +1251,6 @@ declare global {
     exitCode: number;
     stderr: string[];
     stdout: string[];
-
-    isError(o: any): o is SystemError;
-
-    isResult(o: any): o is SystemError;
   }
 
   type SystemFunction = (program: string, args?: string[], options?: SystemOptions)
@@ -1267,7 +1259,6 @@ declare global {
   interface System
     extends SystemFunction {
     isError(o: any): o is SystemError;
-
     isResult(o: any): o is SystemResult;
   }
 

@@ -233,7 +233,7 @@ ${ tempFileContents }
         message: string,
         exitCode?: number
       ) {
-        if (SystemError.isError(result)) {
+        if (system.isError(result)) {
           const errorDetails = gatherErrorDetails(result);
           if (errorDetails) {
             message = `${ message }\n${ errorDetails }`;
@@ -318,8 +318,8 @@ ${ tempFileContents }
     }
   }
 
-  system.isError = SystemError.isError;
-  system.isResult = SystemResult.isResult;
+  system.isError = (o: any): o is SystemError => o instanceof SystemError;
+  system.isResult = (o: any): o is SystemResult => o instanceof SystemResult;
 
   module.exports = system;
 })();

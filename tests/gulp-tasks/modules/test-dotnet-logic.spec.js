@@ -50,7 +50,6 @@ else {
                 fakeSystem.mockImplementation((exe, args, options) => realSystem(exe, args, options));
                 const hax = fakeSystem;
                 hax.isError = (arg) => arg instanceof SystemError;
-                hax.isSystemError = hax.isError;
             });
             const { testOneDotNetCoreProject } = requireModule("test-dotnet-logic");
             it(`should test the project`, async () => {
@@ -103,7 +102,6 @@ else {
                 fakeSystem.mockImplementation((exe, args, options) => realSystem(exe, args, options));
                 const hax = fakeSystem;
                 hax.isError = (arg) => arg instanceof SystemError;
-                hax.isSystemError = hax.isError;
             });
             it(`should report the correct totals`, async () => {
                 await (0, run_locked_1.withLockedNuget)(async () => {
