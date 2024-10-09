@@ -507,6 +507,15 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         if (!opts.apiKey) {
             throw new ZarroError("apiKey was not specified");
         }
+        const o = opts;
+        // the dotnet cli mentions --skip-duplicate, which makes
+        // sense for a single package, however, as an outer caller
+        // potentially acting on multiple packages will use the
+        // pluralized version, and since I've just spent 1/2 an hour
+        // figuring this out... let's add some boilerplating.
+        if (o.skipDuplicate !== undefined && o.skipDuplicates === undefined) {
+            o.skipDuplicates = o.skipDuplicate;
+        }
         const args = [
             "nuget",
             "push",
@@ -525,7 +534,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         pushIfSet(args, opts.timeout, "--timeout");
         pushFlag(args, opts.disableBuffering, "--disable-buffering");
         pushFlag(args, opts.noSymbols, "--no-symbols");
-        pushFlag(args, opts.skipDuplicate, "--skip-duplicate");
+        pushFlag(args, opts.skipDuplicates, "--skip-duplicate");
         pushFlag(args, opts.noServiceEndpoint, "--no-service-endpoint");
         pushFlag(args, opts.forceEnglishOutput, "--force-english-output");
         pushAdditionalArgs(args, opts);

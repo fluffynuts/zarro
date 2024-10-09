@@ -105,12 +105,12 @@ describe(`dotnet-cli:nugetPush`, () => {
     });
     it(`should skip duplicates on request`, async () => {
         // Arrange
-        const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), skipDuplicate = true;
+        const target = faker_1.faker.word.sample(), apiKey = faker_1.faker.string.alphanumeric(10), skipDuplicates = true;
         // Act
         await nugetPush({
             target,
             apiKey,
-            skipDuplicate
+            skipDuplicates
         });
         // Assert
         expect(system)
