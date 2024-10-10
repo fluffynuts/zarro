@@ -3,6 +3,7 @@ import os from "os";
 import { Sandbox } from "filesystem-sandbox";
 import { faker } from "@faker-js/faker";
 import { readTextFile } from "yafs";
+import { ChildProcess } from "child_process";
 
 describe(`system`, () => {
   const sut = requireModule<System>("system");
@@ -454,15 +455,15 @@ describe(`system`, () => {
       // Arrange
       // Act
       const before = Date.now();
+      let child: ChildProcess | undefined;
       const promise = sut(
         `node -e "(async function() { await new Promise(resolve => setTimeout(resolve, 5000)); })()"`,
         [],
         {
           timeout: 100,
-          onChildSpawned: (_, opts) => {
-            if (opts.kill) {
-              opts.kill();
-            }
+          onChildSpawned: (c, opts) => {
+            opts.kill();
+            child = c;
           }
         }
       );
@@ -472,6 +473,10 @@ describe(`system`, () => {
       const duration = after - before;
       expect(duration)
         .toBeLessThan(5000);
+      expect(child)
+        .toBeDefined();
+      expect(child?.killed)
+        .toBeTrue();
     });
   });
 

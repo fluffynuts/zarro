@@ -380,12 +380,12 @@ describe(`system`, () => {
             // Arrange
             // Act
             const before = Date.now();
+            let child;
             const promise = sut(`node -e "(async function() { await new Promise(resolve => setTimeout(resolve, 5000)); })()"`, [], {
                 timeout: 100,
-                onChildSpawned: (_, opts) => {
-                    if (opts.kill) {
-                        opts.kill();
-                    }
+                onChildSpawned: (c, opts) => {
+                    opts.kill();
+                    child = c;
                 }
             });
             await promise;
@@ -394,6 +394,10 @@ describe(`system`, () => {
             const duration = after - before;
             expect(duration)
                 .toBeLessThan(5000);
+            expect(child)
+                .toBeDefined();
+            expect(child === null || child === void 0 ? void 0 : child.killed)
+                .toBeTrue();
         });
     });
     describe(`discovery`, () => {

@@ -413,46 +413,6 @@ else {
                     });
                 });
             });
-            describe.skip(`clear extraneous sources`, () => {
-                beforeEach(() => {
-                    enableSystemCallThrough();
-                });
-                const { removeNugetSource } = sut;
-                // if you're trying to clean up some massive source noise, modify the array
-                // below and run the test
-                const keep = new Set([
-                    "nuget.org",
-                    "github-codeo",
-                    "github-fluffynuts",
-                    "codeo",
-                    "Microsoft Visual Studio Offline Packages"
-                ]);
-                it(`should keep only the keepers`, async () => {
-                    // Arrange
-                    bypassNugetSourceRestore = true;
-                    const sources = await listNugetSources();
-                    // Act
-                    const kept = [], chucked = [];
-                    for (const source of sources) {
-                        if (keep.has(source.name)) {
-                            kept.push(source.name);
-                        }
-                        else {
-                            chucked.push(source.name);
-                        }
-                    }
-                    for (const source of chucked) {
-                        await removeNugetSource(source);
-                    }
-                    console.warn(`
-kept:
-  ${kept.join("\n  ")}
-chucked:
-  ${chucked.join("\n  ")}
-  `.trim());
-                    // Assert
-                });
-            });
         });
         describe(`specific integrations`, () => {
             describe(`incrementTempDbPortHintIfFound`, () => {
@@ -495,91 +455,31 @@ chucked:
             usedSourceNames.clear();
             mockSystem();
             disableSystemCallThrough();
-            await storeAllKnownNugetSources();
         });
-        afterAll(async () => {
-            await restoreAllKnownNugetSources();
+        afterEach(async () => {
+            await removeTestNugetSources();
         });
         const usedSourceNames = new Set();
+        const testSourcePrefix = "test-source-";
         function randomSourceName() {
             let result;
             do {
-                result = `${faker_1.faker.word.sample()}-${faker_1.faker.word.sample()}`;
+                result = `${testSourcePrefix}${faker_1.faker.word.sample()}-${faker_1.faker.word.sample()}`;
             } while (usedSourceNames.has(result));
             usedSourceNames.add(result);
             return result;
         }
         const knownSources = [];
         const { listNugetSources } = sut;
-        async function storeAllKnownNugetSources() {
-            bypassNugetSourceRestore = false;
+        async function removeTestNugetSources() {
             await runWithRealSystem(async () => {
-                const sources = await listNugetSources();
-                knownSources.push(...sources);
-            });
-        }
-        let bypassNugetSourceRestore = false;
-        async function restoreAllKnownNugetSources() {
-            if (bypassNugetSourceRestore) {
-                return;
-            }
-            await runWithRealSystem(async () => {
-                const toRestore = knownSources.splice(0, knownSources.length), currentSources = await listNugetSources(), toRemove = [], toDisable = [], toAdd = [], toEnable = [];
-                for (const source of toRestore) {
-                    const match = currentSources.find(o => o.name === source.name && o.url === source.url);
-                    if (match) {
-                        if (match.enabled === source.enabled) {
-                            continue;
-                        }
-                        if (source.enabled) {
-                            toEnable.push(source);
-                        }
-                        else {
-                            toDisable.push(source);
-                        }
-                    }
-                    else {
-                        toAdd.push(source);
-                    }
-                }
+                const currentSources = await sut.listNugetSources();
                 for (const source of currentSources) {
-                    const match = toRestore.find(o => o.name === source.name && o.url === source.url);
-                    if (match) {
-                        if (match.enabled === source.enabled) {
-                            continue;
-                        }
-                        if (source.enabled) {
-                            toDisable.push(source);
-                        }
-                        else {
-                            toEnable.push(source);
-                        }
-                    }
-                    else {
-                        toRemove.push(source);
+                    if (source.name.indexOf(testSourcePrefix) === 0) {
+                        await sut.removeNugetSource(source);
                     }
                 }
-                await addNugetSources(toAdd);
-                await removeNugetSources(toRemove);
-                await enableNugetSources(toEnable);
-                await disableNugetSources(toDisable);
             });
-        }
-        async function addNugetSources(toAdd) {
-            const { addNugetSource } = sut;
-            await runOnSources(toAdd, addNugetSource);
-        }
-        async function removeNugetSources(toRemove) {
-            const { removeNugetSource } = sut;
-            await runOnSources(toRemove, removeNugetSource);
-        }
-        async function enableNugetSources(toEnable) {
-            const { enableNugetSource } = sut;
-            await runOnSources(toEnable, enableNugetSource);
-        }
-        async function disableNugetSources(toDisable) {
-            const { disableNugetSource } = sut;
-            await runOnSources(toDisable, disableNugetSource);
         }
         async function runOnSources(sources, fn) {
             for (const source of sources) {
