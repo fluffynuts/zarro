@@ -375,6 +375,27 @@ describe(`system`, () => {
                 .toBeTrue();
         });
     });
+    describe(`child process access`, () => {
+        it(`should be able to kill the child`, async () => {
+            // Arrange
+            // Act
+            const before = Date.now();
+            const promise = sut(`node -e "(async function() { await new Promise(resolve => setTimeout(resolve, 5000)); })()"`, [], {
+                timeout: 100,
+                onChildSpawned: (_, opts) => {
+                    if (opts.kill) {
+                        opts.kill();
+                    }
+                }
+            });
+            await promise;
+            const after = Date.now();
+            // Assert
+            const duration = after - before;
+            expect(duration)
+                .toBeLessThan(5000);
+        });
+    });
     describe(`discovery`, () => {
         // just double-checking that the system command doesn't, somehow, drop io
         it.skip(`should record all output from the external process`, async () => {

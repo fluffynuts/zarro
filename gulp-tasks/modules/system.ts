@@ -1,6 +1,6 @@
 import { ChildProcess, SpawnOptionsWithStdioTuple, StdioNull } from "child_process";
 
-(function () {
+(function() {
   const
     os = require("os"),
     debug = requireModule<DebugFactory>("debug")(__filename),
@@ -142,6 +142,20 @@ ${ tempFileContents }
         programArgs as ReadonlyArray<string>,
         spawnOptions as SpawnOptionsWithStdioTuple<StdioNull, StdioNull, StdioNull>
       );
+      if (!!options) {
+        const optsWithKill = options as SystemOptionsWithKill;
+        optsWithKill.kill = (signal?: NodeJS.Signals | number) => {
+          destroyPipesOn(child);
+          child.kill(signal);
+        };
+        if (optsWithKill?.onChildSpawned) {
+          try {
+            optsWithKill.onChildSpawned(child, optsWithKill);
+          } catch (e) {
+            // suppress
+          }
+        }
+      }
       const stdoutFn = typeof opts.stdout === "function" ? opts.stdout : noop;
       const stderrFn = typeof opts.stderr === "function" ? opts.stderr : noop;
       const

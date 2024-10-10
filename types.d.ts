@@ -5,7 +5,7 @@ import { StatsBase } from "fs";
 import { Stream, Transform } from "stream";
 import ansiColors, { StyleFunction } from "ansi-colors";
 import { RimrafOptions } from "./gulp-tasks/modules/rimraf";
-import { ExecFileOptionsWithBufferEncoding } from "child_process";
+import { ChildProcess, ExecFileOptionsWithBufferEncoding } from "child_process";
 import * as vinyl from "vinyl";
 import { BufferFile } from "vinyl";
 // noinspection ES6PreferShortImport
@@ -1095,6 +1095,7 @@ declare global {
      * io writer or the result from after spawn completes
      */
     suppressOutput?: boolean;
+
   }
 
   interface SystemOptions {
@@ -1134,6 +1135,17 @@ declare global {
      * / error as the first argument, with the exe set to either cmd or sh
      */
     keepTempFiles?: boolean;
+
+    // gain direct access to the child process as
+    // soon as it spawns
+    onChildSpawned?: (child: ChildProcess, originalOptions: SystemOptionsWithKill) => void;
+
+  }
+
+  interface SystemOptionsWithKill extends SystemOptions {
+    // this function will be filled in for you once the
+    // child process has started
+    kill: (signal?: NodeJS.Signals | number) => void;
   }
 
   /**

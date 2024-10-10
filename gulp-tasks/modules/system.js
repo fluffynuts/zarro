@@ -91,6 +91,19 @@ ${tempFileContents}
         const result = new SystemResult(`${exe}`, programArgs, undefined, [], []);
         return new Promise((resolve, reject) => {
             const child = child_process.spawn(exe, programArgs, spawnOptions);
+            const optsWithKill = options;
+            optsWithKill.kill = (signal) => {
+                destroyPipesOn(child);
+                child.kill(signal);
+            };
+            if (optsWithKill === null || optsWithKill === void 0 ? void 0 : optsWithKill.onChildSpawned) {
+                try {
+                    optsWithKill.onChildSpawned(child, optsWithKill);
+                }
+                catch (e) {
+                    // suppress
+                }
+            }
             const stdoutFn = typeof opts.stdout === "function" ? opts.stdout : noop;
             const stderrFn = typeof opts.stderr === "function" ? opts.stderr : noop;
             const stdoutLineBuffer = new LineBuffer(s => {
