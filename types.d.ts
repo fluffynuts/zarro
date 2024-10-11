@@ -2201,5 +2201,16 @@ declare global {
     forget(key: string): void;
     clear(): void;
   }
+
+  export interface TimestampOptions {
+    delimiter?: string;
+    includeSeconds?: boolean;
+    includeMilliseconds?: boolean;
+    fullYear?: boolean;
+    forDate?: Date;
+  }
+  interface Timestamp {
+    timestamp: (opts?: TimestampOptions) => string;
+  }
 }
 
