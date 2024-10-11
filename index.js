@@ -192,7 +192,7 @@ async function transpileTypeScriptFiles(
     return;
   }
 
-  importTypeScript();
+  importTypeScript(toTranspile);
 
   try {
     const
