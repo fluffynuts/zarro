@@ -21,6 +21,12 @@
     const Version = requireModule("version");
     const SystemError = requireModule("system-error");
     const cache = requireModule("cache");
+    const cacheTTLEnvVar = "NUGET_HTTP_CACHE_TTL";
+    env.register({
+        name: cacheTTLEnvVar,
+        default: "300",
+        help: "The amount of time, in seconds, to cache nuget query results for (whilst the app is running)"
+    });
     const emojiLabels = {
         testing: `🧪 Testing`,
         packing: `📦 Packing`,
@@ -819,8 +825,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         if (opts.skipCache) {
             return await searchPackagesUncached(opts);
         }
-        return await cache.through(JSON.stringify(opts), async () => await searchPackagesUncached(opts), 60 // cache for a minute
-        );
+        return await cache.through(JSON.stringify(opts), async () => await searchPackagesUncached(opts), env.resolveNumber(cacheTTLEnvVar));
     }
     async function searchPackagesUncached(opts) {
         var _a;
