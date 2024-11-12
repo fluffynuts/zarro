@@ -36,7 +36,7 @@
          * @param ttlSeconds
          */
         write(key, value, ttlSeconds) {
-            this._store[key] = new CacheItem(value, Date.now() + ttlSeconds);
+            this._store[key] = new CacheItem(value, Date.now() + ttlSeconds * 1000);
         }
         /**
          * Runs the generator if there is no cache item with
