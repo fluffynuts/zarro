@@ -1,4 +1,4 @@
-(function () {
+(function() {
   interface ICache {
     read<T>(key: string, fallback?: T): Optional<T>;
 
@@ -66,7 +66,10 @@
      * @param ttlSeconds
      */
     public write<T>(key: string, value: T, ttlSeconds: number): void {
-      this._store[key] = new CacheItem(value, Date.now() + ttlSeconds);
+      this._store[key] = new CacheItem(
+        value,
+        Date.now() + ttlSeconds * 1000
+      );
     }
 
     /**
