@@ -326,6 +326,8 @@ function looksLikeAnonymousTaskMessage(str) {
   return anonymousPos > -1;
 }
 
+const generatedFileMatcher = /\.generated\.js$/;
+
 async function removeOrphanedGeneratedFilesUnder(dir) {
   const allFiles = await ls(dir, {
       recurse: true,
@@ -335,8 +337,8 @@ async function removeOrphanedGeneratedFilesUnder(dir) {
   const lookup = new Set(allFiles);
   for (let i = 0; i < allFiles.length; i++) {
     const current = allFiles[i];
-    if (current.match(/\.generated\.js$/)) {
-      const seek = current.replace(".generated", "");
+    if (current.match(generatedFileMatcher)) {
+      const seek = current.replace(generatedFileMatcher, ".ts");
       if (!lookup.has(seek)) {
         await rm(current);
       }
