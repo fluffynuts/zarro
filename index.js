@@ -12,7 +12,8 @@ const
     readTextFile,
     fileExists,
     readTextFileLines,
-    writeTextFile
+    writeTextFile,
+    rm
   } = require("yafs"),
   log = require("./gulp-tasks/modules/log"),
   path = require("path"),
@@ -261,74 +262,6 @@ function importTypeScript() {
 }
 
 
-async function transpileTasksUnder_(folder) {
-  const toTranspile = [];
-  const fullPath = path.isAbsolute(folder)
-    ? folder
-    : path.join(process.cwd(), folder);
-  const contents = await ls(fullPath, {
-    recurse: false,
-    entities: FsEntities.files,
-    match: /\.ts$/,
-    fullPaths: true
-  });
-  for (const item of contents) {
-    toTranspile.push(item);
-  }
-
-  if (toTranspile.length === 0) {
-    debug(`no typescript modules found; skipping transpile phase.`);
-    return;
-  }
-
-  importTypeScript();
-
-  try {
-    const
-      { ExecStepContext } = require("exec-step"),
-      ctx = new ExecStepContext(),
-      { transpileModule, ModuleKind } = require("typescript");
-    for (const src of toTranspile) {
-      const test = src.replace(/\.ts$/, ".js");
-      if (await fileExists(test)) {
-        // assume this is a compilation handled elsewhere
-        continue;
-      }
-      const output = src.replace(/\.ts$/, ".generated.js");
-      if (await fileExists(output)) {
-        const srcStat = await stat(src);
-        const outStat = await stat(output);
-
-        const srcLastModified = srcStat.mtime.getTime();
-        const outLastModified = outStat.mtime.getTime();
-
-
-        if (srcLastModified <= outLastModified) {
-          debug(`${ output } modified after ${ src }; skipping transpile`);
-          continue;
-        }
-        debug(`will transpile: ${ src }`);
-      }
-      await ctx.exec(
-        `transpiling ${ src }`,
-        async () => {
-          const contents = await readTextFile(src);
-          const transpiled = transpileModule(contents, {
-            compilerOptions: {
-              esModuleInterop: true,
-              module: ModuleKind.CommonJS,
-              target: "es2017"
-            }
-          }).outputText;
-          await writeTextFile(output, transpiled);
-        }
-      );
-    }
-  } catch (e) {
-    log.error(`one or more typescript modules could not be transpiled:\n${ e }`);
-  }
-}
-
 const timestampMatcher = /\[\d\d:\d\d:\d\d]/;
 
 function patchConsoleOutputToSuppressIntermediateTasks() {
@@ -393,6 +326,43 @@ function looksLikeAnonymousTaskMessage(str) {
   return anonymousPos > -1;
 }
 
+async function removeOrphanedGeneratedFilesUnder(dir) {
+  const allFiles = await ls(dir, {
+      recurse: true,
+      entities: FsEntities.files,
+      fullPaths: true
+    });
+  const lookup = new Set(allFiles);
+  for (let i = 0; i < allFiles.length; i++) {
+    const current = allFiles[i];
+    if (current.match(/\.generated\.js$/)) {
+      const seek = current.replace(".generated", "");
+      if (!lookup.has(seek)) {
+        await rm(current);
+      }
+    }
+  }
+}
+
+async function removeOrphanedGeneratedFiles() {
+  await Promise.all([
+    removeOrphanedGeneratedFilesUnder("local-tasks"),
+    removeOrphanedGeneratedFilesUnder("override-tasks")
+  ]);
+  const externalTaskFolders = await ls(
+      "external-tasks", {
+        entities: FsEntities.folders,
+        recurse: false,
+        fullPaths: true
+      }
+    ),
+    promises = externalTaskFolders.map(
+      f => removeOrphanedGeneratedFilesUnder(f)
+    );
+  await Promise.all(promises);
+
+}
+
 (async function () {
   patchConsoleOutputToSuppressIntermediateTasks();
   try {
@@ -418,7 +388,8 @@ function looksLikeAnonymousTaskMessage(str) {
     ]);
     await Promise.all([
       transpileLocalTaskModules(),
-      transpileLocalTasks()
+      transpileLocalTasks(),
+      removeOrphanedGeneratedFiles()
     ]);
     const handler = await findHandlerFor(args);
     if (!handler) {
