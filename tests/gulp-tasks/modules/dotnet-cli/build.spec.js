@@ -255,7 +255,7 @@ describe(`dotnet-cli:build`, () => {
                     });
                     // Assert
                     expect(system)
-                        .toHaveBeenCalledOnceWith("dotnet", ["build", target, `--tl:${t}`], anything);
+                        .toHaveBeenCalledOnceWith("dotnet", ["build", target, `--tl:${tl}`], anything);
                 });
             });
         });
