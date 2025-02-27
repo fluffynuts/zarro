@@ -331,7 +331,7 @@ describe(`dotnet-cli:build`, () => {
         // Assert
         expect(system)
           .toHaveBeenCalledOnceWith(
-            "dotnet", [ "build", target, "--tl", "auto" ],
+            "dotnet", [ "build", target, "--tl:auto" ],
             anything
           );
       });
@@ -349,7 +349,7 @@ describe(`dotnet-cli:build`, () => {
           // Assert
           expect(system)
             .toHaveBeenCalledOnceWith(
-              "dotnet", [ "build", target, "--tl", tl ],
+              "dotnet", [ "build", target, `--tl:${tl}` ],
               anything
             );
         });

@@ -931,7 +931,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       sanitized = (raw === "auto" || raw === "off" || raw === "on")
         ? raw
         : "auto"
-    args.push("--tl", sanitized);
+    args.push(`--tl:${sanitized}`);
   }
 
   function pushOperatingSystem(args: string[], opts: DotNetTestOptions) {

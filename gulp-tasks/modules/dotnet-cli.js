@@ -676,7 +676,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         const raw = `${opts.terminalLogger}`.toLowerCase(), sanitized = (raw === "auto" || raw === "off" || raw === "on")
             ? raw
             : "auto";
-        args.push("--tl", sanitized);
+        args.push(`--tl:${sanitized}`);
     }
     function pushOperatingSystem(args, opts) {
         pushIfSet(args, opts.os, "--os");

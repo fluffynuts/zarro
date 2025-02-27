@@ -240,7 +240,7 @@ describe(`dotnet-cli:build`, () => {
                 });
                 // Assert
                 expect(system)
-                    .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--tl", "auto"], anything);
+                    .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--tl:auto"], anything);
             });
         });
         ["auto", "off", "on"].forEach(tl => {
@@ -255,7 +255,7 @@ describe(`dotnet-cli:build`, () => {
                     });
                     // Assert
                     expect(system)
-                        .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--tl", tl], anything);
+                        .toHaveBeenCalledOnceWith("dotnet", ["build", target, `--tl:${t}`], anything);
                 });
             });
         });
