@@ -62,10 +62,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
             configuration: configuration,
             additionalArguments: msbuildArgs,
             framework: env.resolve(env.BUILD_FRAMEWORK),
-            runtime: env.resolve(env.BUILD_RUNTIME)
+            runtime: env.resolve(env.BUILD_RUNTIME),
+            terminalLogger: sanitizeTerminalLogger(env.resolve(env.BUILD_MSBUILD_TERMINAL_LOGGER))
         };
         return promisifyStream(solutions
             .pipe(build(options)));
+    }
+    function sanitizeTerminalLogger(value) {
+        value = `${value}`.toLowerCase();
+        if (value === "auto" || value === "off" || value === "on") {
+            return value;
+        }
+        return "off";
     }
     function buildForNETFramework(solutions) {
         log.info(chalk.yellowBright("Building with MsBuild"));

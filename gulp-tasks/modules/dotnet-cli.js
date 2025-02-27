@@ -661,12 +661,22 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     }
     function pushCommonBuildArgs(args, opts, configuration) {
         pushVerbosity(args, opts);
+        pushTerminalLogger(args, opts);
         pushConfiguration(args, configuration);
         pushFramework(args, opts);
         pushRuntime(args, opts);
         pushArch(args, opts);
         pushOperatingSystem(args, opts);
         pushOutput(args, opts);
+    }
+    function pushTerminalLogger(args, opts) {
+        if (!opts.terminalLogger) {
+            return;
+        }
+        const raw = `${opts.terminalLogger}`.toLowerCase(), sanitized = (raw === "auto" || raw === "off" || raw === "on")
+            ? raw
+            : "auto";
+        args.push("--tl", sanitized);
     }
     function pushOperatingSystem(args, opts) {
         pushIfSet(args, opts.os, "--os");

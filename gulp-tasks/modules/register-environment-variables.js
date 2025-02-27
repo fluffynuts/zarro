@@ -38,10 +38,20 @@
         });
         env.register({
             name: "BUILD_MSBUILD_NODE_REUSE",
-            default: "false",
+            default: "true",
             help: [
                 "Whether or not to allow modern msbuild to reuse msbuild.exe nodes",
-                "WARNING: enabling node reuse may cause esoteric build errors on shared environments"
+                "WARNING: enabling node reuse may cause esoteric build errors on shared environments",
+                "         it is recommended to disable this feature if you get strange build errors"
+            ].join("\n")
+        });
+        env.register({
+            name: "DOTNET_TERMINAL_LOGGER",
+            default: "off",
+            help: [
+                "Specifies the value to send for --tl (terminal logger)",
+                "- dotnet's default is 'auto' which should do the right thing",
+                "- zarro will, by default, explicitly set this to 'off'"
             ].join("\n")
         });
         env.register({

@@ -100,7 +100,8 @@ import { Stream, Transform } from "stream";
       configuration: configuration,
       additionalArguments: msbuildArgs,
       framework: env.resolve(env.BUILD_FRAMEWORK),
-      runtime: env.resolve(env.BUILD_RUNTIME)
+      runtime: env.resolve(env.BUILD_RUNTIME),
+      terminalLogger: sanitizeTerminalLogger(env.resolve(env.BUILD_MSBUILD_TERMINAL_LOGGER))
     } satisfies DotNetBuildOptions;
     return promisifyStream(
       solutions
@@ -108,6 +109,14 @@ import { Stream, Transform } from "stream";
           build(options)
         )
     );
+  }
+
+  function sanitizeTerminalLogger(value: string): TerminalLogger {
+    value = `${value}`.toLowerCase();
+    if (value === "auto" || value === "off" || value === "on") {
+      return value;
+    }
+    return "off";
   }
 
   function buildForNETFramework(solutions: Transform) {

@@ -1,4 +1,4 @@
-(function () {
+(function() {
   // TODO: perhaps one day, this should become an npm module of its own
   type PerConfigurationFunction = (configuration: string) => Promise<SystemResult | SystemError>;
   const debug = requireModule<DebugFactory>("debug")(__filename);
@@ -913,12 +913,25 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     configuration: string
   ) {
     pushVerbosity(args, opts);
+    pushTerminalLogger(args, opts);
     pushConfiguration(args, configuration);
     pushFramework(args, opts);
     pushRuntime(args, opts);
     pushArch(args, opts);
     pushOperatingSystem(args, opts);
     pushOutput(args, opts);
+  }
+
+  function pushTerminalLogger(args: string[], opts: DotNetCommonBuildOptions) {
+    if (!opts.terminalLogger) {
+      return;
+    }
+    const
+      raw = `${ opts.terminalLogger }`.toLowerCase(),
+      sanitized = (raw === "auto" || raw === "off" || raw === "on")
+        ? raw
+        : "auto"
+    args.push("--tl", sanitized);
   }
 
   function pushOperatingSystem(args: string[], opts: DotNetTestOptions) {
@@ -1637,7 +1650,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         }
       }
     }
-    console.warn(`unable to clear caches:\n${lastError}`);
+    console.warn(`unable to clear caches:\n${ lastError }`);
   }
 
   clearCaches.all = DotNetCache.all;

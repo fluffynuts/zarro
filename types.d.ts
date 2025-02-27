@@ -473,6 +473,7 @@ declare global {
     "DEV_SMTP_PORT" |
     "DEV_SMTP_INTERFACE_PORT" |
     "DOTNET_PARALLEL_STAGGER_MS" |
+    "DOTNET_TERMINAL_LOGGER" |
     string;
 
   type FlagEnvVar =
@@ -663,6 +664,7 @@ declare global {
     PACKAGE_REGISTRY: StringEnvVar;
     UPGRADE_PACKAGES: StringEnvVar;
     UPGRADE_PACKAGES_TARGET: StringEnvVar;
+    DOTNET_TERMINAL_LOGGER: StringEnvVar;
 
     ENABLE_NUGET_PARALLEL_PROCESSING: FlagEnvVar;
     BUILD_SHOW_INFO: FlagEnvVar;
@@ -1471,6 +1473,7 @@ declare global {
 
   type GulpDotNetCover = (opts?: GulpDotNetCoverOptions) => Transform;
 
+  type TerminalLogger = "auto" | "off" | "on";
   interface DotNetCommonBuildOptions
     extends DotNetMsBuildOptions {
     target: string;
@@ -1481,6 +1484,7 @@ declare global {
     arch?: string;
     os?: string;
     disableBuildServers?: boolean;
+    terminalLogger?: TerminalLogger;
   }
 
   interface DotNetPublishContainerOptions {

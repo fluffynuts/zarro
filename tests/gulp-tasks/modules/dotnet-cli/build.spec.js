@@ -215,4 +215,49 @@ describe(`dotnet-cli:build`, () => {
         expect(system)
             .toHaveBeenCalledOnceWith("dotnet", ["build", target, "foo", "bar", "quux"], anything);
     });
+    describe(`terminal logger`, () => {
+        describe(`when not set`, () => {
+            it(`should be omitted`, async () => {
+                // Arrange
+                const target = faker_1.faker.word.sample();
+                // Act
+                await build({
+                    target
+                });
+                // Assert
+                expect(system)
+                    .toHaveBeenCalledOnceWith("dotnet", ["build", target], anything);
+            });
+        });
+        describe(`when set to invalid value`, () => {
+            it(`should be overwritten as 'auto'`, async () => {
+                // Arrange
+                const target = faker_1.faker.word.sample();
+                // Act
+                await build({
+                    target,
+                    terminalLogger: "foo-to-the-bar"
+                });
+                // Assert
+                expect(system)
+                    .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--tl", "auto"], anything);
+            });
+        });
+        ["auto", "off", "on"].forEach(tl => {
+            describe(`when set to '${tl}'`, () => {
+                it(`should be included in commandline`, async () => {
+                    // Arrange
+                    const target = faker_1.faker.word.sample();
+                    // Act
+                    await build({
+                        target,
+                        terminalLogger: tl
+                    });
+                    // Assert
+                    expect(system)
+                        .toHaveBeenCalledOnceWith("dotnet", ["build", target, "--tl", tl], anything);
+                });
+            });
+        });
+    });
 });

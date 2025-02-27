@@ -1,6 +1,7 @@
 import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
 import { Sandbox } from "filesystem-sandbox";
+
 const {
   anything,
   system,
@@ -299,5 +300,60 @@ describe(`dotnet-cli:build`, () => {
         "dotnet", [ "build", target, "foo", "bar", "quux" ],
         anything
       )
+  });
+
+  describe(`terminal logger`, () => {
+    describe(`when not set`, () => {
+      it(`should be omitted`, async () => {
+        // Arrange
+        const target = faker.word.sample();
+        // Act
+        await build({
+          target
+        });
+        // Assert
+        expect(system)
+          .toHaveBeenCalledOnceWith(
+            "dotnet", [ "build", target ],
+            anything
+          );
+      });
+    });
+    describe(`when set to invalid value`, () => {
+      it(`should be overwritten as 'auto'`, async () => {
+        // Arrange
+        const target = faker.word.sample();
+        // Act
+        await build({
+          target,
+          terminalLogger: "foo-to-the-bar" as TerminalLogger
+        });
+        // Assert
+        expect(system)
+          .toHaveBeenCalledOnceWith(
+            "dotnet", [ "build", target, "--tl", "auto" ],
+            anything
+          );
+      });
+    });
+    [ "auto", "off", "on" ].forEach(tl => {
+      describe(`when set to '${ tl }'`, () => {
+        it(`should be included in commandline`, async () => {
+          // Arrange
+          const target = faker.word.sample();
+          // Act
+          await build({
+            target,
+            terminalLogger: tl as TerminalLogger
+          });
+          // Assert
+          expect(system)
+            .toHaveBeenCalledOnceWith(
+              "dotnet", [ "build", target, "--tl", tl ],
+              anything
+            );
+        });
+      });
+    });
   });
 });
