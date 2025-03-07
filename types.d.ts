@@ -2216,5 +2216,9 @@ declare global {
   interface Timestamp {
     timestamp: (opts?: TimestampOptions) => string;
   }
+
+  interface ParseBool {
+    parseBool: (s: string) => boolean;
+  }
 }
 

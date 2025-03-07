@@ -1,5 +1,6 @@
 (function() {
   const ZarroError = requireModule<ZarroError>("zarro-error");
+  const { parseBool } = requireModule<ParseBool>("parse-bool");
 
   function env(name: string, fallback?: string): string {
     const value = process.env[name];
@@ -32,30 +33,17 @@
     const
       haveFallback = fallback !== undefined,
       value = haveFallback ? env(name, fallback?.toString()) : env(name);
-    return parseBool(name, value);
+    return parseBoolEnvVar(name, value);
   }
 
-  const truthy = [
-      "1",
-      "yes",
-      "true"
-    ],
-    falsey = [
-      "0",
-      "no",
-      "false"
-    ];
-
-  function parseBool(name: string, value: string): boolean {
-    if (truthy.indexOf(value?.toString()) > -1) {
-      return true;
+  function parseBoolEnvVar(name: string, value: string): boolean {
+    try {
+      return parseBool(value);
+    } catch (e) {
+      throw new ZarroError(
+        `environment variable '${name}' is invalid: could not parse '${value}' as a boolean value`
+      );
     }
-    if (falsey.indexOf(value?.toString()) > -1) {
-      return false;
-    }
-    throw new ZarroError(
-      `environment variable '${name}' is invalid: could not parse '${value}' as a boolean value`
-    );
   }
 
   module.exports = {
