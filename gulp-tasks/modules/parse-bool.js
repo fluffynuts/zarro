@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseBool = void 0;
+const ZarroError = requireModule("zarro-error");
 const truthy = [
     "1",
     "yes",
@@ -18,7 +19,7 @@ function parseBool(value, strict) {
         return false;
     }
     if (strict) {
-        throw new Error(`could not parse '${value}' as a boolean value`);
+        throw new ZarroError(`could not parse '${value}' as a boolean value`);
     }
     return !!value;
 }
