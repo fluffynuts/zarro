@@ -1,3 +1,4 @@
+const ZarroError = requireModule<ZarroError>("zarro-error");
 const truthy = [
     "1",
     "yes",
@@ -20,7 +21,7 @@ export function parseBool(
     return false;
   }
   if (strict) {
-    throw new Error(
+    throw new ZarroError(
       `could not parse '${value}' as a boolean value`
     );
   }
