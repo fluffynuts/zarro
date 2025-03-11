@@ -2218,7 +2218,7 @@ declare global {
   }
 
   interface ParseBool {
-    parseBool: (s: string) => boolean;
+    parseBool: (s: string, strict?: boolean) => boolean;
   }
 }
 
