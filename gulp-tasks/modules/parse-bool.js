@@ -10,13 +10,16 @@ const truthy = [
     "no",
     "false"
 ];
-function parseBool(value) {
+function parseBool(value, strict) {
     if (truthy.indexOf(value === null || value === void 0 ? void 0 : value.toString()) > -1) {
         return true;
     }
     if (falsey.indexOf(value === null || value === void 0 ? void 0 : value.toString()) > -1) {
         return false;
     }
-    throw new Error(`could not parse '${value}' as a boolean value`);
+    if (strict) {
+        throw new Error(`could not parse '${value}' as a boolean value`);
+    }
+    return !!value;
 }
 exports.parseBool = parseBool;

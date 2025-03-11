@@ -26,7 +26,7 @@
     }
     function parseBoolEnvVar(name, value) {
         try {
-            return parseBool(value);
+            return parseBool(value, true);
         }
         catch (e) {
             throw new ZarroError(`environment variable '${name}' is invalid: could not parse '${value}' as a boolean value`);
