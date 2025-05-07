@@ -1543,6 +1543,24 @@ declare global {
     output?: string;
   }
 
+  interface DotNetRunProjectOptions
+    extends DotNetMsBuildOptions {
+    target: string;
+    framework?: string;
+    runtime?: string;
+    configuration?: string;
+    launchProfile?: string;
+    noLaunchProfile?: boolean;
+    noBuild?: boolean;
+    interactive?: boolean;
+    noRestore?: boolean;
+    selfContained?: boolean;
+    noSelfContained?: boolean;
+    os?: string;
+    disableBuildServers?: boolean;
+    artifactsPath?: string;
+  }
+
   interface DotNetNugetPushOptions
     extends DotNetMsBuildOptions {
     target: string;
@@ -1707,8 +1725,10 @@ declare global {
     globalPackages: DotNetCache;
     temp: DotNetCache;
   }
+  type DotNetRunProjectFunction = (opts: DotNetRunProjectOptions) => Promise<SystemResult | SystemError>;
 
   interface DotNetCli {
+    run: DotNetRunProjectFunction;
     clean: DotNetCleanFunction;
     build: DotNetBuildFunction;
     test: DotNetTestFunction;

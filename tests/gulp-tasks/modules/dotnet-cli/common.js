@@ -1,5 +1,6 @@
 "use strict";
 (function () {
+    debugger;
     const realSystem = requireModule("system");
     const { mockModule } = require("../../../../gulp-tasks/modules/mock-module");
     const realUpdateNuspecVersion = requireModule("update-nuspec-version");

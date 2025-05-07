@@ -1153,7 +1153,27 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     clearCaches.httpCache = DotNetCache.httpCache;
     clearCaches.globalPackages = DotNetCache.globalPackages;
     clearCaches.temp = DotNetCache.temp;
+    async function run(opts) {
+        verifyExists(opts, `no options passed to create`);
+        verifyNonEmptyString(opts.target, `target was not specified`);
+        const args = ["run", "--project", opts.target];
+        pushConfiguration(args, opts.configuration);
+        pushIfSet(args, opts.framework, "--framework");
+        pushRuntime(args, opts);
+        pushIfSet(args, opts.launchProfile, "--launch-profile");
+        pushFlag(args, opts.noLaunchProfile, "--no-launch-profile");
+        pushFlag(args, opts.noBuild, "--no-build");
+        pushFlag(args, opts.interactive, "--interactive");
+        pushFlag(args, opts.noRestore, "--no-restore");
+        pushFlag(args, opts.noSelfContained, "--no-self-contained");
+        pushFlag(args, opts.selfContained, "--self-contained");
+        pushIfSet(args, opts.os, "--os");
+        pushFlag(args, opts.disableBuildServers, "--disable-build-servers");
+        pushIfSet(args, opts.artifactsPath, "--artifacts-path");
+        return runDotNetWith(args);
+    }
     module.exports = {
+        run,
         test,
         build,
         pack,

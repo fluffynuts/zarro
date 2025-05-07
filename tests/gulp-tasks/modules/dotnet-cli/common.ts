@@ -1,4 +1,5 @@
 (function () {
+  debugger;
   const realSystem = requireModule<System>("system");
   const { mockModule } = require("../../../../gulp-tasks/modules/mock-module");
 
