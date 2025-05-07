@@ -1559,6 +1559,7 @@ declare global {
     os?: string;
     disableBuildServers?: boolean;
     artifactsPath?: string;
+    args?: string[]
   }
 
   interface DotNetNugetPushOptions

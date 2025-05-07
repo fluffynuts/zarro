@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 const yafs_1 = require("yafs");
+const faker_1 = require("@faker-js/faker");
 const realSystem = requireModule("system"), { run, create } = requireModule("dotnet-cli");
 describe(`dotnet-cli:run`, () => {
     describe(`integration testing`, () => {
@@ -27,15 +28,31 @@ describe(`dotnet-cli:run`, () => {
             if (!target) {
                 throw new Error(`Can't find hello-world project in ${sandbox.path}`);
             }
+            const program = allFiles.find(s => s.match(/program.cs$/i));
+            if (!program) {
+                throw new Error(`Can't find project.cs in ${sandbox.path}`);
+            }
+            const original = await (0, yafs_1.readTextFile)(program), updated = `
+ ${original}
+ foreach (var arg in args)
+ {
+     Console.WriteLine(arg);
+ }
+ `;
+            await (0, yafs_1.writeTextFile)(program, updated);
+            const args = [faker_1.faker.string.alphanumeric()];
             // Act
             const result = await run({
-                target
+                target,
+                args
             });
             // Assert
             expect(realSystem.isError(result))
                 .toBeFalse();
             expect(result.stdout[0])
                 .toEqual("Hello, World!");
+            expect(result.stdout[1])
+                .toEqual(args[0]);
         });
     });
 });

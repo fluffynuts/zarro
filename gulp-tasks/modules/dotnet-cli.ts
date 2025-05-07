@@ -931,7 +931,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       sanitized = (raw === "auto" || raw === "off" || raw === "on")
         ? raw
         : "auto"
-    args.push(`--tl:${sanitized}`);
+    args.push(`--tl:${ sanitized }`);
   }
 
   function pushOperatingSystem(args: string[], opts: DotNetTestOptions) {
@@ -1658,10 +1658,12 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
   clearCaches.globalPackages = DotNetCache.globalPackages;
   clearCaches.temp = DotNetCache.temp;
 
-  async function run(opts: DotNetRunProjectOptions): Promise<SystemResult | SystemError> {
+  async function run(
+    opts: DotNetRunProjectOptions
+  ): Promise<SystemResult | SystemError> {
     verifyExists(opts, `no options passed to create`);
     verifyNonEmptyString(opts.target, `target was not specified`);
-    const args = [ "run", "--project", opts.target];
+    const args = [ "run", "--project", opts.target ];
     pushConfiguration(args, opts.configuration);
     pushIfSet(args, opts.framework, "--framework");
     pushRuntime(args, opts);
@@ -1675,6 +1677,14 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     pushIfSet(args, opts.os, "--os");
     pushFlag(args, opts.disableBuildServers, "--disable-build-servers");
     pushIfSet(args, opts.artifactsPath, "--artifacts-path");
+
+    const programArgs = opts.args || [];
+    if (programArgs.length) {
+      args.push("--");
+      for (const arg of programArgs) {
+        args.push(q(arg));
+      }
+    }
 
     return runDotNetWith(args);
   }

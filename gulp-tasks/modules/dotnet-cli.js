@@ -1170,6 +1170,13 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         pushIfSet(args, opts.os, "--os");
         pushFlag(args, opts.disableBuildServers, "--disable-build-servers");
         pushIfSet(args, opts.artifactsPath, "--artifacts-path");
+        const programArgs = opts.args || [];
+        if (programArgs.length) {
+            args.push("--");
+            for (const arg of programArgs) {
+                args.push(q(arg));
+            }
+        }
         return runDotNetWith(args);
     }
     module.exports = {
