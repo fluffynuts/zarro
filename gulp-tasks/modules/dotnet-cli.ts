@@ -1,4 +1,6 @@
-(function() {
+import { ExecStepContext } from "exec-step";
+
+(function () {
   // TODO: perhaps one day, this should become an npm module of its own
   type PerConfigurationFunction = (configuration: string) => Promise<SystemResult | SystemError>;
   const debug = requireModule<DebugFactory>("debug")(__filename);
@@ -47,14 +49,14 @@
     packing: `📦 Packing`,
     building: `🏗️ Building`,
     cleaning: `🧹 Cleaning`,
-    publishing: `🚀 Publishing`,
+    publishing: `🚀 Publishing`
   } as Dictionary<string>;
   const asciiLabels = {
     testing: `>>> Testing`,
     packing: `[_] Packing`,
     building: `+++ Building`,
     cleaning: `--- Cleaning`,
-    publishing: `*** Publishing`,
+    publishing: `*** Publishing`
   } as Dictionary<string>;
   const labels = env.resolveFlag(env.NO_COLOR)
     ? asciiLabels
@@ -137,7 +139,7 @@
       );
       if (!match) {
         throw new ZarroError(
-          `container publish logic requires a nuget package reference for '${ requiredContainerPackage }' on project '${ opts.target }'`
+          `container publish logic requires a nuget package reference for '${requiredContainerPackage}' on project '${opts.target}'`
         )
       }
     }
@@ -288,8 +290,8 @@
     opts: DotNetTestOptions
   ): Promise<SystemResult | SystemError> {
     const labelText = !!opts.label
-      ? `${ label("Testing") }`
-      : `${ opts.label } ${ label("Testing") }`;
+      ? `${label("Testing")}`
+      : `${opts.label} ${label("Testing")}`;
     return runOnAllConfigurations(
       labelText,
       opts,
@@ -336,7 +338,7 @@
       return;
     }
     port += tempDbPortIncrements++;
-    env["TEMPDB_PORT_HINT"] = `${ port }`;
+    env["TEMPDB_PORT_HINT"] = `${port}`;
   }
 
   async function listNugetSources(): Promise<NugetSource[]> {
@@ -399,7 +401,7 @@
   ): Promise<SystemResult | SystemError> {
     const toEnable = await tryFindConfiguredNugetSource(source);
     if (!toEnable) {
-      throw new ZarroError(`unable to find source matching: ${ JSON.stringify(source) }`);
+      throw new ZarroError(`unable to find source matching: ${JSON.stringify(source)}`);
     }
     return await runDotNetWith(
       [ "dotnet", "nuget", "enable", "source", toEnable.name ], {
@@ -413,7 +415,7 @@
   ): Promise<SystemResult | SystemError> {
     const toDisable = await tryFindConfiguredNugetSource(source);
     if (!toDisable) {
-      throw new ZarroError(`unable to find source matching: ${ JSON.stringify(source) }`);
+      throw new ZarroError(`unable to find source matching: ${JSON.stringify(source)}`);
     }
     return runDotNetWith(
       [ "dotnet", "nuget", "disable", "source", toDisable.name ], {
@@ -438,8 +440,8 @@
       re = isRegExp(find) ? find as RegExp : undefined;
 
     return findNameMatch() ||
-           findUrlOrHostMatch() ||
-           findUrlPartialMatch();
+      findUrlOrHostMatch() ||
+      findUrlPartialMatch();
 
     function findUrlOrHostMatch() {
       if (url) {
@@ -521,8 +523,8 @@
 
   function isNugetSource(obj: any): obj is NugetSource {
     return typeof obj === "object" &&
-           typeof obj.name === "string" &&
-           typeof obj.url === "string";
+      typeof obj.name === "string" &&
+      typeof obj.url === "string";
   }
 
   async function removeNugetSourceByName(
@@ -530,7 +532,7 @@
   ): Promise<SystemResult | SystemError> {
     const source = await tryFindConfiguredNugetSource(find);
     if (!source) {
-      throw new ZarroError(`Can't find source with '${ find }'`);
+      throw new ZarroError(`Can't find source with '${find}'`);
     }
     const result = await runDotNetWith(
       [ "nuget", "remove", "source", source.name ],
@@ -584,7 +586,7 @@
           if (opts.nuspec && await shouldIncludeNuspec(copy)) {
             const absoluteNuspecPath = await resolveAbsoluteNuspecPath(opts);
             copy.msbuildProperties = copy.msbuildProperties || {};
-            copy.msbuildProperties["NuspecFile"] = `${ copy.nuspec }`;
+            copy.msbuildProperties["NuspecFile"] = `${copy.nuspec}`;
 
             if (opts.versionSuffix !== undefined) {
               revert = {
@@ -594,7 +596,7 @@
 
               log.warn(`
 WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
-          The version in '${ copy.nuspec }' will be temporarily set to ${ opts.versionSuffix } whilst
+          The version in '${copy.nuspec}' will be temporarily set to ${opts.versionSuffix} whilst
           packing and reverted later.
 `.trim());
 
@@ -683,7 +685,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       if (await fileExists(test)) {
         return test;
       }
-      throw new ZarroError(`Unable to resolve '${ resolvedPath }' relative to '${ containerDir }'`);
+      throw new ZarroError(`Unable to resolve '${resolvedPath}' relative to '${containerDir}'`);
     }
   }
 
@@ -725,50 +727,63 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       return false;
     }
     throw new ZarroError(
-      `nuspec file not found at '${ test }' (from cwd: '${ process.cwd() }`
+      `nuspec file not found at '${test}' (from cwd: '${process.cwd()}`
     );
   }
 
   async function nugetPush(
     opts: DotNetNugetPushOptions
-  ): Promise<SystemResult | SystemError> {
-    validateCommonBuildOptions(opts);
-    if (!opts.apiKey) {
-      throw new ZarroError("apiKey was not specified");
-    }
-    const o = opts as any;
-    // the dotnet cli mentions --skip-duplicate, which makes
-    // sense for a single package, however, as an outer caller
-    // potentially acting on multiple packages will use the
-    // pluralized version, and since I've just spent 1/2 an hour
-    // figuring this out... let's add some boilerplating.
-    if (o.skipDuplicate !== undefined && o.skipDuplicates === undefined) {
-      o.skipDuplicates = o.skipDuplicate;
-    }
-    const args = [
-      "nuget",
-      "push",
-      opts.target
-    ];
-    if (opts.apiKey) {
-      args.push("--api-key", opts.apiKey);
-    }
-    if (!opts.source) {
-      // dotnet core _demands_ that the source be set.
-      opts.source = await determineDefaultNugetSource();
-    }
-    pushIfSet(args, opts.source, "--source");
-    pushIfSet(args, opts.symbolApiKey, "--symbol-api-key");
-    pushIfSet(args, opts.symbolSource, "--symbol-source");
-    pushIfSet(args, opts.timeout, "--timeout");
+  ): Promise<SystemResult | SystemError | void> {
+    const pkg = path.basename(opts.target).replace(/\.csproj$/, "");
+    const labelText = `Pushing ${pkg}`;
+    const ctx = new ExecStepContext({
+      prefixes: {
+        wait: "⌛",
+        ok: "🚀",
+        fail: "⛔"
+      }
+    });
+    return ctx.exec(
+      labelText,
+      async () => {
+        validateCommonBuildOptions(opts);
+        if (!opts.apiKey) {
+          return new SystemError("apiKey was not specified", "", [], 1, [], []);
+        }
+        const o = opts as any;
+        // the dotnet cli mentions --skip-duplicate, which makes
+        // sense for a single package, however, as an outer caller
+        // potentially acting on multiple packages will use the
+        // pluralized version, and since I've just spent 1/2 an hour
+        // figuring this out... let's add some boilerplating.
+        if (o.skipDuplicate !== undefined && o.skipDuplicates === undefined) {
+          o.skipDuplicates = o.skipDuplicate;
+        }
+        const args = [
+          "nuget",
+          "push",
+          opts.target
+        ];
+        if (opts.apiKey) {
+          args.push("--api-key", opts.apiKey);
+        }
+        if (!opts.source) {
+          // dotnet core _demands_ that the source be set.
+          opts.source = await determineDefaultNugetSource();
+        }
+        pushIfSet(args, opts.source, "--source");
+        pushIfSet(args, opts.symbolApiKey, "--symbol-api-key");
+        pushIfSet(args, opts.symbolSource, "--symbol-source");
+        pushIfSet(args, opts.timeout, "--timeout");
 
-    pushFlag(args, opts.disableBuffering, "--disable-buffering");
-    pushFlag(args, opts.noSymbols, "--no-symbols");
-    pushFlag(args, opts.skipDuplicates, "--skip-duplicate");
-    pushFlag(args, opts.noServiceEndpoint, "--no-service-endpoint");
-    pushFlag(args, opts.forceEnglishOutput, "--force-english-output");
-    pushAdditionalArgs(args, opts);
-    return runDotNetWith(args, opts);
+        pushFlag(args, opts.disableBuffering, "--disable-buffering");
+        pushFlag(args, opts.noSymbols, "--no-symbols");
+        pushFlag(args, opts.skipDuplicates, "--skip-duplicate");
+        pushFlag(args, opts.noServiceEndpoint, "--no-service-endpoint");
+        pushFlag(args, opts.forceEnglishOutput, "--force-english-output");
+        pushAdditionalArgs(args, opts);
+        return runDotNetWith(args, opts);
+      });
   }
 
   function pushSelfContainedForPublish(
@@ -795,7 +810,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
 
   async function runOnAllConfigurations(
     label: string,
-    opts: DotNetCommonBuildOptions,
+    opts: DotNetMsBuildOptionsWithTargetAndConfigurations,
     toRun: PerConfigurationFunction
   ): Promise<SystemResult | SystemError> {
     validateCommonBuildOptions(opts);
@@ -805,7 +820,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     }
     let lastResult: Optional<SystemResult>;
     for (const configuration of configurations) {
-      showHeader(`${ label } ${ q(opts.target) } with configuration ${ configuration }${ detailedInfoFor(opts) }`)
+      showHeader(`${label} ${q(opts.target)} with configuration ${configuration}${detailedInfoFor(opts)}`)
       const thisResult = await toRun(configuration);
       if (system.isError(thisResult)) {
         return thisResult;
@@ -830,7 +845,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     if (parts.length === 0) {
       return "";
     }
-    return ` (${ parts.join(" ") })`;
+    return ` (${parts.join(" ")})`;
   }
 
   async function determineDefaultNugetSource() {
@@ -927,11 +942,11 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       return;
     }
     const
-      raw = `${ opts.terminalLogger }`.toLowerCase(),
+      raw = `${opts.terminalLogger}`.toLowerCase(),
       sanitized = (raw === "auto" || raw === "off" || raw === "on")
         ? raw
         : "auto"
-    args.push(`--tl:${ sanitized }`);
+    args.push(`--tl:${sanitized}`);
   }
 
   function pushOperatingSystem(args: string[], opts: DotNetTestOptions) {
@@ -1025,7 +1040,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       return result;
     }
     throw new SystemError(
-      `dotnet exit code is zero, but stdout contains logging about an unhandled exception:\n${ errors.join("\n") }`,
+      `dotnet exit code is zero, but stdout contains logging about an unhandled exception:\n${errors.join("\n")}`,
       result.exe,
       result.args,
       result.exitCode || Number.MIN_VALUE,
@@ -1058,7 +1073,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     value: string
   ) {
     args.push(
-      `-p:${ q(key) }=${ q(value) }`
+      `-p:${q(key)}=${q(value)}`
     )
   }
 
@@ -1077,7 +1092,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         const value = options[key];
         build.push([ key, value ].join("="));
       }
-      args.push("--logger", `${ build.join(";") }`);
+      args.push("--logger", `${build.join(";")}`);
     }
   }
 
@@ -1194,10 +1209,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     try {
       parsed = JSON.parse(allText) as PackageSearchResult;
     } catch (e) {
-      throw new ZarroError(`Unable to parse json from:\n${ allText }`);
+      throw new ZarroError(`Unable to parse json from:\n${allText}`);
     }
     if (parsed.problems && parsed.problems.length) {
-      throw new ZarroError(`unable to perform package search (check your access token):\n${ parsed.problems.join("\n") }`);
+      throw new ZarroError(`unable to perform package search (check your access token):\n${parsed.problems.join("\n")}`);
     }
     for (const result of parsed.searchResult || []) {
       for (const pkg of result.packages || []) {
@@ -1246,8 +1261,8 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
 
     const skip = opts.skip === undefined ? 0 : opts.skip;
     const take = opts.take === undefined ? 1024 : opts.take;
-    args.push("--skip", `${ skip }`);
-    args.push("--take", `${ take }`);
+    args.push("--skip", `${skip}`);
+    args.push("--take", `${take}`);
 
     args.push("--format", "json");
     if (opts.search) {
@@ -1317,7 +1332,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
   }
 
   function wrapSearchError(e: SystemError): Error {
-    return new Error(`Unable to perform package search (check your access token if necessary): ${ e }`);
+    return new Error(`Unable to perform package search (check your access token if necessary): ${e}`);
   }
 
   async function installPackage(
@@ -1326,10 +1341,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     if (!opts) {
       throw new ZarroError(`no options passed to 'installPackage' - target project and package name not specified`);
     }
-    if (!`${ opts.projectFile }`.trim()) {
+    if (!`${opts.projectFile}`.trim()) {
       throw new ZarroError(`projectFile not specified`);
     }
-    if (!`${ opts.id }`.trim()) {
+    if (!`${opts.id}`.trim()) {
       throw new ZarroError(`package id not specified`);
     }
     const args = [ "add", opts.projectFile, "package", opts.id ];
@@ -1386,8 +1401,8 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       () => runDotNetWith(args, opts)
     );
     return newFiles.find(isSolution)
-           || newFiles.find(isProject)
-           || newFiles[0];
+      || newFiles.find(isProject)
+      || newFiles[0];
   }
 
   async function runAndReportNewFiles(
@@ -1430,10 +1445,10 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     verifyNonEmptyString(opts.solutionFile, "path to solution file is required");
 
     if (!await fileExists(opts.solutionFile)) {
-      throw new ZarroError(`file not found: ${ opts.solutionFile }`);
+      throw new ZarroError(`file not found: ${opts.solutionFile}`);
     }
     if (!await fileExists(opts.projectFile)) {
-      throw new ZarroError(`file not found: ${ opts.projectFile }`);
+      throw new ZarroError(`file not found: ${opts.projectFile}`);
     }
 
     const args = [ "sln", opts.solutionFile, "add", opts.projectFile ];
@@ -1522,14 +1537,14 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
       }
       if (toUpgrade.length === 0) {
         if (opts.showProgress) {
-          console.log(`  -> no matching packages to upgrade in '${ project }'`);
+          console.log(`  -> no matching packages to upgrade in '${project}'`);
         }
         continue;
       }
 
       const
         s = toUpgrade.length === 1 ? "" : "s",
-        message = `searching for ${ toUpgrade.length } package${ s } to upgrade in ${ project }`,
+        message = `searching for ${toUpgrade.length} package${s} to upgrade in ${project}`,
         upgradeIds = toUpgrade.map(o => o.id);
       const upstream = await ctx.exec(
         message,
@@ -1541,23 +1556,23 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         )
       ) as PackageInfo[];
       if (upstream.length === 0) {
-        log.warn(`No results found for packages at ${ opts.source } (preRelease: ${ !!opts.preRelease })\n- ${ upgradeIds.join(
-          "\n- ") }`);
+        log.warn(`No results found for packages at ${opts.source} (preRelease: ${!!opts.preRelease})\n- ${upgradeIds.join(
+          "\n- ")}`);
       }
       for (const pkg of upstream) {
         const projectMatch = toUpgrade.find(o => o.id.toLowerCase() === pkg.id.toLowerCase());
         if (!projectMatch) {
-          throw new Error(`no matching package reference for '${ pkg.id }' in '${ project }' (HOW?)`);
+          throw new Error(`no matching package reference for '${pkg.id}' in '${project}' (HOW?)`);
         }
         if (pkg.version.equals(projectMatch.version)) {
           if (opts.showProgress) {
-            console.log(`  ${ pkg.id } already at latest version '${ pkg.version }' in '${ project }'`);
+            console.log(`  ${pkg.id} already at latest version '${pkg.version}' in '${project}'`);
           }
           continue;
         }
         ctx.indent += 2;
         await ctx.exec(
-          `installing '${ pkg.id }' at version '${ pkg.version }' into '${ project }'`,
+          `installing '${pkg.id}' at version '${pkg.version}' into '${project}'`,
           async () =>
             await installPackage({
               projectFile: project,
@@ -1620,7 +1635,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     value: string | undefined | null,
     failMessage: string
   ) {
-    if (!`${ value }`.trim()) {
+    if (!`${value}`.trim()) {
       throw new ZarroError(failMessage);
     }
   }
@@ -1635,7 +1650,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
   async function clearCaches(
     cacheType: DotNetCache | string
   ): Promise<void> {
-    const args = [ "nuget", "locals", `${ cacheType }`, "--clear" ];
+    const args = [ "nuget", "locals", `${cacheType}`, "--clear" ];
     let lastError = null;
     for (let i = 0; i < 10; i++) {
       try {
@@ -1650,7 +1665,7 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         }
       }
     }
-    console.warn(`unable to clear caches:\n${ lastError }`);
+    console.warn(`unable to clear caches:\n${lastError}`);
   }
 
   clearCaches.all = DotNetCache.all;
@@ -1664,7 +1679,17 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
     verifyExists(opts, `no options passed to create`);
     verifyNonEmptyString(opts.target, `target was not specified`);
     const args = [ "run", "--project", opts.target ];
-    pushConfiguration(args, opts.configuration);
+    if (!Array.isArray(opts.configuration)) {
+      pushConfiguration(args, opts.configuration);
+    } else {
+      if (!opts.configuration) {
+        opts.configuration = [];
+      }
+      if (opts.configuration.length > 1) {
+        throw new Error(`you may only specify one configuration for dotnet run`);
+      }
+      pushConfiguration(args, opts.configuration[0]);
+    }
     pushIfSet(args, opts.framework, "--framework");
     pushRuntime(args, opts);
     pushIfSet(args, opts.launchProfile, "--launch-profile");

@@ -1473,11 +1473,14 @@ declare global {
 
   type GulpDotNetCover = (opts?: GulpDotNetCoverOptions) => Transform;
 
-  type TerminalLogger = "auto" | "off" | "on";
-  interface DotNetCommonBuildOptions
-    extends DotNetMsBuildOptions {
+  interface DotNetMsBuildOptionsWithTargetAndConfigurations extends DotNetMsBuildOptions {
     target: string;
     configuration?: string | string[];
+  }
+
+  type TerminalLogger = "auto" | "off" | "on";
+  interface DotNetCommonBuildOptions
+    extends DotNetMsBuildOptionsWithTargetAndConfigurations {
     framework?: string;
     runtime?: string;
     output?: string;
@@ -1506,10 +1509,8 @@ declare global {
   }
 
   interface DotNetPackOptions
-    extends DotNetMsBuildOptions {
-    target: string;
+    extends DotNetMsBuildOptionsWithTargetAndConfigurations {
     output?: string;
-    configuration?: string | string[];
     noBuild?: boolean;
     includeSymbols?: boolean;
     includeSource?: boolean;
@@ -1535,20 +1536,16 @@ declare global {
   }
 
   interface DotNetCleanOptions
-    extends DotNetMsBuildOptions {
-    target: string;
+    extends DotNetMsBuildOptionsWithTargetAndConfigurations {
     framework?: string;
     runtime?: string;
-    configuration?: string | string[],
     output?: string;
   }
 
   interface DotNetRunProjectOptions
-    extends DotNetMsBuildOptions {
-    target: string;
+    extends DotNetMsBuildOptionsWithTargetAndConfigurations {
     framework?: string;
     runtime?: string;
-    configuration?: string;
     launchProfile?: string;
     noLaunchProfile?: boolean;
     noBuild?: boolean;
@@ -1563,8 +1560,7 @@ declare global {
   }
 
   interface DotNetNugetPushOptions
-    extends DotNetMsBuildOptions {
-    target: string;
+    extends DotNetMsBuildOptionsWithTargetAndConfigurations {
     apiKey?: string;
     symbolApiKey?: string;
     disableBuffering?: boolean;
