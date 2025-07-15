@@ -1,4 +1,6 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const exec_step_1 = require("exec-step");
 (function () {
     const debug = requireModule("debug")(__filename);
     const system = requireModule("system");
@@ -32,14 +34,14 @@
         packing: `📦 Packing`,
         building: `🏗️ Building`,
         cleaning: `🧹 Cleaning`,
-        publishing: `🚀 Publishing`,
+        publishing: `🚀 Publishing`
     };
     const asciiLabels = {
         testing: `>>> Testing`,
         packing: `[_] Packing`,
         building: `+++ Building`,
         cleaning: `--- Cleaning`,
-        publishing: `*** Publishing`,
+        publishing: `*** Publishing`
     };
     const labels = env.resolveFlag(env.NO_COLOR)
         ? asciiLabels
@@ -509,42 +511,53 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         throw new ZarroError(`nuspec file not found at '${test}' (from cwd: '${process.cwd()}`);
     }
     async function nugetPush(opts) {
-        validateCommonBuildOptions(opts);
-        if (!opts.apiKey) {
-            throw new ZarroError("apiKey was not specified");
-        }
-        const o = opts;
-        // the dotnet cli mentions --skip-duplicate, which makes
-        // sense for a single package, however, as an outer caller
-        // potentially acting on multiple packages will use the
-        // pluralized version, and since I've just spent 1/2 an hour
-        // figuring this out... let's add some boilerplating.
-        if (o.skipDuplicate !== undefined && o.skipDuplicates === undefined) {
-            o.skipDuplicates = o.skipDuplicate;
-        }
-        const args = [
-            "nuget",
-            "push",
-            opts.target
-        ];
-        if (opts.apiKey) {
-            args.push("--api-key", opts.apiKey);
-        }
-        if (!opts.source) {
-            // dotnet core _demands_ that the source be set.
-            opts.source = await determineDefaultNugetSource();
-        }
-        pushIfSet(args, opts.source, "--source");
-        pushIfSet(args, opts.symbolApiKey, "--symbol-api-key");
-        pushIfSet(args, opts.symbolSource, "--symbol-source");
-        pushIfSet(args, opts.timeout, "--timeout");
-        pushFlag(args, opts.disableBuffering, "--disable-buffering");
-        pushFlag(args, opts.noSymbols, "--no-symbols");
-        pushFlag(args, opts.skipDuplicates, "--skip-duplicate");
-        pushFlag(args, opts.noServiceEndpoint, "--no-service-endpoint");
-        pushFlag(args, opts.forceEnglishOutput, "--force-english-output");
-        pushAdditionalArgs(args, opts);
-        return runDotNetWith(args, opts);
+        const pkg = path.basename(opts.target).replace(/\.csproj$/, "");
+        const labelText = `Pushing ${pkg}`;
+        const ctx = new exec_step_1.ExecStepContext({
+            prefixes: {
+                wait: "⌛",
+                ok: "🚀",
+                fail: "⛔"
+            }
+        });
+        return ctx.exec(labelText, async () => {
+            validateCommonBuildOptions(opts);
+            if (!opts.apiKey) {
+                return new SystemError("apiKey was not specified", "", [], 1, [], []);
+            }
+            const o = opts;
+            // the dotnet cli mentions --skip-duplicate, which makes
+            // sense for a single package, however, as an outer caller
+            // potentially acting on multiple packages will use the
+            // pluralized version, and since I've just spent 1/2 an hour
+            // figuring this out... let's add some boilerplating.
+            if (o.skipDuplicate !== undefined && o.skipDuplicates === undefined) {
+                o.skipDuplicates = o.skipDuplicate;
+            }
+            const args = [
+                "nuget",
+                "push",
+                opts.target
+            ];
+            if (opts.apiKey) {
+                args.push("--api-key", opts.apiKey);
+            }
+            if (!opts.source) {
+                // dotnet core _demands_ that the source be set.
+                opts.source = await determineDefaultNugetSource();
+            }
+            pushIfSet(args, opts.source, "--source");
+            pushIfSet(args, opts.symbolApiKey, "--symbol-api-key");
+            pushIfSet(args, opts.symbolSource, "--symbol-source");
+            pushIfSet(args, opts.timeout, "--timeout");
+            pushFlag(args, opts.disableBuffering, "--disable-buffering");
+            pushFlag(args, opts.noSymbols, "--no-symbols");
+            pushFlag(args, opts.skipDuplicates, "--skip-duplicate");
+            pushFlag(args, opts.noServiceEndpoint, "--no-service-endpoint");
+            pushFlag(args, opts.forceEnglishOutput, "--force-english-output");
+            pushAdditionalArgs(args, opts);
+            return runDotNetWith(args, opts);
+        });
     }
     function pushSelfContainedForPublish(args, opts) {
         if (opts.runtime === undefined) {
@@ -1157,7 +1170,18 @@ WARNING: 'dotnet pack' ignores --version-suffix when a nuspec file is provided.
         verifyExists(opts, `no options passed to create`);
         verifyNonEmptyString(opts.target, `target was not specified`);
         const args = ["run", "--project", opts.target];
-        pushConfiguration(args, opts.configuration);
+        if (!Array.isArray(opts.configuration)) {
+            pushConfiguration(args, opts.configuration);
+        }
+        else {
+            if (!opts.configuration) {
+                opts.configuration = [];
+            }
+            if (opts.configuration.length > 1) {
+                throw new Error(`you may only specify one configuration for dotnet run`);
+            }
+            pushConfiguration(args, opts.configuration[0]);
+        }
         pushIfSet(args, opts.framework, "--framework");
         pushRuntime(args, opts);
         pushIfSet(args, opts.launchProfile, "--launch-profile");

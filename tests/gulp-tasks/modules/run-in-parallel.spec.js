@@ -65,7 +65,7 @@ describe(`run-in-parallel`, () => {
         await sut(2, ...tasks);
         // Assert
         async function collect(value) {
-            await sleep(100);
+            await sleep(500);
             collected.push(value);
         }
     });
