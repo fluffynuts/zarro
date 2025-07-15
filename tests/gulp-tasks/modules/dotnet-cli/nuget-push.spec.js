@@ -10,6 +10,7 @@ describe(`dotnet-cli:nugetPush`, () => {
         mockUpdatePackageNuspec();
         disableSystemCallThrough();
         spyOn(console, "log");
+        spyOn(process.stdout, "write");
     });
     afterEach(async () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
@@ -34,6 +35,8 @@ describe(`dotnet-cli:nugetPush`, () => {
         // Assert
         expect(system)
             .toHaveBeenCalledOnceWith("dotnet", ["nuget", "push", target, "--api-key", apiKey, "--source", "nuget.org"], anything);
+        expect(process.stdout.write)
+            .toHaveBeenCalledWith(expect.stringContaining(`Pushing ${target}`));
     });
     it(`should set the timeout when provided`, async () => {
         // Arrange
