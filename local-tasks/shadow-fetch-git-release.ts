@@ -27,18 +27,19 @@ gulp.task("shadow-fetch-github-release-dist", async () => {
   for (const f of sourceFiles) {
     const parts = splitPath(f);
     for (let i = 0; i < parts.length; i++) {
+      if (parts[i] === "") {
+        parts[i] = "/";
+        continue;
+      }
       if (parts[i] === "dist") {
         parts[i] = "dist-copy";
         break; // only mod the first occurrence, for speed & safety
       }
     }
     const
-      targetFile = path.join(...parts),
-      relSource = path.relative(baseDir, f),
-      relTarget = path.relative(baseDir, targetFile);
-
+      targetFile = path.join(...parts);
     await ctx.exec(
-      `${ relSource } -> ${ relTarget }`,
+      `${ f } -> ${ targetFile }`,
       () => copyFile(f, targetFile, CopyFileOptions.overwriteExisting)
     );
   }

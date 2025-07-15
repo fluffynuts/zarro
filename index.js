@@ -23,8 +23,11 @@ const
   gatherArgs = require("./index-modules/gather-args");
 
 function requireHandler(name) {
-  const result = require(`./index-modules/handlers/${ name }`);
-  return { ...result, name };
+  const result = require(`./index-modules/handlers/${name}`);
+  return {
+    ...result,
+    name
+  };
 }
 
 const handlers = [
@@ -43,7 +46,7 @@ async function findHandlerFor(args) {
       name: handler.name
     });
     if (await handler.test(args)) {
-      debug(`  -> invoking handler: ${ handler.name }`);
+      debug(`  -> invoking handler: ${handler.name}`);
       return handler.handler;
     }
   }
@@ -81,7 +84,7 @@ async function loadDefaults() {
       continue;
     }
     if (looksInvalid(code)) {
-      log.warn(`invalid config line in ${ defaultsFile }:\n${ line }`);
+      log.warn(`invalid config line in ${defaultsFile}:\n${line}`);
       continue;
     }
     const
@@ -93,14 +96,14 @@ async function loadDefaults() {
     if (notYetSet || forced) {
       const key = name.replace(/^!/, "");
       if (value) {
-        debug(`setting env var ${ key } to '${ value }'`);
+        debug(`setting env var ${key} to '${value}'`);
         process.env[key] = value;
       } else {
-        debug(`deleting env var ${ key }`);
+        debug(`deleting env var ${key}`);
         delete process.env[key];
       }
     } else {
-      debug(`env var ${ name } is already set, force it by setting !${ name }=${ value } in ${ defaultsFile }`)
+      debug(`env var ${name} is already set, force it by setting !${name}=${value} in ${defaultsFile}`)
     }
   }
 }
@@ -199,7 +202,10 @@ async function transpileTypeScriptFiles(
     const
       { ExecStepContext } = require("exec-step"),
       ctx = new ExecStepContext(),
-      { transpileModule, ModuleKind } = require("typescript");
+      {
+        transpileModule,
+        ModuleKind
+      } = require("typescript");
     for (const src of toTranspile) {
       if (!transpileAnyTypeScript) {
         const test = src.replace(/\.ts$/, ".js");
@@ -218,13 +224,13 @@ async function transpileTypeScriptFiles(
 
 
         if (srcLastModified <= outLastModified) {
-          debug(`${ output } modified after ${ src }; skipping transpile`);
+          debug(`${output} modified after ${src}; skipping transpile`);
           continue;
         }
-        debug(`will transpile: ${ src }`);
+        debug(`will transpile: ${src}`);
       }
       await ctx.exec(
-        `transpiling ${ src }`,
+        `transpiling ${src}`,
         async () => {
           const contents = await readTextFile(src);
           const transpiled = transpileModule(contents, {
@@ -239,7 +245,7 @@ async function transpileTypeScriptFiles(
       );
     }
   } catch (e) {
-    log.error(`one or more typescript modules could not be transpiled:\n${ e }`);
+    log.error(`one or more typescript modules could not be transpiled:\n${e}`);
   }
 }
 
@@ -255,7 +261,7 @@ function importTypeScript() {
   try {
     require("typescript");
   } catch (e) {
-    const message = `TypeScript not installed, unable to transpile local tasks: \n- ${ toTranspile.join("\n -") }`;
+    const message = `TypeScript not installed, unable to transpile local tasks: \n- ${toTranspile.join("\n -")}`;
     console.error(message);
     process.exit(2);
   }
@@ -273,7 +279,7 @@ function patchConsoleOutputToSuppressIntermediateTasks() {
   const original = process.stdout.write.bind(process.stdout);
   let last = "";
   process.stdout.write = (...args) => {
-    const main = plainText(`${ args[0] }`);
+    const main = plainText(`${args[0]}`);
     if (main.match(timestampMatcher) && last.match(timestampMatcher)) {
       // suppress duplicated timestamps
       last = main;
@@ -296,7 +302,7 @@ let eatNewLines = {};
 function patchConsoleFunction(fn) {
   const original = console[fn].bind(console);
   console[fn] = (...args) => {
-    const main = `${ args[0] }`;
+    const main = `${args[0]}`;
     if (shouldSuppressLog(main)) {
       eatNewLines[fn] = true;
       return;
@@ -330,10 +336,10 @@ const generatedFileMatcher = /\.generated\.js$/;
 
 async function removeOrphanedGeneratedFilesUnder(dir) {
   const allFiles = await ls(dir, {
-      recurse: true,
-      entities: FsEntities.files,
-      fullPaths: true
-    });
+    recurse: true,
+    entities: FsEntities.files,
+    fullPaths: true
+  });
   const lookup = new Set(allFiles);
   for (let i = 0; i < allFiles.length; i++) {
     const current = allFiles[i];
@@ -377,7 +383,7 @@ async function removeOrphanedGeneratedFiles() {
         continue;
       }
       if (shouldChangeDir) {
-        log.info(` --- running in ${ arg } ---`);
+        log.info(` --- running in ${arg} ---`);
         process.chdir(arg);
         shouldChangeDir = false;
         continue;
@@ -398,7 +404,7 @@ async function removeOrphanedGeneratedFiles() {
       throw new ZarroError("no handler for current args");
     }
     if (typeof handler !== "function") {
-      throw new ZarroError(`handler for ${ JSON.stringify(args) } is not a function?!`);
+      throw new ZarroError(`handler for ${JSON.stringify(args)} is not a function?!`);
     }
     await handler(args);
   } catch (e) {

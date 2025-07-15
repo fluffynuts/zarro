@@ -71,7 +71,7 @@ describe(`run-in-parallel`, () => {
         // Assert
 
         async function collect(value: number) {
-            await sleep(100);
+            await sleep(500);
             collected.push(value);
         }
     });
