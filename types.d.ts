@@ -359,7 +359,11 @@ declare global {
     devDependencies?: Dictionary<string>;
     files?: string[];
     author: Author; // I'm sure there's a multi-author construct too
-    license: LicenseIdentifier
+    license: LicenseIdentifier,
+    repository?: {
+      type: string;
+      url: string;
+    }
   }
 
   type ResolveMasks = (
