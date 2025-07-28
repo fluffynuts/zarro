@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 (function () {
-    const quoteIfRequired = requireModule("quote-if-required"), system = requireModule("system"), defaultOptions = {
+    const quoteIfRequired = requireModule("quote-if-required"), { system } = require("system-wrapper"), defaultOptions = {
         noConsoleLogger: false,
         target: ["build"],
         configuration: "Debug",

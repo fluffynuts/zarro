@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const resolveNuget = requireModule("resolve-nuget"), findLocalNuget = requireModule("find-local-nuget"), parseNugetSources = requireModule("parse-nuget-sources"), log = requireModule("log"), { mkdir } = require("yafs"), system = requireModule("system"), { pushFlag, pushIfSet } = requireModule("cli-support");
+    const resolveNuget = requireModule("resolve-nuget"), findLocalNuget = requireModule("find-local-nuget"), parseNugetSources = requireModule("parse-nuget-sources"), log = requireModule("log"), { mkdir } = require("yafs"), { system } = require("system-wrapper"), { pushFlag, pushIfSet } = requireModule("cli-support");
     const defaultInstallOptions = {
         nonInteractive: true
     };

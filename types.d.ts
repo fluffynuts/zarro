@@ -13,6 +13,7 @@ import { FetchReleaseOptions, ListReleasesOptions, ReleaseInfo } from "./gulp-ta
 import { DecompressOptions, File } from "decompress";
 
 export * from "./gulp-tasks/modules/fetch-github-release/src";
+export * from "dotnet-cli";
 
 type RequireModuleFunction<T> = (module: string) => T
 

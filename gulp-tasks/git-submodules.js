@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const system = requireModule("system"), path = require("path"), gulp = requireModule("gulp"), log = requireModule("log"), { existsSync, readTextFile, mkdir } = require("yafs"), subModulesFile = ".gitmodules";
+    const { system } = require("system-wrapper"), path = require("path"), gulp = requireModule("gulp"), log = requireModule("log"), { existsSync, readTextFile, mkdir } = require("yafs"), subModulesFile = ".gitmodules";
     gulp.task("git-submodules", "Updates (with --init) all submodules in tree", function () {
         return system("git", ["submodule", "update", "--init", "--recursive"]);
     });

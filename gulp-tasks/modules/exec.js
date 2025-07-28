@@ -10,10 +10,9 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 (function () {
     // this is a convenient wrapper around system()
-    const { fileExists, folderExists } = require("yafs"), path = require("path"), quoteIfRequired = requireModule("quote-if-required"), failAfter = requireModule("fail-after"), isWindows = requireModule("is-windows"), system = requireModule("system"), debug = requireModule("debug")(__filename), which = requireModule("which"), ZarroError = requireModule("zarro-error");
+    const { fileExists, folderExists } = require("yafs"), path = require("path"), quoteIfRequired = requireModule("quote-if-required"), failAfter = requireModule("fail-after"), isWindows = requireModule("is-windows"), system = require("system-wrapper"), debug = requireModule("debug")(__filename), which = requireModule("which"), ZarroError = requireModule("zarro-error");
     function makeDefaultOptions() {
         return {
             cwd: process.cwd(),
@@ -81,7 +80,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
         const stderrHandler = (_a = handlers === null || handlers === void 0 ? void 0 : handlers.stderr) !== null && _a !== void 0 ? _a : noop;
         const stdoutHandler = (_b = handlers === null || handlers === void 0 ? void 0 : handlers.stdout) !== null && _b !== void 0 ? _b : noop;
         try {
-            await system(cmd, args, Object.assign(Object.assign({}, opts), { stdout: (s) => {
+            await system.system(cmd, args, Object.assign(Object.assign({}, opts), { stdout: (s) => {
                     result.push(s);
                     stdout.push(s);
                     originalStdOut(s);

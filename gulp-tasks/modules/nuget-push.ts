@@ -1,9 +1,9 @@
 (function() {
     const
-        system = requireModule<System>("system"),
+        { system } = require("system-wrapper"),
         quoteIfRequired = requireModule<QuoteIfRequired>("quote-if-required"),
         { splitPath } = requireModule<PathUtils>("path-utils"),
-        dotnetCli = requireModule<DotNetCli>("dotnet-cli"),
+        dotnetCli = require("dotnet-cli"),
         env = requireModule<Env>("env"),
         resolveNugetApiKey = requireModule<ResolveNugetApiKey>("resolve-nuget-api-key"),
         findLocalNuget = require("./find-local-nuget");

@@ -10,7 +10,7 @@
   async function testZarro(opts: TestZarroOptions): Promise<void> {
     const
       log = requireModule<Log>("log"),
-      system = requireModule<System>("system");
+      { system } = require("system-wrapper");
     if (!opts) {
       throw new Error(`no options provided`);
     }

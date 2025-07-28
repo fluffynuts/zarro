@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const system = requireModule("system"), quoteIfRequired = requireModule("quote-if-required"), { splitPath } = requireModule("path-utils"), dotnetCli = requireModule("dotnet-cli"), env = requireModule("env"), resolveNugetApiKey = requireModule("resolve-nuget-api-key"), findLocalNuget = require("./find-local-nuget");
+    const { system } = require("system-wrapper"), quoteIfRequired = requireModule("quote-if-required"), { splitPath } = requireModule("path-utils"), dotnetCli = require("dotnet-cli"), env = requireModule("env"), resolveNugetApiKey = requireModule("resolve-nuget-api-key"), findLocalNuget = require("./find-local-nuget");
     function isDotnetCore(binaryPath) {
         const trimmed = binaryPath.replace(/^"/, "")
             .replace(/"$/, ""), parts = splitPath(trimmed), executable = (parts[parts.length - 1] || "");

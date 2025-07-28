@@ -6,7 +6,7 @@
     path = require("path"),
     debug = requireModule<DebugFactory>("debug"),
     env = requireModule<Env>("env"),
-    system = requireModule<System>("system");
+    system = require("system-wrapper");
   let updating: Promise<void> | undefined;
   module.exports = function(nugetPath: string) {
     if (env.resolveFlag("SKIP_NUGET_UPDATES")) {
@@ -19,7 +19,7 @@
       debug(`Requesting self-update from '${ nugetPath }'`);
       if (isWindows) {
         try {
-          await system(
+          await system.system(
             nugetPath,
             [ "update", "-self" ],
             { suppressOutput: true }
@@ -38,7 +38,7 @@
         }
         try {
           if (ext) {
-            await system(
+            await system.system(
               "mono", [
                 nugetPath,
                 "update",
@@ -46,7 +46,7 @@
               ], { suppressOutput: true }
             );
           } else {
-            await system(
+            await system.system(
               nugetPath,
               [ "update", "-self" ],
               { suppressOutput: true }

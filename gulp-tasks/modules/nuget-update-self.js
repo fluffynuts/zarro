@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const os = require("os"), which = requireModule("which"), isWindows = os.platform() === "win32", path = require("path"), debug = requireModule("debug"), env = requireModule("env"), system = requireModule("system");
+    const os = require("os"), which = requireModule("which"), isWindows = os.platform() === "win32", path = require("path"), debug = requireModule("debug"), env = requireModule("env"), system = require("system-wrapper");
     let updating;
     module.exports = function (nugetPath) {
         if (env.resolveFlag("SKIP_NUGET_UPDATES")) {
@@ -13,7 +13,7 @@
             debug(`Requesting self-update from '${nugetPath}'`);
             if (isWindows) {
                 try {
-                    await system(nugetPath, ["update", "-self"], { suppressOutput: true });
+                    await system.system(nugetPath, ["update", "-self"], { suppressOutput: true });
                     resolve();
                 }
                 catch (e) {
@@ -31,14 +31,14 @@
                 }
                 try {
                     if (ext) {
-                        await system("mono", [
+                        await system.system("mono", [
                             nugetPath,
                             "update",
                             "-self"
                         ], { suppressOutput: true });
                     }
                     else {
-                        await system(nugetPath, ["update", "-self"], { suppressOutput: true });
+                        await system.system(nugetPath, ["update", "-self"], { suppressOutput: true });
                     }
                     resolve();
                 }

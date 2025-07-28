@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const system = require("system"), log = requireModule("log"), { rm } = require("yafs");
+    const { system } = require("system"), log = requireModule("log"), { rm } = require("yafs");
     module.exports = async function (path) {
         console.log("verifying executable at: ", path);
         try {

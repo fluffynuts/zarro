@@ -1,6 +1,6 @@
 (function() {
     const
-        system = require("system"),
+        { system } = require("system"),
         log = requireModule<Log>("log"),
         { rm } = require("yafs");
 

@@ -1,25 +1,26 @@
+const realSystem = { ...require("system-wrapper") };
+jest.doMock("system-wrapper", () => realSystem);
 import "expect-even-more-jest";
 
 describe(`nuget-update-self`, () => {
-  const
-    systemMock = jest.fn();
-  jest.doMock("../../../gulp-tasks/modules/system", () => systemMock);
-
+  const { spyOn } = jest;
   const
     path = require("path"),
-    SystemResult = requireModule<SystemResult>("system-result"),
     findLocalNuget = requireModule<FindLocalNuget>("find-local-nuget"),
     nugetUpdateSelf = requireModule<NugetUpdateSelf>("nuget-update-self"),
     os = require("os"),
     isWindows = os.platform() === "win32";
   it(`should run the update -self command`, async () => {
     // Arrange
+    spyOn(realSystem, "system").mockImplementation((exe, args, options) =>
+      new realSystem.SystemResult(exe, args, 0, [], [])
+    );
     const nuget = await findLocalNuget();
     // Act
     await nugetUpdateSelf(nuget);
     // Assert
     if (isWindows) {
-      expect(systemMock)
+      expect(realSystem.system)
         .toHaveBeenCalledWith(
           nuget,
           [ "update", "-self" ],
@@ -27,7 +28,7 @@ describe(`nuget-update-self`, () => {
         );
     } else {
       const shim = path.join(path.dirname(nuget), "nuget");
-      expect(systemMock)
+      expect(realSystem.system)
         .toHaveBeenCalledWith(
           shim,
           [ "update", "-self" ],
@@ -35,18 +36,4 @@ describe(`nuget-update-self`, () => {
         );
     }
   }, 30000);
-
-  beforeEach(() => setupSystemMock());
-
-  function setupSystemMock() {
-    systemMock.mockImplementation((exe, args, opts) => {
-      return Promise.resolve(new SystemResult(
-        exe,
-        args,
-        0,
-        [],
-        [],
-      ));
-    });
-  }
 });

@@ -302,6 +302,7 @@ Test Run Summary
         return `${seconds}.${ms} seconds`;
     }
     async function testOneDotNetCoreProject(target, configuration, verbosity, testResults, runningInParallel, forceBuild, suppressOutput, label) {
+        debugger;
         const quackersState = {
             inSummary: false,
             inFailureSummary: false,
@@ -328,6 +329,7 @@ Test Run Summary
         // addTrxLoggerTo(loggers, target);
         testResults.quackersEnabled = testResults.quackersEnabled || useQuackers;
         try {
+            debugger;
             const result = await test({
                 target,
                 verbosity: finalVerbosity,
@@ -342,10 +344,12 @@ Test Run Summary
                 env: testEnvironment,
                 label
             });
+            debugger;
             return result;
         }
         catch (e) {
-            debug("WARN: catching SystemError instead of retrieving it");
+            debugger;
+            debug("WARN: catching SystemError instead of rethrowing it");
             const err = e;
             return err;
         }

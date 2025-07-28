@@ -4,7 +4,7 @@ import { Stream } from "stream";
 (function() {
     const
         quoteIfRequired = requireModule<QuoteIfRequired>("quote-if-required"),
-        system = requireModule<System>("system"),
+        { system } = require("system-wrapper"),
         defaultOptions = {
             noConsoleLogger: false,
             target: [ "build" ],

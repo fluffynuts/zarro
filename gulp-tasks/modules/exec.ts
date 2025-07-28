@@ -1,5 +1,3 @@
-import { SpawnOptions } from "child_process";
-
 (function () {
   // this is a convenient wrapper around system()
   const
@@ -11,7 +9,7 @@ import { SpawnOptions } from "child_process";
     quoteIfRequired = requireModule<QuoteIfRequired>("quote-if-required"),
     failAfter = requireModule<FailAfter>("fail-after"),
     isWindows = requireModule<IsWindows>("is-windows"),
-    system = requireModule<System>("system"),
+    system = require("system-wrapper"),
     debug = requireModule<DebugFactory>("debug")(__filename),
     which = requireModule<Which>("which"),
     ZarroError = requireModule<ZarroError>("zarro-error");
@@ -129,7 +127,7 @@ import { SpawnOptions } from "child_process";
     const stderrHandler = handlers?.stderr ?? noop;
     const stdoutHandler = handlers?.stdout ?? noop;
     try {
-      await system(
+      await system.system(
         cmd,
         args, {
           ...opts,

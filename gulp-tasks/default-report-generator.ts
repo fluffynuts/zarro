@@ -2,7 +2,7 @@
     const gulp = requireModule<Gulp>("gulp"),
         path = require("path"),
         findTool = requireModule<TestUtilFinder>("test-util-finder").findTool,
-        system = requireModule<System>("system"),
+        { system } = require("system-wrapper"),
         quoteIfRequired = requireModule<QuoteIfRequired>("quote-if-required"),
         { rm, mkdir, exists } = require("yafs"),
         env = requireModule<Env>("env");

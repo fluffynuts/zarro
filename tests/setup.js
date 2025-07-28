@@ -1,5 +1,5 @@
 global.requireModule = require("../gulp-tasks/modules/require-module");
-if (!process.env.RUNNING_FROM_IDE) {
+if (!process.env.RUNNING_FROM_IDE && !process.env.JB_IDE_PORT) {
   jest.retryTimes(3, { logErrorsBeforeRetry: true });
 }
 const log = requireModule("log");

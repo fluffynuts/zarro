@@ -6,7 +6,7 @@ import { ExecStepOverrideMessage } from "exec-step";
     "Pushes the latest versions of packages in the package build dir",
     async () => {
       const
-        system = requireModule<System>("system"),
+        { system } = require("system-wrapper"),
         { ctx } = require("exec-step"),
         debug = requireModule<DebugFactory>("debug")(__filename),
         path = require("path"),

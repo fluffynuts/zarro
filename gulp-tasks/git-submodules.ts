@@ -1,6 +1,6 @@
 (function() {
     const
-        system = requireModule<System>("system"),
+        { system } = require("system-wrapper"),
         path = require("path"),
         gulp = requireModule<Gulp>("gulp"),
         log = requireModule<Log>("log"),

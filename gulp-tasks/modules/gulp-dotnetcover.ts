@@ -9,7 +9,7 @@ import { BufferFile } from "vinyl";
         path = require("path"),
         testUtilFinder = requireModule<TestUtilFinder>("test-util-finder"),
         getToolsFolder = requireModule<GetToolsFolder>("get-tools-folder"),
-        system = requireModule<System>("system"),
+        { system } = require("system-wrapper"),
         coverageTarget = process.env.COVERAGE_TARGET || "Debug",
         debug = requireModule<DebugFactory>("debug")(__filename),
         log = requireModule<Log>("log"),

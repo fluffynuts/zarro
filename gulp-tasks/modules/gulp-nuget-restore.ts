@@ -6,7 +6,7 @@ import { Stream } from "stream";
         path = require("path"),
         gutil = requireModule<GulpUtil>("gulp-util"),
         es = require("event-stream"),
-        system = requireModule<System>("system"),
+        { system } = require("system-wrapper"),
         log = requireModule<Log>("log"),
         resolveNuget = requireModule<ResolveNuget>("resolve-nuget"),
         env = requireModule<Env>("env"),

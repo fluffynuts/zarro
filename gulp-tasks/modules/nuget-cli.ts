@@ -5,7 +5,7 @@
     parseNugetSources = requireModule<ParseNugetSources>("parse-nuget-sources"),
     log = requireModule<Log>("log"),
     { mkdir } = require("yafs"),
-    system = requireModule<System>("system"),
+    { system } = require("system-wrapper"),
     {
       pushFlag,
       pushIfSet

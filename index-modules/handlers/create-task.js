@@ -147,7 +147,7 @@ ${whyClosure}
     // or called functions) as this will mean that these modules
     // would only have to be fully resolved when actually necessary
     const
-        system = requireModule<System>("system"),
+        { system } = require("system-wrapper"),
         systemResult = await system("whoami", [], { suppressOutput: true });
     console.log(\`'whoami' from system() reports the current user is: $\{systemResult.stdout[0]}\`);
 

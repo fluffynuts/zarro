@@ -6,7 +6,7 @@
         [`latest`]: "zarro@latest"
     }, readPackageJson = requireModule("read-package-json");
     async function testZarro(opts) {
-        const log = requireModule("log"), system = requireModule("system");
+        const log = requireModule("log"), { system } = require("system-wrapper");
         if (!opts) {
             throw new Error(`no options provided`);
         }

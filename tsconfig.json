@@ -78,6 +78,7 @@
     /* Disallow inconsistently-cased references to the same file. */
   },
   "exclude": [
-    "external-tasks"
+    "external-tasks",
+    "tests_deprecated"
   ]
 }

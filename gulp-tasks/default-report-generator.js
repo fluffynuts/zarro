@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const gulp = requireModule("gulp"), path = require("path"), findTool = requireModule("test-util-finder").findTool, system = requireModule("system"), quoteIfRequired = requireModule("quote-if-required"), { rm, mkdir, exists } = require("yafs"), env = requireModule("env");
+    const gulp = requireModule("gulp"), path = require("path"), findTool = requireModule("test-util-finder").findTool, { system } = require("system-wrapper"), quoteIfRequired = requireModule("quote-if-required"), { rm, mkdir, exists } = require("yafs"), env = requireModule("env");
     env.associate(["COVERAGE_XML", "COVERAGE_REPORTING_EXCLUDE"], "cover-dotnet");
     gulp.task("default-report-generator", `Generates HTML reports from existing coverage XML reports`, async () => {
         const reportGenerator = findTool("ReportGenerator.exe");

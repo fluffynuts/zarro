@@ -1,6 +1,6 @@
 (function() {
     const
-        system = requireModule<System>("system"),
+        { system } = require("system-wrapper"),
         debug = requireModule<DebugFactory>("debug")(__filename),
         findLocalNuget = requireModule<FindLocalNuget>("find-local-nuget");
 

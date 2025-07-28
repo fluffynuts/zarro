@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 (function () {
-    const gutil = requireModule("gulp-util"), env = requireModule("env"), es = require("event-stream"), path = require("path"), testUtilFinder = requireModule("test-util-finder"), getToolsFolder = requireModule("get-tools-folder"), system = requireModule("system"), coverageTarget = process.env.COVERAGE_TARGET || "Debug", debug = requireModule("debug")(__filename), log = requireModule("log"), { mkdirSync, fileExistsSync } = require("yafs");
+    const gutil = requireModule("gulp-util"), env = requireModule("env"), es = require("event-stream"), path = require("path"), testUtilFinder = requireModule("test-util-finder"), getToolsFolder = requireModule("get-tools-folder"), { system } = require("system-wrapper"), coverageTarget = process.env.COVERAGE_TARGET || "Debug", debug = requireModule("debug")(__filename), log = requireModule("log"), { mkdirSync, fileExistsSync } = require("yafs");
     const PLUGIN_NAME = "gulp-dotnetcover";
     function projectPathFor(p) {
         return path.resolve(p);
