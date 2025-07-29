@@ -63,7 +63,6 @@
         if (system.system.isError(sysResult)) {
             throw sysResult;
         }
-        debugger;
         return parseNugetSources(sysResult.stdout);
     }
     async function addSource(src) {
@@ -142,7 +141,6 @@
         const nuget = resolveNuget(undefined, false) ||
             await findLocalNuget(true);
         const result = await system.system(nuget, args, opts);
-        debugger;
         return result;
     }
     module.exports = {

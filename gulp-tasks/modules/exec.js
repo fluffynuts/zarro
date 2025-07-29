@@ -81,19 +81,16 @@ var __rest = (this && this.__rest) || function (s, e) {
         const stdoutHandler = (_b = handlers === null || handlers === void 0 ? void 0 : handlers.stdout) !== null && _b !== void 0 ? _b : noop;
         try {
             await system.system(cmd, args, Object.assign(Object.assign({}, opts), { stdout: (s) => {
-                    debugger;
                     result.push(s);
                     stdout.push(s);
                     originalStdOut(s);
                     tryDo(() => stdoutHandler(s));
                 }, stderr: (s) => {
-                    debugger;
                     result.push(s);
                     stderr.push(s);
                     originalStdErr(s);
                     tryDo(() => stderrHandler(s));
                 } }));
-            debugger;
             return result.join("\n");
         }
         catch (e) {
