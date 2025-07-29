@@ -7,8 +7,16 @@ import * as dotnetCli from "dotnet-cli";
   const { yellowBright, cyanBright } = colors;
   const env = requireModule<Env>("env");
 
-  function wrap<T>(fn: (opts: T) => Promise<SystemResult | void>): AsyncTVoid<T> | AsyncVoidVoid {
+  interface CanSuppressOutput {
+    suppressOutput?: boolean;
+  }
+
+  function wrap<T extends CanSuppressOutput>(fn: (opts: T) => Promise<SystemResult | void>): AsyncTVoid<T> | AsyncVoidVoid {
     return async (opts: T) => {
+      if (opts.suppressOutput === undefined) {
+        opts.suppressOutput = false;
+      }
+
       const result = await fn(opts);
       if (result instanceof Error) {
         throw result;

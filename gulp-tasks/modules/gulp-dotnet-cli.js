@@ -32,6 +32,9 @@ const dotnetCli = __importStar(require("dotnet-cli"));
     const env = requireModule("env");
     function wrap(fn) {
         return async (opts) => {
+            if (opts.suppressOutput === undefined) {
+                opts.suppressOutput = false;
+            }
             const result = await fn(opts);
             if (result instanceof Error) {
                 throw result;
