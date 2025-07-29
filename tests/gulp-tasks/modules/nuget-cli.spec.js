@@ -1,18 +1,43 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
+const systemWrapper = __importStar(require("system-wrapper"));
 describe(`nuget-cli`, () => {
+    const { spyOn } = jest;
     const path = require("path");
-    const systemMock = jest.fn();
     let isSystemError = false;
-    jest.doMock("../../../gulp-tasks/modules/system", () => systemMock);
+    const realSystemWrapper = Object.assign({}, systemWrapper);
+    jest.doMock("system-wrapper", () => realSystemWrapper);
     const resolveNugetMock = jest.fn();
     jest.doMock("../../../gulp-tasks/modules/resolve-nuget", () => resolveNugetMock);
     const log = requireModule("log");
     let nuget = "/path/to/nuget";
-    const { objectContaining, anything } = expect, sut = requireModule("nuget-cli"), SystemResult = requireModule("system-result");
+    const { objectContaining, anything } = expect, sut = requireModule("nuget-cli");
     describe(`install`, () => {
         const { install } = sut;
         it(`should attempt to install the requested package`, async () => {
@@ -21,7 +46,7 @@ describe(`nuget-cli`, () => {
             // Act
             await install({ packageId });
             // Assert
-            expect(systemMock)
+            expect(realSystemWrapper.system)
                 .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive"], objectContaining({ suppressOutput: true }));
         });
         describe(`optional parameters`, () => {
@@ -34,7 +59,7 @@ describe(`nuget-cli`, () => {
                     version
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-Version", version], anything());
             });
             it(`should observe outputDirectory`, async () => {
@@ -46,7 +71,7 @@ describe(`nuget-cli`, () => {
                     outputDirectory
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-OutputDirectory", outputDirectory], anything());
             });
             it(`should observe dependencyVersion`, async () => {
@@ -58,7 +83,7 @@ describe(`nuget-cli`, () => {
                     dependencyVersion
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-DependencyVersion", dependencyVersion], anything());
             });
             it(`should observe framework`, async () => {
@@ -70,7 +95,7 @@ describe(`nuget-cli`, () => {
                     framework
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-Framework", framework], objectContaining({ suppressOutput: true }));
             });
             it(`should observe excludeVersion`, async () => {
@@ -82,7 +107,7 @@ describe(`nuget-cli`, () => {
                     excludeVersion
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-ExcludeVersion", excludeVersion], objectContaining({ suppressOutput: true }));
             });
             it(`should observe preRelease (true)`, async () => {
@@ -94,7 +119,7 @@ describe(`nuget-cli`, () => {
                     preRelease
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-Prerelease"], objectContaining({ suppressOutput: true }));
             });
             it(`should observe preRelease (false)`, async () => {
@@ -106,7 +131,7 @@ describe(`nuget-cli`, () => {
                     preRelease
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive"], objectContaining({ suppressOutput: true }));
             });
             it(`should observe requireConsent (true)`, async () => {
@@ -118,7 +143,7 @@ describe(`nuget-cli`, () => {
                     requireConsent
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-RequireConsent"], objectContaining({ suppressOutput: true }));
             });
             it(`should observe requireConsent (false)`, async () => {
@@ -130,7 +155,7 @@ describe(`nuget-cli`, () => {
                     requireConsent
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive",], objectContaining({ suppressOutput: true }));
             });
             it(`should observe solutionDirectory`, async () => {
@@ -142,7 +167,7 @@ describe(`nuget-cli`, () => {
                     solutionDirectory
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-SolutionDirectory", solutionDirectory], objectContaining({ suppressOutput: true }));
             });
             it(`should observe source`, async () => {
@@ -154,7 +179,7 @@ describe(`nuget-cli`, () => {
                     source
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-Source", source], objectContaining({ suppressOutput: true }));
             });
             it(`should observe fallbackSource`, async () => {
@@ -166,7 +191,7 @@ describe(`nuget-cli`, () => {
                     fallbackSource
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-FallbackSource", fallbackSource], objectContaining({ suppressOutput: true }));
             });
             it(`should observe noCache (true)`, async () => {
@@ -178,7 +203,7 @@ describe(`nuget-cli`, () => {
                     noCache
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-NoCache"], objectContaining({ suppressOutput: true }));
             });
             it(`should observe noCache (false)`, async () => {
@@ -190,7 +215,7 @@ describe(`nuget-cli`, () => {
                     noCache
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive"], objectContaining({ suppressOutput: true }));
             });
             it(`should observe directDownload (true)`, async () => {
@@ -202,7 +227,7 @@ describe(`nuget-cli`, () => {
                     directDownload
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-DirectDownload"], objectContaining({ suppressOutput: true }));
             });
             it(`should observe disableParallelProcessing (true)`, async () => {
@@ -214,7 +239,7 @@ describe(`nuget-cli`, () => {
                     disableParallelProcessing
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-DisableParallelProcessing"], objectContaining({ suppressOutput: true }));
             });
             it(`should observe disableParallelProcessing (false)`, async () => {
@@ -226,7 +251,7 @@ describe(`nuget-cli`, () => {
                     disableParallelProcessing
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive"], objectContaining({ suppressOutput: true }));
             });
             it(`should observe packageSaveMode`, async () => {
@@ -241,7 +266,7 @@ describe(`nuget-cli`, () => {
                     packageSaveMode: packageSaveMode
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-PackageSaveMode", packageSaveMode], objectContaining({ suppressOutput: true }));
             });
             it(`should observe packageSaveMode (delimited)`, async () => {
@@ -253,7 +278,7 @@ describe(`nuget-cli`, () => {
                     packageSaveMode: packageSaveMode
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-PackageSaveMode", `"${packageSaveMode}"`], objectContaining({ suppressOutput: true }));
             });
             it(`should observe verbosity`, async () => {
@@ -269,7 +294,7 @@ describe(`nuget-cli`, () => {
                     verbosity
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledWith(nuget, ["install", packageId, "-NonInteractive", "-Verbosity", verbosity], objectContaining({ suppressOutput: true }));
             });
             it(`should observe nonInteractive (false)`, async () => {
@@ -281,7 +306,7 @@ describe(`nuget-cli`, () => {
                     nonInteractive
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId], objectContaining({ suppressOutput: false }));
             });
             it(`should observe configFile`, async () => {
@@ -293,7 +318,7 @@ describe(`nuget-cli`, () => {
                     configFile
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-ConfigFile", configFile], objectContaining({ suppressOutput: true }));
             });
             it(`should observe forceEnglishOutput (true)`, async () => {
@@ -305,7 +330,7 @@ describe(`nuget-cli`, () => {
                     forceEnglishOutput
                 });
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["install", packageId, "-NonInteractive", "-ForceEnglishOutput"], objectContaining({ suppressOutput: true }));
             });
         });
@@ -318,7 +343,7 @@ describe(`nuget-cli`, () => {
                 // Act
                 await clearAllCache();
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["locals", "-clear"], objectContaining({ suppressOutput: true }));
             });
         });
@@ -328,7 +353,7 @@ describe(`nuget-cli`, () => {
                 // Act
                 await clearHttpCache();
                 // Assert
-                expect(systemMock)
+                expect(realSystemWrapper.system)
                     .toHaveBeenCalledOnceWith(nuget, ["locals", "http-cache", "-clear"], objectContaining({ suppressOutput: true }));
             });
         });
@@ -388,7 +413,7 @@ describe(`nuget-cli`, () => {
                 validAuthenticationTypes
             });
             // Assert
-            expect(systemMock)
+            expect(realSystemWrapper.system)
                 .toHaveBeenCalledOnceWith(expect.stringContaining("nuget"), [
                 "source", "add",
                 "-Name", expectedName,
@@ -420,7 +445,7 @@ describe(`nuget-cli`, () => {
                 enabled
             });
             // Assert
-            expect(systemMock)
+            expect(realSystemWrapper.system)
                 .not.toHaveBeenCalledWith(expect.stringContaining("nuget"), expect.arrayContaining(["source", "add"]));
         });
         it(`should enable the source if found, disabled, by name`, async () => {
@@ -441,9 +466,9 @@ describe(`nuget-cli`, () => {
                 enabled
             });
             // Assert
-            expect(systemMock)
+            expect(realSystemWrapper.system)
                 .not.toHaveBeenCalledWith(expect.stringContaining("nuget"), expect.arrayContaining(["source", "add"]));
-            expect(systemMock)
+            expect(realSystemWrapper.system)
                 .toHaveBeenCalledWith(expect.stringContaining("nuget"), ["source", "enable", "-Name", name], expect.objectContaining({ suppressOutput: true }));
         });
     });
@@ -463,7 +488,7 @@ describe(`nuget-cli`, () => {
             // Act
             await enableSource(randomCasedName);
             // Assert
-            expect(systemMock)
+            expect(realSystemWrapper.system)
                 .toHaveBeenCalledWith(expect.stringContaining("nuget"), ["source", "enable", "-Name", randomCasedName], expect.objectContaining({ suppressOutput: true }));
         });
         it(`should do nothing when the source exists and is enabled`, async () => {
@@ -479,7 +504,7 @@ describe(`nuget-cli`, () => {
             ]);
             // Act
             await enableSource(randomCasedName);
-            expect(systemMock)
+            expect(realSystemWrapper.system)
                 .not.toHaveBeenCalledWith(expect.stringContaining("nuget"), ["source", "enable", "-Name", randomCasedName], expect.objectContaining({ suppressOutput: true }));
             // Assert
         });
@@ -508,7 +533,7 @@ describe(`nuget-cli`, () => {
             // Act
             await disableSource(randomCasedName);
             // Assert
-            expect(systemMock)
+            expect(realSystemWrapper.system)
                 .toHaveBeenCalledWith(expect.stringContaining("nuget"), ["source", "disable", "-Name", randomCasedName], expect.objectContaining({ suppressOutput: true }));
         });
         it(`should do nothing when the source exists and is disabled`, async () => {
@@ -524,7 +549,7 @@ describe(`nuget-cli`, () => {
             ]);
             // Act
             await disableSource(randomCasedName);
-            expect(systemMock)
+            expect(realSystemWrapper.system)
                 .not.toHaveBeenCalledWith(expect.stringContaining("nuget"), ["source", "disable", "-Name", randomCasedName], expect.objectContaining({ suppressOutput: true }));
             // Assert
         });
@@ -538,19 +563,36 @@ describe(`nuget-cli`, () => {
         });
     });
     function mockAvailableSources(sources) {
-        systemMock.mockImplementation((exe, args, opts) => {
+        realSystemWrapper.system.mockImplementation((exe, args, opts) => {
+            debugger;
             if (["sources", "list"].every((el, idx) => el === args[idx])) {
                 const lines = [];
                 let idx = 1;
                 for (const src of sources) {
                     lines.push(`${idx++}.  ${src.name} [${(src.enabled ? "Enabled" : "Disabled")}]`);
                     lines.push(`    ${src.url}`);
+                    if (typeof (opts === null || opts === void 0 ? void 0 : opts.stdout) === "function") {
+                        for (const line of lines) {
+                            opts.stdout(line);
+                        }
+                    }
                 }
-                return SystemResult.create()
+                const result = systemWrapper.SystemResult.create()
+                    .withExe(exe)
                     .withArgs(args)
                     .withStdOut(lines)
+                    .withStdErr([])
+                    .withExitCode(0)
                     .build();
+                return Promise.resolve(result);
             }
+            return Promise.resolve(systemWrapper.SystemResult.create()
+                .withExitCode(0)
+                .withExe(exe)
+                .withArgs(args)
+                .withStdOut([])
+                .withStdErr([])
+                .build());
         });
     }
     function randomCase(str) {
@@ -596,11 +638,23 @@ describe(`nuget-cli`, () => {
     let i = 0;
     function setupMocks() {
         nuget = `/${i++}/path/to/nuget`;
-        systemMock.mockImplementation((exe, args, opts) => {
-            return new SystemResult(exe, args || [], 0, [], []);
+        spyOn(realSystemWrapper, "system")
+            .mockImplementation((exe, args, opts) => {
+            return new Promise(resolve => {
+                resolve(new systemWrapper.SystemResult(exe, args || [], 0, [], []));
+            });
         });
-        systemMock.isError = jest.fn().mockImplementation(() => isSystemError);
-        systemMock.isResult = jest.fn().mockImplementation(() => !isSystemError);
+        // for some reason, these don't come through on the destructure
+        realSystemWrapper.system.isError = systemWrapper.system.isError;
+        realSystemWrapper.system.isResult = systemWrapper.system.isResult;
+        expect(typeof realSystemWrapper.system.isError)
+            .toEqual("function");
+        expect(typeof realSystemWrapper.system.isResult)
+            .toEqual("function");
+        realSystemWrapper.system.isError = jest.fn()
+            .mockImplementation(() => isSystemError);
+        realSystemWrapper.system.isResult = jest.fn()
+            .mockImplementation(() => !isSystemError);
         resolveNugetMock.mockImplementation(() => nuget);
         spyOn(log, "info");
     }

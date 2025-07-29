@@ -1,6 +1,8 @@
 import "expect-even-more-jest";
+import { spyOnConsole } from "./test-helpers/spy-on-console";
 
 describe(`behaviors`, () => {
+  spyOnConsole();
   const system = requireModule<System>("system");
 
   describe(`npm scripts vs missing tasks`, () => {

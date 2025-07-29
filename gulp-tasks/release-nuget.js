@@ -6,7 +6,7 @@
         env.NUGET_SOURCE
     ], taskName);
     gulp.task(taskName, ["clear-packages-folder", "pack"], async () => {
-        const { ctx } = require("exec-step"), log = requireModule("log"), Git = require("simple-git"), git = new Git("."), ZarroError = requireModule("zarro-error"), resolveNugetApiKey = requireModule("resolve-nuget-api-key"), { FsEntities, ls } = require("yafs"), { nugetPush } = requireModule("dotnet-cli"), packageDir = env.resolve(env.PACK_TARGET_FOLDER), packageFiles = await ls(packageDir, {
+        const { ctx } = require("exec-step"), log = requireModule("log"), Git = require("simple-git"), git = new Git("."), ZarroError = requireModule("zarro-error"), resolveNugetApiKey = requireModule("resolve-nuget-api-key"), { FsEntities, ls } = require("yafs"), { nugetPush } = require("dotnet-cli"), packageDir = env.resolve(env.PACK_TARGET_FOLDER), packageFiles = await ls(packageDir, {
             fullPaths: true,
             recurse: false,
             entities: FsEntities.files,

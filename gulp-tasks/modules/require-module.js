@@ -13,6 +13,9 @@
         return allModules;
     }
     function requireModule(mod) {
+        if (mod === "dotnet-cli") {
+            debugger;
+        }
         if (!mod) {
             throw new Error("No module file name specified");
         }

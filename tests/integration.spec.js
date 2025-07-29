@@ -1,6 +1,9 @@
 "use strict";
-const system = requireModule("system");
+Object.defineProperty(exports, "__esModule", { value: true });
+const spy_on_console_1 = require("./test-helpers/spy-on-console");
 describe(`integration testing`, () => {
+    (0, spy_on_console_1.spyOnConsole)();
+    const system = requireModule("system");
     it(`should be able to run with --show-env`, async () => {
         // Arrange
         const args = [

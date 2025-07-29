@@ -39,7 +39,7 @@ import { StyleFunction } from "ansi-colors";
     resolveTestMasks = requireModule<ResolveTestMasks>("resolve-test-masks"),
     logConfig = requireModule<LogConfig>("log-config"),
     gatherPaths = requireModule<GatherPaths>("gather-paths"),
-    { test } = requireModule<DotNetCli>("dotnet-cli"),
+    { test } = require("dotnet-cli"),
     { resolveTestPrefixFor } = requireModule<TestUtils>("test-utils"),
     buildReportFolder = path.dirname(env.resolve("BUILD_REPORT_XML")),
     Version = requireModule<Version>("version"),
@@ -461,7 +461,6 @@ Test Run Summary
     suppressOutput?: boolean,
     label?: string
   ): Promise<SystemResult | SystemError> {
-    debugger;
     const
       quackersState = {
         inSummary: false, // gather summary info into test results
@@ -496,7 +495,6 @@ Test Run Summary
     // addTrxLoggerTo(loggers, target);
     testResults.quackersEnabled = testResults.quackersEnabled || useQuackers;
     try {
-      debugger;
       const result = await test({
         target,
         verbosity: finalVerbosity,
@@ -511,10 +509,8 @@ Test Run Summary
         env: testEnvironment,
         label
       });
-      debugger;
       return result;
     } catch (e) {
-      debugger;
       debug("WARN: catching SystemError instead of rethrowing it");
       const err = e as SystemError;
       return err;

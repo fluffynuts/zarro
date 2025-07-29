@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const gitFactory = require("simple-git"), spawn = requireModule("spawn"), gulp = requireModule("gulp"), gutil = requireModule("gulp-util"), log = requireModule("log"), ZarroError = requireModule("zarro-error"), { ask } = requireModule("ask"), readGitInfo = requireModule("read-git-info"), env = requireModule("env"), readPackageVersion = requireModule("read-package-version"), { runTask } = requireModule("run-task"), { withEnvironment } = requireModule("temporary-environment"), alterPackageJsonVersion = requireModule("alter-package-json-version");
+    const gitFactory = require("simple-git"), { system } = require("system-wrapper"), gulp = requireModule("gulp"), gutil = requireModule("gulp-util"), log = requireModule("log"), ZarroError = requireModule("zarro-error"), { ask } = requireModule("ask"), readGitInfo = requireModule("read-git-info"), env = requireModule("env"), readPackageVersion = requireModule("read-package-version"), { runTask } = requireModule("run-task"), { withEnvironment } = requireModule("temporary-environment"), alterPackageJsonVersion = requireModule("alter-package-json-version");
     async function rollBackPackageJson() {
         await alterPackageJsonVersion({ loadUnsetFromEnvironment: true, incrementBy: -1 });
     }
@@ -53,7 +53,7 @@
                     args.push("--registry");
                     args.push(registry);
                 }
-                await spawn("npm", args, {
+                await system("npm", args, {
                     interactive: true
                 });
             }
@@ -87,7 +87,7 @@
         }
     });
     async function npmSupportsOtpSwitch() {
-        const result = await spawn("npm", ["publish", "--help"], {
+        const result = await system("npm", ["publish", "--help"], {
             suppressOutput: true
         });
         const allStdOut = result.stdout.join("\n");

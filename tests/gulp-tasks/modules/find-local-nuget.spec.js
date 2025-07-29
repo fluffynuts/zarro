@@ -29,6 +29,7 @@ const path = __importStar(require("path"));
 const yafs_1 = require("yafs");
 const run_locked_1 = require("../../test-helpers/run-locked");
 const should_skip_slow_network_tests_1 = require("../../test-helpers/should-skip-slow-network-tests");
+const spy_on_console_1 = require("../../test-helpers/spy-on-console");
 if ((0, should_skip_slow_network_tests_1.shouldSkipSlowNetworkTests)()) {
     describe(`find-local-nuget`, () => {
         it(`skipping tests`, async () => {
@@ -72,6 +73,7 @@ else {
         });
         it(`should be able to install nuget package in dir via resolved nuget path`, async () => {
             await (0, run_locked_1.withLockedNuget)(async () => {
+                (0, spy_on_console_1.spyOnConsole)();
                 const system = requireModule("system");
                 // Arrange
                 spyOn(console, "log");

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 (function () {
-    const spawn = requireModule("spawn"), gulp = requireModule("gulp"), env = requireModule("env"), chalk = requireModule("ansi-colors"), resolveMasks = requireModule("resolve-masks"), debug = requireModule("debug")(__filename), es = require("event-stream");
+    const { system } = require("system-wrapper"), gulp = requireModule("gulp"), env = requireModule("env"), chalk = requireModule("ansi-colors"), resolveMasks = requireModule("resolve-masks"), debug = requireModule("debug")(__filename), es = require("event-stream");
     env.associate([
         env.DRY_RUN,
         env.INCLUDE_PACKAGE_JSON,
@@ -47,7 +47,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
                 });
             }
             else {
-                promises.push(spawn.call(null, proc, args, opts));
+                promises.push(system.call(null, proc, args, opts));
             }
         }, async function end() {
             try {

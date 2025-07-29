@@ -1,5 +1,7 @@
 // noinspection JSUnusedGlobalSymbols,JSUnusedLocalSymbols
-
+import type * as dotnetCli from "dotnet-cli";
+import type * as systemWrapper from "system-wrapper";
+export { dotnetCli, systemWrapper };
 import * as fs from "fs";
 import { StatsBase } from "fs";
 import { Stream, Transform } from "stream";
@@ -15,6 +17,7 @@ import { DecompressOptions, File } from "decompress";
 export * from "./gulp-tasks/modules/fetch-github-release/src";
 export * from "dotnet-cli";
 
+
 type RequireModuleFunction<T> = (module: string) => T
 
 interface RequireModule<T>
@@ -23,6 +26,11 @@ interface RequireModule<T>
 }
 
 declare global {
+
+  interface SystemResult extends systemWrapper.SystemResult {}
+  interface SystemError extends systemWrapper.SystemError {}
+  interface SystemOptionsWithKill extends systemWrapper.SystemOptionsWithKill {}
+  interface SystemCommand extends systemWrapper.SystemCommand {}
 
   function requireModule<T>(module: string): T;
 
@@ -1149,11 +1157,11 @@ declare global {
 
   }
 
-  interface SystemOptionsWithKill extends SystemOptions {
-    // this function will be filled in for you once the
-    // child process has started
-    kill: (signal?: NodeJS.Signals | number) => void;
-  }
+  // interface SystemOptionsWithKill extends SystemOptions {
+  //   // this function will be filled in for you once the
+  //   // child process has started
+  //   kill: (signal?: NodeJS.Signals | number) => void;
+  // }
 
   /**
    * @deprecated rather use the better-tested `system` module and SystemError
@@ -1222,10 +1230,10 @@ declare global {
     isSpawnResult: (o: any) => o is SpawnResult;
   }
 
-  interface SystemCommand {
-    exe: string;
-    args: string[];
-  }
+  // interface SystemCommand {
+  //   exe: string;
+  //   args: string[];
+  // }
 
   interface SystemResultImpl
     extends SystemCommand {
@@ -1256,34 +1264,31 @@ declare global {
     build(): SystemResult;
   }
 
-  type SystemResult = {
-    create(): SystemResultBuilder;
-  } & SystemResultImpl;
+  // type SystemResult = {
+  //   create(): SystemResultBuilder;
+  // } & SystemResultImpl;
+  //
+  // interface SystemError
+  //   extends Error, SystemCommand {
+  //   new(
+  //     message: string,
+  //     exe: string,
+  //     args: string[] | undefined,
+  //     exitCode: number,
+  //     stdout: Nullable<string[]>,
+  //     stderr: Nullable<string[]>
+  //   ): SystemError;
+  //
+  //   exitCode: number;
+  //   stderr: string[];
+  //   stdout: string[];
+  // }
 
-  interface SystemError
-    extends Error, SystemCommand {
-    new(
-      message: string,
-      exe: string,
-      args: string[] | undefined,
-      exitCode: number,
-      stdout: Nullable<string[]>,
-      stderr: Nullable<string[]>
-    ): SystemError;
 
-    exitCode: number;
-    stderr: string[];
-    stdout: string[];
-  }
+  // type SystemFunction = (program: string, args?: string[], options?: SystemOptions)
+  //   => Promise<SystemResult | SystemError>;
 
-  type SystemFunction = (program: string, args?: string[], options?: SystemOptions)
-    => Promise<SystemResult | SystemError>;
-
-  interface System
-    extends SystemFunction {
-    isError(o: any): o is SystemError;
-    isResult(o: any): o is SystemResult;
-  }
+  type System = systemWrapper.System;
 
   interface TempFile {
     path: string;
@@ -1416,26 +1421,10 @@ declare global {
     verbosity?: string;
   }
 
-  type DotNetVerbosity = "q" | "quiet" | "m" | "minimal" | "n" | "normal" | "d" | "detailed" | "diag" | "diagnostic";
-
-  type DotNetTestLoggers = Dictionary<Dictionary<string>>;
-
-  interface DotNetBaseOptions
-    extends IoConsumers {
-    verbosity?: DotNetVerbosity | string;
-    // when set, errors are returned instead of thrown
-    suppressErrors?: boolean;
-    suppressStdIoInErrors?: boolean;
-    suppressOutput?: boolean;
-  }
-
-  interface DotNetMsBuildOptions
-    extends DotNetBaseOptions {
-    msbuildProperties?: Dictionary<string>;
-    additionalArguments?: string[];
-
-    env?: Dictionary<string>;
-  }
+  type DotNetVerbosity = dotnetCli.DotNetVerbosity;
+  type DotNetTestLoggers = dotnetCli.DotNetTestLoggers;
+  interface DotNetBaseOptions extends dotnetCli.DotNetBaseOptions {}
+  interface DotNetMsBuildOptions extends dotnetCli.DotNetMsBuildOptions {}
 
   type GulpXBuild = (opts?: any) => Transform;
   type GulpMsBuild = (opts?: any) => Transform;
@@ -1478,228 +1467,33 @@ declare global {
 
   type GulpDotNetCover = (opts?: GulpDotNetCoverOptions) => Transform;
 
-  interface DotNetMsBuildOptionsWithTargetAndConfigurations extends DotNetMsBuildOptions {
-    target: string;
-    configuration?: string | string[];
-  }
-
-  type TerminalLogger = "auto" | "off" | "on";
-  interface DotNetCommonBuildOptions
-    extends DotNetMsBuildOptionsWithTargetAndConfigurations {
-    framework?: string;
-    runtime?: string;
-    output?: string;
-    arch?: string;
-    os?: string;
-    disableBuildServers?: boolean;
-    terminalLogger?: TerminalLogger;
-  }
-
-  interface DotNetPublishContainerOptions {
-    publishContainer?: boolean;
-    containerImageTag?: string;
-    containerRegistry?: string;
-    containerImageName?: string;
-  }
-
-  interface DotNetPublishOptions
-    extends DotNetCommonBuildOptions,
-            DotNetPublishContainerOptions {
-    useCurrentRuntime?: boolean;
-    manifest?: string;
-    noBuild?: boolean;
-    noRestore?: boolean;
-    selfContained?: boolean;
-    versionSuffix?: string;
-  }
-
-  interface DotNetPackOptions
-    extends DotNetMsBuildOptionsWithTargetAndConfigurations {
-    output?: string;
-    noBuild?: boolean;
-    includeSymbols?: boolean;
-    includeSource?: boolean;
-    noRestore?: boolean;
-    versionSuffix?: string;
-    nuspec?: string;
-    /**
-     * @description when the specified Package.nuspec is not
-     * found and this flag is set, then pack() will silently
-     * drop the option; otherwise an error will be thrown.
-     */
-    ignoreMissingNuspec?: boolean
-  }
-
-  interface DotNetBuildOptions
-    extends DotNetCommonBuildOptions {
-    noIncremental?: boolean;
-    disableBuildServers?: boolean;
-    selfContained?: boolean;
-    noDependencies?: boolean;
-    noRestore?: boolean;
-    versionSuffix?: string;
-  }
-
-  interface DotNetCleanOptions
-    extends DotNetMsBuildOptionsWithTargetAndConfigurations {
-    framework?: string;
-    runtime?: string;
-    output?: string;
-  }
-
-  interface DotNetRunProjectOptions
-    extends DotNetMsBuildOptionsWithTargetAndConfigurations {
-    framework?: string;
-    runtime?: string;
-    launchProfile?: string;
-    noLaunchProfile?: boolean;
-    noBuild?: boolean;
-    interactive?: boolean;
-    noRestore?: boolean;
-    selfContained?: boolean;
-    noSelfContained?: boolean;
-    os?: string;
-    disableBuildServers?: boolean;
-    artifactsPath?: string;
-    args?: string[]
-  }
-
-  interface DotNetNugetPushOptions
-    extends DotNetMsBuildOptionsWithTargetAndConfigurations {
-    apiKey?: string;
-    symbolApiKey?: string;
-    disableBuffering?: boolean;
-    noSymbols?: boolean;
-    skipDuplicates?: boolean;
-    noServiceEndpoint?: boolean;
-    forceEnglishOutput?: boolean;
-    source?: string;
-    symbolSource?: string;
-    timeout?: number;
-  }
-
-  interface DotNetSearchPackagesOptions
-    extends DotNetMsBuildOptions {
-    source?: string | null | undefined;
-    search?: string;
-    take?: number;
-    skip?: number;
-    exactMatch?: boolean;
-    preRelease?: boolean;
-    configFile?: string;
-    latestOnly?: boolean;
-    /**
-     * search results are typically cached in memory
-     * for 1 minute. If you absolutely _must_ have
-     * fresh data, set this to false
-     */
-    skipCache?: boolean;
-  }
-
-  interface DotNetInstallNugetPackageOption
-    extends DotNetMsBuildOptions {
-    id: string;
-    projectFile: string;
-    version?: string;
-    framework?: string;
-    noRestore?: boolean;
-    source?: string;
-    packageDirectory?: string;
-    preRelease?: boolean;
-  }
-
-  interface IoConsumers {
-    stdout?: IoConsumer;
-    stderr?: IoConsumer;
-    cwd?: string;
-    env?: NodeJS.ProcessEnv
-  }
-
-  interface DotNetTestOptions
-    extends DotNetCommonBuildOptions {
-    noBuild?: boolean;
-    noRestore?: boolean;
-    loggers?: DotNetTestLoggers;
-    settingsFile?: string;
-    env?: Dictionary<string>;
-    filter?: string;
-    diagnostics?: string;
-    label?: string;
-  }
-
-  interface NugetSource {
-    name: string;
-    url: string;
-    enabled: boolean;
-  }
-
-  interface NugetAddSourceOptions {
-    name: string;
-    url: string;
-    username?: string;
-    password?: string;
-    storePasswordInClearText?: boolean;
-    validAuthenticationTypes?: string;
-    configFile?: string;
-    enabled?: boolean;
-  }
-
-  interface DotNetPackageReference {
-    id: string;
-    version: string;
-  }
-
-  interface ResolvedContainerOption {
-    value: string;
+  type DotNetMsBuildOptionsWithTargetAndConfigurations = dotnetCli.DotNetMsBuildOptionsWithTargetAndConfigurations;
+  type TerminalLogger = dotnetCli.TerminalLogger;
+  type DotNetCommonBuildOptions = dotnetCli.DotNetCommonBuildOptions;
+  type DotNetPublishContainerOptions = dotnetCli.DotNetPublishContainerOptions;
+  type DotNetPublishOptions = dotnetCli.DotNetPublishOptions;
+  type DotNetPackOptions = dotnetCli.DotNetPackOptions;
+  type DotNetBuildOptions = dotnetCli.DotNetBuildOptions;
+  type DotNetCleanOptions = dotnetCli.DotNetCleanOptions;
+  type DotNetRunProjectOptions = dotnetCli.DotNetRunProjectOptions;
+  type DotNetNugetPushOptions = dotnetCli.DotNetNugetPushOptions;
+  type DotNetSearchPackagesOptions = dotnetCli.DotNetSearchPackagesOptions;
+  type DotNetInstallNugetPackageOption = dotnetCli.DotNetInstallNugetPackageOptions;
+  type IoConsumers = dotnetCli.IoConsumers;
+  type DotNetTestOptions = dotnetCli.DotNetTestOptions;
+  type NugetSource = dotnetCli.NugetSource;
+  type NugetAddSourceOptions = dotnetCli.NugetAddSourceOptions;
+  type DotNetPackageReference = dotnetCli.DotNetPackageReference;
+  interface ResolvedContainerOption extends dotnetCli.ResolvedContainerOption {
     environmentVariable: string;
-    option: keyof DotNetPublishContainerOptions;
-    usingFallback: boolean;
   }
-
-  interface DotNetCreateBaseOptions
-    extends DotNetBaseOptions {
-    output?: string;
-    name: string;
-    dryRun?: boolean;
-    force?: boolean;
-    skipTemplateUpdateCheck?: boolean;
-    enableDiagnostics?: boolean;
-  }
-
-  interface DotNetCreateOptions
-    extends DotNetCreateBaseOptions {
-    template: string;
-    projectFile?: string;
-  }
-
-  interface DotNetAddProjectToSolutionOptions
-    extends DotNetBaseOptions {
-    solutionFile: string;
-    projectFile: string;
-  }
-
+  type DotNetCreateBaseOptions = dotnetCli.DotNetCreateBaseOptions;
+  type DotNetCreateOptions = dotnetCli.DotNetCreateOptions;
+  type DotNetAddProjectToSolutionOptions = dotnetCli.DotNetAddProjectToSolutionOptions;
   type StringOrRegex = string | RegExp;
 
-  interface DotNetUpgradePackagesOptions {
-    pathToProjectOrSolution: string;
-    packages: StringOrRegex[],
-    preRelease?: boolean;
-    noRestore?: boolean;
-    source?: string;
-    /**
-     * defaults to true
-     */
-    showProgress?: boolean;
-    clearNugetHttpCache?: boolean;
-  }
-
-  enum DotNetCache {
-    all = "all",
-    httpCache = "http-cache",
-    globalPackages = "global-packages",
-    temp = "temp"
-  }
-
+  type DotNetUpgradePackagesOptions = dotnetCli.DotNetUpgradePackagesOptions;
+  type DotNetCache = dotnetCli.DotNetCache;
   type DotNetTestFunction = (opts: DotNetTestOptions) => Promise<SystemResult | SystemError>;
   type DotNetBuildFunction = (opts: DotNetBuildOptions) => Promise<SystemResult | SystemError>;
   type DotNetPackFunction = (opts: DotNetPackOptions) => Promise<SystemResult | SystemError>;

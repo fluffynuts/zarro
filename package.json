@@ -18,7 +18,7 @@
     "verify-no-debugger": "node index.js @",
     "clean-cache": "rimraf .jest-cache",
     "pretest": "run-s clean-cache build verify-submodules",
-    "test": "cross-env ZARRO_NO_WARN_DEPRECATED=1 jest",
+    "test": "jest --detectOpenHandles",
     "quick-test": "jest -o --no-cache",
     "clear-console": "console-cls",
     "autotest-once": "run-s clear-console build quick-test",

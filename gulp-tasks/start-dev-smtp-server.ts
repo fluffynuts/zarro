@@ -21,7 +21,7 @@
 
   gulp.task("start-dev-smtp-server", async () => {
     const
-      spawn = requireModule<Spawn>("spawn"),
+      { system } = require("system-wrapper"),
       mailpitBinary = await findOrDownloadMailpit(),
       smtpPort = env.resolveNumber(env.DEV_SMTP_PORT),
       smtpIp = env.resolveWithFallback(env.DEV_SMTP_BIND_IP, mailpitAllIps),
@@ -43,7 +43,7 @@
 
     try {
       await Promise.all([
-        spawn(
+        system(
           mailpitBinary,
           args, {
             detached: env.resolveFlag(env.DEV_SMTP_DETACHED)

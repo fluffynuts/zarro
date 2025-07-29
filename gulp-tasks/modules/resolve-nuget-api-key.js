@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const env = requireModule("env"), log = requireModule("log"), { listNugetSources } = requireModule("dotnet-cli");
+    const env = requireModule("env"), log = requireModule("log"), { listNugetSources } = require("dotnet-cli");
     async function resolveNugetApiKey(source) {
         const allKeys = resolveSourceToKeyLookup(), requestedSource = resolveSource(source);
         if (!requestedSource) {

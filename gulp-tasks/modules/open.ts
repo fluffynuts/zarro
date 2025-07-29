@@ -7,11 +7,11 @@
   const
     os = require("os"),
     ZarroError = requireModule<ZarroError>("zarro-error"),
-    spawn = requireModule<Spawn>("spawn");
+    { system } = require("system-wrapper");
 
   async function open(url: string): Promise<void> {
     const opener = findOpenerForPlatform();
-    await spawn(opener, [ url ]);
+    await system(opener, [ url ]);
   }
 
   function findOpenerForPlatform(): string {

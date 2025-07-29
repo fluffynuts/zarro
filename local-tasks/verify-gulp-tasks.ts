@@ -1,4 +1,4 @@
-// import path from "path";
+import type { StatusResult } from "simple-git";
 
 (function() {
   const
@@ -8,6 +8,14 @@
     const
       gitFactory = require("simple-git"),
       path = require("path");
+
+    const rootGit = gitFactory(".");
+    const status = (await rootGit.status()) as StatusResult;
+    if (status.current !== "master") {
+      console.warn("Running in a branch - not verifying gulp-tasks branch to be master");
+      return;
+    }
+
     try {
       if (process.env.RUNNING_IN_GITHUB_ACTION) {
         return;

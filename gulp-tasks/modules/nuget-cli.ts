@@ -5,7 +5,7 @@
     parseNugetSources = requireModule<ParseNugetSources>("parse-nuget-sources"),
     log = requireModule<Log>("log"),
     { mkdir } = require("yafs"),
-    { system } = require("system-wrapper"),
+    system = require("system-wrapper"),
     {
       pushFlag,
       pushIfSet
@@ -93,8 +93,12 @@
   }
 
   async function listSources(): Promise<NugetSource[]> {
-    const sysResult = await runNugetWith("", [ "sources", "list" ], { suppressOutput: true });
-    if (system.isError(sysResult)) {
+    const sysResult = await runNugetWith(
+      "",
+      [ "sources", "list" ],
+      { suppressOutput: true }
+    );
+    if (system.system.isError(sysResult)) {
       throw sysResult;
     }
     return parseNugetSources(sysResult.stdout);
@@ -196,11 +200,12 @@
     }
     const nuget = resolveNuget(undefined, false) ||
                   await findLocalNuget(true);
-    return await system(
+    const result = await system.system(
       nuget,
       args,
       opts
     );
+    return result;
   }
 
   module.exports = {

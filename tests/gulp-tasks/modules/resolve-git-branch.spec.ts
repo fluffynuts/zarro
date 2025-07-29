@@ -1,6 +1,8 @@
 import "expect-even-more-jest";
 import { Sandbox } from "filesystem-sandbox";
+
 const resolveGitBranch = requireModule<ResolveGitBranch>("resolve-git-branch");
+import { system } from "system-wrapper";
 
 describe(`resolve-git-branch`, () => {
   it(`should export a function`, async () => {
@@ -11,13 +13,23 @@ describe(`resolve-git-branch`, () => {
     // Assert
   });
 
-  it(`should return the remote when there is one`, async () => {
+  it(`should return the branch when there is one`, async () => {
     // Arrange
+    const sysresult = await system(
+      "git", [ "rev-parse", "--abbrev-ref", "HEAD" ], {
+        suppressOutput: true
+      }
+    );
+    const expected = sysresult.stdout[0];
+    expect(expected)
+      .toExist();
+    expect(expected)
+      .not.toBeEmptyString();
     // Act
     const zarroBranch = await resolveGitBranch();
     // Assert
     expect(zarroBranch)
-      .toEqual("master");
+      .toEqual(expected);
   });
 
   it(`should return undefined when there is no remote`, async () => {

@@ -3,12 +3,12 @@ import * as through from "through2";
 import PluginError from "plugin-error";
 import { faker } from "@faker-js/faker";
 const { streamify } = requireModule<Streamify>("streamify");
-const spawn = requireModule<Spawn>("spawn");
 const { Sandbox } = require("filesystem-sandbox");
 const gulp = requireModule<Gulp>("gulp");
+import { system } from "system-wrapper";
 import * as vinyl from "vinyl";
 
-describe(`streamify-async-function`, () => {
+describe(`streamify-function`, () => {
   interface FooOpts {
     target: string;
     flag?: boolean;
@@ -67,7 +67,7 @@ describe(`streamify-async-function`, () => {
           streamify(
             (opts: FooOpts) => Promise.resolve(),
             async (f: vinyl.BufferFile) => {
-              await spawn(
+              await system(
                 "node", [ errorJs ]
               );
               // shouldn't get here...

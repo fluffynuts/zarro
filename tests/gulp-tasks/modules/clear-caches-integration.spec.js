@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 describe(`dotnet-cli:clearCaches (integration)`, () => {
-    const { clearCaches } = requireModule("dotnet-cli");
+    const { clearCaches } = require("dotnet-cli");
     describe(`integration testing - validate that dotnet doesn't explode`, () => {
         it(`should be able to clear http cache`, async () => {
             // clearing the global cache every time I release will get old

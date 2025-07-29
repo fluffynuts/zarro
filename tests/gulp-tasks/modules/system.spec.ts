@@ -4,8 +4,10 @@ import { Sandbox } from "filesystem-sandbox";
 import { faker } from "@faker-js/faker";
 import { readTextFile } from "yafs";
 import { ChildProcess } from "child_process";
+import { spyOnConsole } from "../../test-helpers/spy-on-console";
 
 describe(`system`, () => {
+  spyOnConsole();
   const sut = requireModule<System>("system");
   describe(`default`, () => {
     it(`should run the program, output the output and return the exit code + stdio`, async () => {

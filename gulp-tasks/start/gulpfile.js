@@ -145,14 +145,14 @@ function mustInstallDeps(){
 }
 
 function initializeNpm(){
-  const spawn = requireModule("spawn");
   const os = require("os");
+  const { system } = require("system-wrapper");
   return runNpmWith([ "init" ])
     .then(() => {
       if (os.platform() === "win32") {
-        spawn("cmd", [ "/c", "node", process.argv[ 1 ] ]);
+        return system("cmd", [ "/c", "node", process.argv[ 1 ] ]);
       } else {
-        spawn("node", [ process.argv[ 1 ] ]);
+        return system("node", [ process.argv[ 1 ] ]);
       }
     });
 }
@@ -262,13 +262,13 @@ function bootstrapGulp(){
 }
 
 function runNpmWith(args){
-  const spawn = requireModule("spawn");
+  const { system } = require("system-wrapper");
   const os = require("os");
   return os.platform() === "win32"
-    ? spawn("cmd", [ "/c", "npm" ].concat(args), {
+    ? system("cmd", [ "/c", "npm" ].concat(args), {
       interactive: true
     })
-    : spawn("npm", args, {
+    : system("npm", args, {
       interactive: true
     });
 }

@@ -10,7 +10,7 @@
   gulp.task("upgrade-packages", async () => {
     const
       env = requireModule<Env>("env"),
-      { upgradePackages } = requireModule<DotNetCli>("dotnet-cli"),
+      { upgradePackages } = require("dotnet-cli"),
       rawPackageMask = env.resolveArray(env.UPGRADE_PACKAGES),
       packageMask = parseMasks(rawPackageMask, true),
       rawTargetMask = env.resolveArray(env.UPGRADE_PACKAGES_TARGET),

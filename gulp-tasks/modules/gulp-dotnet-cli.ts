@@ -1,11 +1,13 @@
-(function() {
-  const dotnetCli = requireModule<DotNetCli>("dotnet-cli");
+import * as dotnetCli from "dotnet-cli";
+
+(function () {
   const { streamify } = requireModule<Streamify>("streamify");
   const ZarroError = requireModule<ZarroError>("zarro-error");
   const { log, colors } = requireModule<GulpUtil>("gulp-util");
   const { yellowBright, cyanBright } = colors;
+  const env = requireModule<Env>("env");
 
-  function wrap<T>(fn: (opts: T) => Promise<SystemResult | SystemError>): AsyncTVoid<T> {
+  function wrap<T>(fn: (opts: T) => Promise<SystemResult | void>): AsyncTVoid<T> | AsyncVoidVoid {
     return async (opts: T) => {
       const result = await fn(opts);
       if (result instanceof Error) {
@@ -91,9 +93,9 @@
         if (copy.publishContainer) {
           const
             containerOpts = await dotnetCli.resolveContainerOptions(copy),
-            nameOpt = definitelyFind(containerOpts, o => o.option === "containerImageName"),
-            tagOpt = definitelyFind(containerOpts, o => o.option === "containerImageTag"),
-            registryOpt = definitelyFind(containerOpts, o => o.option == "containerRegistry");
+            nameOpt = definitelyFind(containerOpts, "containerImageName"),
+            tagOpt = definitelyFind(containerOpts, "containerImageTag"),
+            registryOpt = definitelyFind(containerOpts, "containerRegistry");
           logResolvedOption("Publish container", nameOpt);
           logResolvedOption("         with tag", tagOpt);
           logResolvedOption("      to registry", registryOpt);
@@ -105,22 +107,29 @@
     )
   }
 
+  const envVarLookup: Dictionary<string> = {
+    "containerImageName": env.DOTNET_PUBLISH_CONTAINER_IMAGE_NAME,
+    "containerImageTag": env.DOTNET_PUBLISH_CONTAINER_IMAGE_TAG,
+    "containerRegistry": env.DOTNET_PUBLISH_CONTAINER_REGISTRY
+  };
+
   function logResolvedOption(
     label: string,
     opt: ResolvedContainerOption
   ) {
-    log(`${ yellowBright(label) }: ${ cyanBright(opt.value) } (override with: ${opt.environmentVariable})`);
+    log(`${yellowBright(label)}: ${cyanBright(opt.value)} (override with: ${opt.environmentVariable})`);
   }
 
-  function definitelyFind<T>(
-    collection: T[],
-    predicate: ((item: T) => boolean)
-  ): T {
-    const found = collection.find(predicate);
+  function definitelyFind(
+    collection: dotnetCli.ResolvedContainerOption[],
+    key: string
+  ): ResolvedContainerOption {
+    const found = collection.find(o => o.option === key);
     if (found) {
-      return found;
+      const result = found as ResolvedContainerOption;
+      result.environmentVariable = envVarLookup[key];
     }
-    throw new ZarroError(`Unable to find item with predicate: (${ predicate })`);
+    throw new ZarroError(`Unable to find item with key: (${key})`);
   }
 
   module.exports = {

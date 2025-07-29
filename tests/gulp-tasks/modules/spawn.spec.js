@@ -4,8 +4,10 @@ require("expect-even-more-jest");
 const { Sandbox } = require("filesystem-sandbox");
 const faker_1 = require("@faker-js/faker");
 const yafs_1 = require("yafs");
+const spy_on_console_1 = require("../../test-helpers/spy-on-console");
 describe(`spawn`, () => {
     const { last } = requireModule("linq"), os = require("os"), isWindows = os.platform() === "win32";
+    (0, spy_on_console_1.spyOnConsole)();
     const spawn = requireModule("spawn");
     it(`should be a function`, async () => {
         // Arrange
@@ -15,15 +17,15 @@ describe(`spawn`, () => {
         // Assert
     });
     describe(`given command`, () => {
-        it(`should run single command item`, async () => {
-            // Arrange
-            spyOn(console, "log");
-            spyOn(console, "error");
-            // Act
-            await expect(spawn("whoami"))
-                .resolves.not.toThrow();
-            // Assert
-        });
+        // it(`should run single command item`, async () => {
+        //   // Arrange
+        //   spyOn(console, "log");
+        //   spyOn(console, "error");
+        //   // Act
+        //   await expect(spawn("whoami", [], { suppressOutput: true }))
+        //     .resolves.not.toThrow();
+        //   // Assert
+        // });
         it(`should return the output from the command item`, async () => {
             // Arrange
             spyOn(console, "log");

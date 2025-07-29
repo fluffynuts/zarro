@@ -1,5 +1,8 @@
-const system = requireModule<System>("system");
+import { spyOnConsole } from "./test-helpers/spy-on-console";
+
 describe(`integration testing`, () => {
+  spyOnConsole();
+  const system = requireModule<System>("system");
   it(`should be able to run with --show-env`, async () => {
     // Arrange
     const args = [

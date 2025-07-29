@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("expect-even-more-jest");
 const faker_1 = require("@faker-js/faker");
 describe(`resolve-nuget-api-key`, () => {
-    const resolveNugetApiKey = requireModule("resolve-nuget-api-key"), dotnetCli = requireModule("dotnet-cli"), which = requireModule("which"), env = requireModule("env");
+    const resolveNugetApiKey = requireModule("resolve-nuget-api-key"), dotnetCli = require("dotnet-cli"), which = requireModule("which"), env = requireModule("env");
     async function findRandomKnownNugetSource() {
         const all = await dotnetCli.listNugetSources();
         return faker_1.faker.helpers.arrayElement(all);
@@ -117,7 +117,7 @@ describe(`resolve-nuget-api-key`, () => {
             it(`should handle NUGET_PUSH_SOURCE being an url`, async () => {
                 // Arrange
                 blockEnvVars(env.NUGET_API_KEY, env.NUGET_SOURCE, env.NUGET_PUSH_SOURCE, env.NUGET_SOURCES);
-                const dotnetCli = requireModule("dotnet-cli"), knownSources = await dotnetCli.listNugetSources(), selectedSource = faker_1.faker.helpers.arrayElement(knownSources), expected = faker_1.faker.string.alphanumeric(32);
+                const dotnetCli = require("dotnet-cli"), knownSources = await dotnetCli.listNugetSources(), selectedSource = faker_1.faker.helpers.arrayElement(knownSources), expected = faker_1.faker.string.alphanumeric(32);
                 const apiKeys = {
                     ["https://some-private-repository"]: faker_1.faker.string.alphanumeric(32),
                     [selectedSource.url]: expected

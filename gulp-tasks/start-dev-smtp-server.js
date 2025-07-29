@@ -11,7 +11,7 @@
         env.DEV_SMTP_OPEN_INTERFACE
     ], "start-dev-smtp-server");
     gulp.task("start-dev-smtp-server", async () => {
-        const spawn = requireModule("spawn"), mailpitBinary = await findOrDownloadMailpit(), smtpPort = env.resolveNumber(env.DEV_SMTP_PORT), smtpIp = env.resolveWithFallback(env.DEV_SMTP_BIND_IP, mailpitAllIps), smtpInterfacePort = env.resolveNumber(env.DEV_SMTP_INTERFACE_PORT), smtpInterfaceIp = env.resolveWithFallback(env.DEV_SMTP_INTERFACE_BIND_IP, mailpitAllIps), raiseErrors = !env.resolveFlag(env.DEV_SMTP_IGNORE_ERRORS);
+        const { system } = require("system-wrapper"), mailpitBinary = await findOrDownloadMailpit(), smtpPort = env.resolveNumber(env.DEV_SMTP_PORT), smtpIp = env.resolveWithFallback(env.DEV_SMTP_BIND_IP, mailpitAllIps), smtpInterfacePort = env.resolveNumber(env.DEV_SMTP_INTERFACE_PORT), smtpInterfaceIp = env.resolveWithFallback(env.DEV_SMTP_INTERFACE_BIND_IP, mailpitAllIps), raiseErrors = !env.resolveFlag(env.DEV_SMTP_IGNORE_ERRORS);
         if (mailpitBinary === undefined) {
             const downloadError = `Unable to download mailpit from GitHub`;
             if (raiseErrors) {
@@ -27,7 +27,7 @@
         pushSmtpInterfacePort(args, smtpInterfaceIp, smtpInterfacePort);
         try {
             await Promise.all([
-                spawn(mailpitBinary, args, {
+                system(mailpitBinary, args, {
                     detached: env.resolveFlag(env.DEV_SMTP_DETACHED)
                 }),
                 openSmtpInterfaceIfRequired(smtpInterfaceIp, smtpInterfacePort)

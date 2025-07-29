@@ -1,10 +1,11 @@
 import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
+import { PackageSource } from "node-nuget-client/dist/try-find-nuget-config";
 
 describe(`resolve-nuget-api-key`, () => {
   const
     resolveNugetApiKey = requireModule<ResolveNugetApiKey>("resolve-nuget-api-key"),
-    dotnetCli = requireModule<DotNetCli>("dotnet-cli"),
+    dotnetCli = require("dotnet-cli"),
     which = requireModule<Which>("which"),
     env = requireModule<Env>("env");
 
@@ -143,7 +144,7 @@ describe(`resolve-nuget-api-key`, () => {
         );
         const
           knownSources = await dotnetCli.listNugetSources(),
-          selectedSource = faker.helpers.arrayElement(knownSources),
+          selectedSource = faker.helpers.arrayElement(knownSources) as NugetSource,
           expected = faker.string.alphanumeric(32);
 
         const apiKeys = {
@@ -168,9 +169,9 @@ describe(`resolve-nuget-api-key`, () => {
           env.NUGET_SOURCES
         );
         const
-          dotnetCli = requireModule<DotNetCli>("dotnet-cli"),
+          dotnetCli = require("dotnet-cli"),
           knownSources = await dotnetCli.listNugetSources(),
-          selectedSource = faker.helpers.arrayElement(knownSources),
+          selectedSource = faker.helpers.arrayElement(knownSources) as NugetSource,
           expected = faker.string.alphanumeric(32);
 
         const apiKeys = {

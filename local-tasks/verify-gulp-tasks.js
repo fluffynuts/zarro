@@ -1,9 +1,15 @@
 "use strict";
-// import path from "path";
+Object.defineProperty(exports, "__esModule", { value: true });
 (function () {
     const gulp = requireModule("gulp");
     gulp.task("verify-gulp-tasks", async () => {
         const gitFactory = require("simple-git"), path = require("path");
+        const rootGit = gitFactory(".");
+        const status = (await rootGit.status());
+        if (status.current !== "master") {
+            console.warn("Running in a branch - not verifying gulp-tasks branch to be master");
+            return;
+        }
         try {
             if (process.env.RUNNING_IN_GITHUB_ACTION) {
                 return;

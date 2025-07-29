@@ -1,7 +1,7 @@
 (function() {
   const
     gitFactory = require("simple-git"),
-    spawn = requireModule<Spawn>("spawn"),
+    { system } = require("system-wrapper"),
     gulp = requireModule<GulpWithHelp>("gulp"),
     gutil = requireModule<GulpUtil>("gulp-util"),
     log = requireModule<Log>("log"),
@@ -79,7 +79,7 @@
           args.push(registry);
         }
 
-        await spawn("npm", args, {
+        await system("npm", args, {
           interactive: true
         });
       }
@@ -117,7 +117,7 @@
   });
 
   async function npmSupportsOtpSwitch() {
-    const result = await spawn("npm", [ "publish", "--help" ], {
+    const result = await system("npm", [ "publish", "--help" ], {
       suppressOutput: true
     });
     const allStdOut = result.stdout.join("\n");

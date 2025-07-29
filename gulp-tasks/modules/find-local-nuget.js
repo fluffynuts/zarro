@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const path = require("path"), log = requireModule("log"), { fileExists, writeTextFile, chmod } = require("yafs"), resolveNuget = requireModule("resolve-nuget"), shimNuget = requireModule("shim-nuget"), pathUnquote = requireModule("path-unquote"), downloadNuget = requireModule("download-nuget"), env = requireModule("env");
+    const path = require("path"), log = requireModule("log"), { fileExists } = require("yafs"), resolveNuget = requireModule("resolve-nuget"), shimNuget = requireModule("shim-nuget"), pathUnquote = requireModule("path-unquote"), downloadNuget = requireModule("download-nuget"), env = requireModule("env");
     let startedDownload = false, resolver = (_) => {
     }, lastResolution = new Promise(function (resolve) {
         resolver = resolve;

@@ -2,7 +2,7 @@
   const
     env = requireModule<Env>("env"),
     log = requireModule<Log>("log"),
-    { listNugetSources } = requireModule<DotNetCli>("dotnet-cli");
+    { listNugetSources } = require("dotnet-cli");
 
   async function resolveNugetApiKey(
     source?: string

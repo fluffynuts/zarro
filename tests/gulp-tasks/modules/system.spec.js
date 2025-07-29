@@ -8,7 +8,9 @@ const os_1 = __importDefault(require("os"));
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 const faker_1 = require("@faker-js/faker");
 const yafs_1 = require("yafs");
+const spy_on_console_1 = require("../../test-helpers/spy-on-console");
 describe(`system`, () => {
+    (0, spy_on_console_1.spyOnConsole)();
     const sut = requireModule("system");
     describe(`default`, () => {
         it(`should run the program, output the output and return the exit code + stdio`, async () => {

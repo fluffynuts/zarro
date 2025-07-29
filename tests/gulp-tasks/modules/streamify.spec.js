@@ -31,10 +31,10 @@ const through = __importStar(require("through2"));
 const plugin_error_1 = __importDefault(require("plugin-error"));
 const faker_1 = require("@faker-js/faker");
 const { streamify } = requireModule("streamify");
-const spawn = requireModule("spawn");
 const { Sandbox } = require("filesystem-sandbox");
 const gulp = requireModule("gulp");
-describe(`streamify-async-function`, () => {
+const system_wrapper_1 = require("system-wrapper");
+describe(`streamify-function`, () => {
     const captured = {};
     async function foo(opts) {
         captured.opts = opts;
@@ -73,7 +73,7 @@ describe(`streamify-async-function`, () => {
         await new Promise(resolve => {
             gulp.src(`${sandbox.path}/**/*.txt`)
                 .pipe(streamify((opts) => Promise.resolve(), async (f) => {
-                await spawn("node", [errorJs]);
+                await (0, system_wrapper_1.system)("node", [errorJs]);
                 // shouldn't get here...
                 return {};
             }, "test plugin", "foo")).on("error", e => {

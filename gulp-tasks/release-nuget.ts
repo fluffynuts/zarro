@@ -21,7 +21,7 @@
           FsEntities,
           ls
         } = require("yafs"),
-        { nugetPush } = requireModule<DotNetCli>("dotnet-cli"),
+        { nugetPush } = require("dotnet-cli"),
         packageDir = env.resolve(env.PACK_TARGET_FOLDER),
         packageFiles = await ls(packageDir, {
           fullPaths: true,

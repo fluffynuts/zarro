@@ -2,7 +2,7 @@
   const
     path = require("path"),
     log = requireModule<Log>("log"),
-    { fileExists, writeTextFile, chmod } = require("yafs"),
+    { fileExists } = require("yafs"),
     resolveNuget = requireModule<ResolveNuget>("resolve-nuget"),
     shimNuget = requireModule<ShimNuget>("shim-nuget"),
     pathUnquote = requireModule<PathUnquote>("path-unquote"),

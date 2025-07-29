@@ -4,6 +4,7 @@ import * as path from "path";
 import { FsEntities, ls } from "yafs";
 import { withLockedNuget } from "../../test-helpers/run-locked";
 import { shouldSkipSlowNetworkTests } from "../../test-helpers/should-skip-slow-network-tests";
+import { spyOnConsole } from "../../test-helpers/spy-on-console";
 
 if (shouldSkipSlowNetworkTests()) {
   describe(`find-local-nuget`, () => {
@@ -55,6 +56,7 @@ if (shouldSkipSlowNetworkTests()) {
 
     it(`should be able to install nuget package in dir via resolved nuget path`, async () => {
       await withLockedNuget(async () => {
+        spyOnConsole();
         const system = requireModule<System>("system");
         // Arrange
         spyOn(console, "log");
