@@ -1,12 +1,15 @@
 "use strict";
 (function () {
-    const os = require("os"), chalk = requireModule("ansi-colors"), log = requireModule("log"), env = requireModule("env"), gitFactory = require("simple-git"), failAfter = requireModule("fail-after"), readMainBranchName = requireModule("read-main-branch-name"), readAllGitRemotes = requireModule("read-all-git-remotes"), readCurrentBranch = requireModule("read-current-git-branch"), readGitCommitDeltaCount = requireModule("read-git-commit-delta-count"), readLastFetchTime = requireModule("read-last-fetch-time"), gulp = requireModule("gulp"), ZarroError = requireModule("zarro-error"), taskName = "verify-up-to-date";
+    const os = require("os"), chalk = requireModule("ansi-colors"), log = requireModule("log"), env = requireModule("env"), gitFactory = require("simple-git"), failAfter = requireModule("fail-after"), readMainBranchName = requireModule("read-main-branch-name"), readAllGitRemotes = requireModule("read-all-git-remotes"), readCurrentBranch = requireModule("read-current-git-branch"), readGitCommitDeltaCount = requireModule("read-git-commit-delta-count"), readLastFetchTime = requireModule("read-last-fetch-time"), gulp = requireModule("gulp"), gitBroadcastConfigFile = ".git-broadcast", { heredoc } = require("heredoc-ts"), { fileExists, readTextFile } = require("yafs"), ZarroError = requireModule("zarro-error"), taskName = "verify-up-to-date";
     env.associate([
         "SKIP_FETCH_ON_VERIFY",
         "ENFORCE_VERIFICATION",
         "INTERACTIVE"
     ], taskName);
     gulp.task(taskName, async () => {
+        if (await isDetachedGitBroadcastBranch()) {
+            return;
+        }
         // git on OSX is still inserting a pager somewhere, breaking this, so temporarily
         // disable this test
         if (os.platform() === "darwin") {
@@ -68,6 +71,24 @@
             }
         }
     });
+    async function isDetachedGitBroadcastBranch() {
+        var _a;
+        if (!await fileExists(gitBroadcastConfigFile)) {
+            return false;
+        }
+        try {
+            const contents = await readTextFile(gitBroadcastConfigFile), config = JSON.parse(contents), result = (_a = config === null || config === void 0 ? void 0 : config.detached) !== null && _a !== void 0 ? _a : true;
+            log.warn(heredoc `
+      Treating this branch as detached via .git-broadcast
+      - validation that master is merged into this branch is SKIPPED
+      `);
+            return result;
+        }
+        catch (e) {
+            log.warn(`Error reading / parsing ${gitBroadcastConfigFile} - assuming detached for safety`);
+            return true;
+        }
+    }
     async function resolveDefaultVerifyTarget(remotes) {
         remotes = remotes !== null && remotes !== void 0 ? remotes : [];
         const mainBranchName = await readMainBranchName(), remote = remotes[0];

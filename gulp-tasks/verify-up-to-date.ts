@@ -12,6 +12,9 @@
     readGitCommitDeltaCount = requireModule<ReadGitCommitDeltaCount>("read-git-commit-delta-count"),
     readLastFetchTime = requireModule<ReadLastFetchTime>("read-last-fetch-time"),
     gulp = requireModule<GulpWithHelp>("gulp"),
+    gitBroadcastConfigFile = ".git-broadcast",
+    { heredoc } = require("heredoc-ts"),
+    { fileExists, readTextFile } = require("yafs"),
     ZarroError = requireModule<ZarroError>("zarro-error"),
     taskName = "verify-up-to-date";
 
@@ -22,6 +25,9 @@
   ], taskName);
 
   gulp.task(taskName, async () => {
+    if (await isDetachedGitBroadcastBranch()) {
+      return;
+    }
     // git on OSX is still inserting a pager somewhere, breaking this, so temporarily
     // disable this test
     if (os.platform() === "darwin") {
@@ -110,6 +116,26 @@
       }
     }
   });
+
+  async function isDetachedGitBroadcastBranch(): Promise<boolean> {
+    if (!await fileExists(gitBroadcastConfigFile)) {
+      return false;
+    }
+    try {
+      const
+        contents = await readTextFile(gitBroadcastConfigFile),
+        config = JSON.parse(contents),
+        result = config?.detached ?? true;
+      log.warn(heredoc`
+      Treating this branch as detached via .git-broadcast
+      - validation that master is merged into this branch is SKIPPED
+      `);
+      return result;
+    } catch (e: any) {
+      log.warn(`Error reading / parsing ${gitBroadcastConfigFile} - assuming detached for safety`);
+      return true;
+    }
+  }
 
   async function resolveDefaultVerifyTarget(remotes?: string[]) {
     remotes = remotes ?? [];
