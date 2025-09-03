@@ -157,7 +157,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
         }, {});
         const result = [...testProjects];
         const rankKeys = Object.keys(rankLookup);
-        debugger;
         return result.sort((a, b) => {
             const rankA = findProjectRank(rankLookup, rankKeys, a), rankB = findProjectRank(rankLookup, rankKeys, b);
             if (rankA === rankB) {
