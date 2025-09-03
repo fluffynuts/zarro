@@ -267,7 +267,7 @@ import { StyleFunction } from "ansi-colors";
       const project = path.basename(lowerNeedle)
         .replace(/\.dll$/i, "")
         .replace(/\.csproj$/i, "");
-      if (project === key) {
+      if (project === lowerKey) {
         return key;
       }
     }

@@ -270,7 +270,8 @@ if (shouldSkipSlowNetworkTests()) {
               "bbb.csproj",
               "ccc.csproj"
             ];
-          process.env.TEST_ORDER = "bbb,ccc";
+          spyOn(env, "resolveArray")
+            .mockReturnValue([ "bbb", "ccc" ]);
           const
             expected = [
               "bbb.csproj",
@@ -282,6 +283,49 @@ if (shouldSkipSlowNetworkTests()) {
           // Assert
           expect(result)
             .toEqual(expected);
+        });
+        it(`larger list: should prioritise according to the var`, async () => {
+          // Arrange
+          const
+            projects = [
+              "/path/to/projectRoot/BLL.Tests/BLL.Tests.csproj",
+              "/path/to/projectRoot/BLL.Tests.Commands/BLL.Tests.Commands.csproj",
+              "/path/to/projectRoot/BLL.Tests.Models/BLL.Tests.Models.csproj",
+              "/path/to/projectRoot/BLL.Tests.Queries/BLL.Tests.Queries.csproj",
+              "/path/to/projectRoot/BLL.Tests.Workflows/BLL.Tests.Workflows.csproj",
+              "/path/to/projectRoot/BLL.Vouchers.Tests/BLL.Vouchers.Tests.csproj",
+              "/path/to/projectRoot/Claxon.Queue.Tests/Clyral.PrinterQueue.Tests.csproj",
+              "/path/to/projectRoot/DAL.Tests/DAL.Tests.csproj",
+              "/path/to/projectRoot/Moocows.BLL.Tests/Moocows.BLL.Tests.csproj",
+              "/path/to/projectRoot/ServiceHost.Tests/ServiceHost.Tests.csproj",
+              "/path/to/projectRoot/CowMoos.LoadTest.MinimalDatabase.Tests/CowMoos.LoadTest.MinimalDatabase.Tests.csproj",
+              "/path/to/projectRoot/CowMoos.LoadTestClient.Tests/CowMoos.LoadTestClient.Tests.csproj",
+              "/path/to/projectRoot/CowMoos.Shared.Tests/CowMoos.Shared.Tests.csproj",
+              "/path/to/projectRoot/CowMoos.Tests.Common.Tests/CowMoos.Tests.Common.Tests.csproj",
+              "/path/to/projectRoot/CowMoos.Tests.LongRunningBatchSagaTests/CowMoos.Tests.LongRunningBatchSagaTests.csproj",
+              "/path/to/projectRoot/CowMoos.Web.Areas.Admin.Tests/CowMoos.Web.Areas.Admin.Tests.csproj",
+              "/path/to/projectRoot/CowMoos.Web.Areas.Api.Tests/CowMoos.Web.Areas.Api.Tests.csproj",
+              "/path/to/projectRoot/CowMoos.Web.Areas.Application.Tests/CowMoos.Web.Areas.Application.Tests.csproj",
+              "/path/to/projectRoot/CowMoos.Web.Tests/CowMoos.Web.Tests.csproj"
+            ];
+          spyOn(env, "resolveArray")
+            .mockReturnValue([
+              "BLL.Tests.Commands",
+              "BLL.Tests.Queries",
+              "BLL.Tests",
+              "CowMoos.Web.Areas.Api.Tests"
+            ]);
+          // Act
+          const result = sortTestProjects(projects);
+          // Assert
+          expect(result[0])
+            .toContain("BLL.Tests.Commands");
+          expect(result[1])
+            .toContain("BLL.Tests.Queries");
+          expect(result[2])
+            .toContain("BLL.Tests");
+          expect(result[3])
+            .toContain("CowMoos.Web.Areas.Api.Tests");
         });
       });
     });

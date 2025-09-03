@@ -183,7 +183,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
             const project = path.basename(lowerNeedle)
                 .replace(/\.dll$/i, "")
                 .replace(/\.csproj$/i, "");
-            if (project === key) {
+            if (project === lowerKey) {
                 return key;
             }
         }
