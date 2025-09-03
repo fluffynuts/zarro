@@ -218,7 +218,6 @@ if (shouldSkipSlowNetworkTests()) {
           .mockReturnValue();
         const yellow = jest.fn()
           .mockImplementation(s => {
-            debugger;
             collected.push(s);
             return s;
           });

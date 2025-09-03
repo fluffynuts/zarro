@@ -812,7 +812,6 @@ describe(`nuget-cli`, () => {
       args: string[],
       opts?: SystemOptions
     ) => {
-      debugger;
       if ([ "sources", "list" ].every((el, idx) => el === args[idx])) {
         const lines = [] as string[];
         let idx = 1;
