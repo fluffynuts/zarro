@@ -271,7 +271,7 @@ Test Run Summary
             acc.push({ project, runTimeMs: cur.runTimeMs });
             return acc;
         }, []);
-        console.log(yellow(`Test suite timings:`));
+        console.log(yellow(`\nTest suite timings:`));
         for (const r of assembliesAndTimes) {
             console.log(yellow(`  ${r.project}: ${nunitLikeTime(r.runTimeMs)}`));
         }

@@ -215,7 +215,7 @@ else {
                 expect(collected.length)
                     .toEqual(4);
                 expect(collected[0])
-                    .toEqual("Test suite timings:");
+                    .toEqual("\nTest suite timings:");
                 expect(collected[1].trimStart())
                     .toEqual("failed: 5.0 seconds");
                 expect(collected[2].trimStart())
