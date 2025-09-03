@@ -284,6 +284,7 @@ declare global {
     testAsDotNetCore: DotNetTester;
     shouldTestInParallel: (testProjectPaths: string[]) => Promise<boolean>;
     logTestSuiteTimes: (results: ResultOrError[], styleFn: StyleFunction) => void;
+    sortTestProjects: (projects: string[]) => string;
     testOneDotNetCoreProject: (
       target: string,
       configuration: string,
@@ -403,6 +404,7 @@ declare global {
     "NUNIT_LABELS" |
     "NUNIT_PROCESS" |
     "TEST_INCLUDE" |
+    "TEST_ORDER" |
     "TEST_ADDITIONAL_INCLUDE" |
     "TEST_EXCLUDE" |
     "TEST_ADDITIONAL_EXCLUDE" |
@@ -611,6 +613,7 @@ declare global {
     NUNIT_LABELS: StringEnvVar; // for now, at least
     NUNIT_PROCESS: StringEnvVar;
     TEST_INCLUDE: StringEnvVar;
+    TEST_ORDER: StringEnvVar;
     TEST_ADDITIONAL_INCLUDE: StringEnvVar;
     TEST_EXCLUDE: StringEnvVar;
     TEST_ADDITIONAL_EXCLUDE: StringEnvVar;

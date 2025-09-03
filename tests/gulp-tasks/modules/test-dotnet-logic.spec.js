@@ -205,7 +205,6 @@ else {
                     .mockReturnValue();
                 const yellow = jest.fn()
                     .mockImplementation(s => {
-                    debugger;
                     collected.push(s);
                     return s;
                 });
@@ -222,6 +221,45 @@ else {
                     .toStartWith("project2:");
                 expect(collected[3].trimStart())
                     .toStartWith("project1:");
+            });
+        });
+        describe(`sortTestProjects`, () => {
+            const env = requireModule("env"), { sortTestProjects } = requireModule("test-dotnet-logic");
+            describe(`when TEST_ORDER env var not set`, () => {
+                it(`should not change the order`, async () => {
+                    // Arrange
+                    const projects = [
+                        "bbb.csproj",
+                        "aaa.csproj"
+                    ], expected = [...projects];
+                    process.env.TEST_ORDER = "";
+                    // Act
+                    const result = sortTestProjects(projects);
+                    // Assert
+                    expect(result)
+                        .toEqual(expected);
+                });
+            });
+            describe(`when TEST_ORDER env var set`, () => {
+                it(`should prioritise according to the var`, async () => {
+                    // Arrange
+                    const projects = [
+                        "aaa.csproj",
+                        "bbb.csproj",
+                        "ccc.csproj"
+                    ];
+                    process.env.TEST_ORDER = "bbb,ccc";
+                    const expected = [
+                        "bbb.csproj",
+                        "ccc.csproj",
+                        "aaa.csproj"
+                    ];
+                    // Act
+                    const result = sortTestProjects(projects);
+                    // Assert
+                    expect(result)
+                        .toEqual(expected);
+                });
             });
         });
         const totalRe = /\s*test count:\s*(?<value>\d+)/i;

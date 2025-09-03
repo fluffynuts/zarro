@@ -226,6 +226,12 @@
     });
 
     env.register({
+      name: "TEST_ORDER",
+      help: "comma-separated list of project names or paths to use as an ordering guide when testing dotnet projects",
+      default: ""
+    })
+
+    env.register({
       name: "TEST_ADDITIONAL_EXCLUDE",
       help: "And additional list of test exclusions - perhaps you'd like a subset test task?"
     });

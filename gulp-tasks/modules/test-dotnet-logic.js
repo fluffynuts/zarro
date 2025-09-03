@@ -146,6 +146,49 @@ Object.defineProperty(exports, "__esModule", { value: true });
         logParallelState(testInParallel, parallelFlag);
         return testInParallel;
     }
+    function sortTestProjects(testProjects) {
+        const envOrder = env.resolveArray(env.TEST_ORDER);
+        if (envOrder.length === 0) {
+            return testProjects;
+        }
+        const rankLookup = envOrder.reduce((acc, cur, idx) => {
+            acc[cur] = testProjects.length - idx;
+            return acc;
+        }, {});
+        const result = [...testProjects];
+        const rankKeys = Object.keys(rankLookup);
+        debugger;
+        return result.sort((a, b) => {
+            const rankA = findProjectRank(rankLookup, rankKeys, a), rankB = findProjectRank(rankLookup, rankKeys, b);
+            if (rankA === rankB) {
+                return 0;
+            }
+            return rankA > rankB ? -1 : 1;
+        });
+    }
+    function findProjectRank(lookup, keys, seek) {
+        var _a;
+        const k = findBestMatch(seek, keys);
+        if (!k) {
+            return 0;
+        }
+        return (_a = lookup[k]) !== null && _a !== void 0 ? _a : 0;
+    }
+    function findBestMatch(needle, haystack) {
+        const lowerNeedle = needle.toLowerCase();
+        for (const key of haystack) {
+            const lowerKey = key.toLowerCase();
+            if (lowerKey.endsWith(lowerNeedle)) {
+                return key;
+            }
+            const project = path.basename(lowerNeedle)
+                .replace(/\.dll$/i, "")
+                .replace(/\.csproj$/i, "");
+            if (project === key) {
+                return key;
+            }
+        }
+    }
     async function testAsDotNetCore(configuration, testProjects) {
         const runInParallel = requireModule("run-in-parallel"), testResults = {
             quackersEnabled: false,
@@ -592,6 +635,7 @@ Test Run Summary
         shouldTestInParallel,
         testOneDotNetCoreProject,
         testAsDotNetCore,
-        logTestSuiteTimes
+        logTestSuiteTimes,
+        sortTestProjects
     };
 })();

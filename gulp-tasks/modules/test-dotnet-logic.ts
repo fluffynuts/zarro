@@ -16,8 +16,8 @@ import { StyleFunction } from "ansi-colors";
     QUACKERS_SUMMARY_TOTALS_COMPLETE_MARKER = "::totals_summary_complete::",
     QUACKERS_OUTPUT_FAILURES_INLINE = "true",
     quackersLogPrefixLength = QUACKERS_LOG_PREFIX.length,
-    quackersFullSummaryStartMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_START_MARKER }`,
-    quackersFullSummaryCompleteMarker = `${ QUACKERS_LOG_PREFIX }${ QUACKERS_SUMMARY_COMPLETE_MARKER }`,
+    quackersFullSummaryStartMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_START_MARKER}`,
+    quackersFullSummaryCompleteMarker = `${QUACKERS_LOG_PREFIX}${QUACKERS_SUMMARY_COMPLETE_MARKER}`,
     {
       rm,
       ls,
@@ -84,7 +84,7 @@ import { StyleFunction } from "ansi-colors";
     });
 
     for (const f of agentLogs.concat(internalTraces)) {
-      debug(`delete test diagnostic: ${ f }`);
+      debug(`delete test diagnostic: ${f}`);
       await rm(f);
     }
   }
@@ -142,7 +142,7 @@ import { StyleFunction } from "ansi-colors";
       config.options.process = nunitProcess;
       logInfo.process = "Process model for NUnit";
     }
-    log.info(`Using NUnit runner at ${ config.executable }`);
+    log.info(`Using NUnit runner at ${config.executable}`);
     log.info("Find files:", source);
     logConfig(config.options, logInfo);
     debug({
@@ -199,7 +199,7 @@ import { StyleFunction } from "ansi-colors";
     for (const project of testProjectPaths) {
       if (!await projectReferencesQuackers(project)) {
         if (env.resolveFlag(env.DOTNET_TEST_PARALLEL)) {
-          log.warn(`Parallel testing for dotnet targets disabled because '${ project }' does not reference Quackers.TestLogger`);
+          log.warn(`Parallel testing for dotnet targets disabled because '${project}' does not reference Quackers.TestLogger`);
         }
         allProjectsReferenceQuackers = false;
         break;
@@ -214,6 +214,63 @@ import { StyleFunction } from "ansi-colors";
     }
     logParallelState(testInParallel, parallelFlag);
     return testInParallel;
+  }
+
+  function sortTestProjects(
+    testProjects: string[]
+  ) {
+    const envOrder = env.resolveArray(env.TEST_ORDER);
+    if (envOrder.length === 0) {
+      return testProjects;
+    }
+    const rankLookup = envOrder.reduce(
+      (acc, cur, idx) => {
+        acc[cur] = testProjects.length - idx;
+        return acc;
+      }, {} as Dictionary<number>
+    );
+    const result = [...testProjects];
+    const rankKeys = Object.keys(rankLookup);
+    return result.sort((a, b) => {
+      const
+        rankA = findProjectRank(rankLookup, rankKeys, a),
+        rankB = findProjectRank(rankLookup, rankKeys, b);
+      if (rankA === rankB) {
+        return 0;
+      }
+      return rankA > rankB ? -1 : 1;
+    });
+  }
+
+  function findProjectRank(
+    lookup: Dictionary<number>,
+    keys: string[],
+    seek: string
+  ) {
+    const k = findBestMatch(seek, keys);
+    if (!k) {
+      return 0;
+    }
+    return lookup[k] ?? 0;
+  }
+
+  function findBestMatch(
+    needle: string,
+    haystack: string[]
+  ) {
+    const lowerNeedle = needle.toLowerCase();
+    for (const key of haystack) {
+      const lowerKey = key.toLowerCase();
+      if (lowerKey.endsWith(lowerNeedle)) {
+        return key;
+      }
+      const project = path.basename(lowerNeedle)
+        .replace(/\.dll$/i, "")
+        .replace(/\.csproj$/i, "");
+      if (project === key) {
+        return key;
+      }
+    }
   }
 
   async function testAsDotNetCore(
@@ -243,9 +300,9 @@ import { StyleFunction } from "ansi-colors";
       ? env.resolveNumber("MAX_CONCURRENCY")
       : 1;
 
-    console.log(`Will run tests for project${ testProjectPaths.length === 1 ? "" : "s" } with concurrency ${ concurrency }:`);
+    console.log(`Will run tests for project${testProjectPaths.length === 1 ? "" : "s"} with concurrency ${concurrency}:`);
     for (const projectPath of testProjectPaths) {
-      console.log(`  ${ projectPath }`);
+      console.log(`  ${projectPath}`);
     }
 
     const rebuild = env.resolveFlag(env.DOTNET_TEST_REBUILD);
@@ -254,7 +311,7 @@ import { StyleFunction } from "ansi-colors";
     const tasks = testProjectPaths.map(
       (path, idx) => {
         return async () => {
-          debug(`${ idx }  start test run ${ path }`);
+          debug(`${idx}  start test run ${path}`);
           try {
             const result = await testOneDotNetCoreProject(
               path,
@@ -264,11 +321,11 @@ import { StyleFunction } from "ansi-colors";
               runningInParallel,
               rebuild,
               suppressOutput,
-              `(${ idx + 1 } / ${ testProjectPaths.length })`
+              `(${idx + 1} / ${testProjectPaths.length})`
             );
             testProcessResults.push(result);
           } catch (e) {
-            console.error(`unable to test dotnet core project '${ path }':\n${ e }`);
+            console.error(`unable to test dotnet core project '${path}':\n${e}`);
             process.exit(1);
           }
         };
@@ -302,9 +359,9 @@ import { StyleFunction } from "ansi-colors";
         const errors = (result.stderr || []);
         if (errors.length === 0) {
           if (!haveGenericWarning) {
-            debug(`Test run fails for: ${ tryFindTestProjectFromTestCli(result.args) }\nstdout: ${ result.stdout.join(
-              "\n") }`);
-            allErrors.push(`Test run fails for: ${ tryFindTestProjectFromTestCli(result.args) }`);
+            debug(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}\nstdout: ${result.stdout.join(
+              "\n")}`);
+            allErrors.push(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}`);
             haveGenericWarning = true;
           }
         } else {
@@ -313,7 +370,7 @@ import { StyleFunction } from "ansi-colors";
       }
     }
     if (allErrors.length) {
-      throw new Error(`One or more test runs failed:\n\t${ allErrors.join("\n\t") }`);
+      throw new Error(`One or more test runs failed:\n\t${allErrors.join("\n\t")}`);
     }
   }
 
@@ -354,15 +411,15 @@ import { StyleFunction } from "ansi-colors";
     logSlow(testResults, cyan);
     console.log(yellow(`
 Test Run Summary
-  Overall result: ${ overallResultFor(testResults) }
-  Test Count: ${ total }
-    Passed: ${ testResults.passed } 
-    Failed: ${ testResults.failed }
-    Skipped: ${ testResults.skipped }
-    Slow: ${ testResults.slowSummary.length }
-  Start time: ${ dateString(testResults.started) }
-    End time: ${ dateString(now) }
-    Duration: ${ runTime }
+  Overall result: ${overallResultFor(testResults)}
+  Test Count: ${total}
+    Passed: ${testResults.passed} 
+    Failed: ${testResults.failed}
+    Skipped: ${testResults.skipped}
+    Slow: ${testResults.slowSummary.length}
+  Start time: ${dateString(testResults.started)}
+    End time: ${dateString(now)}
+    Duration: ${runTime}
 `));
     console.log("\n");
   }
@@ -446,7 +503,7 @@ Test Run Summary
     if (!lines || lines.length == 0) {
       return;
     }
-    console.log(`\n${ heading }`);
+    console.log(`\n${heading}`);
     let
       blankLines = 0,
       failIndex = 1;
@@ -460,7 +517,7 @@ Test Run Summary
       if (blankLines > 1) {
         continue;
       }
-      const substituted = line.replace(marker, `[${ failIndex }]`);
+      const substituted = line.replace(marker, `[${failIndex}]`);
       if (substituted !== line) {
         failIndex++;
       }
@@ -488,7 +545,7 @@ Test Run Summary
     const
       ms = totalMs % 1000,
       seconds = Math.floor(totalMs / 1000);
-    return `${ seconds }.${ ms } seconds`;
+    return `${seconds}.${ms} seconds`;
   }
 
   interface QuackersState {
@@ -573,14 +630,14 @@ Test Run Summary
     const
       proj = baseName(target),
       projName = chopExtension(proj),
-      logFileName = path.resolve(path.join(buildReportFolder, `${ projName }.trx`));
+      logFileName = path.resolve(path.join(buildReportFolder, `${projName}.trx`));
     loggers.trx = {
       logFileName
     };
   }
 
   function quackersStdErrHandler(s: string) {
-    debug(`[test stderr]: ${ s }`);
+    debug(`[test stderr]: ${s}`);
     console.error(s);
   }
 
@@ -598,7 +655,7 @@ Test Run Summary
         return;
       }
       state.fullLog.push(s);
-      debug(`[test stdout] ${ s }`);
+      debug(`[test stdout] ${s}`);
       if (s.startsWith(quackersFullSummaryStartMarker)) {
         debug("  summary starts");
         state.inSummary = true;
@@ -695,7 +752,7 @@ Test Run Summary
       if (!state.haveSeenQuackersLog || isQuackersLog) {
         console.log(stripQuackersLogPrefix(s));
       } else {
-        debug(`discarding log: "${ s }"`);
+        debug(`discarding log: "${s}"`);
       }
     } catch (e) {
       debug(`quackersStdOutHandler errors:\n${e}`);
@@ -749,7 +806,7 @@ Test Run Summary
           recommendedVersion = "1.0.16",
           ver = new Version(packageRef.groups["version"]);
         if (ver.isLessThan(recommendedVersion)) {
-          console.warn(`${ csproj }: Quackers.TestLogger is out of date. Please upgrade to at least version ${ recommendedVersion }`);
+          console.warn(`${csproj}: Quackers.TestLogger is out of date. Please upgrade to at least version ${recommendedVersion}`);
         }
         return quackersRefCache[csproj] = true;
       }
@@ -809,6 +866,7 @@ Test Run Summary
     shouldTestInParallel,
     testOneDotNetCoreProject,
     testAsDotNetCore,
-    logTestSuiteTimes
+    logTestSuiteTimes,
+    sortTestProjects
   };
 })();

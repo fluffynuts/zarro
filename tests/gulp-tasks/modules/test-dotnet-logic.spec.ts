@@ -1,5 +1,6 @@
 import { Sandbox } from "filesystem-sandbox";
 import { sleep } from "expect-even-more-jest";
+
 const realSystem = require("system-wrapper");
 const fakeSystem = { ...realSystem };
 jest.doMock("../../../gulp-tasks/modules/system", () => fakeSystem);
@@ -222,7 +223,7 @@ if (shouldSkipSlowNetworkTests()) {
             return s;
           });
         // Act
-        logTestSuiteTimes([result1, result2, fail], yellow as unknown as StyleFunction)
+        logTestSuiteTimes([ result1, result2, fail ], yellow as unknown as StyleFunction)
         // Assert
         expect(collected.length)
           .toEqual(4);
@@ -234,6 +235,54 @@ if (shouldSkipSlowNetworkTests()) {
           .toStartWith("project2:");
         expect(collected[3].trimStart())
           .toStartWith("project1:");
+      });
+    });
+
+    describe(`sortTestProjects`, () => {
+      const
+        env = requireModule<Env>("env"),
+        { sortTestProjects } = requireModule<TestDotNetLogic>("test-dotnet-logic");
+
+      describe(`when TEST_ORDER env var not set`, () => {
+        it(`should not change the order`, async () => {
+          // Arrange
+          const
+            projects = [
+              "bbb.csproj",
+              "aaa.csproj"
+            ],
+            expected = [ ...projects ];
+          process.env.TEST_ORDER = "";
+          // Act
+          const result = sortTestProjects(projects);
+          // Assert
+          expect(result)
+            .toEqual(expected);
+        });
+      });
+
+      describe(`when TEST_ORDER env var set`, () => {
+        it(`should prioritise according to the var`, async () => {
+          // Arrange
+          const
+            projects = [
+              "aaa.csproj",
+              "bbb.csproj",
+              "ccc.csproj"
+            ];
+          process.env.TEST_ORDER = "bbb,ccc";
+          const
+            expected = [
+              "bbb.csproj",
+              "ccc.csproj",
+              "aaa.csproj"
+            ];
+          // Act
+          const result = sortTestProjects(projects);
+          // Assert
+          expect(result)
+            .toEqual(expected);
+        });
       });
     });
 

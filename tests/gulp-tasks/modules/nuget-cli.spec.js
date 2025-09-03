@@ -564,7 +564,6 @@ describe(`nuget-cli`, () => {
     });
     function mockAvailableSources(sources) {
         realSystemWrapper.system.mockImplementation((exe, args, opts) => {
-            debugger;
             if (["sources", "list"].every((el, idx) => el === args[idx])) {
                 const lines = [];
                 let idx = 1;
