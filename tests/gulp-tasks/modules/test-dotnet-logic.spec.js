@@ -24,6 +24,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const filesystem_sandbox_1 = require("filesystem-sandbox");
+const expect_even_more_jest_1 = require("expect-even-more-jest");
 const realSystem = require("system-wrapper");
 const fakeSystem = Object.assign({}, realSystem);
 jest.doMock("../../../gulp-tasks/modules/system", () => fakeSystem);
@@ -32,7 +33,9 @@ require("expect-even-more-jest");
 const yafs_1 = require("yafs");
 const path = __importStar(require("path"));
 const should_skip_slow_network_tests_1 = require("../../test-helpers/should-skip-slow-network-tests");
+const system_wrapper_1 = require("system-wrapper");
 if ((0, should_skip_slow_network_tests_1.shouldSkipSlowNetworkTests)()) {
+    const ansiColors = requireModule("ansi-colors");
     describe(`test-dotnet-logic`, () => {
         it(`skipping tests`, async () => {
             // Arrange
@@ -182,6 +185,44 @@ else {
                 expect(results)
                     .toEqual(expected);
             }, 90000);
+        });
+        describe(`logTestSuiteTimes`, () => {
+            const { logTestSuiteTimes } = requireModule("test-dotnet-logic");
+            it(`producing a sorted list of test runtimes`, async () => {
+                // Arrange
+                const result1 = system_wrapper_1.SystemResult.create()
+                    .withExe("dotnet")
+                    .withArgs(["test", "project1.dll"])
+                    .build(), result2 = system_wrapper_1.SystemResult.create()
+                    .withExe("dotnet")
+                    .withArgs(["test", "project2.dll"])
+                    .build(), fail = new system_wrapper_1.SystemError("fail", "dotnet", ["test", "failed.dll"], 2, [], [], Date.now() - 5000), collected = [];
+                await (0, expect_even_more_jest_1.sleep)(100);
+                result1.complete();
+                await (0, expect_even_more_jest_1.sleep)(100);
+                result2.complete();
+                spyOn(console, "log")
+                    .mockReturnValue();
+                const yellow = jest.fn()
+                    .mockImplementation(s => {
+                    debugger;
+                    collected.push(s);
+                    return s;
+                });
+                // Act
+                logTestSuiteTimes([result1, result2, fail], yellow);
+                // Assert
+                expect(collected.length)
+                    .toEqual(4);
+                expect(collected[0])
+                    .toEqual("Test suite timings:");
+                expect(collected[1].trimStart())
+                    .toEqual("failed: 5.0 seconds");
+                expect(collected[2].trimStart())
+                    .toStartWith("project2:");
+                expect(collected[3].trimStart())
+                    .toStartWith("project1:");
+            });
         });
         const totalRe = /\s*test count:\s*(?<value>\d+)/i;
         const passedRe = /\s*passed:\s*(?<value>\d+)/i;

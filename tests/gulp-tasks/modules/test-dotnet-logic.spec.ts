@@ -1,5 +1,5 @@
 import { Sandbox } from "filesystem-sandbox";
-
+import { sleep } from "expect-even-more-jest";
 const realSystem = require("system-wrapper");
 const fakeSystem = { ...realSystem };
 jest.doMock("../../../gulp-tasks/modules/system", () => fakeSystem);
@@ -8,8 +8,11 @@ import "expect-even-more-jest";
 import { FsEntities, ls } from "yafs";
 import * as path from "path";
 import { shouldSkipSlowNetworkTests } from "../../test-helpers/should-skip-slow-network-tests";
+import { SystemResult, SystemError } from "system-wrapper";
+import ansiColors, { StyleFunction } from "ansi-colors";
 
 if (shouldSkipSlowNetworkTests()) {
+  const ansiColors = requireModule<AnsiColors>("ansi-colors");
   describe(`test-dotnet-logic`, () => {
     it(`skipping tests`, async () => {
       // Arrange
@@ -185,6 +188,54 @@ if (shouldSkipSlowNetworkTests()) {
         expect(results)
           .toEqual(expected);
       }, 90000);
+    });
+
+    describe(`logTestSuiteTimes`, () => {
+      const { logTestSuiteTimes } = requireModule<TestDotNetLogic>("test-dotnet-logic");
+      it(`producing a sorted list of test runtimes`, async () => {
+        // Arrange
+        const
+          result1 = SystemResult.create()
+            .withExe("dotnet")
+            .withArgs([ "test", "project1.dll" ])
+            .build(),
+          result2 = SystemResult.create()
+            .withExe("dotnet")
+            .withArgs([ "test", "project2.dll" ])
+            .build(),
+          fail = new SystemError(
+            "fail",
+            "dotnet",
+            [ "test", "failed.dll" ],
+            2, [], [], Date.now() - 5000
+          ),
+          collected = [] as string[];
+        await sleep(100);
+        result1.complete();
+        await sleep(100);
+        result2.complete();
+        spyOn(console, "log")
+          .mockReturnValue();
+        const yellow = jest.fn()
+          .mockImplementation(s => {
+            debugger;
+            collected.push(s);
+            return s;
+          });
+        // Act
+        logTestSuiteTimes([result1, result2, fail], yellow as unknown as StyleFunction)
+        // Assert
+        expect(collected.length)
+          .toEqual(4);
+        expect(collected[0])
+          .toEqual("Test suite timings:");
+        expect(collected[1].trimStart())
+          .toEqual("failed: 5.0 seconds");
+        expect(collected[2].trimStart())
+          .toStartWith("project2:");
+        expect(collected[3].trimStart())
+          .toStartWith("project1:");
+      });
     });
 
     const totalRe = /\s*test count:\s*(?<value>\d+)/i;

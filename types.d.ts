@@ -276,12 +276,14 @@ declare global {
   }
 
   type DotNetTester = (configuration: string, source: string[]) => Promise<TestResults>;
+  type ResultOrError = SystemResult | SystemError;
 
   interface TestDotNetLogic {
     runTests: () => Promise<void>;
     testWithNunitCli: DotNetTester;
     testAsDotNetCore: DotNetTester;
     shouldTestInParallel: (testProjectPaths: string[]) => Promise<boolean>;
+    logTestSuiteTimes: (results: ResultOrError[], styleFn: StyleFunction) => void;
     testOneDotNetCoreProject: (
       target: string,
       configuration: string,

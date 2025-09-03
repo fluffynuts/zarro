@@ -279,7 +279,7 @@ import { StyleFunction } from "ansi-colors";
     );
 
     if (testResults.quackersEnabled) {
-      logOverallResults(testResults);
+      logOverallResults(testResults, testProcessResults);
     } else {
       console.log("If you install Quackers.TestLogger into your test projects, you'll get a lot more info here!");
     }
@@ -331,7 +331,8 @@ import { StyleFunction } from "ansi-colors";
   }
 
   function logOverallResults(
-    testResults: TestResults
+    testResults: TestResults,
+    testProcessResults: (SystemResult | SystemError)[]
   ) {
     const
       total = testResults.passed + testResults.skipped + testResults.failed,
@@ -348,6 +349,7 @@ import { StyleFunction } from "ansi-colors";
       yellow = darkerThemeSelected
         ? ansiColors.yellow.bind(ansiColors)
         : ansiColors.yellowBright.bind(ansiColors);
+    logTestSuiteTimes(testProcessResults, yellow);
     logFailures(testResults, red);
     logSlow(testResults, cyan);
     console.log(yellow(`
@@ -363,6 +365,53 @@ Test Run Summary
     Duration: ${ runTime }
 `));
     console.log("\n");
+  }
+
+  interface TestTime {
+    project: string;
+    runTimeMs: number;
+  }
+
+  function logTestSuiteTimes(
+    testProcessResults: (SystemResult | SystemError)[],
+    yellow: StyleFunction
+  ) {
+    if (!testProcessResults || testProcessResults.length === 0) {
+      return;
+    }
+    testProcessResults.sort((a, b) => {
+      if (a.runTimeMs === b.runTimeMs) {
+        return 0;
+      }
+      return a.runTimeMs > b.runTimeMs ? -1 : 1;
+    });
+    const assembliesAndTimes = testProcessResults.reduce(
+      (acc, cur) => {
+        const
+          project = parseTestProjectFrom(cur.args);
+        acc.push({ project, runTimeMs: cur.runTimeMs });
+        return acc;
+      }, [] as TestTime[]);
+
+    console.log(yellow(`Test suite timings:`));
+    for (const r of assembliesAndTimes) {
+      console.log(yellow(`  ${r.project}: ${nunitLikeTime(r.runTimeMs)}`));
+    }
+  }
+
+  function parseTestProjectFrom(args: string[]): string {
+    let
+      next = false;
+    for (const arg of args) {
+      if (arg === "test") {
+        next = true;
+        continue;
+      }
+      if (next) {
+        return path.basename(arg).replace(/\.dll$/i, "");
+      }
+    }
+    return `(project name parse failed for:) ${args.join(" ")}`;
   }
 
   function logSlow(
@@ -495,7 +544,7 @@ Test Run Summary
     // addTrxLoggerTo(loggers, target);
     testResults.quackersEnabled = testResults.quackersEnabled || useQuackers;
     try {
-      const result = await test({
+      return await test({
         target,
         verbosity: finalVerbosity,
         configuration,
@@ -509,11 +558,9 @@ Test Run Summary
         env: testEnvironment,
         label
       });
-      return result;
     } catch (e) {
       debug("WARN: catching SystemError instead of rethrowing it");
-      const err = e as SystemError;
-      return err;
+      return e as SystemError;
     }
   }
 
@@ -759,6 +806,7 @@ Test Run Summary
     testWithNunitCli,
     shouldTestInParallel,
     testOneDotNetCoreProject,
-    testAsDotNetCore
+    testAsDotNetCore,
+    logTestSuiteTimes
   };
 })();

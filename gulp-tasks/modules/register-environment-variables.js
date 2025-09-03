@@ -56,7 +56,7 @@
         });
         env.register({
             name: "MAX_CONCURRENCY",
-            default: os.cpus().length.toString(),
+            default: `${Math.floor(os.cpus().length / 2)}`,
             help: "Overrides other concurrency settings (BUILD_MAX_CPU_COUNT, MAX_NUNIT_AGENTS)"
         });
         env.register({
