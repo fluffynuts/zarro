@@ -291,7 +291,7 @@ import { StyleFunction } from "ansi-colors";
 
       } satisfies TestResults,
       testProcessResults = [] as (SystemResult | SystemError)[],
-      testProjectPaths = await gatherPaths(testProjects, true),
+      testProjectPaths = sortTestProjects(await gatherPaths(testProjects, true)),
       verbosity = env.resolve("TEST_VERBOSITY");
 
     const testInParallel = await shouldTestInParallel(testProjectPaths);
