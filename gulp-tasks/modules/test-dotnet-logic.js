@@ -284,7 +284,9 @@ Test Run Summary
                 continue;
             }
             if (next) {
-                return path.basename(arg).replace(/\.dll$/i, "");
+                return path.basename(arg)
+                    .replace(/\.dll$/i, "")
+                    .replace(/\.csproj$/i, "");
             }
         }
         return `(project name parse failed for:) ${args.join(" ")}`;
