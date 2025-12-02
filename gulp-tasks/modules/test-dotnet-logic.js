@@ -253,6 +253,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
                     }
                 }
                 else {
+                    allErrors.push(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}`);
                     allErrors.push(errors.join("\n"));
                 }
             }
