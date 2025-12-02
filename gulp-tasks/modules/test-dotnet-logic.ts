@@ -365,6 +365,7 @@ import { StyleFunction } from "ansi-colors";
             haveGenericWarning = true;
           }
         } else {
+          allErrors.push(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}`);
           allErrors.push(errors.join("\n"));
         }
       }
