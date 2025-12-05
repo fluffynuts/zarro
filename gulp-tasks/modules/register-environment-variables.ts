@@ -106,9 +106,21 @@
       existing: Optional<string>,
       override: Optional<string>
     ) {
+      if (!override) {
+        return false;
+      }
+      if (!existing) {
+        return true;
+      }
       const existingNumber = parseInt(`${ existing }`, 10);
       const overrideNumber = parseInt(`${ override }`, 10);
       if (isNaN(existingNumber) || isNaN(overrideNumber)) {
+        if (!isNaN(existingNumber)) {
+          return false;
+        }
+        if (!isNaN(overrideNumber)) {
+          return true
+        }
         throw new ZarroError(
           `Can't determine if override '${ override }' should take precedence over '${ existing }'`
         );
