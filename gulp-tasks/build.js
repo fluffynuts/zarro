@@ -55,6 +55,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
         if (!env.resolveFlag(env.BUILD_MSBUILD_NODE_REUSE)) {
             msbuildArgs.push("/nodeReuse:false");
         }
+        const concurrency = env.resolveNumber(env.BUILD_MAX_CPU_COUNT);
+        msbuildArgs.push(`/m:${concurrency}`);
         /** @type DotNetBuildOptions */
         const options = {
             target: "[not set]",
