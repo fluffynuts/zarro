@@ -293,10 +293,6 @@
         if (fileExistsSync(name)) {
             return (readTextFileSync(name) || "").trim();
         }
-        else {
-            const { lsSync } = require("yafs");
-            const files = lsSync(process.cwd());
-        }
     }
     function resolveInternal(name, ignoreDefault, overrideDefault) {
         if (Array.isArray(name)) {
