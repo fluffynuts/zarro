@@ -149,7 +149,7 @@ declare global {
     logic: AsyncVoidFunc<T>,
     retries: number | string,
     onTransientError?: ErrorReporter,
-    onFinalFailure?: VoidVoid
+    onFinalFailure?: ((e: Error) => void) | ((e: Error) => Promise<void>)
   ) => Promise<T>;
   type Optional<T> = T | undefined;
   type Nullable<T> = T | null;

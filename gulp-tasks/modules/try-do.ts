@@ -7,7 +7,7 @@
     logic: AsyncVoidFunc<T>,
     retries: number | string,
     onTransientError: ErrorReporter,
-    onFinalFailure: VoidVoid | AsyncVoidVoid
+    onFinalFailure: ((e: Error) => void) | ((e: Error) => Promise<void>)
   ): Promise<T> {
     // always attempt at least once
     const requestedRetries = typeof retries === "string"
@@ -36,7 +36,7 @@
         } else {
           if (requestedRetries < 1) {
             if (onFinalFailure) {
-              await onFinalFailure()
+              await onFinalFailure(e)
             } else {
               console.log(chalk.magentaBright(`Failed after ${ totalAttempts } attempts`));
               if (typeof retries === "string") {

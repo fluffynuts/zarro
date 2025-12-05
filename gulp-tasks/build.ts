@@ -55,8 +55,15 @@ import { Stream, Transform } from "stream";
       build,
       "BUILD_RETRIES",
       e => console.error(chalk.red(`Build fails: ${ e }`)),
-      () => console.log(chalk.magentaBright(
-        `Build fails! If the error looks transient, I suggest setting the environment variable 'BUILD_RETRIES' to some number > 0 🔨.`))
+      e => console.log(chalk.magentaBright(`
+Build fails! 
+
+${e}
+
+If the error looks transient, I suggest setting the environment 
+  variable 'BUILD_RETRIES' to some number > 0
+`.trim()))
+
     );
   }
 
