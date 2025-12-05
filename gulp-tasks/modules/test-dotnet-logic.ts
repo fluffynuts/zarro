@@ -358,12 +358,10 @@ import { StyleFunction } from "ansi-colors";
       if (!!result.exitCode) {
         const errors = (result.stderr || []);
         if (errors.length === 0) {
-          if (!haveGenericWarning) {
-            debug(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}\nstdout: ${result.stdout.join(
-              "\n")}`);
-            allErrors.push(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}`);
-            haveGenericWarning = true;
-          }
+          debug(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}\nstdout: ${result.stdout.join(
+            "\n")}`);
+          allErrors.push(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}`);
+          haveGenericWarning = true;
         } else {
           allErrors.push(`Test run fails for: ${tryFindTestProjectFromTestCli(result.args)}`);
           allErrors.push(errors.join("\n"));
