@@ -1,7 +1,6 @@
 import "expect-even-more-jest";
 import { faker } from "@faker-js/faker";
 import { Sandbox } from "filesystem-sandbox";
-import { readTextFile } from "yafs";
 
 describe(`env`, () => {
   const env = requireModule<Env>("env");
@@ -9,7 +8,7 @@ describe(`env`, () => {
     it(`should return undefined when var not set`, async () => {
       // Arrange
       const
-        varname = `${ faker.word.sample() }_${ faker.word.sample() }`;
+        varname = `${faker.word.sample()}_${faker.word.sample()}`;
       expect(process.env[varname])
         .not.toBeDefined();
       // Act
@@ -22,7 +21,7 @@ describe(`env`, () => {
     it(`should return the json value as an object`, async () => {
       // Arrange
       const
-        varname = `${ faker.word.sample() }_${ faker.word.sample() }`,
+        varname = `${faker.word.sample()}_${faker.word.sample()}`,
         expected = {
           id: faker.number.int(),
           name: faker.person.firstName()
@@ -39,7 +38,7 @@ describe(`env`, () => {
     it(`should throw when the json cannot be parsed`, async () => {
       // Arrange
       const
-        varname = `${ faker.word.sample() }_${ faker.word.sample() }`;
+        varname = `${faker.word.sample()}_${faker.word.sample()}`;
       envVars.push(varname);
       process.env[varname] = faker.word.words(2);
       // Act
@@ -223,7 +222,7 @@ describe(`env`, () => {
           bar: faker.word.sample()
         },
         key = faker.string.sample(10),
-        envVar = `foo=${ expected.foo },bar=${ expected.bar }`;
+        envVar = `foo=${expected.foo},bar=${expected.bar}`;
       // Act
       process.env[key] = envVar;
       const result = env.resolveMap(key as AnyEnvVar);
@@ -288,7 +287,7 @@ describe(`env`, () => {
         sandbox = await Sandbox.create(),
         expected = faker.word.sample(),
         key = faker.string.alphanumeric(10);
-      await sandbox.writeFile(key, `${ expected }\n`);
+      await sandbox.writeFile(key, `${expected}\n`);
       // Act
       delete process.env[key];
       const result = await sandbox.run(() => env.resolve(key as StringEnvVar));
@@ -508,6 +507,52 @@ describe(`env`, () => {
         .not.toBeDefined();
       // Act
       const result = env.resolveWithFallback(varname, expected);
+      // Assert
+      expect(result)
+        .toEqual(expected);
+    });
+  });
+
+  describe(`resolveNumber`, () => {
+    it(`should resolve single numeric env var`, async () => {
+      // Arrange
+      let expected = faker.number.int();
+      process.env.FOOBAR = `${expected}`;
+      // Act
+      const result = env.resolveNumber("FOOBAR");
+      // Assert
+      expect(result)
+        .toEqual(expected);
+    });
+    it(`should throw when the env var is not numeric`, async () => {
+      // Arrange
+      process.env.BAZBUZZ = "wibbly";
+      // Act
+      expect(() => env.resolveNumber("BAZBUZZ"))
+        .toThrow();
+      // Assert
+    });
+    it(`should be able to fall back on another value`, async () => {
+      // Arrange
+      let unsetVar = "UNSET_VAR_";
+      while (process.env[unsetVar] !== undefined) {
+        unsetVar += "A";
+      }
+      const expected = faker.number.int();
+      process.env.FALLBACK_VAR = `${expected}`;
+      // Act
+      const result = env.resolveNumber(unsetVar, "FALLBACK_VAR");
+      // Assert
+      expect(result)
+        .toEqual(expected);
+    });
+    it(`should select the first defined value`, async () => {
+      // Arrange
+      const expected = faker.number.int();
+      process.env.ENV_VAR_1 = `${expected}`;
+      process.env.ENV_VAR_2 = `${expected + 1}`;
+      // Act
+      const result = env.resolveNumber("ENV_VAR_1", "ENV_VAR_2");
       // Assert
       expect(result)
         .toEqual(expected);

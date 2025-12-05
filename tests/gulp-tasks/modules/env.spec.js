@@ -418,4 +418,49 @@ describe(`env`, () => {
                 .toEqual(expected);
         });
     });
+    describe(`resolveNumber`, () => {
+        it(`should resolve single numeric env var`, async () => {
+            // Arrange
+            let expected = faker_1.faker.number.int();
+            process.env.FOOBAR = `${expected}`;
+            // Act
+            const result = env.resolveNumber("FOOBAR");
+            // Assert
+            expect(result)
+                .toEqual(expected);
+        });
+        it(`should throw when the env var is not numeric`, async () => {
+            // Arrange
+            process.env.BAZBUZZ = "wibbly";
+            // Act
+            expect(() => env.resolveNumber("BAZBUZZ"))
+                .toThrow();
+            // Assert
+        });
+        it(`should be able to fall back on another value`, async () => {
+            // Arrange
+            let unsetVar = "UNSET_VAR_";
+            while (process.env[unsetVar] !== undefined) {
+                unsetVar += "A";
+            }
+            const expected = faker_1.faker.number.int();
+            process.env.FALLBACK_VAR = `${expected}`;
+            // Act
+            const result = env.resolveNumber(unsetVar, "FALLBACK_VAR");
+            // Assert
+            expect(result)
+                .toEqual(expected);
+        });
+        it(`should select the first defined value`, async () => {
+            // Arrange
+            const expected = faker_1.faker.number.int();
+            process.env.ENV_VAR_1 = `${expected}`;
+            process.env.ENV_VAR_2 = `${expected + 1}`;
+            // Act
+            const result = env.resolveNumber("ENV_VAR_1", "ENV_VAR_2");
+            // Assert
+            expect(result)
+                .toEqual(expected);
+        });
+    });
 });

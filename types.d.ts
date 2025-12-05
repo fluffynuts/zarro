@@ -585,7 +585,7 @@ declare global {
 
     resolveMergedArray(name: AnyEnvVar | AnyEnvVar[], delimiter?: string): string[];
 
-    resolveNumber(name: NumericEnvVar): number;
+    resolveNumber(...names: NumericEnvVar[]): number;
 
     resolveFlag(name: FlagEnvVar, fallback?: boolean): boolean;
 

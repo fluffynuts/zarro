@@ -496,15 +496,15 @@
     return result;
   }
 
-  function resolveNumber(name: string): number {
-    const value = resolveInternal(name),
+  function resolveNumber(...names: string[]): number {
+    const value = resolveInternal(names),
       asNumber = parseInt(value || "", 10);
     if (isNaN(asNumber)) {
       throw new ZarroError(
         `${ value } is not a valid numeric value for ${ name }`
       );
     }
-    logResolved(name, asNumber);
+    logResolved(names, asNumber);
     return asNumber;
   }
 
