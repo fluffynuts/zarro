@@ -26,7 +26,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
     gulp.task("build", "Builds Visual Studio solutions in tree", ["prebuild"], tryBuild);
     gulp.task("quick-build", "Quick build without pre-cursors", tryBuild);
     async function tryBuild() {
-        return tryDo(build, "BUILD_RETRIES", e => console.error(chalk.red(`Build fails: ${e}`)), () => console.log(chalk.magentaBright(`Build fails! If the error looks transient, I suggest setting the environment variable 'BUILD_RETRIES' to some number > 0 🔨.`)));
+        return tryDo(build, "BUILD_RETRIES", e => console.error(chalk.red(`Build fails: ${e}`)), e => console.log(chalk.magentaBright(`
+Build fails! 
+
+${e}
+
+If the error looks transient, I suggest setting the environment 
+  variable 'BUILD_RETRIES' to some number > 0
+`.trim())));
     }
     async function build() {
         const slnMasks = resolveMasks(env.BUILD_INCLUDE, [env.BUILD_EXCLUDE, env.BUILD_ADDITIONAL_EXCLUDE]);

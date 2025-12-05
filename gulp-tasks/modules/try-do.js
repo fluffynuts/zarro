@@ -30,7 +30,7 @@
                 else {
                     if (requestedRetries < 1) {
                         if (onFinalFailure) {
-                            await onFinalFailure();
+                            await onFinalFailure(e);
                         }
                         else {
                             console.log(chalk.magentaBright(`Failed after ${totalAttempts} attempts`));
