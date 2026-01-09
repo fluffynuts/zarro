@@ -62,8 +62,6 @@ If the error looks transient, I suggest setting the environment
         if (!env.resolveFlag(env.BUILD_MSBUILD_NODE_REUSE)) {
             msbuildArgs.push("/nodeReuse:false");
         }
-        const concurrency = env.resolveNumber(env.BUILD_MAX_CPU_COUNT);
-        msbuildArgs.push(`-m:${concurrency}`);
         /** @type DotNetBuildOptions */
         const options = {
             target: "[not set]",
@@ -73,7 +71,7 @@ If the error looks transient, I suggest setting the environment
             framework: env.resolve(env.BUILD_FRAMEWORK),
             runtime: env.resolve(env.BUILD_RUNTIME),
             lowPriority: env.resolveFlag(env.BUILD_LOW_PRIORITY),
-            maxCPUs: env.resolveNumber(env.MAX_CONCURRENCY),
+            maxCPUs: env.resolveNumber(env.BUILD_MAX_CPU_COUNT),
             terminalLogger: sanitizeTerminalLogger(env.resolve(env.BUILD_MSBUILD_TERMINAL_LOGGER))
         };
         return promisifyStream(solutions
