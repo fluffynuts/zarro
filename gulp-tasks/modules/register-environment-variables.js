@@ -81,6 +81,11 @@
             overriddenBy: "MAX_CONCURRENCY",
             when: overrideWhenSmaller
         });
+        env.register({
+            name: "BUILD_LOW_PRIORITY",
+            default: "false",
+            help: "Perform dotnet operations with -low to spare the host machine"
+        });
         function overrideWhenSmaller(existing, override) {
             if (!override) {
                 return false;

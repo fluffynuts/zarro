@@ -102,6 +102,12 @@
       when: overrideWhenSmaller
     });
 
+    env.register({
+      name: "BUILD_LOW_PRIORITY",
+      default: "false",
+      help: "Perform dotnet operations with -low to spare the host machine"
+    });
+
     function overrideWhenSmaller(
       existing: Optional<string>,
       override: Optional<string>

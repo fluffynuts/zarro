@@ -544,6 +544,7 @@ declare global {
     "UPGRADE_PACKAGES_PROGRESS" |
     "UPGRADE_PACKAGES_PRERELEASE" |
     "UPGRADE_PACKAGES_BYPASS_CACHE" |
+    "BUILD_LOW_PRIORITY" |
     string;
 
   type AnyEnvVar = StringEnvVar | NumericEnvVar | FlagEnvVar | VersionIncrementStrategy;
@@ -734,6 +735,7 @@ declare global {
     UPGRADE_PACKAGES_PROGRESS: FlagEnvVar;
     UPGRADE_PACKAGES_PRERELEASE: FlagEnvVar;
     UPGRADE_PACKAGES_BYPASS_CACHE: FlagEnvVar;
+    BUILD_LOW_PRIORITY: FlagEnvVar;
 
     BUILD_MAX_CPU_COUNT: NumericEnvVar;
     MAX_NUNIT_AGENTS: NumericEnvVar;
