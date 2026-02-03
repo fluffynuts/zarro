@@ -14,10 +14,11 @@
                 return argv.slice(entryPointIndex + 1);
             }
         }
-        for (let arg of argv) {
+        for (let i = 0; i < argv.length; i++) {
+          const arg = argv[i];
           if (arg.match(/node_modules\/zarro\/index.js/)) {
             debug(`using entrypoint from argv: ${arg}`);
-            return arg;
+            return argv.slice(i + 1);
           }
         }
         throw new Error(`Can't figure out args: unable to find entry point in args list:\n${ JSON.stringify(
