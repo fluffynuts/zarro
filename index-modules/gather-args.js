@@ -1,5 +1,6 @@
 "use strict";
 (function () {
+    const debug = requireModule("debug")(__filename);
     module.exports = async function gatherArgs(potentialEntryPoints, overrideArgv // for testing only
     ) {
         const argv = overrideArgv || process.argv;
@@ -10,6 +11,12 @@
             const entryPointIndex = argv.indexOf(entryPoint);
             if (entryPointIndex > -1) {
                 return argv.slice(entryPointIndex + 1);
+            }
+        }
+        for (let arg of argv) {
+            if (arg.match(/node_modules\/zarro\/index.js/)) {
+                debug(`using entrypoint from argv: ${arg}`);
+                return arg;
             }
         }
         throw new Error(`Can't figure out args: unable to find entry point in args list:\n${JSON.stringify({

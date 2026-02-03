@@ -13,7 +13,7 @@ const
     fileExists,
     readTextFileLines,
     writeTextFile,
-    rm
+    rm, lsSync
   } = require("yafs"),
   log = require("./gulp-tasks/modules/log"),
   path = require("path"),
@@ -257,7 +257,10 @@ async function transpileTasksUnder(folder) {
   );
 }
 
-function importTypeScript() {
+function importTypeScript(toTranspile) {
+  if (!toTranspile || toTranspile.length === 0) {
+    return;
+  }
   try {
     require("typescript");
   } catch (e) {
