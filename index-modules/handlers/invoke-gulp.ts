@@ -1,6 +1,7 @@
 (function () {
   const
     os = require("os"),
+    { fileExistsSync, readTextFileSync } = require("yafs"),
     requireModule = require("../../gulp-tasks/modules/require-module") as (<T>(mod: string) => T),
     chalk = requireModule<AnsiColors>("ansi-colors"),
     quoteIfRequired = requireModule<QuoteIfRequired>("quote-if-required"),
@@ -59,7 +60,48 @@
     return generateFullGulpCliPathFor(binDir);
   }
 
+  function findPkgRoot(startFile: string, pkgName: string): { dir: string, pkg: PackageIndex } {
+    let dir = path.dirname(startFile);
+    while (true) {
+      const test = path.join(dir, "package.json")
+      if (fileExistsSync(test)) {
+        try {
+          const pkg = JSON.parse(
+            readTextFileSync(
+              test
+            )
+          );
+          if (pkg.name === pkgName) {
+            return {
+              dir,
+              pkg
+            }
+          }
+
+        } catch (e) {
+          // ignore
+        }
+        const parent = path.dirname(dir);
+        if (parent === dir) {
+          throw new Error(`Could not find ${pkgName}'s package.json`);
+        }
+      }
+    }
+  }
+
   async function findGulp() {
+    try {
+      const
+        gulpEntry = require.resolve("gulp"),
+        { dir: gulpDir, pkg } = findPkgRoot(gulpEntry, "gulp"),
+        binRel = typeof pkg.bin === "string" ? pkg.bin : pkg.bin?.gulp,
+        gulpBin = path.resolve(gulpDir, binRel);
+      if (fileExistsSync(gulpBin)) {
+        return gulpBin;
+      }
+    } catch (e) {
+      console.warn("fancy new gulp appropriation not working; falling back on Ye Olde Methodes", e);
+    }
     try {
       return await which("gulp");
     } catch (e) {
@@ -103,11 +145,11 @@
     });
 
     process.env["RUNNING_AS_ZARRO"] = "1";
-    process.argv = [ process.argv[0], process.argv[1]].concat(allArgs);
+    process.argv = [ process.argv[0], process.argv[1] ].concat(allArgs);
     const gulpCli = tryRequire("gulp-cli") || tryRequire("gulp/node_modules/gulp-cli");
     if (!gulpCli) {
       console.error(
-          chalk.redBright(`
+        chalk.redBright(`
 Unable to load ${chalk.yellowBright("gulp-cli")} module.
 This should have been brought in with gulp, and should
 either be found at one of the following places, depending
@@ -124,7 +166,7 @@ to know:
 - version of zarro
 - result of 'npm ls gulp-cli'
 `.trim()
-          )
+        )
       );
       throw new Error(`Unable to load required module: gulp-cli`);
     }

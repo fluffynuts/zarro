@@ -363,7 +363,7 @@ declare global {
     name: string;
     version: string;
     description?: string;
-    bin?: Dictionary<string>;
+    bin?: Dictionary<string> | string;
     homepage?: string;
     main?: string;
     scripts?: Dictionary<string>;

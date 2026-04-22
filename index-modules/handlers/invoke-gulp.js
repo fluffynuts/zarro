@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const os = require("os"), requireModule = require("../../gulp-tasks/modules/require-module"), chalk = requireModule("ansi-colors"), quoteIfRequired = requireModule("quote-if-required"), which = require("which"), { splitPath } = requireModule("path-utils"), path = require("path"), isFile = require("../is-file"), isDir = require("../is-dir"), debug = require("debug")("zarro::invoke-gulp"), projectDir = path.dirname(path.dirname(__dirname)), ZarroError = requireModule("zarro-error");
+    const os = require("os"), { fileExistsSync, readTextFileSync } = require("yafs"), requireModule = require("../../gulp-tasks/modules/require-module"), chalk = requireModule("ansi-colors"), quoteIfRequired = requireModule("quote-if-required"), which = require("which"), { splitPath } = requireModule("path-utils"), path = require("path"), isFile = require("../is-file"), isDir = require("../is-dir"), debug = require("debug")("zarro::invoke-gulp"), projectDir = path.dirname(path.dirname(__dirname)), ZarroError = requireModule("zarro-error");
     function alwaysAccept() {
         return true;
     }
@@ -37,7 +37,42 @@
         await validate(nodeModulesDir, binDir);
         return generateFullGulpCliPathFor(binDir);
     }
+    function findPkgRoot(startFile, pkgName) {
+        let dir = path.dirname(startFile);
+        while (true) {
+            const test = path.join(dir, "package.json");
+            if (fileExistsSync(test)) {
+                try {
+                    const pkg = JSON.parse(readTextFileSync(test));
+                    if (pkg.name === pkgName) {
+                        return {
+                            dir,
+                            pkg
+                        };
+                    }
+                }
+                catch (e) {
+                    // ignore
+                }
+                const parent = path.dirname(dir);
+                if (parent === dir) {
+                    throw new Error(`Could not find ${pkgName}'s package.json`);
+                }
+            }
+        }
+    }
     async function findGulp() {
+        var _a;
+        try {
+            const gulpEntry = require.resolve("gulp"), { dir: gulpDir, pkg } = findPkgRoot(gulpEntry, "gulp"), binRel = typeof pkg.bin === "string" ? pkg.bin : (_a = pkg.bin) === null || _a === void 0 ? void 0 : _a.gulp, gulpBin = path.resolve(gulpDir, binRel);
+            if (fileExistsSync(gulpBin)) {
+                console.warn(`using gulp from: ${gulpBin}`);
+                return gulpBin;
+            }
+        }
+        catch (e) {
+            console.warn("fancy new gulp appropriation not working; falling back on Ye Olde Methodes", e);
+        }
         try {
             return await which("gulp");
         }
