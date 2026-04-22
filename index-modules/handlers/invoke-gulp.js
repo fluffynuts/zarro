@@ -66,7 +66,6 @@
         try {
             const gulpEntry = require.resolve("gulp"), { dir: gulpDir, pkg } = findPkgRoot(gulpEntry, "gulp"), binRel = typeof pkg.bin === "string" ? pkg.bin : (_a = pkg.bin) === null || _a === void 0 ? void 0 : _a.gulp, gulpBin = path.resolve(gulpDir, binRel);
             if (fileExistsSync(gulpBin)) {
-                console.warn(`using gulp from: ${gulpBin}`);
                 return gulpBin;
             }
         }
