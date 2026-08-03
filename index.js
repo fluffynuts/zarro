@@ -13,7 +13,7 @@ const
     fileExists,
     readTextFileLines,
     writeTextFile,
-    rm, lsSync
+    rm
   } = require("yafs"),
   log = require("./gulp-tasks/modules/log"),
   path = require("path"),

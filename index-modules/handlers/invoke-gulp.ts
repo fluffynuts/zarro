@@ -117,7 +117,14 @@
     }
   }
 
-  async function invokeGulp(args: string[]) {
+  async function invokeGulp(rawArgs: string[]) {
+    const args = [];
+    for (const arg of rawArgs) {
+      if (arg === "--") {
+        break;
+      }
+      args.push(arg);
+    }
     if (args && args.length === 1 && args[0] === "@") {
       args[0] = process.env.npm_lifecycle_event as string;
     }
