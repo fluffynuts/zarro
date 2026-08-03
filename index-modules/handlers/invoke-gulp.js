@@ -87,15 +87,8 @@
                 : tryToFindGulpFromOwnNodeModules();
         }
     }
-    async function invokeGulp(rawArgs) {
-        const args = [];
-        for (const arg of rawArgs) {
-            if (arg === "--") {
-                break;
-            }
-            args.push(arg);
-        }
-        if (args && args.length === 1 && args[0] === "@") {
+    async function invokeGulp(args) {
+        if (args && args[0] === "@") {
             args[0] = process.env.npm_lifecycle_event;
         }
         const gulp = await findGulp(), gulpTasksFolder = path.join(projectDir, "gulp-tasks"), gulpFile = path.join(gulpTasksFolder, "start", "gulpfile.js"), cwd = process.cwd(), trueFlags = new Set(["true", "1", "T", "on"]), noColor = trueFlags.has(`${process.env.NO_COLOR}`), allArgs = [
