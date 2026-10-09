@@ -86,7 +86,7 @@
     "run-sequence": "^2.2.1",
     "sax": "^1.2.4",
     "semver": "^7.5.4",
-    "simple-git": "^3.25.0",
+    "simple-git": "^4.0.1",
     "system-wrapper": "^1.8.0",
     "temp": "^0.9.4",
     "through2": "^3.0.2",
