@@ -7,8 +7,8 @@
       env = requireModule<Env>("env"),
       log = requireModule<Log>("log"),
       { runTask } = requireModule<RunTask>("run-task"),
-      Git = require("simple-git"),
-      git = Git("."),
+      { simpleGit } = require("simple-git"),
+      git = simpleGit("."),
       branchInfo = await git.branch(),
       mainBranch = env.resolve(env.GIT_MAIN_BRANCH);
 

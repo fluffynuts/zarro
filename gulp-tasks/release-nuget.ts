@@ -13,8 +13,8 @@
       const
         { ctx } = require("exec-step"),
         log = requireModule<Log>("log"),
-        Git = require("simple-git"),
-        git = new Git("."),
+        { simpleGit } = require("simple-git"),
+        git = simpleGit("."),
         ZarroError = requireModule<ZarroError>("zarro-error"),
         resolveNugetApiKey = requireModule<ResolveNugetApiKey>("resolve-nuget-api-key"),
         {

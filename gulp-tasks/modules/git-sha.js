@@ -1,8 +1,8 @@
 "use strict";
 (function () {
-    const Git = require("simple-git");
+    const { simpleGit } = require("simple-git");
     async function fetchGitSha(forRepo, short) {
-        const git = new Git(forRepo);
+        const git = simpleGit(forRepo);
         const log = await git.log({ maxCount: 1 });
         return !!short
             ? log.latest.hash.substring(0, 7)

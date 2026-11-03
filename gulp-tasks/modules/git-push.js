@@ -1,6 +1,6 @@
 (function () {
   const
-    gitFactory = require("simple-git"),
+    { simpleGit } = require("simple-git"),
     resolveGitBranch = requireModule("resolve-git-branch"),
     resolveGitRemote = requireModule("resolve-git-remote"),
     gutil = requireModule("gulp-util");
@@ -27,7 +27,7 @@
     where = where || ".";
     quiet = !!quiet;
     const
-      git = gitFactory(where),
+      git = simpleGit(where),
       more = (where && where !== ".") ? ` (${ where })` : "";
     if (dryRun) {
       gutil.log(gutil.colors.green(`dry run: whould push local commits now${ more }...`));

@@ -6,10 +6,10 @@ import type { StatusResult } from "simple-git";
 
   gulp.task("verify-gulp-tasks", async () => {
     const
-      gitFactory = require("simple-git"),
+      { simpleGit } = require("simple-git"),
       path = require("path");
 
-    const rootGit = gitFactory(".");
+    const rootGit = simpleGit(".");
     const status = (await rootGit.status()) as StatusResult;
     if (status.current !== "master") {
       console.warn("Running in a branch - not verifying gulp-tasks branch to be master");
@@ -22,12 +22,13 @@ import type { StatusResult } from "simple-git";
       }
       const
         at = path.resolve(path.join(__dirname, "..", "gulp-tasks")),
-        git = gitFactory(at),
+        git = simpleGit(at),
         expected = "master",
         branchInfo = await git.branch();
       if (!branchInfo || branchInfo.current !== expected) {
         const err = `Expected gulp-tasks to be checked out as master`;
         console.error(err);
+        // noinspection ExceptionCaughtLocallyJS
         throw new Error(err);
       }
     } catch (e) {

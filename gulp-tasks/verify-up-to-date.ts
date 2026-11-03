@@ -4,7 +4,7 @@
     chalk = requireModule<AnsiColors>("ansi-colors"),
     log = requireModule<Log>("log"),
     env = requireModule<Env>("env"),
-    gitFactory = require("simple-git"),
+    { simpleGit } = require("simple-git"),
     failAfter = requireModule<FailAfter>("fail-after"),
     readMainBranchName = requireModule<ReadMainBranchName>("read-main-branch-name"),
     readAllGitRemotes = requireModule<ReadAllGitRemotes>("read-all-git-remotes"),
@@ -64,7 +64,7 @@
       if (!recentEnough) {
         log.info(`${ taskName } :: fetching all remotes...`);
         const
-          git = gitFactory(),
+          git = simpleGit(),
           timeout = env.resolveNumber("GIT_FETCH_TIMEOUT");
         try {
           const fail = failAfter(timeout);

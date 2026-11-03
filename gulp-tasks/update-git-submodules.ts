@@ -18,8 +18,8 @@
       const
         { ExecStepContext } = require("exec-step"),
         ctx = new ExecStepContext(),
-        gitFactory = require("simple-git"),
-        git = gitFactory(".");
+        { simpleGit } = require("simple-git"),
+        git = simpleGit(".");
       await ctx.exec(
         "Ensure submodules are initialized...",
         async () => await git.subModule([ "update", "--init" ])

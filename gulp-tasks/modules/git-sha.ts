@@ -1,12 +1,12 @@
 (function () {
     const
-        Git = require("simple-git");
+      { simpleGit } = require("simple-git");
 
     async function fetchGitSha(
       forRepo?: string,
       short?: boolean
     ) {
-        const git = new Git(forRepo);
+        const git = simpleGit(forRepo);
         const log = await git.log({maxCount: 1});
         return !!short
           ? log.latest.hash.substring(0, 7)

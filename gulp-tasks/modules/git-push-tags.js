@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const gitFactory = require("simple-git"), gutil = requireModule("gulp-util"), resolveGitRemote = requireModule("resolve-git-remote");
+    const { simpleGit } = require("simple-git"), gutil = requireModule("gulp-util"), resolveGitRemote = requireModule("resolve-git-remote");
     async function gitPushTags(dryRun, where) {
         if (dryRun === undefined) {
             dryRun = {};
@@ -15,7 +15,7 @@
             gutil.log.warn(gutil.colors.red("depreciation warning: options for git-push-tags should be sent via an object"));
         }
         where = where || ".";
-        const git = gitFactory(where), more = where && where !== "." ? ` (${where})` : "";
+        const git = simpleGit(where), more = where && where !== "." ? ` (${where})` : "";
         if (dryRun) {
             if (!quiet) {
                 gutil.log(gutil.colors.green(`dry run: should push tags now${more}...`));

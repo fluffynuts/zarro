@@ -1,11 +1,11 @@
 (function() {
   const
     safeGit = requireModule<SafeGit>("safe-git"),
-    gitFactory = require("simple-git");
+    { simpleGit } = require("simple-git");
 
   module.exports = async function readGitRemote(at?: string): Promise<string | undefined> {
     const
-      git = gitFactory(at || ".");
+      git = simpleGit(at || ".");
     git._silentLogging = true;
 
     const

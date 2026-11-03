@@ -1,11 +1,11 @@
 "use strict";
 (function () {
-    const gitFactory = require("simple-git"), { system } = require("system-wrapper"), gulp = requireModule("gulp"), gutil = requireModule("gulp-util"), log = requireModule("log"), ZarroError = requireModule("zarro-error"), { ask } = requireModule("ask"), readGitInfo = requireModule("read-git-info"), env = requireModule("env"), readPackageVersion = requireModule("read-package-version"), { runTask } = requireModule("run-task"), { withEnvironment } = requireModule("temporary-environment"), alterPackageJsonVersion = requireModule("alter-package-json-version");
+    const { simpleGit } = require("simple-git"), { system } = require("system-wrapper"), gulp = requireModule("gulp"), gutil = requireModule("gulp-util"), log = requireModule("log"), ZarroError = requireModule("zarro-error"), { ask } = requireModule("ask"), readGitInfo = requireModule("read-git-info"), env = requireModule("env"), readPackageVersion = requireModule("read-package-version"), { runTask } = requireModule("run-task"), { withEnvironment } = requireModule("temporary-environment"), alterPackageJsonVersion = requireModule("alter-package-json-version");
     async function rollBackPackageJson() {
         await alterPackageJsonVersion({ loadUnsetFromEnvironment: true, incrementBy: -1 });
     }
     gulp.task("release-npm", ["increment-package-json-version"], async () => {
-        const dryRun = env.resolveFlag("DRY_RUN"), git = gitFactory(), version = await readPackageVersion(), isBeta = env.resolveFlag("BETA"), releaseTag = env.resolve("TAG"), tag = `v${version}`, gitInfo = await readGitInfo();
+        const dryRun = env.resolveFlag("DRY_RUN"), git = simpleGit(), version = await readPackageVersion(), isBeta = env.resolveFlag("BETA"), releaseTag = env.resolve("TAG"), tag = `v${version}`, gitInfo = await readGitInfo();
         if (version === undefined) {
             throw new ZarroError(`unable to read version from package.json`);
         }

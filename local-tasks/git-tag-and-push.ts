@@ -1,6 +1,6 @@
 export {}
 const
-  gitFactory = require("simple-git"),
+  { simpleGit } = require("simple-git"),
   gutil = requireModule<GulpUtil>("gulp-util"),
   gulp = requireModule<GulpWithHelp>("gulp"),
   gitTag = requireModule<GitTag>("git-tag"),
@@ -21,7 +21,7 @@ async function commitAll(
   if (dryRun) {
     log(`would add & commit all from: ${ where }`);
   } else {
-    const git = gitFactory(where || ".");
+    const git = simpleGit(where || ".");
     await git.add(":/");
     await git.commit(comment);
   }

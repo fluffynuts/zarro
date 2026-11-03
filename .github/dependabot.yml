@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # faker 10 is ESM-only; jest + ts-jest here run as CommonJS
+      - dependency-name: "@faker-js/faker"
+        update-types: ["version-update:semver-major"]

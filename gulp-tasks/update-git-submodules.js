@@ -8,7 +8,7 @@
             const log = requireModule("log");
             log.warn(`Not updating submodules: env var ${env.UPDATE_SUBMODULES_TO_LATEST} is set to ${process.env[env.UPDATE_SUBMODULES_TO_LATEST]}`);
         }
-        const { ExecStepContext } = require("exec-step"), ctx = new ExecStepContext(), gitFactory = require("simple-git"), git = gitFactory(".");
+        const { ExecStepContext } = require("exec-step"), ctx = new ExecStepContext(), { simpleGit } = require("simple-git"), git = simpleGit(".");
         await ctx.exec("Ensure submodules are initialized...", async () => await git.subModule(["update", "--init"]));
         await ctx.exec("Check out master on all submodules...", async () => await git.subModule(["foreach", "git", "checkout", "master"]));
         await ctx.exec("Update to latest commit on each submodule...", async () => await git.subModule(["foreach", "git", "pull", "--rebase"]));

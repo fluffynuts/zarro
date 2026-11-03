@@ -1,6 +1,6 @@
 const
   { cyanBright, yellow, redBright } = require("./gulp-tasks/modules/ansi-colors"),
-  gitFactory = require("simple-git");
+  { simpleGit } = require("simple-git");
 
 (async function (){
   try {

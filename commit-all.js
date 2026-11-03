@@ -1,5 +1,5 @@
 const
-  gitFactory = require("simple-git"),
+  { simpleGit } = require("simple-git"),
   { ask } = require("./gulp-tasks/modules/ask"),
   yargs = require("yargs");
 
@@ -20,7 +20,7 @@ async function addAllAndCommit(git, message) {
   }
   try {
     const
-      rootGit = gitFactory(".");
+      rootGit = simpleGit(".");
 
     await addAllAndCommit(rootGit, message);
     process.exit(0);

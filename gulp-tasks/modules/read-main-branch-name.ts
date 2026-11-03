@@ -2,7 +2,7 @@
   const
     os = require("os"),
     chalk = requireModule<AnsiColors>("ansi-colors"),
-    gitFactory = require("simple-git"),
+    { simpleGit } = require("simple-git"),
     readGitRemote = requireModule<ReadGitRemote>("read-git-remote"),
     exec = requireModule<Exec>("exec");
 
@@ -24,7 +24,7 @@
           "default"
         ],
         probableRemote = await readGitRemote(),
-        git = gitFactory(),
+        git = simpleGit(),
         branchesResult = await git.branch(["-a"]),
         allBranches = new Set(branchesResult.all);
       for (const branch of possibles) {

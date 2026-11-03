@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-    const ZarroError = requireModule("zarro-error"), gitFactory = require("simple-git"), env = requireModule("env"), gutil = requireModule("gulp-util");
+    const ZarroError = requireModule("zarro-error"), { simpleGit } = require("simple-git"), env = requireModule("env"), gutil = requireModule("gulp-util");
     async function gitTag(tag, comment, where) {
         let dryRun = false;
         if (typeof tag === "object") {
@@ -22,7 +22,7 @@
             gutil.log(gutil.colors.green(`dry run: would tag${more} at ${tag} with comment: ${comment}`));
         }
         else {
-            const git = gitFactory(where);
+            const git = simpleGit(where);
             gutil.log(gutil.colors.cyan(`Tagging${more} at: "${tag}"`));
             await git.addAnnotatedTag(tag, comment);
         }

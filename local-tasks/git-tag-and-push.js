@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const gitFactory = require("simple-git"), gutil = requireModule("gulp-util"), gulp = requireModule("gulp"), gitTag = requireModule("git-tag"), gitPushTags = requireModule("git-push-tags"), gitPush = requireModule("git-push"), env = requireModule("env"), readPackageVersion = requireModule("read-package-version");
+const { simpleGit } = require("simple-git"), gutil = requireModule("gulp-util"), gulp = requireModule("gulp"), gitTag = requireModule("git-tag"), gitPushTags = requireModule("git-push-tags"), gitPush = requireModule("git-push"), env = requireModule("env"), readPackageVersion = requireModule("read-package-version");
 function log(str) {
     gutil.log(gutil.colors.green(str));
 }
@@ -9,7 +9,7 @@ async function commitAll(dryRun, where, comment) {
         log(`would add & commit all from: ${where}`);
     }
     else {
-        const git = gitFactory(where || ".");
+        const git = simpleGit(where || ".");
         await git.add(":/");
         await git.commit(comment);
     }

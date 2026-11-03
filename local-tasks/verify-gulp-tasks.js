@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 (function () {
     const gulp = requireModule("gulp");
     gulp.task("verify-gulp-tasks", async () => {
-        const gitFactory = require("simple-git"), path = require("path");
-        const rootGit = gitFactory(".");
+        const { simpleGit } = require("simple-git"), path = require("path");
+        const rootGit = simpleGit(".");
         const status = (await rootGit.status());
         if (status.current !== "master") {
             console.warn("Running in a branch - not verifying gulp-tasks branch to be master");
@@ -14,10 +14,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
             if (process.env.RUNNING_IN_GITHUB_ACTION) {
                 return;
             }
-            const at = path.resolve(path.join(__dirname, "..", "gulp-tasks")), git = gitFactory(at), expected = "master", branchInfo = await git.branch();
+            const at = path.resolve(path.join(__dirname, "..", "gulp-tasks")), git = simpleGit(at), expected = "master", branchInfo = await git.branch();
             if (!branchInfo || branchInfo.current !== expected) {
                 const err = `Expected gulp-tasks to be checked out as master`;
                 console.error(err);
+                // noinspection ExceptionCaughtLocallyJS
                 throw new Error(err);
             }
         }
