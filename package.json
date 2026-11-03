@@ -90,7 +90,7 @@
     "system-wrapper": "^1.8.0",
     "temp": "^0.9.4",
     "through2": "^3.0.2",
-    "undertaker-forward-reference": "^1.0.2",
+    "undertaker-forward-reference": "^2.0.0",
     "unfetch": "^5.0.0",
     "vinyl": "^2.2.1",
     "which": "^2.0.2",
