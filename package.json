@@ -117,7 +117,7 @@
     "@faker-js/faker": "^9.9.0",
     "@jest/types": "^29.6.1",
     "@types/decompress": "^4.2.4",
-    "@types/event-stream": "^3.3.34",
+    "@types/event-stream": "^4.0.6",
     "@types/fancy-log": "^1.3.1",
     "@types/gulp": "^4.0.8",
     "@types/jest": "^29.5.3",
