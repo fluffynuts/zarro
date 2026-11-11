@@ -32,7 +32,7 @@
                 recentEnough = (now - fetchRecentPeriod) < lastFetch.getTime();
             }
             if (!recentEnough) {
-                log.info(`${taskName} :: fetching all remotes...`);
+                log.info(`${taskName} :: fetching remote: ${defaultUpstream}...`);
                 const git = simpleGit(), timeout = env.resolveNumber("GIT_FETCH_TIMEOUT");
                 try {
                     const fail = failAfter(timeout);
