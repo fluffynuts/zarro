@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "zarro": "^1.149.2"
+    "zarro": "^1.215.0"
   }
 }
