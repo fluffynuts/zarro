@@ -69,7 +69,7 @@
         try {
           const fail = failAfter(timeout);
           await Promise.race([
-            git.fetch([ "--all" ]),
+            git.fetch([ defaultUpstream ]),
             fail.promise
           ]);
           fail.cancel();
