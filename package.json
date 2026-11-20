@@ -92,7 +92,7 @@
     "through2": "^3.0.2",
     "undertaker-forward-reference": "^2.0.0",
     "unfetch": "^5.0.0",
-    "vinyl": "^2.2.1",
+    "vinyl": "^3.0.1",
     "which": "^2.0.2",
     "xml2js": "^0.6.2",
     "yafs": "^1.48.0",
