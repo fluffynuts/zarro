@@ -129,7 +129,7 @@
     "@types/typescript": "^2.0.0",
     "@types/which": "^3.0.3",
     "@types/xml2js": "^0.4.8",
-    "@types/yargs": "^15.0.13",
+    "@types/yargs": "^17.0.35",
     "console-cls": "^1.2.2",
     "debug": "^4.3.4",
     "debugger-is-attached": "^1.2.0",
