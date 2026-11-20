@@ -99,3 +99,4 @@ bin
 obj
 local-tasks/*.generated.js
 *.user
+/tmp/*

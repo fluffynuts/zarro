@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const realSystem = Object.assign({}, require("system-wrapper"));
+const realSystem = { ...require("system-wrapper") };
 jest.doMock("system-wrapper", () => realSystem);
 require("expect-even-more-jest");
 describe(`nuget-update-self`, () => {
@@ -23,4 +23,18 @@ describe(`nuget-update-self`, () => {
                 .toHaveBeenCalledWith(shim, ["update", "-self"], expect.anything());
         }
     }, 30000);
+    (isWindows ? it.skip : it)(`should reject, not hang, when mono is not available`, async () => {
+        // Arrange
+        const originalPath = process.env.PATH;
+        process.env.PATH = "";
+        try {
+            // Act
+            // Assert
+            await expect(nugetUpdateSelf("/some/path/nuget.exe"))
+                .rejects.toThrow(/mono/);
+        }
+        finally {
+            process.env.PATH = originalPath;
+        }
+    }, 5000);
 });

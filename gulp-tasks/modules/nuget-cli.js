@@ -11,7 +11,10 @@
         if (!`${options.packageId}`.trim()) {
             throw new Error(`no nuget packageId provided`);
         }
-        const opts = Object.assign(Object.assign({}, defaultInstallOptions), options);
+        const opts = {
+            ...defaultInstallOptions,
+            ...options
+        };
         if (opts.outputDirectory) {
             await mkdir(opts.outputDirectory);
         }
@@ -37,7 +40,7 @@
         pushFlag(args, opts.preRelease, "-Prerelease");
         pushFlag(args, opts.requireConsent, "-RequireConsent");
         pushFlag(args, opts.forceEnglishOutput, "-ForceEnglishOutput");
-        const systemOpts = Object.assign({}, opts.systemOptions);
+        const systemOpts = { ...opts.systemOptions };
         systemOpts.suppressOutput = systemOpts.suppressOutput === undefined
             ? !!opts.nonInteractive
             : systemOpts.suppressOutput;

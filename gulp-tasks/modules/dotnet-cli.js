@@ -5,7 +5,7 @@
     }
     const { system } = require("system-wrapper");
     const realDotnetCli = require("dotnet-cli");
-    const dotnetCli = Object.assign({}, realDotnetCli);
+    const dotnetCli = { ...realDotnetCli };
     const decoratedClearCaches = dotnetCli.clearCaches;
     decoratedClearCaches.httpCache = dotnetCli.DotNetCache.httpCache;
     decoratedClearCaches.temp = dotnetCli.DotNetCache.temp;
@@ -26,5 +26,7 @@
             }
         };
     }
-    module.exports = Object.assign({}, dotnetCli);
+    module.exports = {
+        ...dotnetCli
+    };
 })();

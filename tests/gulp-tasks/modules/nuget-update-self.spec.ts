@@ -36,4 +36,18 @@ describe(`nuget-update-self`, () => {
         );
     }
   }, 30000);
+
+  (isWindows ? it.skip : it)(`should reject, not hang, when mono is not available`, async () => {
+    // Arrange
+    const originalPath = process.env.PATH;
+    process.env.PATH = "";
+    try {
+      // Act
+      // Assert
+      await expect(nugetUpdateSelf("/some/path/nuget.exe"))
+        .rejects.toThrow(/mono/);
+    } finally {
+      process.env.PATH = originalPath;
+    }
+  }, 5000);
 });

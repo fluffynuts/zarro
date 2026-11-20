@@ -1,15 +1,4 @@
 "use strict";
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 (function () {
     // this is a convenient wrapper around system()
     const { fileExists, folderExists } = require("yafs"), path = require("path"), quoteIfRequired = requireModule("quote-if-required"), failAfter = requireModule("fail-after"), isWindows = requireModule("is-windows"), system = require("system-wrapper"), debug = requireModule("debug")(__filename), which = requireModule("which"), ZarroError = requireModule("zarro-error");
@@ -37,7 +26,10 @@ var __rest = (this && this.__rest) || function (s, e) {
         // intentionally blank
     }
     async function doSystemWin32(cmd, args, opts, handlers) {
-        const _a = (opts || {}), { cwd } = _a, optsWithoutCwd = __rest(_a, ["cwd"]), systemOpts = Object.assign(Object.assign({}, optsWithoutCwd), { cwd: `${cwd}` });
+        const { cwd, ...optsWithoutCwd } = (opts || {}), systemOpts = {
+            ...optsWithoutCwd,
+            cwd: `${cwd}`
+        };
         return await isBatchFile(cmd)
             ? runBatchFile(cmd, args, systemOpts, handlers)
             : doSystem(cmd, args, systemOpts, handlers);
@@ -80,17 +72,21 @@ var __rest = (this && this.__rest) || function (s, e) {
         const stderrHandler = (_a = handlers === null || handlers === void 0 ? void 0 : handlers.stderr) !== null && _a !== void 0 ? _a : noop;
         const stdoutHandler = (_b = handlers === null || handlers === void 0 ? void 0 : handlers.stdout) !== null && _b !== void 0 ? _b : noop;
         try {
-            await system.system(cmd, args, Object.assign(Object.assign({}, opts), { stdout: (s) => {
+            await system.system(cmd, args, {
+                ...opts,
+                stdout: (s) => {
                     result.push(s);
                     stdout.push(s);
                     originalStdOut(s);
                     tryDo(() => stdoutHandler(s));
-                }, stderr: (s) => {
+                },
+                stderr: (s) => {
                     result.push(s);
                     stderr.push(s);
                     originalStdErr(s);
                     tryDo(() => stderrHandler(s));
-                } }));
+                }
+            });
             return result.join("\n");
         }
         catch (e) {

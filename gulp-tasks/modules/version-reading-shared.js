@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tryReadVersionFrom = void 0;
+exports.tryReadVersionFrom = tryReadVersionFrom;
 function readTextFrom(node) {
     return node
         ? node[0]
@@ -9,4 +9,3 @@ function readTextFrom(node) {
 function tryReadVersionFrom(groups, nodeName) {
     return groups.reduce((acc, cur) => acc || readTextFrom(cur[nodeName]), undefined);
 }
-exports.tryReadVersionFrom = tryReadVersionFrom;

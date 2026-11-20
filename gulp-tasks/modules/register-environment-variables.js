@@ -56,7 +56,7 @@
         });
         env.register({
             name: "MAX_CONCURRENCY",
-            default: `${Math.floor(os.cpus().length / 2)}`,
+            default: `${Math.floor(os.cpus().length / 2)}`, // in the age of hyperthreading, loading all logical cores can starve the host
             help: "Overrides other concurrency settings (BUILD_MAX_CPU_COUNT, MAX_NUNIT_AGENTS)"
         });
         env.register({
@@ -131,7 +131,7 @@
         });
         env.register({
             name: "MAX_NUNIT_AGENTS",
-            default: `${os.cpus().length - 1}`,
+            default: `${os.cpus().length - 1}`, // in the age of hyperthreading, loading all logical cores can starve tests
             help: "How many NUNit agents to use for testing (net framework)",
             overriddenBy: "MAX_CONCURRENCY",
             when: overrideWhenSmaller

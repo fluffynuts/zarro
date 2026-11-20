@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.spyOnConsole = void 0;
+exports.spyOnConsole = spyOnConsole;
 const noop_1 = require("./noop");
 const { spyOn } = jest;
 function spyOnConsole(outputs) {
@@ -9,4 +9,3 @@ function spyOnConsole(outputs) {
         spyOn(console, k).mockImplementation(noop_1.noop);
     }
 }
-exports.spyOnConsole = spyOnConsole;

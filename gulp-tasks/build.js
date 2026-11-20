@@ -107,7 +107,10 @@ If the error looks transient, I suggest setting the environment
         };
         if (env.resolveFlag("BUILD_SHOW_INFO")) {
             const buildRetries = env.resolveNumber(env.BUILD_RETRIES), retryMessage = buildRetries > 0 ? `yes (${buildRetries})` : `no`;
-            logConfig(Object.assign(Object.assign({}, config), { buildRetries: retryMessage }), {
+            logConfig({
+                ...config,
+                buildRetries: retryMessage
+            }, {
                 toolsVersion: "Tools version",
                 targets: "Build targets",
                 configuration: "Build configuration",
