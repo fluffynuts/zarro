@@ -34,7 +34,8 @@
         const ext = path.extname(nugetPath);
         const mono = which("mono");
         if (!mono) {
-          throw new Error(`To run nuget.exe on this platform, you must install mono`);
+          updating = undefined;
+          return reject(new Error(`To run nuget.exe on this platform, you must install mono`));
         }
         try {
           if (ext) {
