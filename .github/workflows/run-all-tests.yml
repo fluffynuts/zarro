@@ -33,6 +33,12 @@ jobs:
       run: |
         sudo apt install redis-server -q
 
+    - name: 🔎 Verify test prerequisites (redis for locks, mono for nuget.exe)
+      run: |
+        sudo systemctl start redis-server
+        redis-cli ping
+        mono --version | head -n 1
+
     - name: Test
       env:
         SUPPRESS_DOWNLOAD_PROGRESS: 1
