@@ -15,13 +15,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotnetCli = __importStar(require("dotnet-cli"));
 (function () {
@@ -44,42 +54,42 @@ const dotnetCli = __importStar(require("dotnet-cli"));
     }
     function build(opts) {
         return streamify(wrap(dotnetCli.build), f => {
-            const copy = Object.assign({}, opts);
+            const copy = { ...opts };
             copy.target = f.path;
             return copy;
         }, "gulp-dotnet-cli-build", "building project or solution");
     }
     function clean(opts) {
         return streamify(wrap(dotnetCli.clean), f => {
-            const copy = Object.assign({}, opts);
+            const copy = { ...opts };
             copy.target = f.path;
             return copy;
         }, "gulp-dotnet-cli-clean", "cleaning project or solution");
     }
     function test(opts) {
         return streamify(wrap(dotnetCli.test), f => {
-            const copy = Object.assign({}, opts);
+            const copy = { ...opts };
             copy.target = f.path;
             return copy;
         }, "gulp-dotnet-cli-pack", "creating nuget package");
     }
     function pack(opts) {
         return streamify(wrap(dotnetCli.pack), async (f) => {
-            const copy = Object.assign({}, opts);
+            const copy = { ...opts };
             copy.target = f.path;
             return copy;
         }, "gulp-dotnet-cli-pack", "creating nuget package");
     }
     function nugetPush(opts) {
         return streamify(wrap(dotnetCli.nugetPush), f => {
-            const copy = Object.assign({}, opts);
+            const copy = { ...opts };
             copy.target = f.path;
             return copy;
         }, "gulp-dotnet-cli-nuget-push", "pushing nuget package");
     }
     function publish(opts) {
         return streamify(wrap(dotnetCli.publish), async (f) => {
-            const copy = Object.assign({}, opts);
+            const copy = { ...opts };
             copy.target = f.path;
             if (copy.publishContainer) {
                 const containerOpts = await dotnetCli.resolveContainerOptions(copy), nameOpt = definitelyFind(containerOpts, "containerImageName"), tagOpt = definitelyFind(containerOpts, "containerImageTag"), registryOpt = definitelyFind(containerOpts, "containerRegistry");

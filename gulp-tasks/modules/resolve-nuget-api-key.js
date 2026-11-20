@@ -18,10 +18,17 @@
             }
             const result = generateDefaultKeyContainer(defaultKey);
             return defaultSource
-                ? Object.assign(Object.assign({}, result), { [defaultSource]: defaultKey }) : result;
+                ? {
+                    ...result,
+                    [defaultSource]: defaultKey
+                }
+                : result;
         }
         if (!!blob.match(/{+.*:+/)) {
-            return Object.assign(Object.assign({}, generateDefaultKeyContainer(defaultKey)), JSON.parse(blob));
+            return {
+                ...generateDefaultKeyContainer(defaultKey),
+                ...JSON.parse(blob)
+            };
         }
         else {
             return generateDefaultKeyContainer(blob);

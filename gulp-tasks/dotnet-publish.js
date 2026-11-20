@@ -43,7 +43,7 @@
             framework: env.resolve(env.DOTNET_PUBLISH_FRAMEWORK),
             noBuild: env.resolveFlag(env.DOTNET_PUBLISH_NO_BUILD),
             noRestore: env.resolveFlag(env.DOTNET_PUBLISH_NO_RESTORE),
-            target: "[ not set ]",
+            target: "[ not set ]", // intentional: piping through gulp will set this, per project
             verbosity: env.resolve(env.DOTNET_PUBLISH_VERBOSITY),
             msbuildProperties: env.resolveMap(env.MSBUILD_PROPERTIES),
             publishContainer: env.resolveFlag(env.DOTNET_PUBLISH_CONTAINER, anyContainerOptionsSet),

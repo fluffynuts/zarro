@@ -380,7 +380,7 @@ Test Run Summary
     }
     async function testOneDotNetCoreProject(target, configuration, verbosity, testResults, runningInParallel, forceBuild, suppressOutput, label) {
         const quackersState = {
-            inSummary: false,
+            inSummary: false, // gather summary info into test results
             inFailureSummary: false,
             inSlowSummary: false,
             inTotalsSummary: false,
@@ -415,7 +415,7 @@ Test Run Summary
                 stderr,
                 stdout,
                 suppressOutput,
-                suppressErrors: true,
+                suppressErrors: true, // we want to collect the errors later, not die when one happens
                 env: testEnvironment,
                 label
             });
@@ -618,7 +618,7 @@ Test Run Summary
         if (prefix) {
             quackersVars.QUACKERS_TEST_NAME_PREFIX = prefix;
         }
-        return Object.assign(Object.assign({}, process.env), quackersVars);
+        return { ...process.env, ...quackersVars };
     }
     function isDistinctFile(filePath, seenFiles) {
         const basename = path.basename(filePath), result = seenFiles.indexOf(basename) === -1;

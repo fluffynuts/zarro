@@ -9,7 +9,7 @@
             this.replaceExistingEnvironment = existingEnvironment !== null && existingEnvironment !== void 0 ? existingEnvironment : false;
         }
         async run(fn) {
-            const oldEnv = Object.assign({}, process.env);
+            const oldEnv = { ...process.env };
             try {
                 if (this.replaceExistingEnvironment) {
                     replaceEnv(this.env);

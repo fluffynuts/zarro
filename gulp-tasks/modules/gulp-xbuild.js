@@ -10,7 +10,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
         nologo: false
     }, gutil = requireModule("gulp-util"), es = require("event-stream");
     function gulpXBuild(options) {
-        options = Object.assign(Object.assign({}, defaultOptions), options);
+        options = { ...defaultOptions, ...options };
         const args = prepareArgsFrom(options);
         const promise = Promise.resolve();
         return es.through(function write(file) {

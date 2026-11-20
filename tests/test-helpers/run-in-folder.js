@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.runInFolder = void 0;
+exports.runInFolder = runInFolder;
 async function runInFolder(folder, fn) {
     const start = process.cwd(), alreadyThere = start === folder;
     if (!alreadyThere) {
@@ -15,4 +15,3 @@ async function runInFolder(folder, fn) {
         }
     }
 }
-exports.runInFolder = runInFolder;

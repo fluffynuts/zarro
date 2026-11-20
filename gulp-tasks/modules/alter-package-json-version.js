@@ -47,7 +47,7 @@
         if (!shouldFillInFromEnvironment(opts)) {
             return opts;
         }
-        const result = Object.assign({}, opts);
+        const result = { ...opts };
         if (result.packageJsonPath === undefined) {
             result.packageJsonPath = resolve(PACKAGE_JSON);
         }

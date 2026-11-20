@@ -8,3 +8,16 @@ updates:
       # faker 10 is ESM-only; jest + ts-jest here run as CommonJS
       - dependency-name: "@faker-js/faker"
         update-types: ["version-update:semver-major"]
+      # ts-jest peer range is typescript <7; its compiler-API use breaks on TS 7
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      # through2 5 is ESM-only (import-only "exports"); this project is CommonJS
+      - dependency-name: "through2"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/through2"
+        update-types: ["version-update:semver-major"]
+      # gulp-msbuild 1.x depends on the npm "node" package (which its code never
+      # imports); that installs a node binary into node_modules/.bin and shadows
+      # the user's node. Revisit once upstream drops it.
+      - dependency-name: "gulp-msbuild"
+        update-types: ["version-update:semver-major"]

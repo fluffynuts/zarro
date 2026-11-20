@@ -391,9 +391,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
         const result = [
             `"-target:${nunit}"`,
             `"-targetargs:${nunitOptions}"`,
-            `"-targetdir:${process.cwd()}"`,
+            `"-targetdir:${process.cwd()}"`, // TODO: test me please
             `"-output:${options.coverageReportBase + ".xml"}"`,
-            `-filter:"+[*]* ${excludeFilter}"`,
+            `-filter:"+[*]* ${excludeFilter}"`, // TODO: embetterment
             `-register`,
             `-mergebyhash`,
             `"-searchdirs:${getUniqueDirsFrom(testAssemblies)}"`
