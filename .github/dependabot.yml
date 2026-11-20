@@ -16,8 +16,10 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "@types/through2"
         update-types: ["version-update:semver-major"]
-      # gulp-msbuild 1.x depends on the npm "node" package (which its code never
+      # gulp-msbuild 1.0.x depends on the npm "node" package (which its code never
       # imports); that installs a node binary into node_modules/.bin and shadows
-      # the user's node. Revisit once upstream drops it.
+      # the user's node. Ignoring everything up to and including 1.0.3 means a
+      # new PR appears once a release without that dependency is published.
+      # zarro itself is pinned at 0.11.0 in package.json.
       - dependency-name: "gulp-msbuild"
-        update-types: ["version-update:semver-major"]
+        versions: ["<= 1.0.3"]

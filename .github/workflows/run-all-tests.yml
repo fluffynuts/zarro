@@ -8,22 +8,24 @@ on:
 
 jobs:
   main:
-    runs-on: ubuntu-latest
+    # not ubuntu-latest: 26.04 has no ca-certificates-mono / cert-sync, so mono
+    # cannot validate any https certificate and nuget.exe fails every request
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
     - name: Setup .NET for integration testing
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
           7.0.306
 
     - name: 🟢 Setup NodeJS
-      uses: actions/setup-node@v2-beta
+      uses: actions/setup-node@v4
       with:
-        node-version: '16'
+        node-version: '22'
 
     - name: ⬆️ Fetch latest software lists
       run: |
@@ -33,8 +35,29 @@ jobs:
       run: |
         sudo apt install redis-server -q
 
+    - name: 🟦 Setup mono to run nuget.exe
+      run: |
+        sudo apt install mono-complete ca-certificates-mono -q -y
+        # mono keeps its own trust store, which is empty here: without this,
+        # nuget.exe fails every https call with CERTIFICATE_VERIFY_FAILED
+        sudo cert-sync /etc/ssl/certs/ca-certificates.crt
+
+    - name: 🔎 Verify test prerequisites (redis for locks, mono for nuget.exe)
+      run: |
+        sudo systemctl start redis-server
+        redis-cli ping
+        mono --version
+
+    - name: 🔬 Smoke test nuget.exe under mono (what the nuget tests do first)
+      run: |
+        mkdir -p "$RUNNER_TEMP/nuget-smoke"
+        curl -sSfL -o "$RUNNER_TEMP/nuget-smoke/nuget.exe" http://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+        cd "$RUNNER_TEMP/nuget-smoke"
+        timeout 120 mono nuget.exe update -self
+
     - name: Test
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SUPPRESS_DOWNLOAD_PROGRESS: 1
         RUNNING_IN_GITHUB_ACTION: 1
         TEST_TIMEOUT: 60000
@@ -42,4 +65,4 @@ jobs:
       run: |
         npm i
         npm run build
-        npm test
+        npm test -- --bail=0

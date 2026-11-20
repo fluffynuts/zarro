@@ -19,8 +19,7 @@ jobs:
         dotnet-version: 8.x
     - uses: actions/setup-node@v4
       with:
-        # intentionally use 16 to ensure the fetch polyfill is being brought in
-        node-version: '16'
+        node-version: '22'
 
     - name: Build & Test NExpect
       run: |
