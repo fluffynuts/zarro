@@ -35,7 +35,10 @@ jobs:
 
     - name: 🟦 Setup mono to run nuget.exe
       run: |
-        sudo apt install mono-complete -q -y
+        sudo apt install mono-complete ca-certificates-mono -q -y
+        # mono keeps its own trust store, which is empty here: without this,
+        # nuget.exe fails every https call with CERTIFICATE_VERIFY_FAILED
+        sudo cert-sync /etc/ssl/certs/ca-certificates.crt
 
     - name: 🔎 Verify test prerequisites (redis for locks, mono for nuget.exe)
       run: |
