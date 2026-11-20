@@ -57,6 +57,7 @@ jobs:
 
     - name: Test
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SUPPRESS_DOWNLOAD_PROGRESS: 1
         RUNNING_IN_GITHUB_ACTION: 1
         TEST_TIMEOUT: 60000
@@ -64,4 +65,4 @@ jobs:
       run: |
         npm i
         npm run build
-        npm test
+        npm test -- --bail=0
