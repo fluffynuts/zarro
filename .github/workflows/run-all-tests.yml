@@ -43,6 +43,13 @@ jobs:
         redis-cli ping
         mono --version
 
+    - name: 🔬 Smoke test nuget.exe under mono (what the nuget tests do first)
+      run: |
+        mkdir -p "$RUNNER_TEMP/nuget-smoke"
+        curl -sSfL -o "$RUNNER_TEMP/nuget-smoke/nuget.exe" http://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+        cd "$RUNNER_TEMP/nuget-smoke"
+        timeout 120 mono nuget.exe update -self
+
     - name: Test
       env:
         SUPPRESS_DOWNLOAD_PROGRESS: 1
