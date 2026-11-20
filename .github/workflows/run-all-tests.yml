@@ -33,11 +33,15 @@ jobs:
       run: |
         sudo apt install redis-server -q
 
+    - name: 🟦 Setup mono to run nuget.exe
+      run: |
+        sudo apt install mono-complete -q -y
+
     - name: 🔎 Verify test prerequisites (redis for locks, mono for nuget.exe)
       run: |
         sudo systemctl start redis-server
         redis-cli ping
-        mono --version | head -n 1
+        mono --version
 
     - name: Test
       env:
