@@ -8,7 +8,9 @@ on:
 
 jobs:
   main:
-    runs-on: ubuntu-latest
+    # not ubuntu-latest: 26.04 has no ca-certificates-mono / cert-sync, so mono
+    # cannot validate any https certificate and nuget.exe fails every request
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
       with:
