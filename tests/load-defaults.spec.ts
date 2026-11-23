@@ -48,6 +48,22 @@ describe(`load-defaults`, () => {
       .toEqual({});
   });
 
+  it(`should create a skeleton which sets nothing and warns about nothing when loaded`, async () => {
+    // Arrange
+    const
+      sandbox = await Sandbox.create(),
+      defaultsFile = sandbox.fullPathFor(".zarro-defaults"),
+      env: Env = {};
+    await loadDefaults({ defaultsFile, env });
+    // Act
+    await loadDefaults({ defaultsFile, env, taskName: "release" });
+    // Assert
+    expect(env)
+      .toEqual({});
+    expect(warn)
+      .not.toHaveBeenCalled();
+  });
+
   it(`should set variables which are not yet set`, async () => {
     // Arrange
     const
@@ -144,6 +160,88 @@ describe(`load-defaults`, () => {
       .toContain("this is not valid");
     expect(env)
       .toEqual({ FOO: "bar" });
+  });
+
+  describe(`precedence within the file`, () => {
+    it(`should let a later line override an earlier line for the same variable`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("FOO=first", "FOO=second"),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env });
+      // Assert
+      expect(env.FOO)
+        .toEqual("second");
+    });
+
+    it(`should let a [section] override a value given above it, for that task only`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults(
+          "FOO=base",
+          "[release]",
+          "FOO=overridden"
+        ),
+        forRelease: Env = {},
+        forTest: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env: forRelease, taskName: "release" });
+      await loadDefaults({ defaultsFile, env: forTest, taskName: "test" });
+      // Assert
+      expect(forRelease.FOO)
+        .toEqual("overridden");
+      expect(forTest.FOO)
+        .toEqual("base");
+    });
+
+    it(`should still not override an already-set variable, however many lines mention it`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("FOO=first", "FOO=second"),
+        env: Env = { FOO: "from-environment" };
+      // Act
+      await loadDefaults({ defaultsFile, env });
+      // Assert
+      expect(env.FOO)
+        .toEqual("from-environment");
+    });
+
+    it(`should let a later line override a variable which an earlier ! line forced over the environment`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("!FOO=forced", "FOO=later"),
+        env: Env = { FOO: "from-environment" };
+      // Act
+      await loadDefaults({ defaultsFile, env });
+      // Assert
+      expect(env.FOO)
+        .toEqual("later");
+    });
+
+    it(`should let a later empty line unset what an earlier line set`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("FOO=first", "FOO="),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env });
+      // Assert
+      expect(Object.keys(env))
+        .not.toContain("FOO");
+    });
+
+    it(`should let a later forwarded value override an earlier one`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("FOO=$ONE", "FOO=$TWO"),
+        env: Env = { ONE: "1", TWO: "2" };
+      // Act
+      await loadDefaults({ defaultsFile, env });
+      // Assert
+      expect(env.FOO)
+        .toEqual("2");
+    });
   });
 
   describe(`sections`, () => {
