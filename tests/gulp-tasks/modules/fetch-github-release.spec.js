@@ -4,6 +4,12 @@ require("expect-even-more-jest");
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 const yafs_1 = require("yafs");
 describe(`fetch-github-release`, function () {
+    // this test calls the live GitHub API. tests/setup.js already retries every test 3 times,
+    // but back to back: a network blip outlasted all four attempts (inside 42s) in CI.
+    // so space the retries out. Same IDE guard as tests/setup.js.
+    if (!process.env.RUNNING_FROM_IDE && !process.env.JB_IDE_PORT) {
+        jest.retryTimes(3, { logErrorsBeforeRetry: true, waitBeforeRetry: 15000 });
+    }
     const { fetchLatestRelease } = requireModule("fetch-github-release");
     it(`should export fetchLatestRelease function`, async () => {
         // Arrange
