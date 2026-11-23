@@ -4,12 +4,18 @@
         debug = require("debug")("zarro::main"),
         log = requireModule<Log>("log");
 
-    const defaultDefaultsFile = ".zarro-defaults";
+    const
+        defaultDefaultsFile = ".zarro-defaults",
+        defaultsSection = "defaults", // the section before any [header]
+        // the whole (comment-stripped) line must be the header: otherwise a value like PATTERN=[abc] would be one
+        sectionHeaderRe = /^\s*\[([\w\s.-]+)]\s*$/;
 
     interface LoadDefaultsOptions {
         // these are injectable for testing
         defaultsFile?: string;
         env?: Dictionary<string | undefined>;
+        // the npm script being run, which selects [sections] in the defaults file
+        taskName?: string;
     }
 
     async function createZarroDefaultsEmpty(defaultsFile: string) {
@@ -21,6 +27,15 @@
 #   so this means anything you set in your package.json, eg with
 #   cross-env, will override what's in here unless you've specifically
 #   marked the setting in here as forced with !
+#
+# a variable can take its value from another environment variable:
+#     VARIABLE=$OTHER_VARIABLE
+#
+# variables can be limited to one npm script with a [section] header, eg
+#     [release]
+#     VARIABLE=Value
+#   applies only when running \`npm run release\`; use [defaults] to go
+#   back to variables which apply to everything
 `);
     }
 
@@ -28,18 +43,31 @@
         const
             defaultsFile = options?.defaultsFile ?? defaultDefaultsFile,
             env = options?.env ?? process.env,
+            taskName = (options && "taskName" in options
+                ? options.taskName
+                : process.env.npm_lifecycle_event) ?? "",
             exists = await fileExists(defaultsFile);
         if (!exists) {
             await createZarroDefaultsEmpty(defaultsFile);
             return;
         }
         const
-            lines: string[] = await readTextFileLines(defaultsFile);
+            lines: string[] = await readTextFileLines(defaultsFile),
+            currentTask = taskName.toLowerCase();
+        let currentSection = defaultsSection;
         for (const line of lines) {
             const
                 [ code ] = splitComment(line);
             if (isEmpty(code)) {
                 // comment-only line or empty line
+                continue;
+            }
+            const sectionMatch = code.match(sectionHeaderRe);
+            if (sectionMatch) {
+                currentSection = sectionMatch[1].toLowerCase();
+                continue;
+            }
+            if (currentSection !== defaultsSection && currentSection !== currentTask) {
                 continue;
             }
             if (looksInvalid(code)) {
@@ -51,12 +79,17 @@
                 name = parts[0],
                 value = parts.slice(1).join("="),
                 forced = name[0] === "!",
+                forwarded = value[0] === "$",
                 notYetSet = env[name] === undefined;
             if (notYetSet || forced) {
-                const key = name.replace(/^!/, "");
-                if (value) {
-                    debug(`setting env var ${ key } to '${ value }'`);
-                    env[key] = value;
+                const
+                    key = name.replace(/^!/, ""),
+                    finalValue = forwarded
+                        ? env[value.substring(1)]
+                        : value;
+                if (finalValue) {
+                    debug(`setting env var ${ key } to '${ finalValue }'`);
+                    env[key] = finalValue;
                 } else {
                     debug(`deleting env var ${ key }`);
                     delete env[key];

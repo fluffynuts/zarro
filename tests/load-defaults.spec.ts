@@ -145,4 +145,206 @@ describe(`load-defaults`, () => {
     expect(env)
       .toEqual({ FOO: "bar" });
   });
+
+  describe(`sections`, () => {
+    it(`should apply variables from an explicit [defaults] section regardless of task`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("[defaults]", "FOO=bar"),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: "anything" });
+      // Assert
+      expect(env)
+        .toEqual({ FOO: "bar" });
+    });
+
+    it(`should apply variables from a named section when the task matches`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("[release]", "FOO=bar"),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: "release" });
+      // Assert
+      expect(env)
+        .toEqual({ FOO: "bar" });
+    });
+
+    it(`should not apply variables from a named section when the task does not match`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("[release]", "FOO=bar"),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: "test" });
+      // Assert
+      expect(env)
+        .toEqual({});
+    });
+
+    it(`should never apply a named section when there is no task name`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("[release]", "FOO=bar", "[undefined]", "QUX=quux"),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: undefined });
+      // Assert
+      expect(env)
+        .toEqual({});
+    });
+
+    it(`should match section names and task names case-insensitively`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("[Release]", "FOO=bar"),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: "RELEASE" });
+      // Assert
+      expect(env)
+        .toEqual({ FOO: "bar" });
+    });
+
+    it(`should support section names with hyphens, as in npm scripts like release-beta`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("[release-beta]", "FOO=beta", "[release]", "FOO=stable"),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: "release-beta" });
+      // Assert
+      expect(env.FOO)
+        .toEqual("beta");
+    });
+
+    it(`should tolerate whitespace and a trailing comment around a section header`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("  [release]   # only when releasing", "FOO=bar"),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: "release" });
+      // Assert
+      expect(env)
+        .toEqual({ FOO: "bar" });
+    });
+
+    it(`should keep applying a section until the next header, and again after [defaults]`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults(
+          "A=1",
+          "[release]",
+          "B=2",
+          "[defaults]",
+          "C=3"
+        ),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: "test" });
+      // Assert
+      expect(env)
+        .toEqual({ A: "1", C: "3" });
+    });
+
+    it(`should not treat a value containing brackets as a section header`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("PATTERN=[abc]", "OTHER=x[y]"),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: "test" });
+      // Assert
+      expect(env)
+        .toEqual({ PATTERN: "[abc]", OTHER: "x[y]" });
+    });
+
+    it(`should not warn about invalid lines in sections which do not apply`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("[release]", "this is not valid"),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: "test" });
+      // Assert
+      expect(warn)
+        .not.toHaveBeenCalled();
+    });
+
+    it(`should warn about invalid lines in sections which do apply`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("[release]", "this is not valid"),
+        env: Env = {};
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: "release" });
+      // Assert
+      expect(warn)
+        .toHaveBeenCalledOnce();
+    });
+
+    it(`should apply the usual no-override and ! rules inside sections`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("[release]", "KEEP=defaults", "!FORCE=defaults"),
+        env: Env = { KEEP: "environment", FORCE: "environment" };
+      // Act
+      await loadDefaults({ defaultsFile, env, taskName: "release" });
+      // Assert
+      expect(env)
+        .toEqual({ KEEP: "environment", FORCE: "defaults" });
+    });
+  });
+
+  describe(`forwarding values from other environment variables`, () => {
+    it(`should take the value from the named variable when the value starts with $`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("NPM_TOKEN=$MY_TOKEN"),
+        env: Env = { MY_TOKEN: "secret" };
+      // Act
+      await loadDefaults({ defaultsFile, env });
+      // Assert
+      expect(env.NPM_TOKEN)
+        .toEqual("secret");
+    });
+
+    it(`should not override an already-set variable with a forwarded value`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("FOO=$BAR"),
+        env: Env = { FOO: "already", BAR: "forwarded" };
+      // Act
+      await loadDefaults({ defaultsFile, env });
+      // Assert
+      expect(env.FOO)
+        .toEqual("already");
+    });
+
+    it(`should override an already-set variable with a forwarded value when forced`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("!FOO=$BAR"),
+        env: Env = { FOO: "already", BAR: "forwarded" };
+      // Act
+      await loadDefaults({ defaultsFile, env });
+      // Assert
+      expect(env.FOO)
+        .toEqual("forwarded");
+    });
+
+    it(`should treat a forwarded variable which is not set as an empty value (forced: deletes)`, async () => {
+      // Arrange
+      const
+        { defaultsFile } = await createSandboxWithDefaults("!FOO=$MISSING"),
+        env: Env = { FOO: "already" };
+      // Act
+      await loadDefaults({ defaultsFile, env });
+      // Assert
+      expect(Object.keys(env))
+        .not.toContain("FOO");
+    });
+  });
 });

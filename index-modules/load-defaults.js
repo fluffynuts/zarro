@@ -1,7 +1,9 @@
 "use strict";
 (function () {
     const { fileExists, readTextFileLines, writeTextFile } = require("yafs"), debug = require("debug")("zarro::main"), log = requireModule("log");
-    const defaultDefaultsFile = ".zarro-defaults";
+    const defaultDefaultsFile = ".zarro-defaults", defaultsSection = "defaults", // the section before any [header]
+    // the whole (comment-stripped) line must be the header: otherwise a value like PATTERN=[abc] would be one
+    sectionHeaderRe = /^\s*\[([\w\s.-]+)]\s*$/;
     async function createZarroDefaultsEmpty(defaultsFile) {
         await writeTextFile(defaultsFile, `# zarro defaults file:
 # place one VARIABLE=VALUE per line below
@@ -11,32 +13,54 @@
 #   so this means anything you set in your package.json, eg with
 #   cross-env, will override what's in here unless you've specifically
 #   marked the setting in here as forced with !
+#
+# a variable can take its value from another environment variable:
+#     VARIABLE=$OTHER_VARIABLE
+#
+# variables can be limited to one npm script with a [section] header, eg
+#     [release]
+#     VARIABLE=Value
+#   applies only when running \`npm run release\`; use [defaults] to go
+#   back to variables which apply to everything
 `);
     }
     async function loadDefaults(options) {
-        var _a, _b;
-        const defaultsFile = (_a = options === null || options === void 0 ? void 0 : options.defaultsFile) !== null && _a !== void 0 ? _a : defaultDefaultsFile, env = (_b = options === null || options === void 0 ? void 0 : options.env) !== null && _b !== void 0 ? _b : process.env, exists = await fileExists(defaultsFile);
+        var _a, _b, _c;
+        const defaultsFile = (_a = options === null || options === void 0 ? void 0 : options.defaultsFile) !== null && _a !== void 0 ? _a : defaultDefaultsFile, env = (_b = options === null || options === void 0 ? void 0 : options.env) !== null && _b !== void 0 ? _b : process.env, taskName = (_c = (options && "taskName" in options
+            ? options.taskName
+            : process.env.npm_lifecycle_event)) !== null && _c !== void 0 ? _c : "", exists = await fileExists(defaultsFile);
         if (!exists) {
             await createZarroDefaultsEmpty(defaultsFile);
             return;
         }
-        const lines = await readTextFileLines(defaultsFile);
+        const lines = await readTextFileLines(defaultsFile), currentTask = taskName.toLowerCase();
+        let currentSection = defaultsSection;
         for (const line of lines) {
             const [code] = splitComment(line);
             if (isEmpty(code)) {
                 // comment-only line or empty line
                 continue;
             }
+            const sectionMatch = code.match(sectionHeaderRe);
+            if (sectionMatch) {
+                currentSection = sectionMatch[1].toLowerCase();
+                continue;
+            }
+            if (currentSection !== defaultsSection && currentSection !== currentTask) {
+                continue;
+            }
             if (looksInvalid(code)) {
                 log.warn(`invalid config line in ${defaultsFile}:\n${line}`);
                 continue;
             }
-            const parts = code.trim().split("="), name = parts[0], value = parts.slice(1).join("="), forced = name[0] === "!", notYetSet = env[name] === undefined;
+            const parts = code.trim().split("="), name = parts[0], value = parts.slice(1).join("="), forced = name[0] === "!", forwarded = value[0] === "$", notYetSet = env[name] === undefined;
             if (notYetSet || forced) {
-                const key = name.replace(/^!/, "");
-                if (value) {
-                    debug(`setting env var ${key} to '${value}'`);
-                    env[key] = value;
+                const key = name.replace(/^!/, ""), finalValue = forwarded
+                    ? env[value.substring(1)]
+                    : value;
+                if (finalValue) {
+                    debug(`setting env var ${key} to '${finalValue}'`);
+                    env[key] = finalValue;
                 }
                 else {
                     debug(`deleting env var ${key}`);
