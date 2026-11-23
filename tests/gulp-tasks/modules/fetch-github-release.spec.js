@@ -19,7 +19,9 @@ describe(`fetch-github-release`, function () {
         await fetchLatestRelease({
             owner: "axllent",
             repo: "mailpit",
-            destination: sandbox.path
+            destination: sandbox.path,
+            // unauthenticated requests share a low rate limit on CI runners
+            accessToken: process.env.GITHUB_TOKEN
         });
         // Assert
         const contents = await (0, yafs_1.ls)(sandbox.path), lowercased = contents.map(s => s.toLowerCase());

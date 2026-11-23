@@ -22,7 +22,9 @@ describe(`fetch-github-release`, function() {
     await fetchLatestRelease({
       owner: "axllent",
       repo: "mailpit",
-      destination: sandbox.path
+      destination: sandbox.path,
+      // unauthenticated requests share a low rate limit on CI runners
+      accessToken: process.env.GITHUB_TOKEN
     });
     // Assert
     const
