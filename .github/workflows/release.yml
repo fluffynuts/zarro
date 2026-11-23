@@ -54,6 +54,7 @@ jobs:
           set -euo pipefail
           if [ "$EVENT" = "workflow_dispatch" ]; then
             ship=true
+            from="-"
             files="(run by hand)"
           else
             # pull request: the checkout is the merge of the PR into its base, whose first parent is the base.
@@ -62,7 +63,15 @@ jobs:
             if [ "$EVENT" = "push" ] && [ -n "${BEFORE//0/}" ]; then from="$BEFORE"; fi
             files="$(git diff --name-only "$from" HEAD)"
             ship="$(printf '%s\n' "$files" | node .github/scripts/is-shipping-change.js)"
+            if [ -z "$files" ]; then
+              echo "::warning::no changed files found between $from and HEAD: nothing will be published"
+            fi
           fi
+          echo "event:        $EVENT"
+          echo "compared:     $from .. HEAD"
+          echo "changed files:"
+          printf '%s\n' "$files" | sed 's/^/  /'
+          echo "ship:         $ship"
           echo "ship=$ship" >> "$GITHUB_OUTPUT"
           {
             echo "### Changed files"
