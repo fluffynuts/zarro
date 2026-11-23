@@ -1,0 +1,145 @@
+name: Release
+
+# Pull requests (from this repository, not dependabot) that pass the tests publish a
+# BETA:   keeps major.minor, increments patch, npm tag `beta`.
+# Merges to master that pass the tests publish a STABLE release:
+#         keeps major, increments minor (patch 0), npm tag `latest`;
+#         then commits the version bump, tags it and creates a GitHub release.
+#
+# Publishing uses npm trusted publishing (OIDC): there is no npm token and no OTP.
+# The trusted publisher on npmjs.com must name THIS FILE (release.yml): see RELEASING.md.
+# Run by hand (workflow_dispatch) it defaults to a dry run which publishes nothing.
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
+    # merges which can't change what ships don't publish a stable release.
+    # (pull requests are not filtered: every PR still runs the tests)
+    paths-ignore:
+      - "tests/**"
+      - ".github/**"
+      - "**/*.md"
+      - "package-lock.json"
+      - ".gitignore"
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: "Release kind"
+        type: choice
+        options: [ beta, stable ]
+        default: beta
+      dry_run:
+        description: "Dry run: work out the version and run `npm publish --dry-run`; change nothing"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: ./.github/workflows/run-all-tests.yml
+
+  release:
+    needs: test
+    if: >-
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'pull_request' &&
+        github.event.pull_request.head.repo.full_name == github.repository &&
+        github.event.pull_request.user.login != 'dependabot[bot]' &&
+        github.actor != 'dependabot[bot]'
+      )
+    runs-on: ubuntu-latest
+    # two publishes must never race for the same version
+    concurrency:
+      group: npm-publish
+      cancel-in-progress: false
+    permissions:
+      contents: write       # stable: push the version bump and tag, create the GitHub release
+      id-token: write       # npm trusted publishing (OIDC)
+      pull-requests: write  # beta: comment the published version on the pull request
+    env:
+      KIND: ${{ github.event_name == 'workflow_dispatch' && inputs.kind || (github.event_name == 'push' && 'stable' || 'beta') }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refuse to publish a stable release from anywhere but master
+        if: env.KIND == 'stable' && env.DRY_RUN != 'true' && github.ref != 'refs/heads/master'
+        run: |
+          echo "::error::stable releases are only published from master (this is ${{ github.ref }})"
+          exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          # npm trusted publishing needs node >= 22.14 and npm >= 11.5.1
+          node-version: '24'
+
+      - name: Install
+        run: npm ci
+
+      - name: Check npm is new enough for trusted publishing
+        run: |
+          node -e '
+            const semver = require("semver"), v = process.argv[1];
+            if (!semver.gte(v, "11.5.1")) {
+              console.error(`npm ${v} is too old for trusted publishing: need >= 11.5.1`);
+              process.exit(1);
+            }
+            console.log(`npm ${v} ok`);
+          ' "$(npm --version)"
+
+      - name: Build and verify
+        run: |
+          npm run build
+          npm run verify-no-debugger
+
+      - name: Work out the version
+        id: version
+        run: |
+          set -euo pipefail
+          name="$(node -p 'require("./package.json").name')"
+          npm view "$name" versions --json > "$RUNNER_TEMP/published.json"
+          version="$(node .github/scripts/next-release-version.js "$KIND" package.json "$RUNNER_TEMP/published.json")"
+          if [ "$KIND" = "beta" ]; then tag=beta; else tag=latest; fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          {
+            echo "### $KIND release: $name@$version (npm tag \`$tag\`)"
+            if [ "$DRY_RUN" = "true" ]; then echo "Dry run: nothing was published."; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set the version in the workspace
+        run: npm version "${{ steps.version.outputs.version }}" --no-git-tag-version
+
+      - name: Publish to npm
+        run: |
+          set -euo pipefail
+          args=(--access public --tag "${{ steps.version.outputs.tag }}")
+          if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); fi
+          npm publish "${args[@]}"
+
+      - name: Beta - comment the published version on the pull request
+        if: env.KIND == 'beta' && env.DRY_RUN != 'true' && github.event_name == 'pull_request'
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" --body "Published \`zarro@${{ steps.version.outputs.version }}\` with the \`beta\` tag.
+          Try it with: \`npm install --save-dev zarro@${{ steps.version.outputs.version }}\`"
+
+      - name: Stable - commit the version bump, tag it and create the GitHub release
+        if: env.KIND == 'stable' && env.DRY_RUN != 'true'
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m ":bookmark: bump package version to $version"
+          # the package is already published at this point: if this fails, tag v$version by hand
+          git pull --rebase origin master
+          git push origin HEAD:master
+          gh release create "v$version" --target "$(git rev-parse HEAD)" --title "v$version" --generate-notes --latest
