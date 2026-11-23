@@ -14,9 +14,16 @@ The version is worked out from the highest version on npm and in `package.json`
 betas keep counting up and two builds can't pick the same version. Publishes are
 serialised.
 
-Merges which only touch `tests/`, `.github/`, markdown, `package-lock.json` or `.gitignore`
-don't publish. Other merges to master do, including dependabot merges which change
-`package.json`.
+## What doesn't publish
+
+The tests always run. But a pull request or a merge which only touches `tests/`, `.github/`,
+markdown (`*.md`, README included), lockfiles or `.gitignore` publishes **nothing**, neither a
+beta nor a stable release. The `changes` job in the workflow decides this from the list of
+changed files (`.github/scripts/is-shipping-change.js`, with tests in `tests/github-scripts`)
+and lists those files in the run summary. Anything else counts as a change to the package,
+including `package.json`, so a dependabot merge which changes `package.json` does release.
+
+Separately, no beta is published for pull requests from forks or from dependabot.
 
 ## One-time setup on npmjs.com
 
@@ -57,6 +64,15 @@ version check step (needs npm >= 11.5.1); the two allowed-action options above.
 The package is published before the version bump is committed. If the commit/push/release
 step fails, the version is on npm but not in git: bump `package.json` to that version, commit
 `:bookmark: bump package version to X`, tag `vX`, and create the GitHub release by hand.
+
+## Cancelling a release run
+
+Cancelling a run stops it, but does not undo what it already did. Tests take a few minutes;
+after that the release job moves quickly: once `Publish to npm` has started, the version is on
+npm, and the commit, tag and GitHub release follow within a minute or two (a cancel arriving
+during that last step still leaves all of it done). npm doesn't let a version number be
+reused, so to take a bad release back, publish a fixed one on top of it. If you want to stop
+a release, cancel before the `Publish to npm` step.
 
 ## Releasing by hand
 
