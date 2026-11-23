@@ -193,6 +193,30 @@ TEST_EXCLUDE=src/PeanutButter/**/*
 Note also here the shorthand of `@` - if a task has the same name as the npm script
 used to invoke it, this is a quick way to surface that task to `npm run` -space.
 
+#### Variables for one npm script only
+Variables can be limited to a single npm script by putting them under a `[section]` header,
+named for the npm script (so `npm run release-beta` is `[release-beta]`). Names are
+matched case-insensitively. Variables before any header, or under `[defaults]`, always apply:
+
+```
+DOTNET_CORE=1
+
+[release]
+NPM_PUBLISH_ACCESS=public
+
+[defaults]
+# back to variables which apply to every script
+TEST_EXCLUDE=src/PeanutButter/**/*
+```
+
+A section applies until the next header. The usual rules still hold inside a section: the
+value of an existing environment variable wins unless the name is prefixed with `!`.
+
+#### Taking a value from another environment variable
+A value which starts with `$` is replaced with the value of the environment variable of
+that name, eg `NPM_TOKEN=$MY_SECRET_TOKEN`. If that variable isn't set, the value is empty
+(which, for a forced `!NAME=$OTHER`, removes `NAME`).
+
 ## Custom tasks
 
 Zarro will also search two folders:

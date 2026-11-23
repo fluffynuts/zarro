@@ -11,7 +11,6 @@ const
     ls,
     readTextFile,
     fileExists,
-    readTextFileLines,
     writeTextFile,
     rm
   } = require("yafs"),
@@ -19,8 +18,8 @@ const
   path = require("path"),
   debug = require("debug")("zarro::main"),
   ZarroError = require("./gulp-tasks/modules/zarro-error"),
-  { skip } = require("./gulp-tasks/modules/linq"),
-  gatherArgs = require("./index-modules/gather-args");
+  gatherArgs = require("./index-modules/gather-args"),
+  loadDefaults = require("./index-modules/load-defaults");
 
 function requireHandler(name) {
   const result = require(`./index-modules/handlers/${name}`);
@@ -51,80 +50,6 @@ async function findHandlerFor(args) {
     }
   }
   return null;
-}
-
-const defaultsFile = ".zarro-defaults";
-
-async function createZarroDefaultsEmpty() {
-  await writeTextFile(defaultsFile, `# zarro defaults file:
-# place one VARIABLE=VALUE per line below
-# variables here will not override existing environment variables
-#   unless prepended with a bang, ie
-#     !VARIABLE=Value
-#   so this means anything you set in your package.json, eg with
-#   cross-env, will override what's in here unless you've specifically
-#   marked the setting in here as forced with !
-`);
-}
-
-async function loadDefaults() {
-  const
-    exists = await fileExists(defaultsFile);
-  if (!exists) {
-    await createZarroDefaultsEmpty();
-    return;
-  }
-  const
-    lines = await readTextFileLines(defaultsFile);
-  for (const line of lines) {
-    const
-      [ code, _ ] = splitComment(line);
-    if (isEmpty(code)) {
-      // comment-only line or empty line
-      continue;
-    }
-    if (looksInvalid(code)) {
-      log.warn(`invalid config line in ${defaultsFile}:\n${line}`);
-      continue;
-    }
-    const
-      parts = code.trim().split("="),
-      name = parts[0],
-      value = Array.from(skip(parts, 1)).join("="),
-      forced = name[0] === '!',
-      notYetSet = process.env[name] === undefined;
-    if (notYetSet || forced) {
-      const key = name.replace(/^!/, "");
-      if (value) {
-        debug(`setting env var ${key} to '${value}'`);
-        process.env[key] = value;
-      } else {
-        debug(`deleting env var ${key}`);
-        delete process.env[key];
-      }
-    } else {
-      debug(`env var ${name} is already set, force it by setting !${name}=${value} in ${defaultsFile}`)
-    }
-  }
-}
-
-function looksInvalid(code) {
-  return (code || "").indexOf("=") === -1;
-}
-
-function isEmpty(text) {
-  return (text || "").trim() === "";
-}
-
-function splitComment(line) {
-  if (!line) {
-    return [ "", "" ];
-  }
-  const idx = line.indexOf("#");
-  if (idx === -1) {
-    return [ line, "" ];
-  }
-  return [ line.substring(0, idx), line.substring(idx + 1) ];
 }
 
 async function transpileLocalTaskModules() {
