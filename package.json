@@ -39,7 +39,7 @@
     "pull-repo-root": "git pull --rebase",
     "pull": "run-s pull-gulp-tasks pull-repo-root",
     "prebuild": "rimraf tsconfig.tsbuildinfo",
-    "build": "run-p build-zarro build-fetch-github-release",
+    "build": "run-s build-fetch-github-release build-zarro",
     "build-zarro": "tsc",
     "prebuild-fetch-github-release": "rimraf gulp-tasks/modules/fetch-github-release/dist",
     "build-fetch-github-release": "tsc -p gulp-tasks/modules/fetch-github-release/tsconfig.json",
