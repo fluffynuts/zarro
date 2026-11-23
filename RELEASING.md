@@ -26,14 +26,18 @@ This can only be done by a maintainer of the package, with 2FA.
 2. Open the package's **Settings** tab.
 3. Find the **Trusted Publisher** section and choose **GitHub Actions**.
 4. Fill in:
+   - Publisher: GitHub Actions
+   - Label: anything you like
    - Organization or user: `fluffynuts`
    - Repository: `zarro`
    - Workflow filename: `release.yml` (including the extension; it is case-sensitive)
-   - Environment name: leave empty
-5. If there is an option to allow the workflow to manage **dist-tags**, enable it: the
-   workflow publishes with `--tag beta` and `--tag latest`.
-6. Save. npm does **not** check the values when you save: a typo only shows up as an
-   authentication error on the first publish.
+   - Environment name: leave empty. The workflow does not use a GitHub environment, and
+     if you set one here the publish job must declare the same one.
+5. Allowed actions: tick both **Allow `npm publish`** (the workflow publishes directly;
+   only `npm stage publish` is allowed without it) and **Allow `npm dist-tag`** (the
+   workflow publishes with `--tag beta` and `--tag latest`).
+6. Choose **Set up connection**. npm does **not** check the values when you save: a typo
+   only shows up as an authentication error on the first publish.
 
 ## Trying it
 
@@ -46,7 +50,7 @@ This can only be done by a maintainer of the package, with 2FA.
 
 If a publish fails with an authentication error, check in this order: the workflow filename
 and its case in the trusted publisher settings; that the job has `id-token: write`; the npm
-version check step (needs npm >= 11.5.1); the dist-tag option above.
+version check step (needs npm >= 11.5.1); the two allowed-action options above.
 
 ## If a stable release publishes but the follow-up fails
 
