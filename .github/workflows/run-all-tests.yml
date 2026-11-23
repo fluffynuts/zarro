@@ -1,10 +1,9 @@
 name: Tests
 
 on:
-  push:
-    branches: [  ]
-  pull_request:
-    branches: [ master ]
+  # called by release.yml, which only publishes when these pass; or run by hand
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
   main:
