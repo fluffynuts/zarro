@@ -193,24 +193,34 @@ TEST_EXCLUDE=src/PeanutButter/**/*
 Note also here the shorthand of `@` - if a task has the same name as the npm script
 used to invoke it, this is a quick way to surface that task to `npm run` -space.
 
+#### Precedence
+- an environment variable which is already set (from your shell, `cross-env` in an npm script,
+  your CI system...) wins over `.zarro-defaults`, unless the name in `.zarro-defaults` is
+  prefixed with `!`: `!FOO=bar` forces `FOO` to `bar` even if it is already set.
+- within `.zarro-defaults`, later lines override earlier ones, so no `!` is needed to override
+  a value given above it (see sections, below).
+- values are used exactly as written: `FOO="a b"` sets `FOO` to `"a b"`, quotes included, so
+  leave the quotes off: `FOO=a b`.
+
 #### Variables for one npm script only
 Variables can be limited to a single npm script by putting them under a `[section]` header,
 named for the npm script (so `npm run release-beta` is `[release-beta]`). Names are
-matched case-insensitively. Variables before any header, or under `[defaults]`, always apply:
+matched case-insensitively. Variables before any header, or under `[defaults]`, always apply.
+A section applies until the next header, and, since later lines win, it can override a value
+given above it:
 
 ```
 DOTNET_CORE=1
+FOO=the value for everything
 
 [release]
 NPM_PUBLISH_ACCESS=public
+FOO=the value, just for `npm run release`
 
 [defaults]
 # back to variables which apply to every script
 TEST_EXCLUDE=src/PeanutButter/**/*
 ```
-
-A section applies until the next header. The usual rules still hold inside a section: the
-value of an existing environment variable wins unless the name is prefixed with `!`.
 
 #### Taking a value from another environment variable
 A value which starts with `$` is replaced with the value of the environment variable of
