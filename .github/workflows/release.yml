@@ -8,6 +8,8 @@ name: Release
 #
 # Publishing uses npm trusted publishing (OIDC): there is no npm token and no OTP.
 # The trusted publisher on npmjs.com must name THIS FILE (release.yml): see RELEASING.md.
+# Changes which can't affect the package (only tests, .github, markdown, lockfiles or
+# .gitignore: see .github/scripts/is-shipping-change.js) still run the tests, but publish nothing.
 # Run by hand (workflow_dispatch) it defaults to a dry run which publishes nothing.
 
 on:
@@ -15,14 +17,6 @@ on:
     branches: [ master ]
   push:
     branches: [ master ]
-    # merges which can't change what ships don't publish a stable release.
-    # (pull requests are not filtered: every PR still runs the tests)
-    paths-ignore:
-      - "tests/**"
-      - ".github/**"
-      - "**/*.md"
-      - "package-lock.json"
-      - ".gitignore"
   workflow_dispatch:
     inputs:
       kind:
@@ -42,16 +36,66 @@ jobs:
   test:
     uses: ./.github/workflows/run-all-tests.yml
 
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      ship: ${{ steps.check.outputs.ship }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Does this change touch anything which ships?
+        id: check
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            ship=true
+            from="-"
+            files="(run by hand)"
+          else
+            # pull request: the checkout is the merge of the PR into its base, whose first parent is the base.
+            # push to master: everything pushed, or the last commit when there is no usable 'before'.
+            from="HEAD^1"
+            if [ "$EVENT" = "push" ] && [ -n "${BEFORE//0/}" ]; then from="$BEFORE"; fi
+            files="$(git diff --name-only "$from" HEAD)"
+            ship="$(printf '%s\n' "$files" | node .github/scripts/is-shipping-change.js)"
+            if [ -z "$files" ]; then
+              echo "::warning::no changed files found between $from and HEAD: nothing will be published"
+            fi
+          fi
+          echo "event:        $EVENT"
+          echo "compared:     $from .. HEAD"
+          echo "changed files:"
+          printf '%s\n' "$files" | sed 's/^/  /'
+          echo "ship:         $ship"
+          echo "ship=$ship" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Changed files"
+            printf '%s\n' "$files" | sed 's/^/- /'
+            if [ "$ship" = "true" ]; then
+              echo "This change can affect the package: it is eligible for a release."
+            else
+              echo "Nothing which ships changed: the tests run but nothing is published."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
   release:
-    needs: test
+    needs: [ test, changes ]
     if: >-
-      github.event_name == 'push' ||
-      github.event_name == 'workflow_dispatch' ||
+      needs.changes.outputs.ship == 'true' &&
       (
-        github.event_name == 'pull_request' &&
-        github.event.pull_request.head.repo.full_name == github.repository &&
-        github.event.pull_request.user.login != 'dependabot[bot]' &&
-        github.actor != 'dependabot[bot]'
+        github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.event.pull_request.user.login != 'dependabot[bot]' &&
+          github.actor != 'dependabot[bot]'
+        )
       )
     runs-on: ubuntu-latest
     # two publishes must never race for the same version
