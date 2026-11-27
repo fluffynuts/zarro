@@ -17,10 +17,10 @@ updates:
       - dependency-name: "@types/through2"
         update-types: ["version-update:semver-major"]
       # gulp-msbuild 0.11.1 to 0.11.3 require uuid at runtime but only declare it as a dev
-      # dependency, so they crash on load unless something else installs uuid.
+      # dependency; zarro therefore depends on uuid directly so they load.
       # 1.0.x depends on the npm "node" package (which its code never imports); that
       # installs a node binary into node_modules/.bin and shadows the user's node.
       # Ignoring exactly those releases means a PR appears once a fixed release is
       # published. zarro itself is pinned in package.json.
       - dependency-name: "gulp-msbuild"
-        versions: ["0.11.1", "0.11.2", "0.11.3", "1.0.0", "1.0.1", "1.0.2", "1.0.3"]
+        versions: ["1.0.0", "1.0.1", "1.0.2", "1.0.3"]
