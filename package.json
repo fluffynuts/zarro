@@ -92,7 +92,7 @@
     "through2": "^4.0.2",
     "undertaker-forward-reference": "^2.0.0",
     "unfetch": "^5.0.0",
-    "uuid": "^11.1.0",
+    "uuid": "^14.0.3",
     "vinyl": "^3.0.1",
     "which": "^2.0.2",
     "xml2js": "^0.6.2",
