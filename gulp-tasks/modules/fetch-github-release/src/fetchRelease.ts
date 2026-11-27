@@ -2,12 +2,12 @@ import { writeFile, rm } from "yafs";
 import path from 'path'
 
 import { Octokit } from '@octokit/rest'
-import decompress from 'decompress'
 const bent = require("bent");
 
 import { PACKAGE_DATA_DIR } from './constants'
 import { OctokitRelease, OctokitReleaseAssets, RepoInfo } from './types'
 import { ensureDirExist } from './util'
+import { extractArchive } from './extractArchive'
 import { getAssetDefault } from './getAssetDefault'
 
 export interface FetchReleaseOptions extends RepoInfo {
@@ -115,10 +115,10 @@ async function fetchRelease(options: FetchReleaseOptions): Promise<string[]> {
   const downloadPath = path.join(destination, filename)
 
   if (shouldExtract) {
-    const files = await decompress(downloadPath, destination)
+    const files = await extractArchive(downloadPath, destination)
     await rm(downloadPath)
 
-    return files.map((file: decompress.File) => path.join(destination, file.path))
+    return files.map(file => path.join(destination, file))
   }
 
   return [downloadPath]
