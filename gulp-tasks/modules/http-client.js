@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const yafs_1 = require("yafs");
 (function () {
-    const fs = require("fs"), path = require("path"), ZarroError = requireModule("zarro-error"), sleep = requireModule("sleep"), promisifyStream = requireModule("promisify-stream"), ensureFolderExists = require("./ensure-folder-exists").sync, request = require("request"), debug = requireModule("debug")(__filename);
+    const fs = require("fs"), path = require("path"), ZarroError = requireModule("zarro-error"), sleep = requireModule("sleep"), promisifyStream = requireModule("promisify-stream"), ensureFolderExists = require("./ensure-folder-exists").sync, request = require("@cypress/request"), debug = requireModule("debug")(__filename);
     class HttpClient {
         constructor(infoLogFunction, debugLogFunction) {
             this.aborted = false;

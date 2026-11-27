@@ -1,4 +1,5 @@
-import { RequestResponse, ResponseRequest } from "request";
+// @cypress/request is a drop-in for request but ships no types: @types/request supplies them
+import type { RequestResponse, ResponseRequest } from "request";
 import { fileExists } from "yafs";
 
 (function() {
@@ -9,7 +10,7 @@ import { fileExists } from "yafs";
     sleep = requireModule<Sleep>("sleep"),
     promisifyStream = requireModule<PromisifyStream>("promisify-stream"),
     ensureFolderExists = require("./ensure-folder-exists").sync,
-    request = require("request"),
+    request = require("@cypress/request"),
     debug = requireModule<DebugFactory>("debug")(__filename);
 
   class HttpClient {
