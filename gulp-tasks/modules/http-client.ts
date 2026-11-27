@@ -13,6 +13,22 @@ import { fileExists } from "yafs";
     request = require("@cypress/request"),
     debug = requireModule<DebugFactory>("debug")(__filename);
 
+  function refuseDowngradeToHttp(this: { uri: { protocol: string, href: string } }, response: RequestResponse): boolean {
+    const location = response.headers.location;
+    if (!location) {
+      return true;
+    }
+    const target = new URL(location, this.uri.href);
+    return !(this.uri.protocol === "https:" && target.protocol === "http:");
+  }
+
+  // without allowInsecureRedirect, @cypress/request reuses the http agent after a redirect
+  // to https (ERR_INVALID_PROTOCOL); refuseDowngradeToHttp keeps https -> http refused
+  const redirectOptions = {
+    allowInsecureRedirect: true,
+    followRedirect: refuseDowngradeToHttp
+  };
+
   class HttpClient {
     public assumeDownloadedIfExistsAndSizeMatches: boolean;
     public aborted: boolean = false;
@@ -37,7 +53,7 @@ import { fileExists } from "yafs";
 
     async exists(url: string): Promise<boolean> {
       return new Promise<boolean>(resolve => {
-        request.get(url, (err: Error | string) => {
+        request.get(url, redirectOptions, (err: Error | string) => {
           return resolve(!err);
         })
       });
@@ -57,7 +73,7 @@ import { fileExists } from "yafs";
       }
       ensureFolderExists(path.dirname(partFile));
       return new Promise(async (resolve, reject) => {
-        const req = this._request = request.get(url, { timeout: 30000 })
+        const req = this._request = request.get(url, { timeout: 30000, ...redirectOptions })
           .on("response", (response: RequestResponse) => {
             this._debug(`got response: ${ JSON.stringify(response) }`);
             this._downloadSize = parseInt(response.headers["content-length"] || "0");

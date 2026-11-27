@@ -3,6 +3,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const yafs_1 = require("yafs");
 (function () {
     const fs = require("fs"), path = require("path"), ZarroError = requireModule("zarro-error"), sleep = requireModule("sleep"), promisifyStream = requireModule("promisify-stream"), ensureFolderExists = require("./ensure-folder-exists").sync, request = require("@cypress/request"), debug = requireModule("debug")(__filename);
+    function refuseDowngradeToHttp(response) {
+        const location = response.headers.location;
+        if (!location) {
+            return true;
+        }
+        const target = new URL(location, this.uri.href);
+        return !(this.uri.protocol === "https:" && target.protocol === "http:");
+    }
+    // without allowInsecureRedirect, @cypress/request reuses the http agent after a redirect
+    // to https (ERR_INVALID_PROTOCOL); refuseDowngradeToHttp keeps https -> http refused
+    const redirectOptions = {
+        allowInsecureRedirect: true,
+        followRedirect: refuseDowngradeToHttp
+    };
     class HttpClient {
         constructor(infoLogFunction, debugLogFunction) {
             this.aborted = false;
@@ -17,7 +31,7 @@ const yafs_1 = require("yafs");
         }
         async exists(url) {
             return new Promise(resolve => {
-                request.get(url, (err) => {
+                request.get(url, redirectOptions, (err) => {
                     return resolve(!err);
                 });
             });
@@ -36,7 +50,7 @@ const yafs_1 = require("yafs");
             }
             ensureFolderExists(path.dirname(partFile));
             return new Promise(async (resolve, reject) => {
-                const req = this._request = request.get(url, { timeout: 30000 })
+                const req = this._request = request.get(url, { timeout: 30000, ...redirectOptions })
                     .on("response", (response) => {
                     this._debug(`got response: ${JSON.stringify(response)}`);
                     this._downloadSize = parseInt(response.headers["content-length"] || "0");

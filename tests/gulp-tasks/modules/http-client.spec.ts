@@ -1,8 +1,11 @@
 import "expect-even-more-jest";
 import * as http from "http";
+import * as https from "https";
+import * as tls from "tls";
 import { AddressInfo } from "net";
 import { Sandbox } from "filesystem-sandbox";
 import { fileExists, readTextFile } from "yafs";
+import { tlsFixture } from "../../test-helpers/tls-fixture";
 
 describe(`http-client`, () => {
   const HttpClient = requireModule<HttpClientModule>("http-client");
@@ -12,7 +15,8 @@ describe(`http-client`, () => {
     "SUPPRESS_DOWNLOAD_PROGRESS", "BUILD_NUMBER"
   ];
   const savedEnv: Record<string, string | undefined> = {};
-  const servers: http.Server[] = [];
+  const defaultCaCertificates = tls.getCACertificates("default");
+  const servers: Array<http.Server | https.Server> = [];
 
   beforeEach(() => {
     // deterministic whatever the host's proxy configuration is
@@ -23,6 +27,7 @@ describe(`http-client`, () => {
   });
 
   afterEach(async () => {
+    tls.setDefaultCACertificates(defaultCaCertificates);
     for (const name of proxyEnvVars) {
       if (savedEnv[name] === undefined) {
         delete process.env[name];
@@ -47,6 +52,17 @@ describe(`http-client`, () => {
     servers.push(server);
     await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
     return `http://127.0.0.1:${ (server.address() as AddressInfo).port }`;
+  }
+
+  async function serveTls(
+    handler: (req: http.IncomingMessage, res: http.ServerResponse) => void
+  ): Promise<string> {
+    // the fixture certificate is self-signed: trust it rather than disabling verification
+    tls.setDefaultCACertificates([ ...defaultCaCertificates, tlsFixture.cert ]);
+    const server = https.createServer(tlsFixture, handler);
+    servers.push(server);
+    await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
+    return `https://127.0.0.1:${ (server.address() as AddressInfo).port }`;
   }
 
   function create() {
@@ -124,6 +140,49 @@ describe(`http-client`, () => {
       // Assert
       expect(await readTextFile(target))
         .toEqual("the new content");
+    });
+
+    it(`should follow a redirect from http up to https`, async () => {
+      // Arrange
+      const
+        secure = await serveTls((req, res) => res.end("served over tls")),
+        insecure = await serve((req, res) => {
+          res.statusCode = 302;
+          res.setHeader("location", `${ secure }/file`);
+          res.end();
+        }),
+        sandbox = await Sandbox.create(),
+        target = sandbox.fullPathFor("downloaded.txt"),
+        sut = create();
+      // Act
+      await sut.download(`${ insecure }/file`, target);
+      // Assert
+      expect(await readTextFile(target))
+        .toEqual("served over tls");
+    });
+
+    it(`should not follow a redirect from https down to http`, async () => {
+      // Arrange
+      let insecureRequests = 0;
+      const
+        insecure = await serve((req, res) => {
+          insecureRequests++;
+          res.end("served in the clear");
+        }),
+        secure = await serveTls((req, res) => {
+          res.statusCode = 302;
+          res.setHeader("location", `${ insecure }/file`);
+          res.end();
+        }),
+        sandbox = await Sandbox.create(),
+        target = sandbox.fullPathFor("downloaded.txt"),
+        sut = create();
+      // Act
+      await sut.download(`${ secure }/file`, target).catch(() => {
+      });
+      // Assert
+      expect(insecureRequests)
+        .toEqual(0);
     });
 
     it(`should reject when the server can't be reached`, async () => {
@@ -293,6 +352,23 @@ describe(`http-client`, () => {
         sut = create();
       // Act
       const result = await sut.exists(`${ base }/file`);
+      // Assert
+      expect(result)
+        .toBeTrue();
+    });
+
+    it(`should resolve true for a url which redirects from http up to https`, async () => {
+      // Arrange
+      const
+        secure = await serveTls((req, res) => res.end("here")),
+        insecure = await serve((req, res) => {
+          res.statusCode = 302;
+          res.setHeader("location", `${ secure }/file`);
+          res.end();
+        }),
+        sut = create();
+      // Act
+      const result = await sut.exists(`${ insecure }/file`);
       // Assert
       expect(result)
         .toBeTrue();
