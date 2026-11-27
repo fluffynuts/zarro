@@ -123,7 +123,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^26.6.6",
     "@types/request": "^2.48.8",
-    "@types/rimraf": "^3.0.0",
+    "@types/rimraf": "^4.0.5",
     "@types/semver": "^7.8.0",
     "@types/through2": "^2.0.38",
     "@types/typescript": "^2.0.0",
