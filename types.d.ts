@@ -12,7 +12,6 @@ import * as vinyl from "vinyl";
 import { BufferFile } from "vinyl";
 // noinspection ES6PreferShortImport
 import { FetchReleaseOptions, ListReleasesOptions, ReleaseInfo } from "./gulp-tasks/modules/fetch-github-release/src";
-import { DecompressOptions, File } from "decompress";
 
 export * from "./gulp-tasks/modules/fetch-github-release/src";
 export * from "dotnet-cli";
@@ -186,10 +185,6 @@ declare global {
     download(url: string, target: string): Promise<string>;
 
     exists(url: string): Promise<boolean>;
-  }
-
-  interface Decompress {
-    decompress(data: string | Buffer, target: string | DecompressOptions): Promise<File[]>;
   }
 
   type LogFunction = (s: string) => void;
