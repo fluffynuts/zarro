@@ -11,7 +11,7 @@ type ArchiveFormat = "zip" | "tar";
  *
  * Strict on purpose: an archive which tries to write outside the destination, or to leave a symbolic
  * link pointing outside it, is refused (rejects) rather than quietly tidied up, and so is a file
- * which isn't an archive we can read.
+ * which isn't an archive we can read. A refused archive leaves the destination as it was.
  */
 export async function extractArchive(
   archivePath: string,
@@ -52,16 +52,25 @@ function detectFormat(archivePath: string): ArchiveFormat | undefined {
 }
 
 async function extractTar(archivePath: string, destination: string): Promise<string[]> {
-  const extracted: string[] = [];
-  await tar.x({
-    file: archivePath,
-    cwd: destination,
-    // turns every warning, eg an entry containing .. or an absolute link target, into an error
-    strict: true,
-    onReadEntry: entry => {
-      extracted.push(entry.path);
-    }
-  });
+  // strict mode aborts at the first bad entry, after the entries before it were written, so
+  // extract to a working folder and only copy into place once the whole archive was accepted
+  const
+    workingFolder = fs.mkdtempSync(path.join(destination, ".extracting-")),
+    extracted: string[] = [];
+  try {
+    await tar.x({
+      file: archivePath,
+      cwd: workingFolder,
+      // turns every warning, eg an entry containing .. or an absolute link target, into an error
+      strict: true,
+      onReadEntry: entry => {
+        extracted.push(entry.path);
+      }
+    });
+    fs.cpSync(workingFolder, destination, { recursive: true, force: true, verbatimSymlinks: true });
+  } finally {
+    fs.rmSync(workingFolder, { recursive: true, force: true });
+  }
   return extracted;
 }
 

@@ -40,6 +40,10 @@ const tls = __importStar(require("tls"));
 const filesystem_sandbox_1 = require("filesystem-sandbox");
 const yafs_1 = require("yafs");
 const tls_fixture_1 = require("../../test-helpers/tls-fixture");
+if (typeof tls.setDefaultCACertificates !== "function") {
+    throw new Error(`${__filename}: these tests need Node 22.19+ (or 24.5+) for tls.setDefaultCACertificates, ` +
+        `to trust a generated certificate; you are on ${process.version} (see .nvmrc)`);
+}
 describe(`http-client`, () => {
     const HttpClient = requireModule("http-client");
     const proxyEnvVars = [
@@ -49,6 +53,7 @@ describe(`http-client`, () => {
     ];
     const savedEnv = {};
     const defaultCaCertificates = tls.getCACertificates("default");
+    let tlsFixture;
     const servers = [];
     beforeEach(() => {
         // deterministic whatever the host's proxy configuration is
@@ -72,6 +77,9 @@ describe(`http-client`, () => {
             s.close(() => resolve());
         })));
     });
+    beforeAll(async () => {
+        tlsFixture = await (0, tls_fixture_1.createTlsFixture)();
+    });
     afterAll(async () => {
         await filesystem_sandbox_1.Sandbox.destroyAll();
     });
@@ -83,8 +91,8 @@ describe(`http-client`, () => {
     }
     async function serveTls(handler) {
         // the fixture certificate is self-signed: trust it rather than disabling verification
-        tls.setDefaultCACertificates([...defaultCaCertificates, tls_fixture_1.tlsFixture.cert]);
-        const server = https.createServer(tls_fixture_1.tlsFixture, handler);
+        tls.setDefaultCACertificates([...defaultCaCertificates, tlsFixture.cert]);
+        const server = https.createServer(tlsFixture, handler);
         servers.push(server);
         await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
         return `https://127.0.0.1:${server.address().port}`;

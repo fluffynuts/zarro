@@ -1,53 +1,27 @@
-// A throwaway self-signed certificate for 127.0.0.1/localhost (valid 100 years), used only to
-// run a local https server in tests. It protects nothing.
-export const tlsFixture = {
-  key: `-----BEGIN PRIVATE KEY-----
-MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCTuMDkacsenWK2
-bIoove/eNwx5uSWQtT3D+9NGM0vevZMZqK6LUdgPWbKsKQoy/8PeECvK+2Eh97xU
-dgSD6T+r9dQMvEMT3ydR56/baHTOdoIrrXe2TUgyksd8O4Hja49ujRV9qtF1uC5/
-FHmo1WZiz6z3TrZwOvoFaA+4IArzW8yalemNC+zvnrYqzCsAeYzNwEB0zjA5k+Y6
-Ygetc0oD4xAYuFvP4a32hC44LuV55vgD7okWZF9DypZrX83lJMAC8o3Ash72//6C
-myJjfckADGORc4RX+73xP8qu42uVGtJMbmLrk7SiR3H6HLRpRFOVLkFyAEWzbrzW
-sJJRI4PRAgMBAAECggEADqpwiBzSvCre8oKLIulch6DKfck6aAf+Zlc5jgYouafz
-k0ASeCV7gGak3P/EEfUfkovjdScI6TDpwy7mWtxM5Hsm/s6wECh/BFwusudHdXoB
-iWmS8Yfxq4e0A2r7BcOXfV/Hau8LFZdgEmDLhU4OeK/qmbD4XuMUEHZY3SxdOfTU
-Az3b8/BIXbMrYVLTSz4ACr9XWrkDUk0yLFa2tY2omO/lDGFCrzN39pqa/+qElr+Y
-InoQu1M4+x/mAM/ih+OiGnUbcL9s9Z+92nRLac4WrpEHvKP0E5nviNFN5xr0y9h/
-iDnPBLVy7u6aJpgCmrb/8rgh9MK5a6AF5xL4uoML4wKBgQDQD4SKLA5VvK8nwc8z
-G4uRXRMYUa1WHOor9zlDFKy3e18Ciifa4PaRHKs6bv1XMW4B19ss4pGi4YA99teE
-q/dGWIg7o5S9mBXy33ZFRlT6D0iBZeqEuo4/oGb0e6TybWZtmbQ3ZqoeYzDZGCG6
-a8rzpHgfNufqOJTwSQx9IXyJCwKBgQC1wiL40E8LAzBa1CgWDLxHJn7X6OIED7Kz
-BX1v5USg8xUyvz35cwinj1MnlUbcbpdDFuFdIaC3S3SJzjlss7ZHcBjrXogTmlZd
-JylGjiiw2tx2W3hJsy9mt+YMTbCKAK6nXCJx7UbtjuseDwtG/+jQV1Icc4dh8D1X
-ayjmhfcIEwKBgCP+q0VkPc6jaAIOy5Ph7hFl8snAR6agNfsJOETcrMzJcTR1RlPd
-m4qbVRw022tcR9XVzDtFr0BoltEhhUOUpKDs7BS1RiROzW1JL6LoegcQ4dBRG3N+
-+uETFPyy72RpfND1SHJVNpUvP+IvBJbF00S3bXio/RJOW6X+XUTAqFTlAoGBAIza
-mgeARwEdw4dgCoCr9eydpIbl7uF+2NlrU743SmwAdVkSY5DA2OAhbiuqv3NsMMTJ
-InTt7oKdcv6oVlArJQNPl8AvTf0DChK+mnoXCOmlclw2no1e00kjEqBORJVt2evQ
-ttDbNLA8pXBx8CdhgqaSRQvPbAc2ChOI8/VRtBMJAoGAXI7WaIVSE5bajpq4KQzM
-6T7jt6C6rnkH1w5AjDd9qEuymHFYHu/GTqaukWvI/OWcNVcSbMv8MVSB1W7tVib4
-dPDiIg2iziFUewTtP+qIavsMdaMW4sYC7Rr+9seK/s+ZZmDUA9wEz6vVnsqXOW11
-Y7agmDie4ilzRf068v5DxHo=
------END PRIVATE KEY-----
-`,
-  cert: `-----BEGIN CERTIFICATE-----
-MIIDJzCCAg+gAwIBAgIUcwPh0URmVh3JsQrkU56xk6/absswDQYJKoZIhvcNAQEL
-BQAwFDESMBAGA1UEAwwJbG9jYWxob3N0MCAXDTI2MTEyNzEyMTMzNFoYDzIxMjYx
-MTAzMTIxMzM0WjAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwggEiMA0GCSqGSIb3DQEB
-AQUAA4IBDwAwggEKAoIBAQCTuMDkacsenWK2bIoove/eNwx5uSWQtT3D+9NGM0ve
-vZMZqK6LUdgPWbKsKQoy/8PeECvK+2Eh97xUdgSD6T+r9dQMvEMT3ydR56/baHTO
-doIrrXe2TUgyksd8O4Hja49ujRV9qtF1uC5/FHmo1WZiz6z3TrZwOvoFaA+4IArz
-W8yalemNC+zvnrYqzCsAeYzNwEB0zjA5k+Y6Ygetc0oD4xAYuFvP4a32hC44LuV5
-5vgD7okWZF9DypZrX83lJMAC8o3Ash72//6CmyJjfckADGORc4RX+73xP8qu42uV
-GtJMbmLrk7SiR3H6HLRpRFOVLkFyAEWzbrzWsJJRI4PRAgMBAAGjbzBtMB0GA1Ud
-DgQWBBT66r9D1ZoWoIxkFMwnSzIMTfpYyjAfBgNVHSMEGDAWgBT66r9D1ZoWoIxk
-FMwnSzIMTfpYyjAPBgNVHRMBAf8EBTADAQH/MBoGA1UdEQQTMBGCCWxvY2FsaG9z
-dIcEfwAAATANBgkqhkiG9w0BAQsFAAOCAQEAFtMUgYeE3lDN1e7yWMQGMTA1xMUM
-bLNtfRHyNoXumT2N38VUtugaMZJWPFl+o7N/4yjix3+zKe4U6d4CL/SiOUM8vd5e
-egD+aaxkcVzpvuBXNfCcHnwGyBXJxI7s7kZzuuq8j9eRSum3HP28tzO/aU/iNq3L
-NZ6Ry3dk03QjBa/o5C4el/Yd+S9x5Poq+NAnUcm2yoqrAZ7sqXweJJ9RSrqKPFm3
-7as1hMYj8yTr22XKhGv4WH+GgdcLZeD3dm2USqbLKZXK4b8IqwxOiohM57mq94Mx
-Jkub2Eg+FsPJnadWBiIYOgnSLF7IxKv841UX+9OJcEMWgrW1jGKlUbFJyA==
------END CERTIFICATE-----
-`
-};
+import { generate } from "selfsigned";
+
+export interface TlsFixture {
+  key: string;
+  cert: string;
+}
+
+// generated per run so that no private key is committed; protects nothing
+export async function createTlsFixture(): Promise<TlsFixture> {
+  const pems = await generate(
+    [ { name: "commonName", value: "localhost" } ],
+    {
+      keySize: 2048,
+      algorithm: "sha256",
+      extensions: [
+        {
+          name: "subjectAltName",
+          altNames: [
+            { type: 2, value: "localhost" },
+            { type: 7, ip: "127.0.0.1" }
+          ]
+        }
+      ]
+    }
+  );
+  return { key: pems.private, cert: pems.cert };
+}

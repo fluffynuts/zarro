@@ -168,6 +168,34 @@ describe(`extractArchive`, () => {
         expect(fs.existsSync(sandbox.fullPathFor("escaped.txt")))
           .toBeFalse();
       });
+
+      it(`should leave the destination untouched when it refuses an entry (nothing before the bad entry is kept)`, async () => {
+        // Arrange
+        const
+          entries: ArchiveEntry[] = [
+            { name: "ok.txt", data: "fine" },
+            { name: "docs/readme.txt", data: "also fine" },
+            { name: "../escaped.txt", data: "gotcha" }
+          ],
+          { archivePath, destination } = await createLayout(make(entries), archiveName);
+        fs.writeFileSync(path.join(destination, "already-here.txt"), "mine");
+        // Act
+        await expect(extractArchive(archivePath, destination))
+          .rejects.toBeDefined();
+        // Assert
+        expect(fs.readdirSync(destination))
+          .toEqual([ "already-here.txt" ]);
+      });
+
+      it(`should leave nothing but the extracted files in the destination`, async () => {
+        // Arrange
+        const { archivePath, destination } = await createLayout(make(release), archiveName);
+        // Act
+        await extractArchive(archivePath, destination);
+        // Assert
+        expect(fs.readdirSync(destination).sort())
+          .toEqual([ "bin", "docs", "top.txt" ]);
+      });
     });
   }
 });

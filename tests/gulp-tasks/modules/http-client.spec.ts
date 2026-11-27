@@ -5,7 +5,14 @@ import * as tls from "tls";
 import { AddressInfo } from "net";
 import { Sandbox } from "filesystem-sandbox";
 import { fileExists, readTextFile } from "yafs";
-import { tlsFixture } from "../../test-helpers/tls-fixture";
+import { createTlsFixture, TlsFixture } from "../../test-helpers/tls-fixture";
+
+if (typeof tls.setDefaultCACertificates !== "function") {
+  throw new Error(
+    `${ __filename }: these tests need Node 22.19+ (or 24.5+) for tls.setDefaultCACertificates, ` +
+    `to trust a generated certificate; you are on ${ process.version } (see .nvmrc)`
+  );
+}
 
 describe(`http-client`, () => {
   const HttpClient = requireModule<HttpClientModule>("http-client");
@@ -16,6 +23,7 @@ describe(`http-client`, () => {
   ];
   const savedEnv: Record<string, string | undefined> = {};
   const defaultCaCertificates = tls.getCACertificates("default");
+  let tlsFixture: TlsFixture;
   const servers: Array<http.Server | https.Server> = [];
 
   beforeEach(() => {
@@ -39,6 +47,10 @@ describe(`http-client`, () => {
       s.closeAllConnections();
       s.close(() => resolve());
     })));
+  });
+
+  beforeAll(async () => {
+    tlsFixture = await createTlsFixture();
   });
 
   afterAll(async () => {
