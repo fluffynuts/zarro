@@ -64,7 +64,7 @@
     "bent": "^7.3.12",
     "cross-env": "^7.0.3",
     "cross-fetch": "^4.0.0",
-    "del": "^5.1.0",
+    "del": "^9.0.1",
     "dotnet-cli": "^1.6.0",
     "event-stream": "^4.0.1",
     "exec-step": "^0.21.0",
